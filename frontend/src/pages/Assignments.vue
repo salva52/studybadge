@@ -17,28 +17,39 @@
 				<template #prefix>
 					<Plus class="size-4 stroke-1.5" />
 				</template>
-				{{ __('Create') }}
+				{{ __('Crear') }}
 			</Button>
 		</template>
 	</LayoutHeader>
 
 	<div class="flex min-h-0 flex-1 flex-col pt-5">
+		<!-- Hero Header -->
+		<div class="px-5 mb-6 flex items-center gap-4">
+			<div class="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-sb-primary/10 to-sb-medium/10 flex-shrink-0">
+				<FeatherIcon name="file-text" class="w-5 h-5 text-sb-primary stroke-2" />
+			</div>
+			<div>
+				<h1 class="text-xl font-bold text-sb-dark">{{ __('Asignaciones') }}</h1>
+				<p class="text-sm text-gray-500">{{ __('Gestiona las tareas y trabajos de tus estudiantes') }}</p>
+			</div>
+		</div>
+
 		<div
-			class="mx-5 mb-5 flex flex-col justify-between gap-y-4 sm:flex-row sm:items-center"
+			class="mx-5 mb-5 p-4 bg-white rounded-2xl shadow-sb-soft border border-gray-100 flex flex-col justify-between gap-y-4 sm:flex-row sm:items-center"
 		>
 			<div class="text-lg font-semibold text-ink-gray-9">
-				{{ __('{0} Assignments').format(assignments.data?.length) }}
+				{{ __('{0} Asignaciones').format(assignments.data?.length) }}
 			</div>
 			<div class="flex flex-col gap-3 sm:flex-row md:gap-5">
 				<FormControl
 					type="text"
 					v-model="titleFilter"
-					:placeholder="__('Search by Title')"
+					:placeholder="__('Buscar por título')"
 				/>
 				<Select
 					v-model="typeFilter"
 					:options="assignmentTypes"
-					:placeholder="__('Type')"
+					:placeholder="__('Tipo')"
 				/>
 			</div>
 		</div>
@@ -104,8 +115,16 @@
 				</template>
 			</ListSelectBanner>
 		</ListView>
-		<div v-else class="flex-1">
-			<EmptyStateLayout name="Assignments" />
+		<div v-else class="flex flex-col items-center justify-center py-24 mx-5 bg-white rounded-2xl shadow-sb-soft border border-gray-100 mt-6">
+			<div class="w-16 h-16 bg-sb-primary/10 rounded-full flex items-center justify-center mb-4">
+				<FeatherIcon name="file-text" class="w-8 h-8 stroke-1.5 text-sb-primary" />
+			</div>
+			<p class="text-lg font-semibold text-sb-dark mb-2">
+				{{ __('No se encontraron asignaciones') }}
+			</p>
+			<p class="text-sm w-full md:w-1/2 text-center text-gray-500">
+				{{ __('No hay asignaciones en este momento. ¡Crea la primera para empezar!') }}
+			</p>
 		</div>
 		<ListFooter
 			v-model="pageLength"
@@ -119,13 +138,13 @@
 				<div class="flex items-center">
 					<Button
 						v-if="assignments.hasNextPage"
-						:label="__('Load More')"
+						:label="__('Cargar más')"
 						@click="assignments.next()"
 					/>
 					<div v-if="assignments.hasNextPage" class="mx-3 h-[80%] border-l" />
 					<div class="flex items-center gap-1 text-base text-ink-gray-5">
 						<div>{{ assignments.data?.length || 0 }}</div>
-						<div>{{ __('of') }}</div>
+						<div>{{ __('de') }}</div>
 						<div>{{ totalAssignments.data || 0 }}</div>
 					</div>
 				</div>
@@ -262,20 +281,20 @@ const totalAssignments = createResource({
 const assignmentColumns = computed(() => {
 	return [
 		{
-			label: __('Title'),
+			label: __('Título'),
 			key: 'title',
 			width: 1,
 			icon: 'file-text',
 		},
 		{
-			label: __('Type'),
+			label: __('Tipo'),
 			key: 'type',
 			width: 1,
 			align: 'left',
 			icon: 'tag',
 		},
 		{
-			label: __('Updated On'),
+			label: __('Actualizado el'),
 			key: 'modified',
 			width: 1,
 			align: 'right',
@@ -299,19 +318,19 @@ const deleteAssignment = (selections, unselectAll) => {
 		await assignments.delete.submit(assignmentName)
 	})
 	unselectAll()
-	toast.success(__('Assignments deleted successfully'))
+	toast.success(__('Asignaciones eliminadas correctamente'))
 }
 
 const breadcrumbs = computed(() => [
 	{
-		label: __('Assignments'),
+		label: __('Asignaciones'),
 		route: { name: 'Assignments' },
 	},
 ])
 
 usePageMeta(() => {
 	return {
-		title: __('Assignments'),
+		title: __('Asignaciones'),
 		icon: brand.favicon,
 	}
 })

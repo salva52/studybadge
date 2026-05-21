@@ -8,19 +8,30 @@
 				<template #prefix>
 					<Plus class="size-4 stroke-1.5" />
 				</template>
-				{{ __('Create') }}
+				{{ __('Crear') }}
 			</Button>
 		</template>
 	</LayoutHeader>
 
 	<div class="flex min-h-0 flex-1 flex-col pt-5">
+		<!-- Hero Header -->
+		<div class="px-5 mb-6 flex items-center gap-4">
+			<div class="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-sb-primary/10 to-sb-medium/10 flex-shrink-0">
+				<FeatherIcon name="help-circle" class="w-5 h-5 text-sb-primary stroke-2" />
+			</div>
+			<div>
+				<h1 class="text-xl font-bold text-sb-dark">{{ __('Cuestionarios') }}</h1>
+				<p class="text-sm text-gray-500">{{ __('Evalúa el progreso de los estudiantes') }}</p>
+			</div>
+		</div>
+
 		<div
-			class="mx-5 mb-5 flex flex-col justify-between gap-y-4 sm:flex-row sm:items-center"
+			class="mx-5 mb-5 p-4 bg-white rounded-2xl shadow-sb-soft border border-gray-100 flex flex-col justify-between gap-y-4 sm:flex-row sm:items-center"
 		>
 			<div class="text-lg font-semibold text-ink-gray-9">
-				{{ __('{0} Quizzes').format(quizzes.data?.length) }}
+				{{ __('{0} Cuestionarios').format(quizzes.data?.length) }}
 			</div>
-			<FormControl v-model="search" type="text" placeholder="Search">
+			<FormControl v-model="search" type="text" :placeholder="__('Buscar')">
 				<template #prefix>
 					<FeatherIcon name="search" class="size-4 text-ink-gray-5" />
 				</template>
@@ -86,8 +97,16 @@
 				</template>
 			</ListSelectBanner>
 		</ListView>
-		<div v-else class="flex flex-1 items-center justify-center px-5">
-			<EmptyStateLayout name="Quizzes" />
+		<div v-else class="flex flex-col items-center justify-center py-24 mx-5 bg-white rounded-2xl shadow-sb-soft border border-gray-100 mt-6">
+			<div class="w-16 h-16 bg-sb-primary/10 rounded-full flex items-center justify-center mb-4">
+				<FeatherIcon name="help-circle" class="w-8 h-8 stroke-1.5 text-sb-primary" />
+			</div>
+			<p class="text-lg font-semibold text-sb-dark mb-2">
+				{{ __('No se encontraron cuestionarios') }}
+			</p>
+			<p class="text-sm w-full md:w-1/2 text-center text-gray-500">
+				{{ __('No hay cuestionarios en este momento. ¡Crea el primero para empezar a evaluar!') }}
+			</p>
 		</div>
 		<ListFooter
 			v-model="pageLength"
@@ -101,13 +120,13 @@
 				<div class="flex items-center">
 					<Button
 						v-if="quizzes.hasNextPage"
-						:label="__('Load More')"
+						:label="__('Cargar más')"
 						@click="quizzes.next()"
 					/>
 					<div v-if="quizzes.hasNextPage" class="mx-3 h-[80%] border-l" />
 					<div class="flex items-center gap-1 text-base text-ink-gray-5">
 						<div>{{ quizzes.data?.length || 0 }}</div>
-						<div>{{ __('of') }}</div>
+						<div>{{ __('de') }}</div>
 						<div>{{ totalQuizzes.data || 0 }}</div>
 					</div>
 				</div>
@@ -117,11 +136,11 @@
 	<Dialog
 		v-model="showForm"
 		:options="{
-			title: __('Create a Quiz'),
+			title: __('Crear Cuestionario'),
 			size: 'sm',
 			actions: [
 				{
-					label: __('Save'),
+					label: __('Guardar'),
 					variant: 'solid',
 					onClick({ close }) {
 						insertQuiz(close)
@@ -133,7 +152,7 @@
 		<template #body-content>
 			<FormControl
 				v-model="title"
-				:label="__('Title')"
+				:label="__('Título')"
 				type="text"
 				autocomplete="off"
 				@keydown.enter="insertQuiz(() => (showForm = false))"
@@ -267,7 +286,7 @@ const insertQuiz = (close) => {
 		},
 		{
 			onSuccess(data) {
-				toast.success(__('Quiz created successfully'))
+				toast.success(__('Cuestionario creado correctamente'))
 				close()
 				title.value = ''
 				capture('quiz_created')
@@ -279,7 +298,7 @@ const insertQuiz = (close) => {
 				})
 			},
 			onError(error) {
-				toast.error(__('Error creating quiz: {0}', error.message))
+				toast.error(__('Error al crear cuestionario: {0}', [error.message]))
 			},
 		}
 	)
@@ -290,47 +309,47 @@ const deleteQuiz = (selections, unselectAll) => {
 		await quizzes.delete.submit(quizName)
 	})
 	unselectAll()
-	toast.success(__('Quizzes deleted successfully'))
+	toast.success(__('Cuestionarios eliminados correctamente'))
 }
 
 const quizColumns = computed(() => {
 	return [
 		{
-			label: __('Title'),
+			label: __('Título'),
 			key: 'title',
 			width: 2,
 			icon: 'file-text',
 		},
 		{
-			label: __('Total Marks'),
+			label: __('Marcas totales'),
 			key: 'total_marks',
 			width: 0.5,
 			align: 'center',
 			icon: 'hash',
 		},
 		{
-			label: __('Passing Percentage'),
+			label: __('Porcentaje de aprobación'),
 			key: 'passing_percentage',
 			width: 1,
 			align: 'center',
 			icon: 'percent',
 		},
 		{
-			label: __('Max Attempts'),
+			label: __('Intentos máximos'),
 			key: 'max_attempts',
 			width: 0.5,
 			align: 'center',
 			icon: 'repeat',
 		},
 		{
-			label: __('Show Answers'),
+			label: __('Mostrar respuestas'),
 			key: 'show_answers',
 			width: 0.5,
 			align: 'center',
 			icon: 'eye',
 		},
 		{
-			label: __('Updated On'),
+			label: __('Actualizado el'),
 			key: 'modified',
 			width: 1,
 			align: 'right',
@@ -342,7 +361,7 @@ const quizColumns = computed(() => {
 const breadcrumbs = computed(() => {
 	return [
 		{
-			label: __('Quizzes'),
+			label: __('Cuestionarios'),
 			route: {
 				name: 'Quizzes',
 			},
@@ -352,7 +371,7 @@ const breadcrumbs = computed(() => {
 
 usePageMeta(() => {
 	return {
-		title: __('Quizzes'),
+		title: __('Cuestionarios'),
 		icon: brand.favicon,
 	}
 })
