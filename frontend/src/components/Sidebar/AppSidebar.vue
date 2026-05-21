@@ -1,6 +1,6 @@
 <template>
 	<div
-		class="flex h-full flex-col justify-between transition-all duration-300 ease-in-out border-e bg-surface-menu-bar overflow-x-hidden"
+		class="flex h-full flex-col justify-between transition-all duration-300 ease-in-out overflow-x-hidden sb-sidebar"
 		:class="sidebarStore.isSidebarCollapsed ? 'w-14' : 'w-56'"
 	>
 		<div
@@ -12,7 +12,7 @@
 				<div v-for="link in sidebarLinks" class="mx-2 my-2.5">
 					<div
 						v-if="!link.hideLabel"
-						class="mb-2 mt-3 flex cursor-pointer gap-1.5 px-1 text-base font-medium text-ink-gray-5 transition-all duration-300 ease-in-out"
+						class="mb-2 mt-3 flex cursor-pointer gap-1.5 px-1 text-base font-medium text-blue-300/60 transition-all duration-300 ease-in-out"
 					>
 						<span>{{ __(link.label) }}</span>
 					</div>
@@ -37,11 +37,11 @@
 				>
 					<div
 						v-if="!sidebarStore.isSidebarCollapsed"
-						class="flex items-center text-ink-gray-5 my-1"
+						class="flex items-center text-blue-300/60 my-1"
 					>
 						<span class="grid h-5 w-6 flex-shrink-0 place-items-center">
 							<ChevronRight
-								class="h-4 w-4 stroke-1.5 text-ink-gray-9 transition-all duration-300 ease-in-out"
+								class="h-4 w-4 stroke-1.5 text-white/70 transition-all duration-300 ease-in-out"
 								:class="{
 									'rotate-90': !sidebarStore.isWebpagesCollapsed,
 									'rtl:rotate-180': sidebarStore.isWebpagesCollapsed,
@@ -85,7 +85,7 @@
 		<div class="m-2 flex flex-col gap-1">
 			<div
 				v-if="readOnlyMode && !sidebarStore.isSidebarCollapsed"
-				class="z-10 m-2 bg-surface-modal py-2.5 px-3 text-xs text-ink-gray-7 leading-5 rounded-md"
+				class="z-10 m-2 bg-white/10 py-2.5 px-3 text-xs text-blue-200/80 leading-5 rounded-md"
 			>
 				{{
 					__(
@@ -167,7 +167,7 @@
 				>
 					<Tooltip v-if="readOnlyMode && sidebarStore.isSidebarCollapsed">
 						<CircleAlert
-							class="size-4 stroke-1.5 text-ink-gray-7 cursor-pointer"
+							class="size-4 stroke-1.5 text-blue-200/60 cursor-pointer"
 						/>
 						<template #body>
 							<div
@@ -186,13 +186,13 @@
 						:text="__('Book a free onboarding session with the Frappe team')"
 					>
 						<Phone
-							class="size-4 stroke-1.5 text-ink-gray-7 cursor-pointer"
+							class="size-4 stroke-1.5 text-blue-200/60 cursor-pointer"
 							@click="redirectToAppointmentScreen()"
 						/>
 					</Tooltip>
 					<Tooltip v-if="showOnboarding" :text="__('Help')">
 						<CircleHelp
-							class="size-4 stroke-1.5 text-ink-gray-7 cursor-pointer"
+							class="size-4 stroke-1.5 text-blue-200/60 cursor-pointer"
 							@click="
 								() => {
 									showHelpModal = minimize ? true : !showHelpModal
@@ -201,9 +201,9 @@
 							"
 						/>
 					</Tooltip>
-					<Tooltip :text="__('Powered by Frappe Learning')">
+					<Tooltip :text="__('Powered by StudyBadge')">
 						<Zap
-							class="size-4 stroke-1.5 text-ink-gray-7 cursor-pointer"
+							class="size-4 stroke-1.5 text-sb-accent cursor-pointer"
 							@click="redirectToWebsite()"
 						/>
 					</Tooltip>
@@ -214,7 +214,7 @@
 					"
 				>
 					<CollapseSidebar
-						class="size-4 text-ink-gray-7 duration-300 stroke-1.5 ease-in-out cursor-pointer"
+						class="size-4 text-blue-200/60 duration-300 stroke-1.5 ease-in-out cursor-pointer"
 						:style="{
 							transform:
 								isRtl !== sidebarStore.isSidebarCollapsed
@@ -232,7 +232,7 @@
 			v-model="showHelpModal"
 			v-model:articles="articles"
 			appName="learning"
-			title="Frappe Learning"
+			title="StudyBadge"
 			:logo="LMSLogo"
 			:afterSkip="(step) => capture('onboarding_step_skipped_' + step)"
 			:afterSkipAll="() => capture('onboarding_steps_skipped')"

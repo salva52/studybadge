@@ -8,8 +8,8 @@
 						isCollapsed
 							? 'px-0 w-auto'
 							: open
-							? 'bg-surface-white shadow-sm px-2 w-52'
-							: 'hover:bg-surface-gray-3 px-2 w-52'
+							? 'bg-white/15 shadow-sm px-2 w-52'
+							: 'hover:bg-white/10 px-2 w-52'
 					"
 				>
 					<img
@@ -26,7 +26,7 @@
 								: 'opacity-100 ms-2 w-auto'
 						"
 					>
-						<div class="text-base font-medium text-ink-gray-9 leading-none">
+						<div class="text-base font-medium text-white leading-none">
 							<span
 								v-if="
 									branding.data?.app_name && branding.data?.app_name != 'Frappe'
@@ -34,11 +34,11 @@
 							>
 								{{ branding.data?.app_name }}
 							</span>
-							<span v-else> Learning </span>
+							<span v-else> StudyBadge </span>
 						</div>
 						<div
 							v-if="userResource.data"
-							class="mt-1 text-sm text-ink-gray-7 leading-none"
+							class="mt-1 text-sm text-blue-200/70 leading-none"
 						>
 							{{ convertToTitleCase(userResource.data?.full_name) }}
 						</div>
@@ -51,7 +51,7 @@
 								: 'opacity-100 ms-2 w-auto'
 						"
 					>
-						<ChevronDown class="h-4 w-4 text-ink-gray-7" />
+						<ChevronDown class="h-4 w-4 text-blue-200/70" />
 					</div>
 				</button>
 			</template>

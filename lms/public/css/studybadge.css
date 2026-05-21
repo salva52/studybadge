@@ -1,0 +1,122 @@
+/* StudyBadge — Legacy Page Overrides (Login, Signup, Non-SPA pages)
+   This CSS is loaded on ALL web pages via web_include_css in hooks.py
+   ============================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ============================================
+   Variables
+   ============================================ */
+:root {
+	--sb-dark: #061B49;
+	--sb-primary: #007BFF;
+	--sb-medium: #0A84FF;
+	--sb-accent: #F5B301;
+	--sb-bg: #F5F7FB;
+}
+
+/* ============================================
+   Global Overrides
+   ============================================ */
+body {
+	font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+	background-color: var(--sb-bg) !important;
+	-webkit-font-smoothing: antialiased;
+}
+
+/* ============================================
+   Login Page
+   ============================================ */
+.page-card {
+	border-radius: 16px !important;
+	box-shadow: 0 4px 24px rgba(6, 27, 73, 0.1) !important;
+	border: 1px solid rgba(6, 27, 73, 0.06) !important;
+}
+
+.page-card .page-card-head {
+	background: var(--sb-dark) !important;
+	border-radius: 16px 16px 0 0 !important;
+	padding: 2rem !important;
+}
+
+.page-card .page-card-head .title {
+	color: white !important;
+	font-weight: 700 !important;
+}
+
+/* Primary buttons on login */
+.btn-primary,
+.btn-primary-dark {
+	background-color: var(--sb-primary) !important;
+	border-color: var(--sb-primary) !important;
+	border-radius: 10px !important;
+	font-weight: 600 !important;
+	transition: all 0.25s ease !important;
+}
+
+.btn-primary:hover,
+.btn-primary-dark:hover {
+	background-color: var(--sb-medium) !important;
+	border-color: var(--sb-medium) !important;
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3) !important;
+}
+
+/* Links */
+a {
+	color: var(--sb-primary);
+}
+
+a:hover {
+	color: var(--sb-medium);
+}
+
+/* ============================================
+   Navbar (for non-SPA pages)
+   ============================================ */
+.navbar {
+	background-color: var(--sb-dark) !important;
+	border-bottom: none !important;
+	box-shadow: 0 1px 4px rgba(6, 27, 73, 0.1);
+}
+
+.navbar .navbar-brand,
+.navbar .nav-link {
+	color: white !important;
+}
+
+.navbar .nav-link:hover {
+	color: var(--sb-accent) !important;
+}
+
+/* ============================================
+   Footer (for non-SPA pages)
+   ============================================ */
+footer.web-footer {
+	background-color: var(--sb-dark) !important;
+	color: rgba(255, 255, 255, 0.7) !important;
+}
+
+footer.web-footer a {
+	color: rgba(255, 255, 255, 0.8) !important;
+}
+
+footer.web-footer a:hover {
+	color: var(--sb-accent) !important;
+}
+
+/* ============================================
+   Form Controls
+   ============================================ */
+.form-control:focus {
+	border-color: var(--sb-primary) !important;
+	box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15) !important;
+}
+
+/* ============================================
+   Cards & Containers
+   ============================================ */
+.card {
+	border-radius: 12px;
+	border: 1px solid rgba(6, 27, 73, 0.06);
+}

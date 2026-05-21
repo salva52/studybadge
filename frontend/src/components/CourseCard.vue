@@ -1,11 +1,11 @@
 <template>
 	<div
 		v-if="course.title"
-		class="flex flex-col h-full rounded-md overflow-auto text-ink-gray-9 bg-surface-cards"
+		class="flex flex-col h-full overflow-hidden text-ink-gray-9 sb-course-card bg-white"
 		style="min-height: 350px"
 	>
 		<div
-			class="w-[100%] h-[168px] bg-cover bg-center bg-no-repeat border-t border-x rounded-t-md"
+			class="w-[100%] h-[168px] bg-cover bg-center bg-no-repeat"
 			:style="
 				course.image
 					? { backgroundImage: `url('${encodeURI(course.image)}')` }
@@ -47,7 +47,15 @@
 				{{ course.title }}
 			</div>
 		</div>
-		<div class="flex flex-col flex-auto p-4 border-x-2 border-b-2 rounded-b-md">
+		<div
+			v-if="course.custom_recommended_by_studybadge"
+			class="px-5 pt-3 pb-0"
+		>
+			<span class="sb-recommended-badge">
+				⭐ {{ __('Recomendado por StudyBadge') }}
+			</span>
+		</div>
+		<div class="flex flex-col flex-auto p-5 border-0">
 			<div class="flex items-center justify-between mb-2">
 				<div v-if="course.lessons">
 					<Tooltip :text="__('Lessons')">
@@ -195,6 +203,7 @@ const gradientColor = computed(() => {
 	width: 100%;
 	overflow: hidden;
 	margin: 0.25rem 0 1.25rem;
-	line-height: 1.5;
+	line-height: 1.6;
+	color: #4A5568;
 }
 </style>

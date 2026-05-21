@@ -1,5 +1,17 @@
 <template>
 	<div class="w-full px-5 pt-5 pb-10">
+		<!-- StudyBadge Hero Section -->
+		<div class="sb-hero">
+			<h1>Aprende habilidades reales.<br/>Obtén certificados verificables.</h1>
+			<p>Cursos online diseñados para ayudarte a crecer profesionalmente, validar tus conocimientos y avanzar a tu ritmo.</p>
+			<router-link
+				:to="{ name: 'Courses' }"
+				class="sb-hero-cta"
+			>
+				{{ __('Explorar Cursos') }} →
+			</router-link>
+		</div>
+
 		<div class="space-y-2">
 			<div class="flex items-center justify-between">
 				<div class="text-xl font-bold text-ink-gray-9">

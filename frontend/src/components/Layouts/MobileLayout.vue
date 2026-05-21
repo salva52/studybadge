@@ -1,7 +1,7 @@
 <template>
 	<div class="relative flex h-screen flex-col">
 		<div
-			class="flex flex-1 flex-col overflow-y-auto pb-10"
+			class="flex flex-1 flex-col overflow-y-auto pb-10 bg-sb-bg"
 			id="scrollContainer"
 		>
 			<slot />
@@ -43,7 +43,7 @@
 					<component
 						:is="icons[tab.icon]"
 						class="h-6 w-6 stroke-1.5"
-						:class="[isActive(tab) ? 'text-ink-gray-9' : 'text-ink-gray-5']"
+						:class="[isActive(tab) ? 'text-sb-primary' : 'text-ink-gray-5']"
 					/>
 				</button>
 				<button @click="toggleMenu">
