@@ -15,7 +15,7 @@
 						<template #prefix>
 							<Plus class="size-4 stroke-1.5" />
 						</template>
-						{{ __('Create') }}
+						{{ __('Crear') }}
 						<template #suffix>
 							<ChevronDown
 								:class="[
@@ -30,21 +30,30 @@
 		</template>
 	</LayoutHeader>
 	<div class="p-5 pb-10">
-		<div
-			class="mb-5 flex flex-col justify-between space-y-4 lg:flex-row lg:items-center lg:space-y-0"
-		>
-			<div class="text-lg font-semibold text-ink-gray-9">
-				{{ __('All Courses') }}
+		<!-- Page Header -->
+		<div class="mb-6 flex items-center gap-4">
+			<div class="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-sb-primary/10 to-sb-medium/10 flex-shrink-0">
+				<BookOpen class="w-5 h-5 text-sb-primary" />
 			</div>
-			<div
-				class="flex flex-col space-y-3 lg:flex-row lg:items-center lg:gap-x-4 lg:space-y-0"
-			>
-				<TabButtons :buttons="courseTabs" v-model="currentTab" class="w-fit" />
+			<div>
+				<h1 class="text-xl font-bold text-sb-dark">{{ __('Todos los Cursos') }}</h1>
+				<p class="text-sm text-gray-500">{{ __('Explora, filtra y gestiona tu catálogo de cursos') }}</p>
+			</div>
+		</div>
 
+		<!-- Filters -->
+		<div
+			class="mb-6 flex flex-col justify-between space-y-4 lg:flex-row lg:items-center lg:space-y-0"
+		>
+			<TabButtons :buttons="courseTabs" v-model="currentTab" class="w-fit" />
+
+			<div
+				class="flex flex-col space-y-3 lg:flex-row lg:items-center lg:gap-x-3 lg:space-y-0"
+			>
 				<div class="grid grid-cols-2 gap-2">
 					<FormControl
 						v-model="title"
-						:placeholder="__('Search')"
+						:placeholder="__('Buscar')"
 						type="text"
 						class="w-full"
 						@input="updateCourses()"
@@ -53,16 +62,16 @@
 						v-if="categories.length"
 						v-model="currentCategory"
 						:options="categories"
-						:placeholder="__('Category')"
+						:placeholder="__('Categoría')"
 						@update:modelValue="updateCourses()"
 					/>
 				</div>
 
-				<Tooltip :text="__('Only show courses that offer a certificate')">
+				<Tooltip :text="__('Mostrar solo cursos con certificado')">
 					<FormControl
 						type="checkbox"
 						v-model="certification"
-						:label="__('Certification')"
+						:label="__('Certificación')"
 						@change="updateCourses()"
 					/>
 				</Tooltip>
@@ -85,7 +94,7 @@
 			class="flex justify-center mt-5"
 		>
 			<Button @click="courses.next()">
-				{{ __('Load More') }}
+				{{ __('Cargar Más') }}
 			</Button>
 		</div>
 	</div>
@@ -114,7 +123,7 @@ import {
 	usePageMeta,
 } from 'frappe-ui'
 import { computed, inject, onMounted, ref, watch } from 'vue'
-import { ChevronDown, Plus } from 'lucide-vue-next'
+import { ChevronDown, Plus, BookOpen } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
 import { canCreateCourse } from '@/utils'
 import CourseCard from '@/components/CourseCard.vue'
@@ -315,15 +324,15 @@ watch(currentTab, () => {
 const courseTabs = computed(() => {
 	let tabs = [
 		{
-			label: __('Live'),
+			label: __('Activos'),
 			value: 'live',
 		},
 		{
-			label: __('New'),
+			label: __('Nuevos'),
 			value: 'new',
 		},
 		{
-			label: __('Upcoming'),
+			label: __('Próximos'),
 			value: 'upcoming',
 		},
 	]
@@ -332,10 +341,10 @@ const courseTabs = computed(() => {
 		user.data?.is_instructor ||
 		user.data?.is_evaluator
 	) {
-		tabs.push({ label: __('Created'), value: 'created' })
-		tabs.push({ label: __('Unpublished'), value: 'unpublished' })
+		tabs.push({ label: __('Creados'), value: 'created' })
+		tabs.push({ label: __('Sin Publicar'), value: 'unpublished' })
 	} else if (user.data) {
-		tabs.push({ label: __('Enrolled'), value: 'enrolled' })
+		tabs.push({ label: __('Inscritos'), value: 'enrolled' })
 	}
 	return tabs
 })
@@ -343,14 +352,14 @@ const courseTabs = computed(() => {
 const courseMenu = computed(() => {
 	return [
 		{
-			label: __('New Course'),
+			label: __('Nuevo Curso'),
 			icon: 'book-open',
 			onClick() {
 				showCourseModal.value = true
 			},
 		},
 		{
-			label: __('Import via Data Import Tool'),
+			label: __('Importar con Data Import'),
 			icon: 'upload',
 			onClick() {
 				router.push({
@@ -360,7 +369,7 @@ const courseMenu = computed(() => {
 			},
 		},
 		{
-			label: __('Import via ZIP'),
+			label: __('Importar con ZIP'),
 			icon: 'folder-plus',
 			onClick() {
 				showCourseImportModal.value = true
@@ -371,14 +380,14 @@ const courseMenu = computed(() => {
 
 const breadcrumbs = computed(() => [
 	{
-		label: __('Courses'),
+		label: __('Cursos'),
 		route: { name: 'Courses' },
 	},
 ])
 
 usePageMeta(() => {
 	return {
-		title: __('Courses'),
+		title: __('Cursos'),
 		icon: brand.favicon,
 	}
 })
