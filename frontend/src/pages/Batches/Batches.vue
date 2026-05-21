@@ -8,14 +8,14 @@
 				v-if="canCreateBatch()"
 				:options="[
 					{
-						label: __('New Batch'),
+						label: __('Nuevo Grupo'),
 						icon: 'users',
 						onClick() {
 							showBatchModal = true
 						},
 					},
 					{
-						label: __('Import Batch'),
+						label: __('Importar Grupo'),
 						icon: 'upload',
 						onClick() {
 							router.push({
@@ -31,7 +31,7 @@
 						<template #prefix>
 							<Plus class="size-4 stroke-1.5" />
 						</template>
-						{{ __('Create') }}
+						{{ __('Crear') }}
 						<template #suffix>
 							<ChevronDown
 								:class="[
@@ -46,12 +46,19 @@
 		</template>
 	</LayoutHeader>
 	<div class="p-5 pb-10">
-		<div
-			class="mb-5 flex flex-col justify-between space-y-4 lg:flex-row lg:items-center lg:space-y-0"
-		>
-			<div class="text-lg font-semibold text-ink-gray-9">
-				{{ __('All Batches') }}
+		<div class="mb-6 flex items-center gap-4">
+			<div class="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-sb-primary/10 to-sb-medium/10 flex-shrink-0">
+				<Users class="w-5 h-5 text-sb-primary" />
 			</div>
+			<div>
+				<h1 class="text-xl font-bold text-sb-dark">{{ __('Grupos de Estudio') }}</h1>
+				<p class="text-sm text-gray-500">{{ __('Descubre y únete a grupos de aprendizaje colaborativo') }}</p>
+			</div>
+		</div>
+
+		<div
+			class="mb-6 p-4 bg-white rounded-2xl shadow-sb-soft border border-gray-100 flex flex-col justify-between space-y-4 lg:flex-row lg:items-center lg:space-y-0"
+		>
 			<div
 				class="flex flex-col space-y-3 lg:flex-row lg:items-center lg:gap-x-4 lg:space-y-0"
 			>
@@ -64,7 +71,7 @@
 				<div class="grid grid-cols-2 gap-2">
 					<FormControl
 						v-model="title"
-						:placeholder="__('Search by Title')"
+						:placeholder="__('Buscar por título')"
 						type="text"
 						class="min-w-40"
 						@input="updateBatches()"
@@ -73,15 +80,15 @@
 						v-if="categories.length"
 						v-model="currentCategory"
 						:options="categories"
-						:placeholder="__('Category')"
+						:placeholder="__('Categoría')"
 						@update:modelValue="updateBatches()"
 					/>
 				</div>
 
-				<Tooltip :text="__('Only show batches that offer a certificate')">
+				<Tooltip :text="__('Mostrar solo grupos con certificación')">
 					<Checkbox
 						v-model="certification"
-						:label="__('Certification')"
+						:label="__('Certificación')"
 						@change="updateBatches()"
 					/>
 				</Tooltip>
@@ -98,14 +105,24 @@
 				<BatchCard :batch="batch" />
 			</router-link>
 		</div>
-		<EmptyStateLayout v-else-if="!batches.list.loading" name="Batches" />
+		<div v-else-if="!batches.list.loading" class="flex flex-col items-center justify-center py-24 bg-white rounded-2xl shadow-sb-soft border border-gray-100 mt-6">
+			<div class="w-16 h-16 bg-sb-primary/10 rounded-full flex items-center justify-center mb-4">
+				<Users class="size-8 stroke-1.5 text-sb-primary" />
+			</div>
+			<p class="text-lg font-semibold text-sb-dark mb-2">
+				{{ __('No se encontraron grupos') }}
+			</p>
+			<p class="text-sm w-full md:w-1/2 text-center text-gray-500">
+				{{ __('No hay grupos disponibles en este momento. ¡Mantente atento, pronto habrá nuevas experiencias de aprendizaje!') }}
+			</p>
+		</div>
 
 		<div
 			v-if="!batches.list.loading && batches.hasNextPage"
 			class="mt-5 flex justify-center"
 		>
 			<Button @click="batches.next()">
-				{{ __('Load More') }}
+				{{ __('Cargar más') }}
 			</Button>
 		</div>
 	</div>
@@ -130,7 +147,7 @@ import {
 } from 'frappe-ui'
 import { computed, inject, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { ChevronDown, Plus } from 'lucide-vue-next'
+import { ChevronDown, Plus, Users } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
 import BatchCard from '@/pages/Batches/components/BatchCard.vue'
 import EmptyStateLayout from '@/components/Layouts/EmptyStateLayout.vue'
@@ -312,7 +329,7 @@ watch(currentTab, () => {
 const batchTabs = computed(() => {
 	let tabs = [
 		{
-			label: __('All'),
+			label: __('Todos'),
 			value: 'all',
 		},
 	]
@@ -322,11 +339,11 @@ const batchTabs = computed(() => {
 		user.data?.is_instructor ||
 		user.data?.is_evaluator
 	) {
-		tabs.push({ label: __('Upcoming'), value: 'upcoming' })
-		tabs.push({ label: __('Archived'), value: 'archived' })
-		tabs.push({ label: __('Unpublished'), value: 'unpublished' })
+		tabs.push({ label: __('Próximamente'), value: 'upcoming' })
+		tabs.push({ label: __('Archivados'), value: 'archived' })
+		tabs.push({ label: __('Ocultos'), value: 'unpublished' })
 	} else if (user.data) {
-		tabs.push({ label: __('Enrolled'), value: 'enrolled' })
+		tabs.push({ label: __('Inscrito'), value: 'enrolled' })
 	}
 	return tabs
 })
@@ -344,14 +361,14 @@ const canCreateBatch = () => {
 
 const breadcrumbs = computed(() => [
 	{
-		label: __('Batches'),
+		label: __('Grupos'),
 		route: { name: 'Batches' },
 	},
 ])
 
 usePageMeta(() => {
 	return {
-		title: __('Batches'),
+		title: __('Grupos'),
 		icon: brand.favicon,
 	}
 })

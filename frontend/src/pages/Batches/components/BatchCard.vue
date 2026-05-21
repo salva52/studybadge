@@ -1,9 +1,9 @@
 <template>
 	<div
-		class="flex flex-col border hover:border-outline-gray-3 rounded-md p-4 h-full"
+		class="flex flex-col border border-gray-100 hover:border-transparent hover:shadow-sb-soft hover:-translate-y-1 transition-all duration-300 bg-white rounded-2xl p-5 h-full"
 		style="min-height: 150px"
 	>
-		<div class="text-lg leading-5 font-semibold mb-2 text-ink-gray-9">
+		<div class="text-lg leading-6 font-bold mb-2 text-sb-dark">
 			{{ batch.title }}
 		</div>
 		<Badge
@@ -15,7 +15,7 @@
 			:label="
 				batch.seats_left +
 				' ' +
-				(batch.seats_left > 1 ? __('Seats Left') : __('Seat Left'))
+				(batch.seats_left > 1 ? __('Cupos disponibles') : __('Cupo disponible'))
 			"
 		/>
 		<Badge
@@ -24,7 +24,7 @@
 			theme="red"
 			size="md"
 			class="self-start"
-			:label="__('Sold Out')"
+			:label="__('Agotado')"
 		/>
 		<div class="short-introduction text-sm text-ink-gray-7">
 			{{ batch.description }}
