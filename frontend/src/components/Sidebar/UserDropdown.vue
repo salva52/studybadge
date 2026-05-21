@@ -17,7 +17,7 @@
 						:src="branding.data?.banner_image.file_url"
 						class="w-8 h-8 rounded flex-shrink-0"
 					/>
-					<LMSLogo v-else class="w-8 h-8 rounded flex-shrink-0" />
+					<img v-else src="/assets/lms/images/studybadge/studybadge-logo.png" class="w-8 h-8 rounded flex-shrink-0" alt="StudyBadge" />
 					<div
 						class="flex flex-1 flex-col text-start duration-300 ease-in-out"
 						:class="
