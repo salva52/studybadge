@@ -30,9 +30,8 @@
 			</div>
 		</div>
 
-		<div class="divide-y divide-gray-100 bg-white rounded-2xl shadow-sb-soft border border-gray-100 overflow-hidden">
+		<div v-if="notifications?.length" class="divide-y divide-gray-100 bg-white rounded-2xl shadow-sb-soft border border-gray-100 overflow-hidden">
 		<div
-			v-if="notifications?.length"
 			v-for="log in notifications"
 			:key="log.name"
 			class="flex items-center gap-x-3 px-4 py-4 transition-all duration-200 hover:bg-sb-primary/5"
