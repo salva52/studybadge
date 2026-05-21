@@ -1,3 +1,4 @@
+<template>
 	<LayoutHeader>
 		<template #left-header>
 			<Breadcrumbs :items="breadcrumbs" />
