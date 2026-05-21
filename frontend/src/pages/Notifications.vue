@@ -1,4 +1,3 @@
-<template>
 	<LayoutHeader>
 		<template #left-header>
 			<Breadcrumbs :items="breadcrumbs" />
@@ -7,23 +6,35 @@
 			<Button
 				@click="markAllAsRead.submit"
 				:loading="markAllAsRead.loading"
-				v-if="activeTab === 'Unread' && unReadNotifications.data?.length > 0"
+				v-if="activeTab === 'No leídas' && unReadNotifications.data?.length > 0"
 			>
-				{{ __('Mark all as read') }}
+				{{ __('Marcar todo como leído') }}
 			</Button>
 			<TabButtons
 				class="inline-block"
-				:buttons="[{ label: 'Unread', active: true }, { label: 'Read' }]"
+				:buttons="[{ label: 'No leídas', active: true }, { label: 'Leídas' }]"
 				v-model="activeTab"
 			/>
 		</template>
 	</LayoutHeader>
-	<div class="w-full md:w-3/4 mx-auto px-3 sm:px-5 pt-4 sm:pt-6 divide-y">
+	<div class="w-full md:w-3/4 mx-auto px-3 sm:px-5 pt-4 sm:pt-6">
+		<!-- Page Header -->
+		<div class="mb-6 flex items-center gap-4">
+			<div class="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-sb-primary/10 to-sb-medium/10 flex-shrink-0">
+				<Bell class="w-5 h-5 text-sb-primary" />
+			</div>
+			<div>
+				<h1 class="text-xl font-bold text-sb-dark">{{ __('Notificaciones') }}</h1>
+				<p class="text-sm text-gray-500">{{ __('Mantente al tanto de tus cursos y actividades') }}</p>
+			</div>
+		</div>
+
+		<div class="divide-y divide-gray-100 bg-white rounded-2xl shadow-sb-soft border border-gray-100 overflow-hidden">
 		<div
 			v-if="notifications?.length"
 			v-for="log in notifications"
 			:key="log.name"
-			class="flex items-center gap-x-2 px-2 py-4"
+			class="flex items-center gap-x-3 px-4 py-4 transition-all duration-200 hover:bg-sb-primary/5"
 			:class="{
 				'cursor-pointer': log.link,
 				'items-center': !showDetails(log) && !isMentionOrComment(log),
@@ -88,8 +99,8 @@
 						>
 							{{
 								log.document_type === 'LMS Course'
-									? __('New Course')
-									: __('New Batch')
+									? __('Nuevo Curso')
+									: __('Nuevo Grupo')
 							}}
 						</div>
 						<div class="font-semibold mb-1 text-ink-gray-9">
@@ -141,20 +152,23 @@
 				</div>
 			</div>
 		</div>
-		<div v-else class="flex flex-col items-center justify-center mt-60">
-			<Bell class="size-10 mx-auto stroke-1 text-ink-gray-5" />
-			<p class="text-lg font-semibold text-ink-gray-7 mb-2.5">
+		</div>
+		<div v-else class="flex flex-col items-center justify-center py-24 bg-white rounded-2xl shadow-sb-soft border border-gray-100">
+			<div class="w-16 h-16 bg-sb-primary/10 rounded-full flex items-center justify-center mb-4">
+				<Bell class="size-8 stroke-1.5 text-sb-primary" />
+			</div>
+			<p class="text-lg font-semibold text-sb-dark mb-2">
 				{{
-					activeTab === 'Unread'
-						? __('No unread notifications')
-						: __('No read notifications')
+					activeTab === 'No leídas'
+						? __('No hay notificaciones no leídas')
+						: __('No hay notificaciones leídas')
 				}}
 			</p>
-			<p class="text-p-base w-full md:w-2/5 text-center text-ink-gray-7">
+			<p class="text-sm w-full md:w-1/2 text-center text-gray-500">
 				{{
-					activeTab === 'Unread'
-						? __("You're all caught up! Check back later for updates.")
-						: __('Notifications you have read will appear here.')
+					activeTab === 'No leídas'
+						? __("¡Estás al día! Vuelve más tarde para ver actualizaciones.")
+						: __('Las notificaciones que leas aparecerán aquí.')
 				}}
 			</p>
 		</div>
@@ -182,7 +196,7 @@ const { brand } = sessionStore()
 const dayjs = inject('$dayjs')
 const user = inject('$user')
 const socket = inject('$socket')
-const activeTab = ref('Unread')
+const activeTab = ref('No leídas')
 const router = useRouter()
 
 onMounted(() => {
@@ -194,7 +208,7 @@ onMounted(() => {
 })
 
 const notifications = computed(() => {
-	return activeTab.value === 'Unread'
+	return activeTab.value === 'No leídas'
 		? unReadNotifications.data
 		: readNotifications.data
 })
@@ -309,7 +323,7 @@ onUnmounted(() => {
 const breadcrumbs = computed(() => {
 	let crumbs = [
 		{
-			label: 'Notifications',
+			label: __('Notificaciones'),
 			route: {
 				name: 'Notifications',
 			},
@@ -320,7 +334,7 @@ const breadcrumbs = computed(() => {
 
 usePageMeta(() => {
 	return {
-		title: 'Notifications',
+		title: __('Notificaciones'),
 		icon: brand.favicon,
 	}
 })
