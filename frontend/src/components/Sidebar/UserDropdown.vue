@@ -15,9 +15,9 @@
 					<img
 						v-if="branding.data?.banner_image"
 						:src="branding.data?.banner_image.file_url"
-						class="w-8 h-8 rounded flex-shrink-0"
+						class="w-9 h-9 rounded-lg flex-shrink-0 object-contain"
 					/>
-					<img v-else :src="'/assets/lms/images/studybadge/studybadge-logo.png'" class="w-8 h-8 rounded flex-shrink-0" alt="StudyBadge" />
+					<img v-else :src="'/assets/lms/images/studybadge/studybadge-logo.png'" class="w-9 h-9 rounded-lg flex-shrink-0 object-contain" alt="StudyBadge" />
 					<div
 						class="flex flex-1 flex-col text-start duration-300 ease-in-out"
 						:class="

@@ -103,6 +103,34 @@ button[aria-selected="true"],
 	margin-bottom: 2rem;
 }
 
+.sb-hero-brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	padding: 6px 16px 6px 6px;
+	background: rgba(255, 255, 255, 0.12);
+	backdrop-filter: blur(8px);
+	border-radius: 40px;
+	margin-bottom: 1.25rem;
+	position: relative;
+	z-index: 1;
+	border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.sb-hero-logo {
+	width: 32px;
+	height: 32px;
+	border-radius: 8px;
+	object-fit: contain;
+}
+
+.sb-hero-brand-name {
+	font-size: 0.95rem;
+	font-weight: 700;
+	color: #fff;
+	letter-spacing: 0.02em;
+}
+
 .sb-hero::before {
 	content: '';
 	position: absolute;

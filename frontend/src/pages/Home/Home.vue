@@ -2,6 +2,10 @@
 	<div class="w-full px-5 pt-5 pb-10">
 		<!-- StudyBadge Hero Section -->
 		<div class="sb-hero">
+			<div class="sb-hero-brand">
+				<img :src="'/assets/lms/images/studybadge/studybadge-logo.png'" alt="StudyBadge" class="sb-hero-logo" />
+				<span class="sb-hero-brand-name">StudyBadge</span>
+			</div>
 			<h1>Aprende habilidades reales.<br/>Obtén certificados verificables.</h1>
 			<p>Cursos online diseñados para ayudarte a crecer profesionalmente, validar tus conocimientos y avanzar a tu ritmo.</p>
 			<router-link
