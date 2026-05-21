@@ -15,7 +15,7 @@
 					<template #prefix>
 						<ClipboardList class="size-4 stroke-1.5" />
 					</template>
-					{{ __('Check All Submissions') }}
+					{{ __('Ver todas las entregas') }}
 				</Button>
 			</router-link>
 			<Button
@@ -31,27 +31,38 @@
 				<template #prefix>
 					<Plus class="size-4 stroke-1.5" />
 				</template>
-				{{ __('Create') }}
+				{{ __('Crear') }}
 			</Button>
 		</template>
 	</LayoutHeader>
 	<div class="flex min-h-0 flex-1 flex-col pt-5">
+		<!-- Hero Header -->
+		<div class="px-5 mb-6 flex items-center gap-4">
+			<div class="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-sb-primary/10 to-sb-medium/10 flex-shrink-0">
+				<FeatherIcon name="code" class="w-5 h-5 text-sb-primary stroke-2" />
+			</div>
+			<div>
+				<h1 class="text-xl font-bold text-sb-dark">{{ __('Ejercicios de Código') }}</h1>
+				<p class="text-sm text-gray-500">{{ __('Desafía y evalúa las habilidades de programación') }}</p>
+			</div>
+		</div>
+
 		<div
-			class="mb-5 flex flex-col justify-between gap-y-4 px-5 sm:flex-row sm:items-center"
+			class="mx-5 mb-5 p-4 bg-white rounded-2xl shadow-sb-soft border border-gray-100 flex flex-col justify-between gap-y-4 sm:flex-row sm:items-center"
 		>
 			<div class="text-lg font-semibold text-ink-gray-9">
-				{{ __('{0} Exercises').format(exercises.data?.length) }}
+				{{ __('{0} Ejercicios').format(exercises.data?.length) }}
 			</div>
 			<div class="flex flex-col gap-3 sm:gap-5 md:flex-row">
 				<FormControl
 					v-model="titleFilter"
-					:placeholder="__('Search by Title')"
+					:placeholder="__('Buscar por título')"
 					@input="updateList"
 				/>
 				<Select
 					v-model="languageFilter"
 					:options="languages"
-					:placeholder="__('Type')"
+					:placeholder="__('Lenguaje')"
 					@update:modelValue="updateList"
 				/>
 			</div>
@@ -116,8 +127,16 @@
 				</template>
 			</ListSelectBanner>
 		</ListView>
-		<div v-else class="flex flex-1 items-center justify-center px-5">
-			<EmptyStateLayout name="Programming Exercises" />
+		<div v-else class="flex flex-col items-center justify-center py-24 mx-5 bg-white rounded-2xl shadow-sb-soft border border-gray-100 mt-6">
+			<div class="w-16 h-16 bg-sb-primary/10 rounded-full flex items-center justify-center mb-4">
+				<FeatherIcon name="code" class="w-8 h-8 stroke-1.5 text-sb-primary" />
+			</div>
+			<p class="text-lg font-semibold text-sb-dark mb-2">
+				{{ __('No se encontraron ejercicios de programación') }}
+			</p>
+			<p class="text-sm w-full md:w-1/2 text-center text-gray-500">
+				{{ __('No hay ejercicios en este momento. ¡Crea el primero para empezar a desafiar a tus estudiantes!') }}
+			</p>
 		</div>
 		<ListFooter
 			v-model="pageLength"
@@ -131,13 +150,13 @@
 				<div class="flex items-center">
 					<Button
 						v-if="exercises.hasNextPage"
-						:label="__('Load More')"
+						:label="__('Cargar más')"
 						@click="exercises.next()"
 					/>
 					<div v-if="exercises.hasNextPage" class="mx-3 h-[80%] border-l" />
 					<div class="flex items-center gap-1 text-base text-ink-gray-5">
 						<div>{{ exercises.data?.length || 0 }}</div>
-						<div>{{ __('of') }}</div>
+						<div>{{ __('de') }}</div>
 						<div>{{ totalExercises.data || 0 }}</div>
 					</div>
 				</div>
@@ -244,13 +263,13 @@ const showDeleteConfirmation = (
 	unselectAll: () => void
 ) => {
 	$dialog({
-		title: __('Confirm Your Action'),
+		title: __('Confirmar Acción'),
 		message: __(
-			'Deleting these exercises will permanently remove them from the system, along with all associated submissions. This action is irreversible. Are you sure you want to proceed?'
+			'Eliminar estos ejercicios los borrará permanentemente del sistema, junto con todas las entregas asociadas. Esta acción es irreversible. ¿Estás seguro de que deseas continuar?'
 		),
 		actions: [
 			{
-				label: __('Delete'),
+				label: __('Eliminar'),
 				theme: 'red',
 				variant: 'solid',
 				onClick(close: () => void) {
@@ -268,7 +287,7 @@ const deleteExercises = (selections: Set<string>, unselectAll: () => void) => {
 			exercise: exerciseName,
 		})
 			.then(() => {
-				toast.success(__('Exercise deleted successfully'))
+				toast.success(__('Ejercicio eliminado correctamente'))
 				updateList()
 			})
 			.catch((error: any) => {
@@ -310,20 +329,20 @@ const languages = [
 const columns = computed(() => {
 	return [
 		{
-			label: __('Title'),
+			label: __('Título'),
 			key: 'title',
 			width: 1,
 			icon: 'file-text',
 		},
 		{
-			label: __('Language'),
+			label: __('Lenguaje'),
 			key: 'language',
 			width: 1,
 			align: 'left',
 			icon: 'code',
 		},
 		{
-			label: __('Updated On'),
+			label: __('Actualizado el'),
 			key: 'modified',
 			width: 1,
 			icon: 'clock',
@@ -334,7 +353,7 @@ const columns = computed(() => {
 
 usePageMeta(() => {
 	return {
-		title: __('Programming Exercises'),
+		title: __('Ejercicios de Código'),
 		icon: brand.favicon,
 	}
 })
@@ -342,7 +361,7 @@ usePageMeta(() => {
 const breadcrumbs = computed(() => {
 	return [
 		{
-			label: __('Programming Exercises'),
+			label: __('Ejercicios de Código'),
 			route: { name: 'ProgrammingExercises' },
 		},
 	]
