@@ -1,105 +1,94 @@
 <template>
-	<header
-		class="sticky flex items-center justify-between top-0 z-10 border-b bg-surface-white px-3 py-2.5 sm:px-5"
-	>
-		<Breadcrumbs :items="[{ label: __('Search') }]" />
-	</header>
-	<div class="w-4/6 mx-auto py-5">
-		<div class="px-2.5">
-			<TextInput
-				ref="searchInput"
-				class="flex-1"
-				placeholder="Search for a keyword or phrase and press enter"
-				autocomplete="off"
-				:model-value="query"
-				@update:model-value="updateQuery"
-				@keydown.enter="() => submit()"
-			>
-				<template #prefix>
-					<Search class="w-4 text-ink-gray-5" />
-				</template>
-				<template #suffix>
-					<div class="flex items-center">
-						<button
-							v-if="query"
-							@click="clearSearch"
-							class="p-1 size-6 grid place-content-center focus:outline-none focus:ring focus:ring-outline-gray-3 rounded"
-						>
-							<X class="w-4 text-ink-gray-7" />
-						</button>
-					</div>
-				</template>
-			</TextInput>
-			<div
-				v-if="query && searchResults.length"
-				class="text-sm text-ink-gray-5 mt-2"
-			>
-				{{ searchResults.length }}
-				{{ searchResults.length === 1 ? __('match') : __('matches') }}
+	<div class="min-h-screen">
+		<!-- Search Header -->
+		<div class="px-6 pt-10 pb-6 max-w-2xl mx-auto">
+			<div class="text-center mb-8">
+				<div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-sb-primary/10 to-sb-medium/10 mb-4">
+					<Search class="w-7 h-7 text-sb-primary" />
+				</div>
+				<h1 class="text-2xl font-bold text-sb-dark mb-2">{{ __('Buscar') }}</h1>
+				<p class="text-sm text-gray-500">{{ __('Encuentra cursos, grupos, empleos y más') }}</p>
 			</div>
-			<div v-else-if="queryChanged" class="text-sm text-ink-gray-5 mt-2">
-				{{ __('Press enter to search') }}
+
+			<!-- Search Input -->
+			<div class="relative">
+				<div class="flex items-center bg-white rounded-xl shadow-sb-card border border-gray-100 px-4 py-1 transition-all duration-300 focus-within:shadow-sb-card-hover focus-within:border-sb-primary/30">
+					<Search class="w-5 h-5 text-gray-400 flex-shrink-0" />
+					<input
+						ref="searchInput"
+						type="text"
+						class="flex-1 bg-transparent border-none outline-none px-3 py-3 text-base text-sb-dark placeholder-gray-400 font-inter"
+						:placeholder="__('Escribe una palabra clave y presiona Enter...')"
+						autocomplete="off"
+						:value="query"
+						@input="updateQuery($event.target.value)"
+						@keydown.enter="() => submit()"
+					/>
+					<button
+						v-if="query"
+						@click="clearSearch"
+						class="p-1.5 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+					>
+						<X class="w-4 h-4 text-gray-400" />
+					</button>
+				</div>
 			</div>
-			<div
-				v-else-if="query && !searchResults.length"
-				class="text-sm text-ink-gray-5 mt-2"
-			>
-				{{ __('No results found') }}
+
+			<!-- Status Text -->
+			<div class="mt-4 text-center">
+				<div v-if="query && searchResults.length" class="text-sm text-gray-500">
+					<span class="font-semibold text-sb-primary">{{ searchResults.length }}</span>
+					{{ searchResults.length === 1 ? __('resultado encontrado') : __('resultados encontrados') }}
+				</div>
+				<div v-else-if="queryChanged" class="text-sm text-gray-400 flex items-center justify-center gap-1.5">
+					<span>{{ __('Presiona Enter para buscar') }}</span>
+					<kbd class="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-500 rounded font-mono">↵</kbd>
+				</div>
+				<div v-else-if="query && !searchResults.length" class="text-sm text-gray-400">
+					{{ __('No se encontraron resultados') }}
+				</div>
 			</div>
 		</div>
 
-		<div class="mt-5">
-			<div v-if="searchResults.length" class="">
+		<!-- Results -->
+		<div class="max-w-2xl mx-auto px-6 pb-10">
+			<div v-if="searchResults.length" class="space-y-3">
 				<div
 					v-for="(result, index) in searchResults"
+					:key="index"
 					@click="navigate(result)"
-					class="rounded-md cursor-pointer hover:bg-surface-gray-2 px-2"
+					class="group bg-white rounded-xl p-4 cursor-pointer border border-gray-100 transition-all duration-300 hover:shadow-sb-card-hover hover:border-sb-primary/20 hover:-translate-y-0.5"
 				>
-					<div
-						class="flex gap-x-2 py-3"
-						:class="{
-							'border-b': index !== searchResults.length - 1,
-						}"
-					>
+					<div class="flex gap-x-3.5 items-start">
 						<Tooltip :text="result.author_info.full_name">
 							<Avatar
 								:label="result.author_info.full_name"
 								:image="result.author_info.user_image"
-								size="md"
+								size="lg"
+								class="flex-shrink-0 ring-2 ring-white shadow-sm"
 							/>
 						</Tooltip>
-						<div class="space-y-1 w-full">
-							<div class="flex items-center">
+						<div class="flex-1 min-w-0">
+							<div class="flex items-center gap-2 mb-1">
 								<div
-									class="font-medium text-ink-gray-9"
+									class="font-semibold text-sb-dark group-hover:text-sb-primary transition-colors duration-200 truncate"
 									v-html="result.title"
 								></div>
-								<div class="text-sm text-ink-gray-5 ms-2">
+								<span class="flex-shrink-0 px-2 py-0.5 text-xs font-medium rounded-full bg-sb-primary/8 text-sb-primary">
 									{{ getDocTypeTitle(result.doctype) }}
-								</div>
-								<div
-									v-if="
-										result.published_on ||
-										result.start_date ||
-										result.creation ||
-										result.modified
-									"
-									class="ms-auto text-sm text-ink-gray-5"
-								>
-									{{
-										dayjs(
-											result.published_on ||
-												result.start_date ||
-												result.creation ||
-												result.modified
-										).format('DD MMM YYYY')
-									}}
-								</div>
+								</span>
 							</div>
 							<div
-								class="leading-5 text-ink-gray-7"
+								v-if="result.content"
+								class="text-sm text-gray-500 leading-relaxed line-clamp-2"
 								v-html="result.content"
 							></div>
+							<div
+								v-if="result.published_on || result.start_date || result.creation || result.modified"
+								class="text-xs text-gray-400 mt-1.5"
+							>
+								{{ dayjs(result.published_on || result.start_date || result.creation || result.modified).format('DD MMM YYYY') }}
+							</div>
 						</div>
 					</div>
 				</div>
@@ -110,10 +99,8 @@
 <script setup lang="ts">
 import {
 	Avatar,
-	Breadcrumbs,
 	createResource,
 	debounce,
-	TextInput,
 	Tooltip,
 	usePageMeta,
 } from 'frappe-ui'
@@ -230,11 +217,11 @@ watch(
 
 const getDocTypeTitle = (doctype: string) => {
 	if (doctype === 'LMS Course') {
-		return __('Course')
+		return __('Curso')
 	} else if (doctype === 'LMS Batch') {
-		return __('Batch')
+		return __('Grupo')
 	} else if (doctype === 'Job Opportunity') {
-		return __('Job')
+		return __('Empleo')
 	} else {
 		return doctype
 	}
@@ -247,7 +234,7 @@ const clearSearch = () => {
 
 usePageMeta(() => {
 	return {
-		title: __('Search'),
+		title: __('Buscar'),
 		icon: brand.favicon,
 	}
 })
