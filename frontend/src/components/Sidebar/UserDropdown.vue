@@ -125,7 +125,7 @@ const userDropdownOptions = computed(() => {
 			items: [
 				{
 					icon: User,
-					label: 'My Profile',
+					label: 'Mi Perfil',
 					onClick: () => {
 						router.push(`/user/${userResource.data?.username}`)
 					},
@@ -135,7 +135,7 @@ const userDropdownOptions = computed(() => {
 				},
 				{
 					icon: theme.value === 'light' ? Moon : Sun,
-					label: 'Toggle Theme',
+					label: 'Cambiar Tema',
 					onClick: () => {
 						toggleTheme()
 					},
@@ -153,7 +153,7 @@ const userDropdownOptions = computed(() => {
 				},
 				{
 					icon: Settings,
-					label: 'Settings',
+					label: 'Ajustes',
 					onClick: () => {
 						settingsStore.isSettingsOpen = true
 					},
@@ -168,7 +168,7 @@ const userDropdownOptions = computed(() => {
 					},
 				},
 				{
-					label: 'Clear Demo Data',
+					label: 'Borrar Datos de Prueba',
 					icon: Trash2,
 					onClick: () => {
 						clearDemoDataConfirmation()
@@ -182,16 +182,16 @@ const userDropdownOptions = computed(() => {
 				},
 				{
 					icon: FrappeCloudIcon,
-					label: 'Login to Frappe Cloud',
+					label: 'Iniciar sesión en Frappe Cloud',
 					onClick: () => {
 						$dialog({
-							title: __('Login to Frappe Cloud?'),
+							title: __('¿Iniciar sesión en Frappe Cloud?'),
 							message: __(
-								'Are you sure you want to login to your Frappe Cloud dashboard?'
+								'¿Estás seguro de que deseas iniciar sesión en tu panel de Frappe Cloud?'
 							),
 							actions: [
 								{
-									label: __('Confirm'),
+									label: __('Confirmar'),
 									variant: 'solid',
 									onClick(close) {
 										loginToFrappeCloud()
@@ -210,7 +210,7 @@ const userDropdownOptions = computed(() => {
 				},
 				{
 					icon: LogOut,
-					label: 'Log out',
+					label: 'Cerrar sesión',
 					onClick: () => {
 						logout.submit().then(() => {
 							isLoggedIn = false
@@ -222,7 +222,7 @@ const userDropdownOptions = computed(() => {
 				},
 				{
 					icon: LogIn,
-					label: 'Log in',
+					label: 'Iniciar sesión',
 					onClick: () => {
 						window.location.href = '/login'
 					},
@@ -242,13 +242,13 @@ const loginToFrappeCloud = () => {
 
 const clearDemoDataConfirmation = () => {
 	$dialog({
-		title: __('Confirm clearing demo data?'),
+		title: __('¿Confirmar borrado de datos de prueba?'),
 		message: __(
-			'Are you sure you want to clear the demo data? This would delete the course "A guide  to Frappe Learning" along with all its associated data. This action cannot be undone.'
+			'¿Estás seguro de que deseas borrar los datos de prueba? Esto eliminará el curso "A guide to Frappe Learning" junto con todos sus datos asociados. Esta acción no se puede deshacer.'
 		),
 		actions: [
 			{
-				label: __('Confirm'),
+				label: __('Confirmar'),
 				theme: 'red',
 				variant: 'solid',
 				onClick(close) {
@@ -264,10 +264,10 @@ const clearDemoData = () => {
 	call('lms.lms.api.clear_demo_data')
 		.then(() => {
 			window.location.href = '/lms'
-			toast.success(__('Demo data cleared successfully'))
+			toast.success(__('Datos de prueba borrados correctamente'))
 		})
 		.catch((error) => {
-			toast.error(__(error.message || 'Error clearing demo data'))
+			toast.error(__(error.message || 'Error al borrar datos de prueba'))
 			console.error('Error clearing demo data:', error)
 		})
 }

@@ -9,7 +9,7 @@
 				<div class="flex gap-2">
 					<LayoutGrid class="size-4 stroke-1.5" />
 					<span class="whitespace-nowrap">
-						{{ __('Apps') }}
+						{{ __('Aplicaciones') }}
 					</span>
 				</div>
 				<ChevronRight class="h-4 w-4 stroke-1.5" />
@@ -47,7 +47,7 @@ const apps = createResource({
 			{
 				name: 'frappe',
 				logo: '/assets/lms/images/desk.png',
-				title: __('Desk'),
+				title: __('Escritorio'),
 				route: '/desk/learning',
 			},
 		]

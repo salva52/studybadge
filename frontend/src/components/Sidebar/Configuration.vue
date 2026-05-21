@@ -9,7 +9,7 @@
 				<div class="flex gap-2">
 					<Wrench class="size-4 stroke-1.5" />
 					<span class="whitespace-nowrap">
-						{{ __('Configuration') }}
+						{{ __('Configuración') }}
 					</span>
 				</div>
 				<ChevronRight class="h-4 w-4 stroke-1.5" />
@@ -33,7 +33,7 @@
 								class="size-9 text-ink-gray-7 p-2 bg-surface-gray-2 rounded-md"
 							/>
 							<div class="text-sm text-ink-gray-7">
-								{{ __('Import') }}
+								{{ __('Importar') }}
 							</div>
 						</div>
 					</router-link>
