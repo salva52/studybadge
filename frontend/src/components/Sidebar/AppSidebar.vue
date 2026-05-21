@@ -89,7 +89,7 @@
 			>
 				{{
 					__(
-						'This site is being updated. You will not be able to make any changes. Full access will be restored shortly.'
+						'Este sitio se está actualizando. No podrás realizar cambios. El acceso completo se restaurará pronto.'
 					)
 				}}
 			</div>
@@ -103,11 +103,11 @@
 					<div class="inline-flex gap-1">
 						<User class="h-4 my-0.5 shrink-0" />
 						<div class="font-medium">
-							{{ __('Complete your profile') }}
+							{{ __('Completa tu perfil') }}
 						</div>
 					</div>
 					<div class="text-ink-gray-7 leading-5">
-						{{ __('Highlight what makes you unique and show your skills.') }}
+						{{ __('Destaca lo que te hace único y muestra tus habilidades.') }}
 					</div>
 				</div>
 				<router-link
@@ -118,7 +118,7 @@
 						},
 					}"
 				>
-					<Button :label="__('My Profile')" class="w-full">
+					<Button :label="__('Mi Perfil')" class="w-full">
 						<template #prefix>
 							<ChevronsRight class="h-4 w-4 text-ink-gray-7 stroke-1.5" />
 						</template>
@@ -129,7 +129,7 @@
 				v-if="
 					isStudent && !profileIsComplete && sidebarStore.isSidebarCollapsed
 				"
-				:text="__('Complete your profile')"
+				:text="__('Completa tu perfil')"
 			>
 				<router-link
 					:to="{
@@ -175,22 +175,13 @@
 							>
 								{{
 									__(
-										'This site is being updated. You will not be able to make any changes. Full access will be restored shortly.'
+										'Este sitio se está actualizando. No podrás realizar cambios. El acceso completo se restaurará pronto.'
 									)
 								}}
 							</div>
 						</template>
 					</Tooltip>
-					<Tooltip
-						v-if="showAppointmentIcon"
-						:text="__('Book a free onboarding session with the Frappe team')"
-					>
-						<Phone
-							class="size-4 stroke-1.5 text-blue-200/60 cursor-pointer"
-							@click="redirectToAppointmentScreen()"
-						/>
-					</Tooltip>
-					<Tooltip v-if="showOnboarding" :text="__('Help')">
+					<Tooltip v-if="showOnboarding" :text="__('Ayuda')">
 						<CircleHelp
 							class="size-4 stroke-1.5 text-blue-200/60 cursor-pointer"
 							@click="
@@ -201,16 +192,10 @@
 							"
 						/>
 					</Tooltip>
-					<Tooltip :text="__('Powered by StudyBadge')">
-						<Zap
-							class="size-4 stroke-1.5 text-sb-accent cursor-pointer"
-							@click="redirectToWebsite()"
-						/>
-					</Tooltip>
 				</div>
 				<Tooltip
 					:text="
-						sidebarStore.isSidebarCollapsed ? __('Expand') : __('Collapse')
+						sidebarStore.isSidebarCollapsed ? __('Expandir') : __('Colapsar')
 					"
 				>
 					<CollapseSidebar
@@ -453,7 +438,7 @@ const getFirstBatch = async () => {
 const steps = reactive([
 	{
 		name: 'create_first_course',
-		title: __('Create your first course'),
+		title: __('Crea tu primer curso'),
 		icon: markRaw(h(BookOpen, iconProps)),
 		completed: false,
 		onClick: () => {
@@ -465,7 +450,7 @@ const steps = reactive([
 	},
 	{
 		name: 'create_first_chapter',
-		title: __('Add your first chapter'),
+		title: __('Agrega tu primer capítulo'),
 		icon: markRaw(h(FolderTree, iconProps)),
 		completed: false,
 		dependsOn: 'create_first_course',
@@ -485,7 +470,7 @@ const steps = reactive([
 	},
 	{
 		name: 'create_first_lesson',
-		title: __('Add your first lesson'),
+		title: __('Agrega tu primera lección'),
 		icon: markRaw(h(FileText, iconProps)),
 		completed: false,
 		dependsOn: 'create_first_chapter',
@@ -505,7 +490,7 @@ const steps = reactive([
 	},
 	{
 		name: 'create_first_quiz',
-		title: __('Create your first quiz'),
+		title: __('Crea tu primera evaluación'),
 		icon: markRaw(h(CircleHelp, iconProps)),
 		completed: false,
 		dependsOn: 'create_first_course',
@@ -516,7 +501,7 @@ const steps = reactive([
 	},
 	{
 		name: 'invite_students',
-		title: __('Invite your team and students'),
+		title: __('Invita a tu equipo y estudiantes'),
 		icon: markRaw(h(InviteIcon, iconProps)),
 		completed: false,
 		onClick: () => {
@@ -527,7 +512,7 @@ const steps = reactive([
 	},
 	{
 		name: 'create_first_batch',
-		title: __('Create your first batch'),
+		title: __('Crea tu primer grupo'),
 		icon: markRaw(h(Users, iconProps)),
 		completed: false,
 		onClick: () => {
@@ -537,7 +522,7 @@ const steps = reactive([
 	},
 	{
 		name: 'add_batch_student',
-		title: __('Add students to your batch'),
+		title: __('Agrega estudiantes a tu grupo'),
 		icon: markRaw(h(UserPlus, iconProps)),
 		completed: false,
 		dependsOn: 'create_first_batch',
@@ -558,7 +543,7 @@ const steps = reactive([
 	},
 	{
 		name: 'add_batch_course',
-		title: __('Add courses to your batch'),
+		title: __('Agrega cursos a tu grupo'),
 		icon: markRaw(h(BookText, iconProps)),
 		completed: false,
 		dependsOn: 'create_first_batch',

@@ -3,7 +3,7 @@
 		<div class="mt-10 space-y-10">
 			<div v-if="evals?.data?.length">
 				<div class="font-semibold text-lg text-ink-gray-9 mb-3">
-					{{ __('Upcoming Evaluations') }}
+					{{ __('Evaluaciones Próximas') }}
 				</div>
 				<div class="grid grid-cols-1 md:grid-cols-4 gap-5">
 					<div
@@ -39,7 +39,7 @@
 			</div>
 			<div v-if="liveClasses?.data?.length">
 				<div class="font-semibold text-lg text-ink-gray-9 mb-3">
-					{{ __('Upcoming Live Classes') }}
+					{{ __('Clases en Vivo Próximas') }}
 				</div>
 				<div class="grid grid-cols-1 md:grid-cols-4 gap-5">
 					<div
@@ -78,7 +78,7 @@
 									:class="cls.join_url ? 'w-full' : 'w-1/2'"
 								>
 									<Monitor class="h-4 w-4 stroke-1.5" />
-									{{ __('Start') }}
+									{{ __('Iniciar') }}
 								</a>
 								<a
 									:href="cls.join_url"
@@ -86,18 +86,18 @@
 									class="w-full cursor-pointer inline-flex items-center justify-center gap-2 transition-colors focus:outline-none text-ink-gray-8 bg-surface-gray-2 hover:bg-surface-gray-3 active:bg-surface-gray-4 focus-visible:ring focus-visible:ring-outline-gray-3 h-7 text-base px-2 rounded"
 								>
 									<Video class="h-4 w-4 stroke-1.5" />
-									{{ __('Join') }}
+									{{ __('Unirse') }}
 								</a>
 							</div>
 							<Tooltip
 								v-else-if="hasClassEnded(cls)"
-								:text="__('This class has ended')"
+								:text="__('Esta clase ha finalizado')"
 								placement="right"
 							>
 								<div class="flex items-center gap-x-2 text-ink-amber-3 w-fit">
 									<Info class="w-4 h-4 stroke-1.5" />
 									<span>
-										{{ __('Ended') }}
+										{{ __('Finalizada') }}
 									</span>
 								</div>
 							</Tooltip>
@@ -110,7 +110,7 @@
 		<div v-if="createdCourses.data?.length" class="mt-10">
 			<div class="flex items-center justify-between mb-3">
 				<span class="font-semibold text-lg text-ink-gray-9">
-					{{ __('Courses Created') }}
+					{{ __('Cursos Creados') }}
 				</span>
 				<router-link
 					:to="{
@@ -119,7 +119,7 @@
 				>
 					<span class="flex items-center gap-x-1 text-ink-gray-5 text-xs">
 						<span>
-							{{ __('See all') }}
+							{{ __('Ver todos') }}
 						</span>
 						<MoveRight class="size-3 stroke-1.5 rtl:rotate-180" />
 					</span>
@@ -138,7 +138,7 @@
 		<div v-if="createdBatches.data?.length" class="mt-10">
 			<div class="flex items-center justify-between mb-3">
 				<span class="font-semibold text-lg text-ink-gray-9">
-					{{ __('Upcoming Batches') }}
+					{{ __('Grupos Próximos') }}
 				</span>
 				<router-link
 					:to="{
@@ -169,14 +169,14 @@
 		>
 			<GraduationCap class="size-10 mx-auto stroke-1 text-ink-gray-5" />
 			<div class="text-lg font-semibold text-ink-gray-7 mb-1.5">
-				{{ __('No courses created') }}
+				{{ __('No hay cursos creados') }}
 			</div>
 			<div
 				class="leading-5 text-base w-full md:w-2/5 text-base text-center text-ink-gray-7"
 			>
 				{{
 					__(
-						'There are no courses currently. Create your first course to get started!'
+						'No hay cursos actualmente. ¡Crea tu primer curso para comenzar!'
 					)
 				}}
 			</div>
@@ -188,7 +188,7 @@
 					<template #prefix>
 						<Plus class="size-4 stroke-1.5" />
 					</template>
-					{{ __('Create Course') }}
+					{{ __('Crear Curso') }}
 				</Button>
 			</router-link>
 		</div>

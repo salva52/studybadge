@@ -15,7 +15,7 @@
 		<div class="space-y-2">
 			<div class="flex items-center justify-between">
 				<div class="text-xl font-bold text-ink-gray-9">
-					{{ __('Hey') }}, {{ user.data?.full_name }} 👋
+					{{ __('Hola') }}, {{ user.data?.full_name }} 👋
 				</div>
 				<div>
 					<div
@@ -142,57 +142,57 @@ const streakInfo = createResource({
 const subtitle = computed(() => {
 	if (isAdmin.value) {
 		let liveClassSuffix =
-			adminLiveClasses.data?.length > 1 ? __('live classes') : __('live class')
+			adminLiveClasses.data?.length > 1 ? __('clases en vivo') : __('clase en vivo')
 		let evalSuffix =
-			adminEvals.data?.length > 1 ? __('evaluations') : __('evaluation')
+			adminEvals.data?.length > 1 ? __('evaluaciones') : __('evaluación')
 		if (adminLiveClasses.data?.length > 0 && adminEvals.data?.length > 0) {
-			return __('You have {0} upcoming {1} and {2} {3} scheduled.').format(
+			return __('Tienes {0} {1} próximas y {2} {3} programadas.').format(
 				adminLiveClasses.data.length,
 				liveClassSuffix,
 				adminEvals.data.length,
 				evalSuffix
 			)
 		} else if (adminLiveClasses.data?.length > 0) {
-			return __('You have {0} upcoming {1}.').format(
+			return __('Tienes {0} {1} próximas.').format(
 				adminLiveClasses.data.length,
 				liveClassSuffix
 			)
 		} else if (adminEvals.data?.length > 0) {
-			return __('You have {0} {1} scheduled.').format(
+			return __('Tienes {0} {1} programadas.').format(
 				adminEvals.data.length,
 				evalSuffix
 			)
 		}
-		return __('Manage your courses and batches at a glance')
+		return __('Gestiona tus cursos y grupos de un vistazo')
 	} else {
 		let liveClassSuffix =
-			myLiveClasses.data?.length > 1 ? __('live classes') : __('live class')
-		let evalSuffix = evalCount.value > 1 ? __('evaluations') : __('evaluation')
+			myLiveClasses.data?.length > 1 ? __('clases en vivo') : __('clase en vivo')
+		let evalSuffix = evalCount.value > 1 ? __('evaluaciones') : __('evaluación')
 		if (myLiveClasses.data?.length > 0 && evalCount.value > 0) {
-			return __('You have {0} upcoming {1} and {2} {3} scheduled.').format(
+			return __('Tienes {0} {1} próximas y {2} {3} programadas.').format(
 				myLiveClasses.data.length,
 				liveClassSuffix,
 				evalCount.value,
 				evalSuffix
 			)
 		} else if (myLiveClasses.data?.length > 0) {
-			return __('You have {0} upcoming {1}.').format(
+			return __('Tienes {0} {1} próximas.').format(
 				myLiveClasses.data.length,
 				liveClassSuffix
 			)
 		} else if (evalCount.value > 0) {
-			return __('You have {0} {1} scheduled.').format(
+			return __('Tienes {0} {1} programadas.').format(
 				evalCount.value,
 				evalSuffix
 			)
 		}
-		return __('Resume where you left off')
+		return __('Continúa donde lo dejaste')
 	}
 })
 
 usePageMeta(() => {
 	return {
-		title: __('Home'),
+		title: __('Inicio'),
 		icon: brand.favicon,
 	}
 })
