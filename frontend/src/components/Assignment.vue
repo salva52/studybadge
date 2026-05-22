@@ -295,6 +295,21 @@ import { FileText, GraduationCap, MessageCircleQuestion, X } from 'lucide-vue-ne
 import { useRouter } from 'vue-router'
 import { validateFile } from '@/utils'
 
+const props = defineProps({
+	assignmentID: {
+		type: String,
+		required: true,
+	},
+	submissionName: {
+		type: String,
+		default: 'new',
+	},
+	showTitle: {
+		type: Boolean,
+		default: true,
+	},
+})
+
 const answer = ref(null)
 const attachment = ref(null)
 const comments = ref(null)
@@ -339,21 +354,6 @@ const submitReply = () => {
 		isSendingReply.value = false
 	})
 }
-
-const props = defineProps({
-	assignmentID: {
-		type: String,
-		required: true,
-	},
-	submissionName: {
-		type: String,
-		default: 'new',
-	},
-	showTitle: {
-		type: Boolean,
-		default: true,
-	},
-})
 
 onMounted(() => {
 	window.addEventListener('keydown', keyboardShortcut)
