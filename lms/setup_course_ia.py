@@ -181,15 +181,6 @@ def run():
             "title": "Módulo 3: IA para ventas y marketing",
             "lessons": [
                 {
-                    "title": "5. Crear ideas de contenido con IA",
-                    "body": "### Lluvia de ideas infinita\nPuedes usar IA para que te genere 30 ideas de contenido para redes sociales en 1 minuto. Dile a tu IA quién es tu cliente ideal y pídele problemas frecuentes.\n\n**Actividad:** Pide a la IA 'Dime los 5 problemas más comunes que tiene un comprador de zapatos deportivos'."
-                },
-                {
-                    "title": "6. Mensajes de venta para WhatsApp e Instagram",
-                    "body": "### Copywriting persuasivo\nUsa fórmulas como AIDA (Atención, Interés, Deseo, Acción). Pídele a ChatGPT: 'Usa la fórmula AIDA para vender una limpieza dental en WhatsApp.'\n\n**Actividad:** Haz que ChatGPT te escriba un mensaje para recuperar un cliente perdido por WhatsApp."
-                }
-            ],
-            "quiz": {
                     "title": "5. Creando copys persuasivos",
                     "body": "### Fórmula PAS (Problema, Agitación, Solución)\nPídele a la IA que escriba un anuncio usando esta fórmula para tu producto.\n\n**Actividad:** Genera 3 copys para tu negocio.",
                     "assign_type": "Document",
