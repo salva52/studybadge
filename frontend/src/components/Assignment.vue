@@ -1,6 +1,12 @@
 <template>
+	<div v-if="assignment.loading" class="p-8 text-center text-ink-gray-5">
+		{{ __('Cargando asignación...') }}
+	</div>
+	<div v-else-if="assignment.error" class="p-8 text-center text-red-500">
+		{{ __('Error al cargar asignación:') }} {{ assignment.error }}
+	</div>
 	<div
-		v-if="assignment.data"
+		v-else-if="assignment.data"
 		:class="showTitle ? 'grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-start' : 'flex flex-col gap-6 p-4'"
 	>
 		<div
