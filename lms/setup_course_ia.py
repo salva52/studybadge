@@ -206,11 +206,11 @@ def run():
         }
     ]
 
-    course.set("chapters", [])
+    course_chapter_names = []
 
     for mod in modules:
         c_name = create_chapter(mod["title"])
-        course.append("chapters", {"chapter": c_name})
+        course_chapter_names.append(c_name)
         
         chapter_doc = frappe.get_doc("Course Chapter", c_name)
         chapter_doc.set("lessons", [])
@@ -231,6 +231,11 @@ def run():
             
             create_quiz(mod["quiz"]["title"], lesson_names[-1], q_names)
             
+    course.reload()
+    course.set("chapters", [])
+    for c_name in course_chapter_names:
+        course.append("chapters", {"chapter": c_name})
+        
     course.save(ignore_permissions=True)
             
     # Assignment
