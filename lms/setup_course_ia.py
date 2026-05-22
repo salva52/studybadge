@@ -1,5 +1,15 @@
-import frappe
+import os
 import sys
+
+# Fix sys.path to avoid shadowing when executing the script directly
+script_dir = os.path.dirname(os.path.abspath(__file__))
+if script_dir in sys.path:
+    sys.path.remove(script_dir)
+apps_dir = os.path.abspath(os.path.join(script_dir, ".."))
+if apps_dir not in sys.path:
+    sys.path.insert(0, apps_dir)
+
+import frappe
 
 def run():
     frappe.set_user("Administrator")
