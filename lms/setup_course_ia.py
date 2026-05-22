@@ -64,15 +64,22 @@ def run():
         return doc.name
 
     # Helper function for lessons
-    def create_lesson(chap_name, title, body):
+    def create_lesson(chap_name, title, body, question=None, file_type=None):
         existing = frappe.get_all("Course Lesson", filters={"title": title, "chapter": chap_name})
         if existing:
+            doc = frappe.get_doc("Course Lesson", existing[0].name)
+            if question:
+                doc.question = question
+                doc.file_type = file_type
+                doc.save(ignore_permissions=True)
             return existing[0].name
         doc = frappe.get_doc({
             "doctype": "Course Lesson",
             "title": title,
             "chapter": chap_name,
-            "body": body
+            "body": body,
+            "question": question,
+            "file_type": file_type
         })
         doc.insert(ignore_permissions=True, ignore_mandatory=True)
         return doc.name
@@ -200,7 +207,11 @@ def run():
                 },
                 {
                     "title": "8. Proyecto Final",
-                    "body": "### Instrucciones del Proyecto\nEn la siguiente sección encontrarás la Tarea (Assignment) para subir tu proyecto final y obtener tu certificado. Sigue las instrucciones allí indicadas."
+                    "body": "### Instrucciones del Proyecto\nEn la parte inferior verás la opción para subir tu proyecto final y obtener tu certificado.",
+                    "assignment": {
+                        "question": "Escribe en un documento PDF o de Word un manual de 1 página explicando 2 tareas que automatizarás con IA en un negocio real o ficticio, y escribe el Prompt Maestro que utilizarías. Sube el documento aquí.",
+                        "file_type": "Document"
+                    }
                 }
             ]
         }
@@ -217,7 +228,9 @@ def run():
         
         lesson_names = []
         for les in mod["lessons"]:
-            l_name = create_lesson(c_name, les["title"], les["body"])
+            question = les.get("assignment", {}).get("question")
+            file_type = les.get("assignment", {}).get("file_type")
+            l_name = create_lesson(c_name, les["title"], les["body"], question, file_type)
             chapter_doc.append("lessons", {"lesson": l_name})
             lesson_names.append(l_name)
         
@@ -238,18 +251,6 @@ def run():
         
     course.save(ignore_permissions=True)
             
-    # Assignment
-    assignment_title = "Propuesta Final: Flujo de IA"
-    if not frappe.db.exists("LMS Assignment", {"title": assignment_title, "course": course_name}):
-        doc = frappe.get_doc({
-            "doctype": "LMS Assignment",
-            "title": assignment_title,
-            "type": "Document",
-            "course": course_name,
-            "question": "Escribe en un documento PDF o de Word un manual de 1 página explicando 2 tareas que automatizarás con IA en un negocio real o ficticio, y escribe el Prompt Maestro que utilizarías. Sube el documento aquí."
-        })
-        doc.insert(ignore_permissions=True, ignore_mandatory=True)
-    
     frappe.db.commit()
     print("¡Curso IA para Negocios desde Cero importado con éxito!")
 
