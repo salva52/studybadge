@@ -16,32 +16,14 @@ def run():
     print("Iniciando creación del curso...")
 
     # Instructor
-    instructor_name = None
-    instructors = frappe.get_all("Course Instructor", limit=1)
-    if instructors:
-        instructor_name = instructors[0].name
-    else:
-        if not frappe.db.exists("Course Instructor", "Administrator"):
-            try:
-                i = frappe.get_doc({
-                    "doctype": "Course Instructor",
-                    "full_name": "Administrator",
-                    "email": "admin@example.com",
-                    "username": "Administrator"
-                })
-                i.insert(ignore_permissions=True, ignore_mandatory=True)
-                instructor_name = i.name
-            except Exception as e:
-                pass
-        else:
-            instructor_name = "Administrator"
+    instructor_name = "Administrator"
 
     # Category
     cat_name = "Tecnología y Negocios"
-    if not frappe.db.exists("LMS Category", {"title": cat_name}):
-        frappe.get_doc({"doctype": "LMS Category", "title": cat_name, "category_name": cat_name}).insert(ignore_permissions=True, ignore_mandatory=True)
+    if not frappe.db.exists("LMS Category", {"category": cat_name}):
+        frappe.get_doc({"doctype": "LMS Category", "category": cat_name}).insert(ignore_permissions=True, ignore_mandatory=True)
     
-    cat = frappe.get_all("LMS Category", filters={"title": cat_name})
+    cat = frappe.get_all("LMS Category", filters={"category": cat_name})
     cat_id = cat[0].name if cat else cat_name
 
     # Course
