@@ -1,12 +1,10 @@
 <template>
 	<div
 		v-if="assignment.data"
-		class="grid grid-cols-2 h-full"
-		:class="{ 'border rounded-lg overflow-auto': !showTitle }"
+		class="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-start"
 	>
 		<div
-			class="border-e p-5 overflow-y-auto h-[calc(100vh-3.2rem)]"
-			:class="{ 'h-full': !showTitle }"
+			class="bg-white dark:bg-gray-800 shadow-sb-soft border border-gray-100 dark:border-gray-700 rounded-2xl p-6 md:p-8"
 		>
 			<div v-if="showTitle" class="text-lg font-semibold mb-5 text-ink-gray-9">
 				<div v-if="submissionName === 'new'">
@@ -16,8 +14,13 @@
 					{{ __('Submission by') }} {{ submissionResource.doc?.member_name }}
 				</div>
 			</div>
-			<div class="text-ink-gray-9 font-semibold mb-5">
-				{{ __('Assignment') }}: {{ assignment.data.title }}
+			<div class="flex items-center gap-x-4 mb-6 pb-4 border-b border-gray-100 dark:border-gray-700">
+				<div class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-3 rounded-full flex-shrink-0">
+					<FileText class="w-6 h-6 stroke-1.5" />
+				</div>
+				<div class="text-2xl font-bold text-ink-gray-9">
+					{{ assignment.data.title }}
+				</div>
 			</div>
 			<div
 				v-html="assignment.data.question"
@@ -25,11 +28,11 @@
 			></div>
 		</div>
 
-		<div class="flex flex-col overflow-y-auto">
-			<div class="p-5 space-y-5">
+		<div class="flex flex-col space-y-6">
+			<div class="bg-white dark:bg-gray-800 shadow-sb-soft border border-gray-100 dark:border-gray-700 rounded-2xl p-6 space-y-5">
 				<div class="flex items-center justify-between">
-					<div class="font-semibold text-ink-gray-9">
-						{{ __('Submission') }}
+					<div class="text-lg font-semibold text-ink-gray-9">
+						{{ __('Tu Trabajo') }}
 					</div>
 					<div class="flex items-center gap-x-2">
 						<Badge v-if="isDirty" theme="orange">
@@ -67,13 +70,13 @@
 					}}
 					{{ __('Feel free to make edits to your submission if needed.') }}
 				</div>
-				<div v-if="showUploader()" class="border rounded-lg p-3">
-					<div class="font-semibold mb-2">
-						{{ __('Upload Assignment') }}
+				<div v-if="showUploader()" class="bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 rounded-xl p-4">
+					<div class="font-semibold mb-2 text-ink-gray-9">
+						{{ __('Subir Tarea') }}
 					</div>
 					<div class="text-ink-gray-5 text-sm mt-1 mb-4">
 						{{
-							__('You can only upload {0} files').format(assignment.data.type)
+							__('Solo se permiten archivos de tipo {0}').format(assignment.data.type)
 						}}
 					</div>
 					<FileUploader
@@ -89,36 +92,44 @@
 						@success="(file) => saveSubmission(file)"
 					>
 						<template #default="{ uploading, progress, openFileSelector }">
-							<Button @click="openFileSelector" :loading="uploading">
+							<Button @click="openFileSelector" :loading="uploading" variant="outline" class="w-full">
+								<template #prefix>
+									<FileText class="w-4 h-4 stroke-1.5" />
+								</template>
 								{{
 									uploading
-										? __('Uploading {0}%').format(progress)
-										: __('Upload File')
+										? __('Subiendo {0}%').format(progress)
+										: __('Subir Archivo')
 								}}
 							</Button>
 						</template>
 					</FileUploader>
 					<div v-else>
-						<div class="flex items-center text-ink-gray-7">
+						<div class="flex items-center justify-between text-ink-gray-7 border border-gray-200 dark:border-gray-700 rounded-lg p-2 pe-3">
 							<a
 								:href="attachment"
 								target="_blank"
-								class="cursor-pointer !no-underline text-sm leading-5"
+								class="cursor-pointer !no-underline text-sm leading-5 flex-1 overflow-hidden"
 							>
 								<div class="flex items-center">
-									<div class="border rounded-md p-2 me-2">
+									<div class="bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-md p-2 me-3">
 										<FileText class="h-5 w-5 stroke-1.5" />
 									</div>
-									<span>
+									<span class="truncate" :title="attachment.split('/').pop()">
 										{{ attachment.split('/').pop() }}
 									</span>
 								</div>
 							</a>
-							<X
+							<Button
 								v-if="canModifyAssignment"
 								@click="removeSubmission()"
-								class="bg-surface-gray-3 rounded-md cursor-pointer stroke-1.5 w-5 h-5 p-1 ms-4"
-							/>
+								variant="ghost"
+								class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+							>
+								<template #icon>
+									<X class="w-4 h-4" />
+								</template>
+							</Button>
 						</div>
 					</div>
 				</div>
@@ -133,8 +144,8 @@
 					/>
 				</div>
 				<div v-else>
-					<div class="text-sm mb-2 text-ink-gray-7">
-						{{ __('Write your answer here') }}
+					<div class="text-sm mb-2 font-medium text-ink-gray-9">
+						{{ __('Escribe tu respuesta aquí') }}
 					</div>
 					<TextEditor
 						:content="answer"
@@ -227,6 +238,7 @@
 						/>
 					</div>
 				</div>
+
 			</div>
 		</div>
 	</div>
