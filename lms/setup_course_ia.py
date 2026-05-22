@@ -206,12 +206,22 @@ def run():
         }
     ]
 
+    course.set("chapters", [])
+
     for mod in modules:
         c_name = create_chapter(mod["title"])
+        course.append("chapters", {"chapter": c_name})
+        
+        chapter_doc = frappe.get_doc("Course Chapter", c_name)
+        chapter_doc.set("lessons", [])
+        
         lesson_names = []
         for les in mod["lessons"]:
             l_name = create_lesson(c_name, les["title"], les["body"])
+            chapter_doc.append("lessons", {"lesson": l_name})
             lesson_names.append(l_name)
+        
+        chapter_doc.save(ignore_permissions=True)
         
         # Quizzes
         if "quiz" in mod:
@@ -220,6 +230,8 @@ def run():
                 q_names.append(create_question(q_data[0], q_data[1], q_data[2]))
             
             create_quiz(mod["quiz"]["title"], lesson_names[-1], q_names)
+            
+    course.save(ignore_permissions=True)
             
     # Assignment
     assignment_title = "Propuesta Final: Flujo de IA"
