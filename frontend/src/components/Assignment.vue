@@ -310,7 +310,7 @@ const replyCount = computed(() => {
 const submitReply = () => {
 	if (!chatMessage.value.trim()) return
 	isSendingReply.value = true
-	call('studybadge_ai.studybadge_ai.ai_grading.submit_student_reply', {
+	call('studybadge_ai.ai_grading.submit_student_reply', {
 		submission_name: props.submissionName,
 		message: chatMessage.value
 	}).then(() => {
