@@ -190,100 +190,116 @@ def run():
                 }
             ],
             "quiz": {
-                "title": "Quiz Módulo 3",
-                "questions": [
-                    ("¿Para qué sirve la IA en Instagram?", ["Dar likes automáticos", "Generar ideas de guiones y copys para posts", "Crear la cuenta sola", "Grabar el video"], 1),
-                    ("¿Qué es la fórmula AIDA?", ["Una bebida", "Atención, Interés, Deseo, Acción", "Algoritmo de IA para Datos Activos", "Un software"], 1),
-                    ("Al pedirle a ChatGPT un mensaje de WhatsApp para clientes, debes...", ["Pedirle que sea muy largo", "Pedirle que use tono cercano y persuasivo", "Usar lenguaje súper formal y aburrido", "Dejar que escriba 5 páginas"], 1),
-                    ("¿Puede la IA crear mi calendario de contenido?", ["No", "Sí, si le das los pilares de contenido", "Sólo si le pagas extra", "Depende del día"], 1),
-                    ("La mejor manera de conseguir ideas de contenido es...", ["Decirle 'dame ideas'", "Explicarle quién es tu cliente ideal, sus dolores y pedir ideas", "No usar IA", "Copiar a la competencia"], 1)
-                ]
-            }
+                    "title": "5. Creando copys persuasivos",
+                    "body": "### Fórmula PAS (Problema, Agitación, Solución)\nPídele a la IA que escriba un anuncio usando esta fórmula para tu producto.\n\n**Actividad:** Genera 3 copys para tu negocio.",
+                    "assign_type": "Document",
+                    "assign_question": "Sube un archivo de texto o Word con los 3 copys que generaste."
+                },
+                {
+                    "title": "6. Cuestionario Módulo 2 y 3",
+                    "body": "{{ Quiz(\"Evaluación M2 y M3: Prompts y Ventas\") }}",
+                    "quiz": {
+                        "title": "Evaluación M2 y M3: Prompts y Ventas",
+                        "questions": [
+                            {"q": "¿Cuál es la fórmula ideal de un prompt?", "opts": ["Rol + Contexto + Tarea + Formato", "Tarea + Por favor + Gracias", "Contexto + Saludo + Tarea"], "ans": 0},
+                            {"q": "¿Qué significa PAS en marketing?", "opts": ["Problema, Agitación, Solución", "Producto, Atención, Servicio", "Precio, Anuncio, Venta"], "ans": 0}
+                        ]
+                    }
+                }
+            ]
         },
         {
             "title": "Módulo 4: Automatización básica y proyecto final",
             "lessons": [
                 {
                     "title": "7. Flujos de trabajo con IA",
-                    "body": "### Integrando IA en tu día a día\nNo se trata de usarla una vez, sino de tener la pestaña siempre abierta y delegar: revisión de ortografía, ideación de campañas, respuestas a clientes.\n\n**Actividad:** Diseña un pequeño flujo de 3 pasos para tu próxima promoción."
+                    "body": "### Integrando IA en tu día a día\nNo se trata de usarla una vez, sino de tener la pestaña siempre abierta y delegar: revisión de ortografía, ideación de campañas, respuestas a clientes.\n\n**Actividad:** Diseña un pequeño flujo de 3 pasos para tu próxima promoción.",
+                    "assign_type": "Text",
+                    "assign_question": "Escribe los 3 pasos de tu flujo de trabajo aquí."
                 },
                 {
                     "title": "8. Proyecto Final",
-                    "content": {
-                        "time": 1716348270119,
-                        "blocks": [
-                            {
-                                "type": "header",
-                                "data": {
-                                    "text": "Instrucciones del Proyecto",
-                                    "level": 3
-                                }
-                            },
-                            {
-                                "type": "paragraph",
-                                "data": {
-                                    "text": "Sube el documento con tu proyecto final para obtener el certificado. Instrucciones: Escribe en un documento PDF o de Word un manual de 1 página explicando 2 tareas que automatizarás con IA en un negocio real o ficticio, y escribe el Prompt Maestro que utilizarías."
-                                }
-                            },
-                            {
-                                "type": "assignment",
-                                "data": {
-                                    "assignment": "Propuesta Final: Flujo de IA"
-                                }
-                            }
-                        ],
-                        "version": "2.29.1"
-                    }
+                    "body": "### Instrucciones del Proyecto\nSube el documento con tu proyecto final para obtener el certificado.\nInstrucciones: Escribe en un documento PDF o de Word un manual de 1 página explicando 2 tareas que automatizarás con IA en un negocio real o ficticio, y escribe el Prompt Maestro que utilizarías.",
+                    "assign_type": "Document",
+                    "assign_question": "Sube el documento de tu proyecto final aquí en formato PDF o Word."
                 }
             ]
         }
     ]
 
-    course_chapter_names = []
+    # Create Course
+    if not frappe.db.exists("LMS Course", course_name):
+        course = frappe.get_doc({
+            "doctype": "LMS Course",
+            "name": course_name,
+            "title": course_title,
+            "short_introduction": "Aprende a usar la Inteligencia Artificial para resolver problemas de negocio, automatizar tareas y aumentar tus ventas sin conocimientos técnicos.",
+            "description": "Bienvenido al curso definitivo de IA para no-programadores. Descubre cómo usar ChatGPT para vender más y trabajar menos.",
+            "published": 1,
+            "category": category_name
+        })
+        course.insert(ignore_permissions=True, ignore_mandatory=True)
+        course.reload()
+    else:
+        print("El curso ya existe. Usando el curso existente.")
+        course = frappe.get_doc("LMS Course", course_name)
+    
+    # Verify Instructor is added
+    instructor_exists = False
+    for i in course.get("instructors"):
+        if i.instructor == instructor_name:
+            instructor_exists = True
+    
+    if not instructor_exists:
+        course.append("instructors", {"instructor": instructor_name})
+        course.save(ignore_permissions=True)
 
-    for mod in modules:
-        c_name = create_chapter(mod["title"])
-        course_chapter_names.append(c_name)
+    # Process modules
+    course_chapter_names = []
+    
+    for idx, mod in enumerate(modules, 1):
+        c_title = mod["title"]
         
-        chapter_doc = frappe.get_doc("Course Chapter", c_name)
+        # Build quizzes if needed
+        for les in mod["lessons"]:
+            if "quiz" in les:
+                les["quiz_name"] = create_quiz(les["quiz"]["title"], les["quiz"]["questions"])
+
+        if frappe.db.exists("Course Chapter", {"title": c_title, "course": course_name}):
+            chapter_doc = frappe.get_doc("Course Chapter", {"title": c_title, "course": course_name})
+        else:
+            chapter_doc = frappe.get_doc({
+                "doctype": "Course Chapter",
+                "title": c_title,
+                "course": course_name,
+            })
+            chapter_doc.insert(ignore_permissions=True, ignore_mandatory=True)
+        
+        # Clear existing lessons in the chapter object before rebuilding to avoid duplicates
         chapter_doc.set("lessons", [])
         
         lesson_names = []
         for les in mod["lessons"]:
-            content_json = None
-            if "content" in les:
-                content_json = json.dumps(les["content"])
-            l_name = create_lesson(c_name, les["title"], les.get("body", ""), content=content_json)
+            l_name = create_lesson(
+                chapter_doc.name, 
+                les["title"], 
+                les["body"], 
+                assignment_type=les.get("assign_type"), 
+                question=les.get("assign_question", "")
+            )
             chapter_doc.append("lessons", {"lesson": l_name})
             lesson_names.append(l_name)
         
         chapter_doc.save(ignore_permissions=True)
-        
-        # Quizzes
-        if "quiz" in mod:
-            q_names = []
-            for q_data in mod["quiz"]["questions"]:
-                q_names.append(create_question(q_data[0], q_data[1], q_data[2]))
-            
-            create_quiz(mod["quiz"]["title"], lesson_names[-1], q_names)
-            
+        course_chapter_names.append(chapter_doc.name)
+
     course.reload()
+    
+    # Clear existing chapters in the course to avoid duplicates
     course.set("chapters", [])
     for c_name in course_chapter_names:
         course.append("chapters", {"chapter": c_name})
         
-    # Assignment
-    assignment_title = "Propuesta Final: Flujo de IA"
-    if not frappe.db.exists("LMS Assignment", {"title": assignment_title, "course": course_name}):
-        doc = frappe.get_doc({
-            "doctype": "LMS Assignment",
-            "title": assignment_title,
-            "type": "Document",
-            "course": course_name,
-            "question": "Sube el documento de tu proyecto final aquí."
-        })
-        doc.insert(ignore_permissions=True, ignore_mandatory=True)
-    
     course.save(ignore_permissions=True)
             
     frappe.db.commit()
