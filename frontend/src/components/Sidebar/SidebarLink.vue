@@ -1,15 +1,15 @@
 <template>
 	<button
 		v-if="link && !link.onlyMobile"
-		class="flex w-full h-7 cursor-pointer items-center rounded text-white/80 duration-300 ease-in-out focus:outline-none focus:transition-none focus-visible:rounded focus-visible:ring-2 focus-visible:ring-sb-accent/30"
+		class="flex w-full min-h-10 cursor-pointer items-center rounded-lg text-white/90 duration-300 ease-in-out focus:outline-none focus:transition-none focus-visible:rounded-lg focus-visible:ring-2 focus-visible:ring-sb-accent/30 mb-1"
 		:class="
-			isActive ? 'bg-white/15 shadow-sm' : 'hover:bg-white/10'
+			isActive ? 'bg-white/15 shadow-sm font-medium' : 'hover:bg-white/10'
 		"
 		@click="handleClick"
 	>
 		<div
 			class="flex items-center w-full duration-300 ease-in-out group"
-			:class="isCollapsed ? 'p-1 relative' : 'px-2 py-1'"
+			:class="isCollapsed ? 'p-2 relative justify-center' : 'px-3 py-2'"
 		>
 			<Tooltip :text="__(link.label)" placement="right">
 				<slot name="icon">
@@ -22,11 +22,11 @@
 				</slot>
 			</Tooltip>
 			<span
-				class="flex-shrink-0 text-sm duration-300 ease-in-out"
+				class="flex-shrink-0 text-[15px] duration-300 ease-in-out"
 				:class="
 					isCollapsed
 						? 'ms-0 w-0 overflow-hidden opacity-0'
-						: 'ms-2 w-auto opacity-100'
+						: 'ms-3 w-auto opacity-100'
 				"
 			>
 				{{ __(link.label) }}

@@ -1,7 +1,7 @@
 <template>
 	<div
 		class="flex h-full flex-col justify-between transition-all duration-300 ease-in-out overflow-x-hidden sb-sidebar"
-		:class="sidebarStore.isSidebarCollapsed ? 'w-14' : 'w-56'"
+		:class="sidebarStore.isSidebarCollapsed ? 'w-14' : 'w-64'"
 	>
 		<div
 			class="flex flex-col overflow-y-auto"

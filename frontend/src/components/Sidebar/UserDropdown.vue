@@ -3,13 +3,13 @@
 		<Dropdown :options="userDropdownOptions">
 			<template v-slot="{ open, close }">
 				<button
-					class="flex h-12 py-2 items-center rounded-md duration-300 ease-in-out"
+					class="flex h-12 py-2 items-center rounded-lg duration-300 ease-in-out"
 					:class="
 						isCollapsed
 							? 'px-0 w-auto'
 							: open
-							? 'bg-white/15 shadow-sm px-2 w-52'
-							: 'hover:bg-white/10 px-2 w-52'
+							? 'bg-white/15 shadow-sm px-3 w-full'
+							: 'hover:bg-white/10 px-3 w-full'
 					"
 				>
 					<img
