@@ -61,7 +61,8 @@
 
 :root[data-theme="dark"] .text-ink-gray-9, .dark .text-ink-gray-9,
 :root[data-theme="dark"] .text-ink-gray-8, .dark .text-ink-gray-8,
-:root[data-theme="dark"] .text-ink-gray-7, .dark .text-ink-gray-7 {
+:root[data-theme="dark"] .text-ink-gray-7, .dark .text-ink-gray-7,
+:root[data-theme="dark"] .text-ink-gray-6, .dark .text-ink-gray-6 {
 	color: #f3f4f6 !important;
 }
 
@@ -153,7 +154,7 @@ button[aria-selected="true"],
 	background: linear-gradient(135deg, var(--sb-dark) 0%, #0D2B5E 50%, var(--sb-medium) 100%);
 	border-radius: var(--sb-radius-lg);
 	padding: 3rem 2.5rem;
-	color: var(--sb-white);
+	color: #ffffff !important;
 	position: relative;
 	overflow: hidden;
 	margin-bottom: 2rem;
