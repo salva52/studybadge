@@ -13,12 +13,13 @@ export default {
 	theme: {
 		extend: {
 			colors: {
-				'sb-dark': '#061B49',
-				'sb-primary': '#007BFF',
-				'sb-medium': '#0A84FF',
-				'sb-accent': '#F5B301',
-				'sb-bg': '#F5F7FB',
-				'sb-accent-light': '#FFF8E1',
+				'sb-dark': 'var(--sb-dark)',
+				'sb-primary': 'var(--sb-primary)',
+				'sb-medium': 'var(--sb-medium)',
+				'sb-accent': 'var(--sb-accent)',
+				'sb-bg': 'var(--sb-bg)',
+				'sb-white': 'var(--sb-white)',
+				'sb-accent-light': 'var(--sb-accent-light)',
 			},
 			fontFamily: {
 				inter: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],

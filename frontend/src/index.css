@@ -30,6 +30,62 @@
 }
 
 /* ============================================
+   Dark Mode Support
+   ============================================ */
+:root[data-theme="dark"], .dark {
+	--sb-dark: #0f172a;
+	--sb-primary: #3b82f6;
+	--sb-medium: #60a5fa;
+	--sb-bg: #111827;
+	--sb-white: #1f2937;
+	--sb-accent-light: #453600;
+
+	--sb-shadow-card: 0 2px 12px rgba(0, 0, 0, 0.4);
+	--sb-shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.5);
+	--sb-shadow-soft: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme="dark"] body, .dark body {
+	background-color: var(--sb-bg) !important;
+	color: #e5e7eb !important;
+}
+
+:root[data-theme="dark"] .bg-white, .dark .bg-white {
+	background-color: var(--sb-white) !important;
+	border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+:root[data-theme="dark"] .border-gray-100, .dark .border-gray-100 {
+	border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+:root[data-theme="dark"] .text-ink-gray-9, .dark .text-ink-gray-9,
+:root[data-theme="dark"] .text-ink-gray-8, .dark .text-ink-gray-8,
+:root[data-theme="dark"] .text-ink-gray-7, .dark .text-ink-gray-7 {
+	color: #f3f4f6 !important;
+}
+
+:root[data-theme="dark"] .text-ink-gray-5, .dark .text-ink-gray-5 {
+	color: #9ca3af !important;
+}
+
+:root[data-theme="dark"] .bg-sb-bg, .dark .bg-sb-bg {
+	background-color: var(--sb-bg) !important;
+}
+
+:root[data-theme="dark"] .bg-white\/95, .dark .bg-white\/95 {
+    background-color: rgba(31, 41, 55, 0.85) !important;
+}
+
+:root[data-theme="dark"] .bg-surface-gray-2, .dark .bg-surface-gray-2 {
+	background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+:root[data-theme="dark"] .bg-surface-gray-3, .dark .bg-surface-gray-3 {
+	background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* ============================================
    Global Typography & Body
    ============================================ */
 
