@@ -70,13 +70,15 @@
 					}}
 					{{ __('Feel free to make edits to your submission if needed.') }}
 				</div>
-				<div v-if="showUploader()" class="bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 rounded-xl p-4">
-					<div class="font-semibold mb-2 text-ink-gray-9">
+				<div v-if="showUploader()" class="bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 rounded-xl p-5">
+					<div class="font-semibold mb-1 text-ink-gray-9 text-base">
 						{{ __('Subir Tarea') }}
 					</div>
-					<div class="text-ink-gray-5 text-sm mt-1 mb-4">
+					<div class="text-ink-gray-5 text-sm mb-4">
 						{{
-							__('Solo se permiten archivos de tipo {0}').format(assignment.data.type)
+							assignment.data.type == 'Document'
+								? __('Se permiten archivos PDF y documentos Word (.doc, .docx)')
+								: __('Solo se permiten archivos de tipo {0}').format(assignment.data.type)
 						}}
 					</div>
 					<FileUploader
@@ -160,48 +162,70 @@
 					/>
 				</div>
 
-				<!-- Chat with Evaluator -->
+				<!-- Chat con el Evaluador -->
 				<div
 					v-if="user.data?.name == submissionResource.doc?.owner && (chatHistory.length > 0 || submissionResource.doc?.comments)"
-					class="mt-8 p-4 border rounded-lg bg-surface-gray-2 flex flex-col space-y-4"
+					class="mt-8 bg-white dark:bg-gray-800 shadow-sb-soft border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden"
 				>
-					<div class="text-ink-gray-5 font-semibold text-sm mb-2">
-						{{ __('Evaluator Feedback & Chat') }}
-					</div>
-					
-					<!-- Legacy or First Feedback -->
-					<div v-if="chatHistory.length === 0 && submissionResource.doc?.comments" class="bg-white p-3 rounded shadow-sm border border-gray-100 text-sm leading-6 self-start max-w-[90%]">
-						<div class="font-bold text-xs text-blue-600 mb-1">StudyBadge AI Evaluator</div>
-						<div v-html="submissionResource.doc.comments"></div>
+					<!-- Header -->
+					<div class="flex items-center gap-x-3 px-5 py-4 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+						<div class="bg-blue-600 text-white p-2 rounded-full">
+							<MessageCircleQuestion class="w-5 h-5" />
+						</div>
+						<div class="text-base font-semibold text-ink-gray-9">
+							Retroalimentación y Chat
+						</div>
 					</div>
 
-					<!-- Chat History -->
-					<div v-for="(msg, idx) in chatHistory" :key="idx" 
-						class="p-3 rounded shadow-sm border text-sm leading-6 max-w-[90%]"
-						:class="msg.role === 'model' ? 'bg-white border-gray-200 self-start' : 'bg-blue-50 border-blue-100 self-end text-blue-900'">
-						<div class="font-bold text-xs mb-1" :class="msg.role === 'model' ? 'text-blue-600' : 'text-gray-600'">
-							{{ msg.role === 'model' ? 'StudyBadge AI Evaluator' : 'You' }}
+					<div class="p-5 flex flex-col space-y-4">
+						<!-- Legacy or First Feedback -->
+						<div v-if="chatHistory.length === 0 && submissionResource.doc?.comments" class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800 text-sm leading-7 self-start max-w-[95%]">
+							<div class="font-semibold text-xs text-blue-700 dark:text-blue-400 mb-2 flex items-center gap-x-1.5">
+								<GraduationCap class="w-3.5 h-3.5" />
+								Evaluador de StudyBadge
+							</div>
+							<div v-html="submissionResource.doc.comments" class="text-ink-gray-9"></div>
 						</div>
-						<div v-html="msg.content"></div>
-					</div>
-					
-					<!-- Pending state -->
-					<div v-if="submissionResource.doc?.ai_status === 'Pending'" class="text-xs text-gray-500 italic mt-2 animate-pulse self-start">
-						AI Evaluator is typing...
-					</div>
 
-					<!-- Reply Input -->
-					<div v-if="replyCount < 3 && submissionResource.doc?.ai_status !== 'Pending'" class="mt-4 pt-4 border-t border-gray-200 flex flex-col">
-						<div class="text-xs text-gray-500 mb-2">
-							Puedes responder o pedir que reconsideren tu calificación ({{ 3 - replyCount }} intentos restantes).
+						<!-- Chat History -->
+						<div v-for="(msg, idx) in chatHistory" :key="idx"
+							class="p-4 rounded-xl text-sm leading-7 max-w-[95%]"
+							:class="msg.role === 'model'
+								? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 self-start'
+								: 'bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 self-end'"
+						>
+							<div class="font-semibold text-xs mb-2 flex items-center gap-x-1.5"
+								:class="msg.role === 'model' ? 'text-blue-700 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'"
+							>
+								<GraduationCap v-if="msg.role === 'model'" class="w-3.5 h-3.5" />
+								{{ msg.role === 'model' ? 'Evaluador de StudyBadge' : 'Tú' }}
+							</div>
+							<div v-html="msg.content" class="text-ink-gray-9"></div>
 						</div>
-						<FormControl v-model="chatMessage" type="textarea" placeholder="Escribe tu mensaje aquí..." class="mb-2 bg-white" />
-						<Button @click="submitReply" variant="solid" class="self-end mt-2" :loading="isSendingReply" :disabled="!chatMessage">
-							Enviar Respuesta
-						</Button>
-					</div>
-					<div v-else-if="replyCount >= 3" class="mt-4 pt-4 border-t border-gray-200 text-xs text-gray-500 text-center">
-						Has alcanzado el límite máximo de respuestas para esta evaluación.
+
+						<!-- Pending state -->
+						<div v-if="submissionResource.doc?.ai_status === 'Pending'" class="flex items-center gap-x-2 text-sm text-blue-600 dark:text-blue-400 italic mt-1 animate-pulse self-start">
+							<div class="flex gap-x-1">
+								<span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0ms"></span>
+								<span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 150ms"></span>
+								<span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 300ms"></span>
+							</div>
+							El evaluador está escribiendo...
+						</div>
+
+						<!-- Reply Input -->
+						<div v-if="replyCount < 3 && submissionResource.doc?.ai_status !== 'Pending'" class="mt-2 pt-4 border-t border-gray-100 dark:border-gray-700 flex flex-col">
+							<div class="text-xs text-ink-gray-5 mb-3">
+								Puedes responder o pedir que reconsideren tu calificación ({{ 3 - replyCount }} intentos restantes).
+							</div>
+							<FormControl v-model="chatMessage" type="textarea" placeholder="Escribe tu mensaje aquí..." class="mb-3" />
+							<Button @click="submitReply" variant="solid" class="self-end" :loading="isSendingReply" :disabled="!chatMessage">
+								Enviar Respuesta
+							</Button>
+						</div>
+						<div v-else-if="replyCount >= 3" class="mt-2 pt-4 border-t border-gray-100 dark:border-gray-700 text-xs text-ink-gray-5 text-center">
+							Has alcanzado el límite máximo de respuestas para esta evaluación.
+						</div>
 					</div>
 				</div>
 
@@ -256,7 +280,7 @@ import {
 	toast,
 } from 'frappe-ui'
 import { computed, inject, onMounted, onBeforeUnmount, ref, watch } from 'vue'
-import { FileText, X } from 'lucide-vue-next'
+import { FileText, GraduationCap, MessageCircleQuestion, X } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { validateFile } from '@/utils'
 
@@ -483,8 +507,10 @@ const getType = () => {
 			'.doc',
 			'.docx',
 			'.xml',
+			'.pdf',
 			'application/msword',
 			'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+			'application/pdf',
 		]
 	} else if (type == 'PDF') {
 		return ['.pdf']
