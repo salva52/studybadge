@@ -1,11 +1,11 @@
 <template>
 	<div
 		v-if="assignment.data"
-		class="grid grid-cols-1 md:grid-cols-2 h-full gap-4"
-		:class="{ 'bg-white dark:bg-gray-800 shadow-sb-soft border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden': !showTitle }"
+		class="grid grid-cols-2 h-full"
+		:class="{ 'border rounded-lg overflow-auto': !showTitle }"
 	>
 		<div
-			class="border-e border-gray-100 dark:border-gray-700 p-6 overflow-y-auto h-[calc(100vh-3.2rem)]"
+			class="border-e p-5 overflow-y-auto h-[calc(100vh-3.2rem)]"
 			:class="{ 'h-full': !showTitle }"
 		>
 			<div v-if="showTitle" class="text-lg font-semibold mb-5 text-ink-gray-9">
@@ -25,8 +25,8 @@
 			></div>
 		</div>
 
-		<div class="flex flex-col overflow-y-auto bg-gray-50/50 dark:bg-gray-900/30">
-			<div class="p-6 space-y-5">
+		<div class="flex flex-col overflow-y-auto">
+			<div class="p-5 space-y-5">
 				<div class="flex items-center justify-between">
 					<div class="font-semibold text-ink-gray-9">
 						{{ __('Submission') }}
@@ -67,7 +67,7 @@
 					}}
 					{{ __('Feel free to make edits to your submission if needed.') }}
 				</div>
-				<div v-if="showUploader()" class="bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 rounded-xl p-4">
+				<div v-if="showUploader()" class="border rounded-lg p-3">
 					<div class="font-semibold mb-2">
 						{{ __('Upload Assignment') }}
 					</div>
@@ -145,24 +145,53 @@
 						:uploadArgs="{
 							private: true,
 						}"
-						editorClass="prose-sm max-w-none border border-outline-gray-modals bg-white dark:bg-gray-800 shadow-sm rounded-lg py-3 px-4 min-h-[10rem] focus:ring-2 focus:ring-blue-500"
+						editorClass="prose-sm max-w-none border-b border-x border-outline-gray-modals bg-surface-gray-2 rounded-b-md py-1 px-2 min-h-[7rem]"
 					/>
 				</div>
 
+				<!-- Chat with Evaluator -->
 				<div
-					v-if="
-						user.data?.name == submissionResource.doc?.owner &&
-						submissionResource.doc?.comments
-					"
-					class="mt-8 p-4 bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 rounded-xl"
+					v-if="user.data?.name == submissionResource.doc?.owner && (chatHistory.length > 0 || submissionResource.doc?.comments)"
+					class="mt-8 p-4 border rounded-lg bg-surface-gray-2 flex flex-col space-y-4"
 				>
-					<div class="text-ink-gray-5 mb-4">
-						{{ __('Comments by Evaluator') }}
+					<div class="text-ink-gray-5 font-semibold text-sm mb-2">
+						{{ __('Evaluator Feedback & Chat') }}
 					</div>
-					<div
-						class="leading-6 text-ink-gray-9"
-						v-html="submissionResource.doc.comments"
-					></div>
+					
+					<!-- Legacy or First Feedback -->
+					<div v-if="chatHistory.length === 0 && submissionResource.doc?.comments" class="bg-white p-3 rounded shadow-sm border border-gray-100 text-sm leading-6 self-start max-w-[90%]">
+						<div class="font-bold text-xs text-blue-600 mb-1">StudyBadge AI Evaluator</div>
+						<div v-html="submissionResource.doc.comments"></div>
+					</div>
+
+					<!-- Chat History -->
+					<div v-for="(msg, idx) in chatHistory" :key="idx" 
+						class="p-3 rounded shadow-sm border text-sm leading-6 max-w-[90%]"
+						:class="msg.role === 'model' ? 'bg-white border-gray-200 self-start' : 'bg-blue-50 border-blue-100 self-end text-blue-900'">
+						<div class="font-bold text-xs mb-1" :class="msg.role === 'model' ? 'text-blue-600' : 'text-gray-600'">
+							{{ msg.role === 'model' ? 'StudyBadge AI Evaluator' : 'You' }}
+						</div>
+						<div v-html="msg.content"></div>
+					</div>
+					
+					<!-- Pending state -->
+					<div v-if="submissionResource.doc?.ai_status === 'Pending'" class="text-xs text-gray-500 italic mt-2 animate-pulse self-start">
+						AI Evaluator is typing...
+					</div>
+
+					<!-- Reply Input -->
+					<div v-if="replyCount < 3 && submissionResource.doc?.ai_status !== 'Pending'" class="mt-4 pt-4 border-t border-gray-200 flex flex-col">
+						<div class="text-xs text-gray-500 mb-2">
+							Puedes responder o pedir que reconsideren tu calificación ({{ 3 - replyCount }} intentos restantes).
+						</div>
+						<FormControl v-model="chatMessage" type="textarea" placeholder="Escribe tu mensaje aquí..." class="mb-2 bg-white" />
+						<Button @click="submitReply" variant="solid" class="self-end mt-2" :loading="isSendingReply" :disabled="!chatMessage">
+							Enviar Respuesta
+						</Button>
+					</div>
+					<div v-else-if="replyCount >= 3" class="mt-4 pt-4 border-t border-gray-200 text-xs text-gray-500 text-center">
+						Has alcanzado el límite máximo de respuestas para esta evaluación.
+					</div>
 				</div>
 
 				<!-- Grading -->
@@ -194,7 +223,7 @@
 							:uploadArgs="{
 								private: true,
 							}"
-							editorClass="prose-sm max-w-none border border-outline-gray-modals bg-white dark:bg-gray-800 shadow-sm rounded-lg py-3 px-4 min-h-[7rem]"
+							editorClass="prose-sm max-w-none border-b border-x border-outline-gray-modals bg-surface-gray-2 rounded-b-md py-1 px-2 min-h-[7rem]"
 						/>
 					</div>
 				</div>
@@ -225,6 +254,39 @@ const comments = ref(null)
 const router = useRouter()
 const user = inject('$user')
 const isDirty = ref(false)
+
+const chatMessage = ref('')
+const isSendingReply = ref(false)
+
+const chatHistory = computed(() => {
+	if (!submissionResource.doc?.ai_chat_history) return []
+	try {
+		return JSON.parse(submissionResource.doc.ai_chat_history)
+	} catch (e) {
+		return []
+	}
+})
+
+const replyCount = computed(() => {
+	return submissionResource.doc?.ai_reply_count || 0
+})
+
+const submitReply = () => {
+	if (!chatMessage.value.trim()) return
+	isSendingReply.value = true
+	call('studybadge_ai.ai_grading.submit_student_reply', {
+		submission_name: props.submissionName,
+		message: chatMessage.value
+	}).then(() => {
+		chatMessage.value = ''
+		toast.success(__('Reply sent to AI Evaluator'))
+		submissionResource.reload()
+	}).catch((err) => {
+		toast.error(err.messages?.[0] || err)
+	}).finally(() => {
+		isSendingReply.value = false
+	})
+}
 
 const props = defineProps({
 	assignmentID: {
