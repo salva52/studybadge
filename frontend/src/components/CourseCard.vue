@@ -15,24 +15,29 @@
 					  }
 			"
 		>
-			<!-- <div class="flex items-center flex-wrap relative top-4 px-2 w-fit">
+			<div class="flex items-center flex-wrap relative top-4 px-3 w-fit gap-1.5">
 				<div
 					v-if="course.featured"
-					class="flex items-center gap-x-1 text-xs text-ink-amber-3 bg-surface-white border border-outline-amber-1 px-2 py-0.5 rounded-md me-1 mb-1"
+					class="flex items-center gap-x-1 text-[11px] font-bold tracking-wide uppercase text-amber-700 bg-amber-100 border border-amber-200 px-2.5 py-1 rounded-full shadow-sm"
 				>
 					<Star class="size-3 stroke-2" />
-					<span>
-						{{ __('Featured') }}
-					</span>
+					<span>{{ __('Más vendido') }}</span>
+				</div>
+				<div
+					v-if="course.enable_certification || course.paid_certificate"
+					class="flex items-center gap-x-1 text-[11px] font-bold tracking-wide uppercase text-blue-700 bg-blue-100 border border-blue-200 px-2.5 py-1 rounded-full shadow-sm"
+				>
+					<GraduationCap class="size-3 stroke-2" />
+					<span>{{ __('Certificado incluido') }}</span>
 				</div>
 				<div
 					v-if="course.tags"
 					v-for="tag in course.tags?.split(', ')"
-					class="text-xs border bg-surface-white text-ink-gray-9 px-2 py-0.5 rounded-md mb-1 me-1"
+					class="flex items-center text-[11px] font-bold tracking-wide uppercase text-emerald-700 bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-full shadow-sm"
 				>
 					{{ tag }}
 				</div>
-			</div> -->
+			</div>
 			<div
 				v-if="!course.image"
 				class="flex items-center justify-center text-white flex-1 font-extrabold my-auto px-5 text-center leading-6 h-full"

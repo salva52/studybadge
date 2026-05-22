@@ -341,7 +341,7 @@ const courseTabs = computed(() => {
 		user.data?.is_instructor ||
 		user.data?.is_evaluator
 	) {
-		tabs.push({ label: __('Creados'), value: 'created' })
+		tabs.push({ label: __('Destacados'), value: 'created' })
 		tabs.push({ label: __('Sin Publicar'), value: 'unpublished' })
 	} else if (user.data) {
 		tabs.push({ label: __('Inscritos'), value: 'enrolled' })
