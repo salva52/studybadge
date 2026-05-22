@@ -920,8 +920,14 @@ def run():
     save_doc(course)
 
     frappe.db.commit()
+    print("¡Curso IA para Negocios desde Cero importado con éxito!")
+    
+    # Actualizar estadísticas (lecciones, rating, enrollments) para que no salga en 0
+    from lms.lms.doctype.lms_course.lms_course import update_course_statistics
+    update_course_statistics()
+    frappe.db.commit()
+    print("Estadísticas del curso actualizadas correctamente.")
 
-    print("✅ Curso importado/actualizado correctamente.")
     print(f"Curso: {COURSE_DATA['course_title']}")
     print(f"Capítulos: {len(course_chapter_names)}")
     print(f"Lecciones: {total_lessons}")

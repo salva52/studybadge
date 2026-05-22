@@ -692,7 +692,13 @@ def run():
         course.save(ignore_permissions=True)
 
     frappe.db.commit()
-    print("\n¡Proceso Finalizado! Los 10 cursos con sus asignaciones se han creado en la base de datos.")
+    print("¡Todos los cursos importados con éxito!")
+    
+    # Actualizar estadísticas de todos los cursos para que el frontend muestre los números correctos
+    from lms.lms.doctype.lms_course.lms_course import update_course_statistics
+    update_course_statistics()
+    frappe.db.commit()
+    print("Estadísticas de los cursos actualizadas correctamente.")
 
 if __name__ == "__main__":
     site = sys.argv[1] if len(sys.argv) > 1 else "studybadge.localhost"
