@@ -65,14 +65,72 @@ def run():
         return doc.name
 
     # Helper function for lessons
-    def create_lesson(chap_name, title, body, content=None):
+    def create_lesson(chap_name, title, body, assignment_type=None, question=""):
+        # 1. Handle Assignment
+        assign_name = None
+        if assignment_type:
+            assignment_title = f"Actividad: {title}"
+            existing_assign = frappe.get_all("LMS Assignment", {"title": assignment_title, "course": course_name})
+            if existing_assign:
+                assign_name = existing_assign[0].name
+            else:
+                doc = frappe.get_doc({
+                    "doctype": "LMS Assignment",
+                    "title": assignment_title,
+                    "type": assignment_type,
+                    "course": course_name,
+                    "question": question
+                })
+                doc.insert(ignore_permissions=True, ignore_mandatory=True)
+                assign_name = doc.name
+
+        # 2. Build EditorJS Content
+        blocks = []
+        for p in body.split('\n\n'):
+            if p.strip():
+                if p.startswith('### '):
+                    blocks.append({
+                        "type": "header",
+                        "data": {
+                            "text": p.replace('### ', ''),
+                            "level": 3
+                        }
+                    })
+                elif p.startswith('{{ Quiz'):
+                    blocks.append({
+                        "type": "quiz",
+                        "data": {
+                            "quiz": p.split('"')[1]
+                        }
+                    })
+                else:
+                    blocks.append({
+                        "type": "paragraph",
+                        "data": {
+                            "text": p.replace('\n', '<br>')
+                        }
+                    })
+        
+        if assign_name:
+            blocks.append({
+                "type": "assignment",
+                "data": {
+                    "assignment": assign_name
+                }
+            })
+
+        content_json = json.dumps({
+            "time": 1716348270119,
+            "blocks": blocks,
+            "version": "2.29.1"
+        })
+
         existing = frappe.get_all("Course Lesson", filters={"title": title, "chapter": chap_name})
         if existing:
             doc = frappe.get_doc("Course Lesson", existing[0].name)
-            if content:
-                doc.content = content
-                doc.body = ""
-                doc.save(ignore_permissions=True)
+            doc.content = content_json
+            doc.body = ""
+            doc.save(ignore_permissions=True)
             return existing[0].name
         
         doc = frappe.get_doc({
@@ -80,8 +138,8 @@ def run():
             "title": title,
             "chapter": chap_name,
             "course": course_name,
-            "body": body,
-            "content": content
+            "body": "",
+            "content": content_json
         })
         doc.insert(ignore_permissions=True, ignore_mandatory=True)
         return doc.name
