@@ -118,7 +118,7 @@
 						'w-full md:w-3/5 mx-auto border-none !pt-10': zenModeEnabled,
 					}"
 				>
-					<div class="px-5">
+					<div class="px-5 max-w-4xl mx-auto w-full">
 						<div
 							class="flex flex-col space-y-3 md:space-y-0 md:flex-row md:items-center justify-between"
 						>

@@ -23,7 +23,7 @@
 		</div>
 		<div
 			:class="{
-				'border-2 rounded-md py-2 px-2': showOutline && outline.data?.length,
+				'bg-white dark:bg-gray-800 shadow-sb-soft border border-gray-100 dark:border-gray-700 rounded-2xl p-4': showOutline && outline.data?.length,
 			}"
 		>
 			<Draggable
@@ -94,9 +94,9 @@
 								>
 									<template #item="{ element: lesson }">
 										<div
-											class="outline-lesson ps-8 py-2 pe-4 text-ink-gray-9"
+											class="outline-lesson ps-8 py-2 pe-4 rounded-lg transition-colors mb-1"
 											:class="
-												isActiveLesson(lesson.number) ? 'bg-surface-gray-3' : ''
+												isActiveLesson(lesson.number) ? 'bg-blue-50 dark:bg-blue-900/30 !text-blue-700 dark:!text-blue-300 font-semibold' : 'text-ink-gray-9 hover:bg-gray-50 dark:hover:bg-gray-800'
 											"
 										>
 											<router-link

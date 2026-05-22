@@ -1,11 +1,11 @@
 <template>
 	<div
 		v-if="assignment.data"
-		class="grid grid-cols-2 h-full"
-		:class="{ 'border rounded-lg overflow-auto': !showTitle }"
+		class="grid grid-cols-1 md:grid-cols-2 h-full gap-4"
+		:class="{ 'bg-white dark:bg-gray-800 shadow-sb-soft border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden': !showTitle }"
 	>
 		<div
-			class="border-e p-5 overflow-y-auto h-[calc(100vh-3.2rem)]"
+			class="border-e border-gray-100 dark:border-gray-700 p-6 overflow-y-auto h-[calc(100vh-3.2rem)]"
 			:class="{ 'h-full': !showTitle }"
 		>
 			<div v-if="showTitle" class="text-lg font-semibold mb-5 text-ink-gray-9">
@@ -25,8 +25,8 @@
 			></div>
 		</div>
 
-		<div class="flex flex-col overflow-y-auto">
-			<div class="p-5 space-y-5">
+		<div class="flex flex-col overflow-y-auto bg-gray-50/50 dark:bg-gray-900/30">
+			<div class="p-6 space-y-5">
 				<div class="flex items-center justify-between">
 					<div class="font-semibold text-ink-gray-9">
 						{{ __('Submission') }}
@@ -67,7 +67,7 @@
 					}}
 					{{ __('Feel free to make edits to your submission if needed.') }}
 				</div>
-				<div v-if="showUploader()" class="border rounded-lg p-3">
+				<div v-if="showUploader()" class="bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 rounded-xl p-4">
 					<div class="font-semibold mb-2">
 						{{ __('Upload Assignment') }}
 					</div>
@@ -145,7 +145,7 @@
 						:uploadArgs="{
 							private: true,
 						}"
-						editorClass="prose-sm max-w-none border-b border-x border-outline-gray-modals bg-surface-gray-2 rounded-b-md py-1 px-2 min-h-[7rem]"
+						editorClass="prose-sm max-w-none border border-outline-gray-modals bg-white dark:bg-gray-800 shadow-sm rounded-lg py-3 px-4 min-h-[10rem] focus:ring-2 focus:ring-blue-500"
 					/>
 				</div>
 
@@ -154,7 +154,7 @@
 						user.data?.name == submissionResource.doc?.owner &&
 						submissionResource.doc?.comments
 					"
-					class="mt-8 p-3 border rounded-lg bg-surface-gray-2"
+					class="mt-8 p-4 bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 rounded-xl"
 				>
 					<div class="text-ink-gray-5 mb-4">
 						{{ __('Comments by Evaluator') }}
@@ -194,7 +194,7 @@
 							:uploadArgs="{
 								private: true,
 							}"
-							editorClass="prose-sm max-w-none border-b border-x border-outline-gray-modals bg-surface-gray-2 rounded-b-md py-1 px-2 min-h-[7rem]"
+							editorClass="prose-sm max-w-none border border-outline-gray-modals bg-white dark:bg-gray-800 shadow-sm rounded-lg py-3 px-4 min-h-[7rem]"
 						/>
 					</div>
 				</div>
