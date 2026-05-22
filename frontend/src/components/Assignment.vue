@@ -62,13 +62,13 @@
 					"
 					class="bg-surface-blue-2 text-ink-blue-2 p-3 rounded-md leading-5 text-sm"
 				>
-					{{ __("You've successfully submitted the assignment.") }}
+					{{ __('Has enviado correctamente la tarea.') }}
 					{{
 						__(
-							"Once the moderator grades your submission, you'll find the details here."
+							'Una vez que el asesor califique tu envío, encontrarás los detalles aquí.'
 						)
 					}}
-					{{ __('Feel free to make edits to your submission if needed.') }}
+					{{ __('Siéntete libre de realizar modificaciones en tu envío si es necesario.') }}
 				</div>
 				<div v-if="showUploader()" class="bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 rounded-xl p-5">
 					<div class="font-semibold mb-1 text-ink-gray-9 text-base">
