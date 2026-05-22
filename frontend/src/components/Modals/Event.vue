@@ -409,11 +409,11 @@ const statusOptions = computed(() => {
 		},
 		{
 			value: 'Pass',
-			label: __('Pass'),
+			label: __('Aprobado'),
 		},
 		{
 			value: 'Fail',
-			label: __('Fail'),
+			label: __('Pendiente de mejora'),
 		},
 	]
 })

@@ -43,7 +43,7 @@
 							:theme="statusTheme"
 							size="lg"
 						>
-							{{ submissionResource.doc?.status }}
+							{{ getStatusLabel(submissionResource.doc?.status) }}
 						</Badge>
 						<Button
 							v-if="canModifyAssignment || canGradeSubmission"
@@ -310,7 +310,7 @@ const replyCount = computed(() => {
 const submitReply = () => {
 	if (!chatMessage.value.trim()) return
 	isSendingReply.value = true
-	call('studybadge_ai.ai_grading.submit_student_reply', {
+	call('studybadge_ai.studybadge_ai.ai_grading.submit_student_reply', {
 		submission_name: props.submissionName,
 		message: chatMessage.value
 	}).then(() => {
@@ -544,11 +544,18 @@ const canModifyAssignment = computed(() => {
 	return false
 })
 
+const getStatusLabel = (status) => {
+	if (status === 'Pass') return __('Aprobado')
+	if (status === 'Fail') return __('Pendiente de mejora')
+	if (status === 'Not Graded') return __('Sin Calificar')
+	return __(status || '')
+}
+
 const submissionStatusOptions = computed(() => {
 	return [
-		{ label: 'Not Graded', value: 'Not Graded' },
-		{ label: 'Pass', value: 'Pass' },
-		{ label: 'Fail', value: 'Fail' },
+		{ label: __('Sin Calificar'), value: 'Not Graded' },
+		{ label: __('Aprobado'), value: 'Pass' },
+		{ label: __('Pendiente de mejora'), value: 'Fail' },
 	]
 })
 

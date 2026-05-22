@@ -46,7 +46,7 @@
 							<ListRowItem :item="row[column.key]" :align="column.align">
 								<div v-if="column.key == 'status'">
 									<Badge :theme="getStatusTheme(row[column.key])">
-										{{ row[column.key] }}
+										{{ getStatusLabel(row[column.key]) }}
 									</Badge>
 								</div>
 								<div v-else>
@@ -194,9 +194,9 @@ const submissionColumns = computed(() => {
 const statusOptions = computed(() => {
 	return [
 		{ label: '', value: '' },
-		{ label: 'Pass', value: 'Pass' },
-		{ label: 'Fail', value: 'Fail' },
-		{ label: 'Not Graded', value: 'Not Graded' },
+		{ label: __('Aprobado'), value: 'Pass' },
+		{ label: __('Pendiente de mejora'), value: 'Fail' },
+		{ label: __('Sin Calificar'), value: 'Not Graded' },
 	]
 })
 
@@ -208,6 +208,13 @@ const getStatusTheme = (status) => {
 	} else {
 		return 'red'
 	}
+}
+
+const getStatusLabel = (status) => {
+	if (status === 'Pass') return __('Aprobado')
+	if (status === 'Fail') return __('Pendiente de mejora')
+	if (status === 'Not Graded') return __('Sin Calificar')
+	return __(status || '')
 }
 
 const breadcrumbs = computed(() => {
