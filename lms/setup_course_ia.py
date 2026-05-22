@@ -65,7 +65,7 @@ def run():
         return doc.name
 
     # Helper function for lessons
-    def create_lesson(chap_name, title, body, assignment_type=None, question=""):
+    def create_lesson(chap_name, title, body, assignment_type=None, question="", quiz_name=None):
         # 1. Handle Assignment
         assign_name = None
         if assignment_type:
@@ -100,7 +100,7 @@ def run():
                     blocks.append({
                         "type": "quiz",
                         "data": {
-                            "quiz": p.split('"')[1]
+                            "quiz": quiz_name if quiz_name else p.split('"')[1]
                         }
                     })
                 else:
@@ -144,34 +144,48 @@ def run():
         doc.insert(ignore_permissions=True, ignore_mandatory=True)
         return doc.name
 
+    # Helper function for questions
+    def create_question(q_text, opts, explanation_idx):
+        existing = frappe.get_all("LMS Question", filters={"question": q_text})
+        if existing:
+            return existing[0].name
+        
+        doc = frappe.get_doc({
+            "doctype": "LMS Question",
+            "question": q_text,
+            "type": "Choices",
+            "option_1": opts[0] if len(opts)>0 else "", "is_correct_1": 1 if explanation_idx == 0 else 0,
+            "option_2": opts[1] if len(opts)>1 else "", "is_correct_2": 1 if explanation_idx == 1 else 0,
+            "option_3": opts[2] if len(opts)>2 else "", "is_correct_3": 1 if explanation_idx == 2 else 0,
+            "option_4": opts[3] if len(opts)>3 else "", "is_correct_4": 1 if explanation_idx == 3 else 0,
+            f"explanation_{explanation_idx+1}": "Respuesta correcta."
+        })
+        doc.insert(ignore_permissions=True, ignore_mandatory=True)
+        return doc.name
+
     # Helper function for quizzes
     def create_quiz(title, questions):
-        if frappe.db.exists("LMS Quiz", {"title": title}):
-            return frappe.get_doc("LMS Quiz", {"title": title}).name
-            
-        doc = frappe.get_doc({
-            "doctype": "LMS Quiz",
-            "title": title,
-            "passing_percentage": 80,
-            "max_attempts": 3
-        })
-        
-        for q in questions:
-            qdoc = frappe.get_doc({
-                "doctype": "LMS Quiz Question",
-                "question": q["q"],
-                "type": "Choices",
-                "multiple": 0
+        existing = frappe.get_all("LMS Quiz", {"title": title})
+        if existing:
+            doc = frappe.get_doc("LMS Quiz", existing[0].name)
+        else:
+            doc = frappe.get_doc({
+                "doctype": "LMS Quiz",
+                "title": title,
+                "passing_percentage": 80,
+                "max_attempts": 3
             })
-            for i, opt in enumerate(q["opts"]):
-                qdoc.append("options", {
-                    "option": opt,
-                    "is_correct": 1 if i == q["ans"] else 0
-                })
-            qdoc.insert(ignore_permissions=True, ignore_mandatory=True)
-            doc.append("questions", {"question": qdoc.name})
+            doc.insert(ignore_permissions=True, ignore_mandatory=True)
+        
+        doc.set("questions", [])
+        for q in questions:
+            q_name = create_question(q["q"], q["opts"], q["ans"])
+            doc.append("questions", {
+                "question": q_name,
+                "marks": 1
+            })
             
-        doc.insert(ignore_permissions=True, ignore_mandatory=True)
+        doc.save(ignore_permissions=True)
         return doc.name
 
     # Data Structure
@@ -321,7 +335,8 @@ def run():
                 les["title"], 
                 les["body"], 
                 assignment_type=les.get("assign_type"), 
-                question=les.get("assign_question", "")
+                question=les.get("assign_question", ""),
+                quiz_name=les.get("quiz_name")
             )
             chapter_doc.append("lessons", {"lesson": l_name})
             lesson_names.append(l_name)
