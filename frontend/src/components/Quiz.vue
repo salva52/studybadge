@@ -10,24 +10,24 @@
 			<ProgressBar :progress="timerProgress" />
 		</div>
 
-		<div v-if="activeQuestion == 0" class="my-6">
-			<div class="relative overflow-hidden bg-gradient-to-br from-white to-blue-50 dark:from-gray-800 dark:to-gray-900 shadow-sb-soft border border-gray-100 dark:border-gray-700 rounded-3xl p-8 md:p-12 text-center">
+		<div v-if="activeQuestion == 0" class="mb-6">
+			<div class="relative overflow-hidden bg-gradient-to-br from-white to-blue-50 dark:from-gray-800 dark:to-gray-900 shadow-sb-soft border border-gray-100 dark:border-gray-700 rounded-2xl p-6 md:p-8 text-center">
 				<div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-blue-500 opacity-5 rounded-full blur-3xl pointer-events-none"></div>
 				<div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-32 h-32 bg-indigo-500 opacity-5 rounded-full blur-2xl pointer-events-none"></div>
 
 				<div class="relative z-10">
-					<div class="inline-flex bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-4 rounded-2xl mb-6 shadow-sm">
-						<ClipboardList class="w-10 h-10 stroke-1.5" />
+					<div class="inline-flex bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-3 rounded-xl mb-4 shadow-sm">
+						<ClipboardList class="w-8 h-8 stroke-1.5" />
 					</div>
-					<h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-4">
+					<h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">
 						{{ quiz.data.title }}
 					</h1>
-					<p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+					<p class="text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto mb-6 leading-relaxed">
 						{{ __('Por favor, lee las siguientes instrucciones cuidadosamente antes de comenzar el cuestionario.') }}
 					</p>
 
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto text-left mb-10">
-						<div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-3xl mx-auto text-left mb-8">
+						<div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
 							<div class="flex items-center gap-3 mb-2 text-amber-500">
 								<AlertTriangle class="w-5 h-5" />
 								<h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ __('¡Importante!') }}</h3>
@@ -37,7 +37,7 @@
 							</p>
 						</div>
 
-						<div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
+						<div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
 							<div class="flex items-center gap-3 mb-2 text-blue-500">
 								<ListOrdered class="w-5 h-5" />
 								<h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ __('Formato') }}</h3>
@@ -47,7 +47,7 @@
 							</p>
 						</div>
 
-						<div v-if="quiz.data?.duration" class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
+						<div v-if="quiz.data?.duration" class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
 							<div class="flex items-center gap-3 mb-2 text-indigo-500">
 								<Clock class="w-5 h-5" />
 								<h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ __('Tiempo Límite') }}</h3>
@@ -57,7 +57,7 @@
 							</p>
 						</div>
 
-						<div v-if="quiz.data.passing_percentage" class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
+						<div v-if="quiz.data.passing_percentage" class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
 							<div class="flex items-center gap-3 mb-2 text-emerald-500">
 								<Target class="w-5 h-5" />
 								<h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ __('Aprobación') }}</h3>
@@ -67,7 +67,7 @@
 							</p>
 						</div>
 
-						<div v-if="quiz.data.max_attempts" class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
+						<div v-if="quiz.data.max_attempts" class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
 							<div class="flex items-center gap-3 mb-2 text-purple-500">
 								<RotateCcw class="w-5 h-5" />
 								<h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ __('Intentos') }}</h3>
@@ -81,7 +81,7 @@
 							</p>
 						</div>
 						
-						<div v-if="quiz.data.enable_negative_marking" class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
+						<div v-if="quiz.data.enable_negative_marking" class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
 							<div class="flex items-center gap-3 mb-2 text-rose-500">
 								<MinusCircle class="w-5 h-5" />
 								<h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ __('Penalizaciones') }}</h3>
@@ -95,24 +95,24 @@
 						</div>
 					</div>
 
-					<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+					<div class="flex flex-col sm:flex-row items-center justify-center gap-3">
 						<Button
 							v-if="!quiz.data.max_attempts || attempts.data?.length < quiz.data.max_attempts"
 							variant="solid"
-							class="px-10 py-3 text-lg h-auto font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all transform hover:-translate-y-0.5 rounded-xl"
+							class="px-8 py-2.5 text-base font-semibold shadow-md shadow-blue-500/20 hover:shadow-blue-500/40 transition-all transform hover:-translate-y-0.5 rounded-xl"
 							@click="startQuiz"
 						>
 							<span>{{ inVideo ? __('Iniciar Cuestionario') : __('Comenzar Prueba') }}</span>
 						</Button>
 						
-						<Button v-if="inVideo" @click="props.backToVideo()" variant="ghost" class="px-8 py-3 text-lg h-auto rounded-xl">
+						<Button v-if="inVideo" @click="props.backToVideo()" variant="ghost" class="px-6 py-2.5 text-base rounded-xl">
 							{{ __('Volver al Video') }}
 						</Button>
 					</div>
 					
 					<div
 						v-if="quiz.data.max_attempts && attempts.data?.length >= quiz.data.max_attempts"
-						class="mt-6 px-6 py-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl font-medium inline-block"
+						class="mt-4 px-4 py-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl font-medium inline-block text-sm"
 					>
 						{{ __('Has superado el límite de intentos permitidos para este cuestionario.') }}
 					</div>
