@@ -1,12 +1,6 @@
 <template>
-	<div v-if="assignment.loading" class="p-8 text-center text-ink-gray-5">
-		{{ __('Cargando asignación...') }}
-	</div>
-	<div v-else-if="assignment.error" class="p-8 text-center text-red-500">
-		{{ __('Error al cargar asignación:') }} {{ assignment.error }}
-	</div>
 	<div
-		v-else-if="assignment.data"
+		v-if="assignment.data"
 		:class="showTitle ? 'grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-start' : 'flex flex-col gap-6 p-4'"
 	>
 		<div
@@ -52,14 +46,7 @@
 							{{ submissionResource.doc?.status }}
 						</Badge>
 						<Button
-							v-if="canModifyAssignment && !isEditing"
-							variant="outline"
-							@click="isEditing = true"
-						>
-							{{ __('Volver a entregar') }}
-						</Button>
-						<Button
-							v-if="(canModifyAssignment && isEditing) || canGradeSubmission"
+							v-if="canModifyAssignment || canGradeSubmission"
 							variant="solid"
 							@click="submitAssignment()"
 						>
@@ -95,7 +82,7 @@
 						}}
 					</div>
 					<FileUploader
-						v-if="!attachment && isEditing"
+						v-if="!attachment"
 						:fileTypes="getType()"
 						:uploadArgs="{
 							private: true,
@@ -119,9 +106,6 @@
 							</Button>
 						</template>
 					</FileUploader>
-					<div v-else-if="!attachment && !isEditing" class="text-sm text-ink-gray-5 py-3 italic text-center bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-200 dark:border-gray-700">
-						{{ __('No se ha subido ningún archivo') }}
-					</div>
 					<div v-else>
 						<div class="flex items-center justify-between text-ink-gray-7 border border-gray-200 dark:border-gray-700 rounded-lg p-2 pe-3">
 							<a
@@ -139,7 +123,7 @@
 								</div>
 							</a>
 							<Button
-								v-if="canModifyAssignment && isEditing"
+								v-if="canModifyAssignment"
 								@click="removeSubmission()"
 								variant="ghost"
 								class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
@@ -156,10 +140,9 @@
 						{{ __('Enter a URL') }}
 					</div>
 					<FormControl
-						v-slot="{ uploading, progress, openFileSelector }"
 						v-model="answer"
 						type="text"
-						:readonly="!isEditing || !canModifyAssignment"
+						:readonly="!canModifyAssignment"
 					/>
 				</div>
 				<div v-else>
@@ -169,9 +152,9 @@
 					<TextEditor
 						:content="answer"
 						@change="(val) => (answer = val)"
-						:editable="isEditing && canModifyAssignment"
+						:editable="true"
 						:fixedMenu="true"
-						:readonly="!isEditing || !canModifyAssignment"
+						:readonly="!canModifyAssignment"
 						:uploadArgs="{
 							private: true,
 						}"
@@ -301,32 +284,12 @@ import { FileText, GraduationCap, MessageCircleQuestion, X } from 'lucide-vue-ne
 import { useRouter } from 'vue-router'
 import { validateFile } from '@/utils'
 
-const props = defineProps({
-	assignmentID: {
-		type: String,
-		required: true,
-	},
-	submissionName: {
-		type: String,
-		default: 'new',
-	},
-	showTitle: {
-		type: Boolean,
-		default: true,
-	},
-})
-
 const answer = ref(null)
 const attachment = ref(null)
 const comments = ref(null)
 const router = useRouter()
 const user = inject('$user')
 const isDirty = ref(false)
-const isEditing = ref(props.submissionName === 'new')
-
-watch(() => props.submissionName, (newVal) => {
-	isEditing.value = newVal === 'new'
-})
 
 const chatMessage = ref('')
 const isSendingReply = ref(false)
@@ -361,6 +324,21 @@ const submitReply = () => {
 	})
 }
 
+const props = defineProps({
+	assignmentID: {
+		type: String,
+		required: true,
+	},
+	submissionName: {
+		type: String,
+		default: 'new',
+	},
+	showTitle: {
+		type: Boolean,
+		default: true,
+	},
+})
+
 onMounted(() => {
 	window.addEventListener('keydown', keyboardShortcut)
 })
@@ -376,17 +354,6 @@ onBeforeUnmount(() => {
 	window.removeEventListener('keydown', keyboardShortcut)
 })
 
-
-
-const submissionResource = createDocumentResource({
-	doctype: 'LMS Assignment Submission',
-	name: props.submissionName,
-	auto: false,
-	onError(err) {
-		toast.error(err.messages?.[0] || err)
-	},
-})
-
 const assignment = createResource({
 	url: 'frappe.client.get',
 	params: {
@@ -398,6 +365,15 @@ const assignment = createResource({
 		if (props.submissionName != 'new') {
 			submissionResource.reload()
 		}
+	},
+})
+
+const submissionResource = createDocumentResource({
+	doctype: 'LMS Assignment Submission',
+	name: props.submissionName,
+	auto: false,
+	onError(err) {
+		toast.error(err.messages?.[0] || err)
 	},
 })
 
@@ -491,7 +467,6 @@ const updateSubmission = () => {
 		{
 			onSuccess(data) {
 				isDirty.value = false
-				isEditing.value = false
 				toast.success(__('Changes saved successfully'))
 			},
 			onError(err) {
