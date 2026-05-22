@@ -245,6 +245,7 @@ def run():
     print("¡Curso IA para Negocios desde Cero importado con éxito!")
 
 if __name__ == "__main__":
-    frappe.init(site="studybadge.localhost")
+    site = sys.argv[1] if len(sys.argv) > 1 else "studybadge.localhost"
+    frappe.init(site=site)
     frappe.connect()
     run()
