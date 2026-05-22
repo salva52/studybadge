@@ -144,47 +144,34 @@ def run():
         doc.insert(ignore_permissions=True, ignore_mandatory=True)
         return doc.name
 
-    # Helper function for questions
-    def create_question(q_text, opts, explanation_idx):
-        existing = frappe.get_all("LMS Question", filters={"question": q_text})
-        if existing:
-            return existing[0].name
-        
-        doc = frappe.get_doc({
-            "doctype": "LMS Question",
-            "question": q_text,
-            "type": "Choices",
-            "option_1": opts[0], "is_correct_1": 1 if explanation_idx == 0 else 0,
-            "option_2": opts[1], "is_correct_2": 1 if explanation_idx == 1 else 0,
-            "option_3": opts[2], "is_correct_3": 1 if explanation_idx == 2 else 0,
-            "option_4": opts[3], "is_correct_4": 1 if explanation_idx == 3 else 0,
-            f"explanation_{explanation_idx+1}": "Esta es la respuesta correcta basada en los principios del curso."
-        })
-        doc.insert(ignore_permissions=True, ignore_mandatory=True)
-        return doc.name
-
     # Helper function for quizzes
-    def create_quiz(title, lesson_name, question_names):
-        existing = frappe.get_all("LMS Quiz", filters={"title": title, "lesson": lesson_name})
-        if existing:
-            return existing[0].name
+    def create_quiz(title, questions):
+        if frappe.db.exists("LMS Quiz", {"title": title}):
+            return frappe.get_doc("LMS Quiz", {"title": title}).name
+            
         doc = frappe.get_doc({
             "doctype": "LMS Quiz",
             "title": title,
-            "lesson": lesson_name,
             "passing_percentage": 80,
-            "show_answers": 1
+            "max_attempts": 3
         })
-        for q in question_names:
-            doc.append("questions", {
-                "question": q,
-                "marks": 1
+        
+        for q in questions:
+            qdoc = frappe.get_doc({
+                "doctype": "LMS Quiz Question",
+                "question": q["q"],
+                "type": "Choices",
+                "multiple": 0
             })
+            for i, opt in enumerate(q["opts"]):
+                qdoc.append("options", {
+                    "option": opt,
+                    "is_correct": 1 if i == q["ans"] else 0
+                })
+            qdoc.insert(ignore_permissions=True, ignore_mandatory=True)
+            doc.append("questions", {"question": qdoc.name})
+            
         doc.insert(ignore_permissions=True, ignore_mandatory=True)
-        
-        # update lesson with quiz_id
-        frappe.db.set_value("Course Lesson", lesson_name, "quiz_id", doc.name)
-        
         return doc.name
 
     # Data Structure
