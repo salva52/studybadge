@@ -6,7 +6,7 @@
 			<div class="font-medium">
 				{{
 					__(
-						'Please read the following instructions carefully before starting the quiz'
+						'Por favor lee las siguientes instrucciones cuidadosamente antes de iniciar el cuestionario'
 					)
 				}}
 			</div>
@@ -23,7 +23,7 @@
 				</li>
 				<li>
 					{{
-						__('This quiz consists of {0} questions.').format(questions.length)
+						__('Este cuestionario consta de {0} preguntas.').format(questions.length)
 					}}
 				</li>
 				<li v-if="quiz.data?.duration">
@@ -43,7 +43,7 @@
 				<li v-if="quiz.data.passing_percentage">
 					{{
 						__(
-							'You will have to get {0}% correct answers in order to pass the quiz.'
+							'Tendrás que obtener {0}% de respuestas correctas para poder aprobar el cuestionario.'
 						).format(quiz.data.passing_percentage)
 					}}
 				</li>
@@ -71,7 +71,7 @@
 
 		<div v-if="quiz.data.duration" class="flex flex-col gap-x-1 my-4 px-2">
 			<div class="mb-2">
-				<span class="text-ink-gray-9"> {{ __('Time') }}: </span>
+				<span class="text-ink-gray-9"> {{ __('Tiempo') }}: </span>
 				<span class="font-semibold text-ink-gray-9">
 					{{ formatTimer(timer) }}
 				</span>
@@ -94,7 +94,7 @@
 						@click="startQuiz"
 					>
 						<span>
-							{{ inVideo ? __('Start the Quiz') : __('Start') }}
+							{{ inVideo ? __('Iniciar Cuestionario') : __('Iniciar') }}
 						</span>
 					</Button>
 					<Button v-if="inVideo" @click="props.backToVideo()">
@@ -124,12 +124,12 @@
 				>
 					<div class="flex justify-between">
 						<div class="text-sm text-ink-gray-5">
-							{{ __('Question {0}').format(activeQuestion) }} -
+							{{ __('Pregunta {0}').format(activeQuestion) }} -
 							{{ getInstructions(questionDetails.data) }}
 						</div>
 						<div class="text-ink-gray-9 text-sm font-semibold item-left">
 							{{ question.marks }}
-							{{ question.marks == 1 ? __('Mark') : __('Marks') }}
+							{{ question.marks == 1 ? __('Punto') : __('Puntos') }}
 						</div>
 					</div>
 					<div
@@ -225,7 +225,7 @@
 					<div class="flex items-center justify-between mt-8">
 						<Checkbox
 							v-if="!quiz.data.show_answers"
-							:label="__('Mark for review')"
+							:label="__('Marcar para revisar')"
 							:model-value="reviewQuestions.includes(activeQuestion) ? 1 : 0"
 							@change="markForReview($event, activeQuestion)"
 						/>
@@ -283,7 +283,7 @@
 							@click="checkAnswer()"
 						>
 							<span>
-								{{ __('Check') }}
+								{{ __('Verificar') }}
 							</span>
 						</Button>
 						<Button
@@ -294,7 +294,7 @@
 							class="ms-auto"
 						>
 							<span>
-								{{ __('Next') }}
+								{{ __('Siguiente') }}
 							</span>
 						</Button>
 						<Button
@@ -304,7 +304,7 @@
 							class="ms-auto"
 						>
 							<span>
-								{{ __('Submit') }}
+								{{ __('Enviar') }}
 							</span>
 						</Button>
 					</div>
@@ -312,7 +312,7 @@
 			</div>
 			<div v-if="reviewQuestions.length" class="border rounded-lg p-4 mt-4">
 				<div class="font-semibold">
-					{{ __('Questions marked for review') }}
+					{{ __('Preguntas marcadas para revisar') }}
 				</div>
 				<div class="flex items-center gap-x-2 mt-2">
 					<div
@@ -327,7 +327,7 @@
 		</div>
 		<div v-else class="border rounded-lg p-20 text-center space-y-2">
 			<div class="text-lg font-semibold text-ink-gray-9">
-				{{ __('Quiz Summary') }}
+				{{ __('Resumen del Cuestionario') }}
 			</div>
 			<div
 				v-if="quizSubmission.data.is_open_ended"
@@ -360,7 +360,7 @@
 					"
 				>
 					<span>
-						{{ __('Try Again') }}
+						{{ __('Intentar de nuevo') }}
 					</span>
 				</Button>
 				<Button v-if="inVideo" @click="props.backToVideo()">
@@ -392,11 +392,11 @@
 	<Dialog
 		v-model="showSubmissionConfirmation"
 		:options="{
-			title: __('Are you sure you want to submit the quiz?'),
+			title: __('¿Estás seguro de que deseas enviar el cuestionario?'),
 			actions: [
 				{
 					size: 'sm',
-					label: __('Submit'),
+					label: __('Enviar'),
 					variant: 'solid',
 					onClick() {
 						submitQuiz()
@@ -411,7 +411,7 @@
 				<div class="divide-y divide-outline-gray-modals">
 					<div class="grid grid-cols-2 divide-x divide-outline-gray-modals">
 						<div class="p-2">
-							{{ __('Total Questions') }}
+							{{ __('Total de Preguntas') }}
 						</div>
 						<div class="p-2">
 							{{ questions.length }}
@@ -419,7 +419,7 @@
 					</div>
 					<div class="grid grid-cols-2 divide-x divide-outline-gray-modals">
 						<div class="p-2">
-							{{ __('Attempted Questions') }}
+							{{ __('Preguntas Contestadas') }}
 						</div>
 						<div class="p-2">
 							{{ attemptedQuestions.length }}
@@ -427,7 +427,7 @@
 					</div>
 					<div class="grid grid-cols-2 divide-x divide-outline-gray-modals">
 						<div class="p-2">
-							{{ __('Unattempted Questions') }}
+							{{ __('Preguntas Sin Contestar') }}
 						</div>
 						<div class="p-2">
 							{{ questions.length - attemptedQuestions.length }}

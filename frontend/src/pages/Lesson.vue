@@ -1,7 +1,7 @@
 <template>
 	<div v-if="lesson.data" class="">
 		<header
-			class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-white px-3 py-2.5 sm:px-5"
+			class="sticky top-0 z-10 flex items-center justify-between border-b bg-white/95 backdrop-blur-sm px-4 py-3 sm:px-6 shadow-sm"
 		>
 			<Breadcrumbs class="h-7" :items="breadcrumbs" />
 			<div class="flex items-center gap-x-2">
@@ -23,7 +23,7 @@
 						<ChevronLeft class="w-4 h-4 stroke-1" />
 					</template>
 					<span>
-						{{ __('Previous') }}
+						{{ __('Anterior') }}
 					</span>
 				</Button>
 
@@ -39,7 +39,7 @@
 					}"
 				>
 					<Button>
-						{{ __('Edit') }}
+						{{ __('Editar') }}
 					</Button>
 				</router-link>
 
@@ -47,8 +47,8 @@
 					<template #suffix>
 						<ChevronRight class="w-4 h-4 stroke-1" />
 					</template>
-					<span>
-						{{ __('Next') }}
+						<span>
+						{{ __('Siguiente') }}
 					</span>
 				</Button>
 
@@ -60,24 +60,24 @@
 					}"
 				>
 					<Button>
-						{{ __('Back to Course') }}
+						{{ __('Volver al Curso') }}
 					</Button>
 				</router-link>
 			</div>
 		</header>
-		<div class="grid md:grid-cols-[70%,30%] h-[94vh]">
+		<div class="grid md:grid-cols-[72%,28%] h-[94vh]">
 			<div v-if="lesson.data.no_preview" class="border-e">
 				<div class="shadow rounded-md w-3/4 mt-10 mx-auto text-center p-4">
 					<div class="flex items-center justify-center mt-4 gap-x-2">
 						<LockKeyholeIcon class="size-4 stroke-2 text-ink-gray-5" />
 						<div class="text-lg font-semibold text-ink-gray-7">
-							{{ __('This lesson is locked') }}
+							{{ __('Esta lección está bloqueada') }}
 						</div>
 					</div>
 					<div class="mt-1 mb-4 text-ink-gray-7">
 						{{
 							__(
-								'This lesson is not available for preview. Please enroll in the course to access it.'
+								'Esta lección no está disponible para vista previa. Inscríbete en el curso para acceder.'
 							)
 						}}
 					</div>
@@ -86,7 +86,7 @@
 						@click="enrollStudent()"
 						variant="solid"
 					>
-						{{ __('Start Learning') }}
+						{{ __('Empezar a Aprender') }}
 					</Button>
 					<Badge
 						theme="blue"
@@ -94,13 +94,13 @@
 						v-else-if="lesson.data.disable_self_learning"
 						class="mt-2"
 					>
-						{{ __('Contact the Administrator to enroll for this course.') }}
+						{{ __('Contacta al administrador para inscribirte en este curso.') }}
 					</Badge>
 					<Button v-else @click="redirectToLogin()">
 						<template #prefix>
 							<LogIn class="w-4 h-4 stroke-1" />
 						</template>
-						{{ __('Login') }}
+						{{ __('Iniciar sesión') }}
 					</Button>
 				</div>
 			</div>
@@ -113,7 +113,7 @@
 				}"
 			>
 				<div
-					class="border-e pt-5 pb-10 h-full"
+					class="border-e pt-6 pb-10 h-full"
 					:class="{
 						'w-full md:w-3/5 mx-auto border-none !pt-10': zenModeEnabled,
 					}"
@@ -123,7 +123,7 @@
 							class="flex flex-col space-y-3 md:space-y-0 md:flex-row md:items-center justify-between"
 						>
 							<div class="flex flex-col">
-								<div class="text-3xl font-semibold text-ink-gray-9">
+								<div class="text-3xl font-bold text-ink-gray-9 leading-tight">
 									{{ lesson.data.title }}
 								</div>
 
@@ -140,7 +140,7 @@
 										class="hidden group-hover:block rounded bg-gray-900 px-2 py-1 text-xs text-white shadow-xl absolute start-0 top-full mt-2"
 									>
 										{{ Math.ceil(lesson.data.membership.progress) }}%
-										{{ __('completed') }}
+										{{ __('completado') }}
 									</div>
 								</div>
 							</div>
@@ -159,7 +159,7 @@
 										<ChevronLeft class="w-4 h-4 stroke-1" />
 									</template>
 									<span>
-										{{ __('Previous') }}
+										{{ __('Anterior') }}
 									</span>
 								</Button>
 
@@ -175,7 +175,7 @@
 									}"
 								>
 									<Button>
-										{{ __('Edit') }}
+										{{ __('Editar') }}
 									</Button>
 								</router-link>
 
@@ -184,7 +184,7 @@
 										<ChevronRight class="w-4 h-4 stroke-1" />
 									</template>
 									<span>
-										{{ __('Next') }}
+										{{ __('Siguiente') }}
 									</span>
 								</Button>
 
@@ -196,7 +196,7 @@
 									}"
 								>
 									<Button>
-										{{ __('Back to Course') }}
+										{{ __('Volver al Curso') }}
 									</Button>
 								</router-link>
 							</div>
@@ -230,7 +230,7 @@
 							class="bg-surface-gray-2 p-3 rounded-md mt-6"
 						>
 							<div class="text-ink-gray-5 font-medium">
-								{{ __('Instructor Notes') }}
+								{{ __('Notas del Instructor') }}
 							</div>
 							<div
 								id="instructor-content"
@@ -286,7 +286,7 @@
 							:docname="lesson.data.name"
 							:key="lesson.data.name"
 							:emptyStateText="
-								__('Ask a question to get help from the community.')
+								__('Haz una pregunta para obtener ayuda de la comunidad.')
 							"
 						/>
 					</div>
@@ -294,14 +294,14 @@
 			</div>
 			<div class="sticky top-10">
 				<div class="bg-surface-menu-bar p-5 border-b">
-					<div class="text-lg font-semibold text-ink-gray-9">
+					<div class="text-lg font-bold text-ink-gray-9 leading-tight">
 						{{ lesson.data.course_title }}
 					</div>
 					<div
 						v-if="user && lesson.data.membership"
 						class="text-sm mt-4 mb-2 text-ink-gray-5"
 					>
-						{{ Math.ceil(lessonProgress) }}% {{ __('completed') }}
+						{{ Math.ceil(lessonProgress) }}% {{ __('completado') }}
 					</div>
 
 					<ProgressBar
@@ -571,7 +571,7 @@ const notes = createListResource({
 })
 
 const breadcrumbs = computed(() => {
-	let crumbs = [{ label: __('Courses'), route: { name: 'Courses' } }]
+	let crumbs = [{ label: __('Cursos'), route: { name: 'Courses' } }]
 	crumbs.push({
 		label: lesson?.data?.course_title,
 		route: { name: 'CourseDetail', params: { courseName: props.courseName } },
@@ -972,12 +972,14 @@ usePageMeta(() => {
 }
 
 .lesson-content p {
-	margin-bottom: 1rem;
-	line-height: 1.7;
+	margin-bottom: 1.25rem;
+	line-height: 1.8;
+	font-size: 1.0625rem;
 }
 
 .lesson-content li {
-	line-height: 1.7;
+	line-height: 1.8;
+	font-size: 1.0625rem;
 }
 
 .lesson-content ol {
