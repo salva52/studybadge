@@ -18,7 +18,7 @@
 				<template #prefix>
 					<Plus class="size-4 stroke-1.5" />
 				</template>
-				{{ __('Add') }}
+				{{ __('Añadir') }}
 			</Button>
 		</div>
 		<div
@@ -60,14 +60,14 @@
 									{{ chapter.title }}
 								</div>
 								<div class="flex ms-auto gap-x-4">
-									<Tooltip :text="__('Edit Chapter')" placement="bottom">
+									<Tooltip :text="__('Editar Capítulo')" placement="bottom">
 										<FilePenLine
 											v-if="allowEdit"
 											@click.prevent="openChapterModal(chapter)"
 											class="h-4 w-4 text-ink-gray-9 invisible group-hover:visible"
 										/>
 									</Tooltip>
-									<Tooltip :text="__('Delete Chapter')" placement="bottom">
+									<Tooltip :text="__('Eliminar Capítulo')" placement="bottom">
 										<Trash2
 											v-if="allowEdit"
 											@click.prevent="trashChapter(chapter.name)"
@@ -160,7 +160,7 @@
 										}"
 									>
 										<Button>
-											{{ __('Add Lesson') }}
+											{{ __('Añadir Lección') }}
 										</Button>
 									</router-link>
 								</div>
@@ -277,7 +277,7 @@ const deleteLesson = createResource({
 	},
 	onSuccess() {
 		outline.reload()
-		toast.success(__('Lesson deleted successfully'))
+		toast.success(__('Lección eliminada exitosamente'))
 	},
 })
 
@@ -292,7 +292,7 @@ const updateLessonIndex = createResource({
 		}
 	},
 	onSuccess() {
-		toast.success(__('Lesson moved successfully'))
+		toast.success(__('Lección movida exitosamente'))
 	},
 })
 
@@ -306,19 +306,19 @@ const updateChapterIndex = createResource({
 		}
 	},
 	onSuccess() {
-		toast.success(__('Chapter moved successfully'))
+		toast.success(__('Capítulo movido exitosamente'))
 	},
 })
 
 const trashLesson = (lessonName, chapterName) => {
 	$dialog({
-		title: __('Delete this lesson?'),
+		title: __('¿Eliminar esta lección?'),
 		message: __(
-			'Deleting this lesson will permanently remove it from the course. This action cannot be undone. Are you sure you want to continue?'
+			'Eliminar esta lección la removerá permanentemente del curso. Esta acción no se puede deshacer. ¿Estás seguro de que deseas continuar?'
 		),
 		actions: [
 			{
-				label: __('Delete'),
+				label: __('Eliminar'),
 				theme: 'red',
 				variant: 'solid',
 				onClick(close) {
@@ -373,19 +373,19 @@ const deleteChapter = createResource({
 	},
 	onSuccess() {
 		outline.reload()
-		toast.success(__('Chapter deleted successfully'))
+		toast.success(__('Capítulo eliminado exitosamente'))
 	},
 })
 
 const trashChapter = (chapterName) => {
 	$dialog({
-		title: __('Delete this chapter?'),
+		title: __('¿Eliminar este capítulo?'),
 		message: __(
-			'Deleting this chapter will also delete all its lessons and permanently remove it from the course. This action cannot be undone. Are you sure you want to continue?'
+			'Eliminar este capítulo también eliminará todas sus lecciones y lo removerá permanentemente del curso. Esta acción no se puede deshacer. ¿Estás seguro de que deseas continuar?'
 		),
 		actions: [
 			{
-				label: __('Delete'),
+				label: __('Eliminar'),
 				theme: 'red',
 				variant: 'solid',
 				onClick(close) {
@@ -402,7 +402,7 @@ const redirectToChapter = (chapter) => {
 	event.preventDefault()
 	if (props.allowEdit) return
 	if (!user.data) {
-		toast.success(__('Please enroll for this course to view this lesson'))
+		toast.success(__('Por favor inscríbete en el curso para ver esta lección'))
 		return
 	}
 
