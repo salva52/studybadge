@@ -370,6 +370,17 @@ onBeforeUnmount(() => {
 	window.removeEventListener('keydown', keyboardShortcut)
 })
 
+
+
+const submissionResource = createDocumentResource({
+	doctype: 'LMS Assignment Submission',
+	name: props.submissionName,
+	auto: false,
+	onError(err) {
+		toast.error(err.messages?.[0] || err)
+	},
+})
+
 const assignment = createResource({
 	url: 'frappe.client.get',
 	params: {
@@ -381,15 +392,6 @@ const assignment = createResource({
 		if (props.submissionName != 'new') {
 			submissionResource.reload()
 		}
-	},
-})
-
-const submissionResource = createDocumentResource({
-	doctype: 'LMS Assignment Submission',
-	name: props.submissionName,
-	auto: false,
-	onError(err) {
-		toast.error(err.messages?.[0] || err)
 	},
 })
 
