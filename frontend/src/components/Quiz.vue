@@ -123,7 +123,7 @@
 			<div v-for="(question, qtidx) in questions">
 				<div
 					v-if="qtidx == activeQuestion - 1 && questionDetails.data"
-					class="border rounded-lg p-5"
+					class="bg-white dark:bg-gray-800 shadow-sb-soft border border-gray-100 dark:border-gray-700 rounded-2xl p-6 md:p-8"
 				>
 					<div class="flex justify-between">
 						<div class="text-sm text-ink-gray-5">
@@ -328,47 +328,55 @@
 				</div>
 			</div>
 		</div>
-		<div v-else class="border rounded-lg p-20 text-center space-y-2">
-			<div class="text-lg font-semibold text-ink-gray-9">
-				{{ __('Resumen del Cuestionario') }}
-			</div>
-			<div
-				v-if="quizSubmission.data.is_open_ended"
-				class="leading-5 text-ink-gray-7"
-			>
-				{{
-					__(
-						"Tu envío se ha guardado correctamente. El instructor lo revisará y calificará pronto, y recibirás una notificación con tu resultado final."
-					)
-				}}
-			</div>
-			<div v-else class="text-ink-gray-7">
-				{{
-					__(
-						'Obtuviste un {0}% de respuestas correctas, con un puntaje de {1} sobre {2}'
-					).format(
-						Math.ceil(quizSubmission.data.percentage),
-						quizSubmission.data.score,
-						quizSubmission.data.score_out_of
-					)
-				}}
-			</div>
-			<div class="flex gap-x-2">
-				<Button
-					@click="resetQuiz()"
-					class="mt-2"
-					v-if="
-						!quiz.data.max_attempts ||
-						attempts?.data.length < quiz.data.max_attempts
-					"
-				>
-					<span>
-						{{ __('Intentar de nuevo') }}
-					</span>
-				</Button>
-				<Button v-if="inVideo" @click="props.backToVideo()">
-					{{ __('Resume Video') }}
-				</Button>
+		<!-- Resumen del Cuestionario -->
+		<div v-else class="relative overflow-hidden bg-white dark:bg-gray-800 shadow-sb-soft border border-gray-100 dark:border-gray-700 rounded-2xl p-8 md:p-12 text-center flex flex-col items-center justify-center">
+			
+			<div class="absolute top-0 right-0 w-40 h-40 bg-emerald-500 opacity-5 rounded-full blur-3xl pointer-events-none"></div>
+			<div class="absolute bottom-0 left-0 w-32 h-32 bg-blue-500 opacity-5 rounded-full blur-2xl pointer-events-none"></div>
+
+			<div class="relative z-10 flex flex-col items-center w-full max-w-lg mx-auto">
+				<div class="inline-flex bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 p-4 rounded-full mb-4 shadow-sm">
+					<CheckCircle class="w-10 h-10 stroke-1.5" />
+				</div>
+				<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+					{{ __('Resumen del Cuestionario') }}
+				</h2>
+				
+				<div v-if="quizSubmission.data.is_open_ended" class="mt-4 p-5 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 rounded-xl border border-blue-100 dark:border-blue-800/50 w-full text-sm leading-relaxed">
+					{{ __('Tu envío se ha guardado correctamente. El instructor lo revisará y calificará pronto, y recibirás una notificación con tu resultado final.') }}
+				</div>
+				
+				<div v-else class="mt-4 mb-6 w-full">
+					<div class="text-5xl font-extrabold text-emerald-600 dark:text-emerald-400 mb-2">
+						{{ Math.ceil(quizSubmission.data.percentage) }}%
+					</div>
+					<p class="text-base text-gray-600 dark:text-gray-400">
+						{{ __('Obtuviste un {0}% de respuestas correctas, con un puntaje de {1} sobre {2}').format(
+							Math.ceil(quizSubmission.data.percentage),
+							quizSubmission.data.score,
+							quizSubmission.data.score_out_of
+						) }}
+					</p>
+				</div>
+
+				<div class="flex flex-col sm:flex-row items-center justify-center gap-3 w-full mt-2">
+					<Button
+						@click="resetQuiz()"
+						v-if="
+							!quiz.data.max_attempts ||
+							attempts?.data.length < quiz.data.max_attempts
+						"
+						variant="solid"
+						class="px-8 py-2.5 text-base font-semibold shadow-md shadow-blue-500/20 hover:shadow-blue-500/40 transition-all rounded-xl"
+					>
+						<span>
+							{{ __('Intentar de nuevo') }}
+						</span>
+					</Button>
+					<Button v-if="inVideo" @click="props.backToVideo()" variant="ghost" class="px-6 py-2.5 text-base rounded-xl">
+						{{ __('Volver al Video') }}
+					</Button>
+				</div>
 			</div>
 		</div>
 		<div
