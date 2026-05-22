@@ -62,7 +62,9 @@
 :root[data-theme="dark"] .text-ink-gray-9, .dark .text-ink-gray-9,
 :root[data-theme="dark"] .text-ink-gray-8, .dark .text-ink-gray-8,
 :root[data-theme="dark"] .text-ink-gray-7, .dark .text-ink-gray-7,
-:root[data-theme="dark"] .text-ink-gray-6, .dark .text-ink-gray-6 {
+:root[data-theme="dark"] .text-ink-gray-6, .dark .text-ink-gray-6,
+:root[data-theme="dark"] a.text-ink-gray-7, .dark a.text-ink-gray-7,
+:root[data-theme="dark"] a.text-ink-gray-9, .dark a.text-ink-gray-9 {
 	color: #f3f4f6 !important;
 }
 

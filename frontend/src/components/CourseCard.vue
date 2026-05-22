@@ -97,7 +97,7 @@
 				{{ course.title }}
 			</div>
 
-			<div class="short-introduction text-sm">
+			<div class="short-introduction text-sm text-ink-gray-7">
 				{{ course.short_introduction }}
 			</div>
 
@@ -204,6 +204,5 @@ const gradientColor = computed(() => {
 	overflow: hidden;
 	margin: 0.25rem 0 1.25rem;
 	line-height: 1.6;
-	color: #4A5568;
 }
 </style>
