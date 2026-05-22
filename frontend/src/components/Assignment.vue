@@ -1,7 +1,7 @@
 <template>
 	<div
 		v-if="assignment.data"
-		class="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-start"
+		:class="showTitle ? 'grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-start' : 'flex flex-col gap-6 p-4'"
 	>
 		<div
 			class="bg-white dark:bg-gray-800 shadow-sb-soft border border-gray-100 dark:border-gray-700 rounded-2xl p-6 md:p-8"
