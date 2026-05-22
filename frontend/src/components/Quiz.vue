@@ -1,118 +1,121 @@
 <template>
 	<div v-if="quiz.data">
-		<div
-			class="bg-surface-blue-2 text-ink-blue-3 space-y-2 p-3 mb-4 rounded-lg leading-5"
-		>
-			<div class="font-medium">
-				{{
-					__(
-						'Por favor lee las siguientes instrucciones cuidadosamente antes de iniciar el cuestionario'
-					)
-				}}
-			</div>
-			<ol class="list-decimal list-inside space-y-2">
-				<li v-if="inVideo">
-					{{ __('You will have to complete the quiz to continue the video') }}
-				</li>
-				<li>
-					{{
-						__(
-							'Do not refresh the page or close this window. If you do, the quiz will be submitted automatically.'
-						)
-					}}
-				</li>
-				<li>
-					{{
-						__('Este cuestionario consta de {0} preguntas.').format(questions.length)
-					}}
-				</li>
-				<li v-if="quiz.data?.duration">
-					{{
-						__(
-							'Please ensure that you complete all the questions in {0} minutes.'
-						).format(quiz.data.duration)
-					}}
-				</li>
-				<li v-if="quiz.data?.duration">
-					{{
-						__(
-							'If you fail to do so, the quiz will be automatically submitted when the timer ends.'
-						)
-					}}
-				</li>
-				<li v-if="quiz.data.passing_percentage">
-					{{
-						__(
-							'Tendrás que obtener {0}% de respuestas correctas para poder aprobar el cuestionario.'
-						).format(quiz.data.passing_percentage)
-					}}
-				</li>
-				<li v-if="quiz.data.max_attempts">
-					{{
-						__('You can attempt this quiz {0}.').format(
-							quiz.data.max_attempts == 1
-								? '1 time'
-								: `${quiz.data.max_attempts} times`
-						)
-					}}
-				</li>
-				<li v-if="quiz.data.enable_negative_marking">
-					{{
-						__(
-							'If you answer incorrectly, {0} {1} will be deducted from your score for each incorrect answer.'
-						).format(
-							quiz.data.marks_to_cut,
-							quiz.data.marks_to_cut == 1 ? 'mark' : 'marks'
-						)
-					}}
-				</li>
-			</ol>
-		</div>
-
-		<div v-if="quiz.data.duration" class="flex flex-col gap-x-1 my-4 px-2">
+		<div v-if="quiz.data.duration && activeQuestion > 0 && !quizSubmission.data" class="flex flex-col gap-x-1 my-4 px-2">
 			<div class="mb-2">
-				<span class="text-ink-gray-9"> {{ __('Tiempo') }}: </span>
-				<span class="font-semibold text-ink-gray-9">
+				<span class="text-ink-gray-9"> {{ __('Tiempo restante') }}: </span>
+				<span class="font-semibold text-ink-gray-9" :class="{'text-red-500': timer < 60}">
 					{{ formatTimer(timer) }}
 				</span>
 			</div>
 			<ProgressBar :progress="timerProgress" />
 		</div>
 
-		<div v-if="activeQuestion == 0">
-			<div class="border text-center p-20 rounded-md">
-				<div class="font-semibold text-lg text-ink-gray-9">
-					{{ quiz.data.title }}
-				</div>
-				<div class="flex items-center justify-center gap-x-2 mt-4">
-					<Button
-						v-if="
-							!quiz.data.max_attempts ||
-							attempts.data?.length < quiz.data.max_attempts
-						"
-						variant="solid"
-						@click="startQuiz"
+		<div v-if="activeQuestion == 0" class="my-6">
+			<div class="relative overflow-hidden bg-gradient-to-br from-white to-blue-50 dark:from-gray-800 dark:to-gray-900 shadow-sb-soft border border-gray-100 dark:border-gray-700 rounded-3xl p-8 md:p-12 text-center">
+				<div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-blue-500 opacity-5 rounded-full blur-3xl pointer-events-none"></div>
+				<div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-32 h-32 bg-indigo-500 opacity-5 rounded-full blur-2xl pointer-events-none"></div>
+
+				<div class="relative z-10">
+					<div class="inline-flex bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-4 rounded-2xl mb-6 shadow-sm">
+						<ClipboardList class="w-10 h-10 stroke-1.5" />
+					</div>
+					<h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white mb-4">
+						{{ quiz.data.title }}
+					</h1>
+					<p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+						{{ __('Por favor, lee las siguientes instrucciones cuidadosamente antes de comenzar el cuestionario.') }}
+					</p>
+
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto text-left mb-10">
+						<div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
+							<div class="flex items-center gap-3 mb-2 text-amber-500">
+								<AlertTriangle class="w-5 h-5" />
+								<h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ __('¡Importante!') }}</h3>
+							</div>
+							<p class="text-sm text-gray-600 dark:text-gray-400">
+								{{ __('No recargues la página ni cierres esta ventana. Si lo haces, el cuestionario se enviará automáticamente.') }}
+							</p>
+						</div>
+
+						<div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
+							<div class="flex items-center gap-3 mb-2 text-blue-500">
+								<ListOrdered class="w-5 h-5" />
+								<h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ __('Formato') }}</h3>
+							</div>
+							<p class="text-sm text-gray-600 dark:text-gray-400">
+								{{ __('Este cuestionario consta de {0} preguntas.').format(questions.length) }}
+							</p>
+						</div>
+
+						<div v-if="quiz.data?.duration" class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
+							<div class="flex items-center gap-3 mb-2 text-indigo-500">
+								<Clock class="w-5 h-5" />
+								<h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ __('Tiempo Límite') }}</h3>
+							</div>
+							<p class="text-sm text-gray-600 dark:text-gray-400">
+								{{ __('Cuentas con {0} minutos para resolverlo. Al finalizar el tiempo, se enviará automáticamente.').format(quiz.data.duration) }}
+							</p>
+						</div>
+
+						<div v-if="quiz.data.passing_percentage" class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
+							<div class="flex items-center gap-3 mb-2 text-emerald-500">
+								<Target class="w-5 h-5" />
+								<h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ __('Aprobación') }}</h3>
+							</div>
+							<p class="text-sm text-gray-600 dark:text-gray-400">
+								{{ __('Tendrás que obtener un {0}% de respuestas correctas para aprobar.').format(quiz.data.passing_percentage) }}
+							</p>
+						</div>
+
+						<div v-if="quiz.data.max_attempts" class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
+							<div class="flex items-center gap-3 mb-2 text-purple-500">
+								<RotateCcw class="w-5 h-5" />
+								<h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ __('Intentos') }}</h3>
+							</div>
+							<p class="text-sm text-gray-600 dark:text-gray-400">
+								{{ __('Puedes intentar este cuestionario un máximo de {0}').format(
+									quiz.data.max_attempts == 1
+										? '1 vez'
+										: `${quiz.data.max_attempts} veces`
+								) }}
+							</p>
+						</div>
+						
+						<div v-if="quiz.data.enable_negative_marking" class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300">
+							<div class="flex items-center gap-3 mb-2 text-rose-500">
+								<MinusCircle class="w-5 h-5" />
+								<h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ __('Penalizaciones') }}</h3>
+							</div>
+							<p class="text-sm text-gray-600 dark:text-gray-400">
+								{{ __('Se restarán {0} {1} de tu puntaje por cada respuesta incorrecta.').format(
+									quiz.data.marks_to_cut,
+									quiz.data.marks_to_cut == 1 ? 'punto' : 'puntos'
+								) }}
+							</p>
+						</div>
+					</div>
+
+					<div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+						<Button
+							v-if="!quiz.data.max_attempts || attempts.data?.length < quiz.data.max_attempts"
+							variant="solid"
+							class="px-10 py-3 text-lg h-auto font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 transition-all transform hover:-translate-y-0.5 rounded-xl"
+							@click="startQuiz"
+						>
+							<span>{{ inVideo ? __('Iniciar Cuestionario') : __('Comenzar Prueba') }}</span>
+						</Button>
+						
+						<Button v-if="inVideo" @click="props.backToVideo()" variant="ghost" class="px-8 py-3 text-lg h-auto rounded-xl">
+							{{ __('Volver al Video') }}
+						</Button>
+					</div>
+					
+					<div
+						v-if="quiz.data.max_attempts && attempts.data?.length >= quiz.data.max_attempts"
+						class="mt-6 px-6 py-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-xl font-medium inline-block"
 					>
-						<span>
-							{{ inVideo ? __('Iniciar Cuestionario') : __('Iniciar') }}
-						</span>
-					</Button>
-					<Button v-if="inVideo" @click="props.backToVideo()">
-						{{ __('Resume Video') }}
-					</Button>
-				</div>
-				<div
-					v-if="
-						quiz.data.max_attempts &&
-						attempts.data?.length >= quiz.data.max_attempts
-					"
-					class="leading-5 text-ink-gray-7"
-				>
-					{{
-						__(
-							'You have already exceeded the maximum number of attempts allowed for this quiz.'
-						)
-					}}
+						{{ __('Has superado el límite de intentos permitidos para este cuestionario.') }}
+					</div>
 				</div>
 			</div>
 		</div>
@@ -335,14 +338,14 @@
 			>
 				{{
 					__(
-						"Your submission has been successfully saved. The instructor will review and grade it shortly, and you'll be notified of your final result."
+						"Tu envío se ha guardado correctamente. El instructor lo revisará y calificará pronto, y recibirás una notificación con tu resultado final."
 					)
 				}}
 			</div>
 			<div v-else class="text-ink-gray-7">
 				{{
 					__(
-						'You got {0}% correct answers with a score of {1} out of {2}'
+						'Obtuviste un {0}% de respuestas correctas, con un puntaje de {1} sobre {2}'
 					).format(
 						Math.ceil(quizSubmission.data.percentage),
 						quizSubmission.data.score,
@@ -383,7 +386,7 @@
 				:options="{
 					selectable: false,
 					showTooltip: false,
-					emptyState: { title: __('No Quiz submissions found') },
+					emptyState: { title: __('No se encontraron envíos para este cuestionario') },
 				}"
 			>
 			</ListView>
@@ -466,6 +469,12 @@ import {
 	ChevronRight,
 	XCircle,
 	MinusCircle,
+	ClipboardList,
+	AlertTriangle,
+	ListOrdered,
+	Clock,
+	Target,
+	RotateCcw
 } from 'lucide-vue-next'
 import { timeAgo } from '@/utils'
 import ProgressBar from '@/components/ProgressBar.vue'
