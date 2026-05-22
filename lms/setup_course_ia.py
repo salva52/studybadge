@@ -64,22 +64,23 @@ def run():
         return doc.name
 
     # Helper function for lessons
-    def create_lesson(chap_name, title, body, question=None, file_type=None):
+    def create_lesson(chap_name, title, body, content=None):
         existing = frappe.get_all("Course Lesson", filters={"title": title, "chapter": chap_name})
         if existing:
             doc = frappe.get_doc("Course Lesson", existing[0].name)
-            if question:
-                doc.question = question
-                doc.file_type = file_type
+            if content:
+                doc.content = content
+                doc.body = ""
                 doc.save(ignore_permissions=True)
             return existing[0].name
+        
         doc = frappe.get_doc({
             "doctype": "Course Lesson",
             "title": title,
             "chapter": chap_name,
+            "course": course_name,
             "body": body,
-            "question": question,
-            "file_type": file_type
+            "content": content
         })
         doc.insert(ignore_permissions=True, ignore_mandatory=True)
         return doc.name
@@ -207,10 +208,30 @@ def run():
                 },
                 {
                     "title": "8. Proyecto Final",
-                    "body": "### Instrucciones del Proyecto\nEn la parte inferior verás la opción para subir tu proyecto final y obtener tu certificado.",
-                    "assignment": {
-                        "question": "Escribe en un documento PDF o de Word un manual de 1 página explicando 2 tareas que automatizarás con IA en un negocio real o ficticio, y escribe el Prompt Maestro que utilizarías. Sube el documento aquí.",
-                        "file_type": "Document"
+                    "content": {
+                        "time": 1716348270119,
+                        "blocks": [
+                            {
+                                "type": "header",
+                                "data": {
+                                    "text": "Instrucciones del Proyecto",
+                                    "level": 3
+                                }
+                            },
+                            {
+                                "type": "paragraph",
+                                "data": {
+                                    "text": "Sube el documento con tu proyecto final para obtener el certificado. Instrucciones: Escribe en un documento PDF o de Word un manual de 1 página explicando 2 tareas que automatizarás con IA en un negocio real o ficticio, y escribe el Prompt Maestro que utilizarías."
+                                }
+                            },
+                            {
+                                "type": "assignment",
+                                "data": {
+                                    "assignment": "Propuesta Final: Flujo de IA"
+                                }
+                            }
+                        ],
+                        "version": "2.29.1"
                     }
                 }
             ]
@@ -228,9 +249,10 @@ def run():
         
         lesson_names = []
         for les in mod["lessons"]:
-            question = les.get("assignment", {}).get("question")
-            file_type = les.get("assignment", {}).get("file_type")
-            l_name = create_lesson(c_name, les["title"], les["body"], question, file_type)
+            content_json = None
+            if "content" in les:
+                content_json = json.dumps(les["content"])
+            l_name = create_lesson(c_name, les["title"], les.get("body", ""), content=content_json)
             chapter_doc.append("lessons", {"lesson": l_name})
             lesson_names.append(l_name)
         
@@ -249,6 +271,18 @@ def run():
     for c_name in course_chapter_names:
         course.append("chapters", {"chapter": c_name})
         
+    # Assignment
+    assignment_title = "Propuesta Final: Flujo de IA"
+    if not frappe.db.exists("LMS Assignment", {"title": assignment_title, "course": course_name}):
+        doc = frappe.get_doc({
+            "doctype": "LMS Assignment",
+            "title": assignment_title,
+            "type": "Document",
+            "course": course_name,
+            "question": "Sube el documento de tu proyecto final aquí."
+        })
+        doc.insert(ignore_permissions=True, ignore_mandatory=True)
+    
     course.save(ignore_permissions=True)
             
     frappe.db.commit()
