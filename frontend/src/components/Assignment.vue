@@ -352,9 +352,15 @@ const updateSubmission = () => {
 			? user.data?.name
 			: null
 
+	let status = submissionResource.doc?.status
+	if (submissionResource.doc?.owner == user.data?.name) {
+		status = 'Not Graded'
+	}
+
 	submissionResource.setValue.submit(
 		{
 			...submissionResource.doc,
+			status: status,
 			evaluator: evaluator,
 			comments: comments.value,
 			answer: answer.value,
@@ -431,7 +437,7 @@ const canModifyAssignment = computed(() => {
 		return true
 	} else if (
 		submissionResource.doc?.owner == user.data?.name &&
-		submissionResource.doc?.status == 'Not Graded'
+		['Not Graded', 'Fail'].includes(submissionResource.doc?.status)
 	) {
 		return true
 	}
