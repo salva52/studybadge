@@ -46,7 +46,14 @@
 							{{ submissionResource.doc?.status }}
 						</Badge>
 						<Button
-							v-if="canModifyAssignment || canGradeSubmission"
+							v-if="canModifyAssignment && !isEditing"
+							variant="outline"
+							@click="isEditing = true"
+						>
+							{{ __('Volver a entregar') }}
+						</Button>
+						<Button
+							v-if="(canModifyAssignment && isEditing) || canGradeSubmission"
 							variant="solid"
 							@click="submitAssignment()"
 						>
@@ -82,7 +89,7 @@
 						}}
 					</div>
 					<FileUploader
-						v-if="!attachment"
+						v-if="!attachment && isEditing"
 						:fileTypes="getType()"
 						:uploadArgs="{
 							private: true,
@@ -106,6 +113,9 @@
 							</Button>
 						</template>
 					</FileUploader>
+					<div v-else-if="!attachment && !isEditing" class="text-sm text-ink-gray-5 py-3 italic text-center bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-200 dark:border-gray-700">
+						{{ __('No se ha subido ningún archivo') }}
+					</div>
 					<div v-else>
 						<div class="flex items-center justify-between text-ink-gray-7 border border-gray-200 dark:border-gray-700 rounded-lg p-2 pe-3">
 							<a
@@ -123,7 +133,7 @@
 								</div>
 							</a>
 							<Button
-								v-if="canModifyAssignment"
+								v-if="canModifyAssignment && isEditing"
 								@click="removeSubmission()"
 								variant="ghost"
 								class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
@@ -140,9 +150,10 @@
 						{{ __('Enter a URL') }}
 					</div>
 					<FormControl
+						v-slot="{ uploading, progress, openFileSelector }"
 						v-model="answer"
 						type="text"
-						:readonly="!canModifyAssignment"
+						:readonly="!isEditing || !canModifyAssignment"
 					/>
 				</div>
 				<div v-else>
@@ -152,9 +163,9 @@
 					<TextEditor
 						:content="answer"
 						@change="(val) => (answer = val)"
-						:editable="true"
+						:editable="isEditing && canModifyAssignment"
 						:fixedMenu="true"
-						:readonly="!canModifyAssignment"
+						:readonly="!isEditing || !canModifyAssignment"
 						:uploadArgs="{
 							private: true,
 						}"
@@ -290,6 +301,11 @@ const comments = ref(null)
 const router = useRouter()
 const user = inject('$user')
 const isDirty = ref(false)
+const isEditing = ref(props.submissionName === 'new')
+
+watch(() => props.submissionName, (newVal) => {
+	isEditing.value = newVal === 'new'
+})
 
 const chatMessage = ref('')
 const isSendingReply = ref(false)
@@ -467,6 +483,7 @@ const updateSubmission = () => {
 		{
 			onSuccess(data) {
 				isDirty.value = false
+				isEditing.value = false
 				toast.success(__('Changes saved successfully'))
 			},
 			onError(err) {
