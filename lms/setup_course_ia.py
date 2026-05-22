@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 
 # Fix sys.path to avoid shadowing when executing the script directly
 script_dir = os.path.dirname(os.path.abspath(__file__))
