@@ -429,7 +429,7 @@ const getSidebarItems = (forMobile = false) => {
 			hideLabel: true,
 			items: [
 				{
-					label: 'Inicio',
+					label: 'Home',
 					icon: 'Home',
 					to: 'Home',
 					condition: () => {
@@ -437,7 +437,7 @@ const getSidebarItems = (forMobile = false) => {
 					},
 				},
 				{
-					label: 'Buscar',
+					label: 'Search',
 					icon: 'Search',
 					to: 'Search',
 					condition: () => {
@@ -445,7 +445,7 @@ const getSidebarItems = (forMobile = false) => {
 					},
 				},
 				{
-					label: 'Notificaciones',
+					label: 'Notifications',
 					icon: 'Bell',
 					to: 'Notifications',
 					condition: () => {
@@ -459,7 +459,7 @@ const getSidebarItems = (forMobile = false) => {
 			hideLabel: true,
 			items: [
 				{
-					label: 'Cursos',
+					label: 'Courses',
 					icon: 'BookOpen',
 					to: 'Courses',
 					activeFor: [
@@ -470,7 +470,7 @@ const getSidebarItems = (forMobile = false) => {
 					],
 				},
 				{
-					label: 'Programas',
+					label: 'Programs',
 					icon: 'Route',
 					to: 'Programs',
 					activeFor: ['Programs', 'ProgramDetail'],
@@ -480,13 +480,13 @@ const getSidebarItems = (forMobile = false) => {
 					},
 				},
 				{
-					label: 'Grupos',
+					label: 'Batches',
 					icon: 'Users',
 					to: 'Batches',
 					activeFor: ['Batches', 'BatchDetail', 'Batch', 'BatchForm'],
 				},
 				{
-					label: 'Certificaciones',
+					label: 'Certifications',
 					icon: 'GraduationCap',
 					to: 'CertifiedParticipants',
 					activeFor: ['CertifiedParticipants'],
@@ -495,19 +495,19 @@ const getSidebarItems = (forMobile = false) => {
 					},
 				},
 				{
-					label: 'Empleos',
+					label: 'Jobs',
 					icon: 'Briefcase',
 					to: 'Jobs',
 					activeFor: ['Jobs', 'JobDetail'],
 				},
 				{
-					label: 'Estadísticas',
+					label: 'Statistics',
 					icon: 'TrendingUp',
 					to: 'Statistics',
 					activeFor: ['Statistics'],
 				},
 				{
-					label: 'Contáctanos',
+					label: 'Contact Us',
 					icon: settings.data?.contact_us_url ? 'Headset' : 'Mail',
 					to: settings.data?.contact_us_url
 						? settings.data?.contact_us_url
@@ -528,7 +528,7 @@ const getSidebarItems = (forMobile = false) => {
 			hideLabel: true,
 			items: [
 				{
-					label: 'Evaluaciones',
+					label: 'Quizzes',
 					icon: 'CircleHelp',
 					to: 'Quizzes',
 					condition: () => {
@@ -543,7 +543,7 @@ const getSidebarItems = (forMobile = false) => {
 					],
 				},
 				{
-					label: 'Tareas',
+					label: 'Assignments',
 					icon: 'Pencil',
 					to: 'Assignments',
 					condition: () => {
@@ -556,7 +556,7 @@ const getSidebarItems = (forMobile = false) => {
 					],
 				},
 				{
-					label: 'Ejercicios de Código',
+					label: 'Programming Exercises',
 					icon: 'Code',
 					to: 'ProgrammingExercises',
 					condition: () => {
