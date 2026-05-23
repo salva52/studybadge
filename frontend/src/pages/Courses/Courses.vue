@@ -31,7 +31,7 @@
 	</LayoutHeader>
 	<div class="bg-gray-50 dark:bg-gray-900 min-h-screen p-4 md:p-8 pb-12">
 		<!-- Page Header / Hero -->
-		<div class="mb-8 relative overflow-hidden rounded-xl bg-blue-950 dark:bg-gray-800 p-8 md:p-12 text-white shadow-md">
+		<div class="mb-8 relative overflow-hidden rounded-xl bg-blue-900 dark:bg-gray-800 p-8 md:p-12 text-white shadow-md">
             <!-- Decorative background elements -->
             <div class="absolute top-0 right-0 -mr-20 -mt-20 w-72 h-72 rounded-full bg-white opacity-10 blur-3xl"></div>
             <div class="absolute bottom-0 left-10 w-48 h-48 rounded-full bg-white opacity-10 blur-2xl"></div>
