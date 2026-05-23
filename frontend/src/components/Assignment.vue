@@ -50,7 +50,7 @@
 							variant="solid"
 							@click="submitAssignment()"
 						>
-							{{ __('Save') }}
+							{{ __('Enviar') }}
 						</Button>
 					</div>
 				</div>
