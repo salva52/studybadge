@@ -31,7 +31,15 @@
 			<!-- Messages -->
 			<div class="tutoria-messages" ref="messagesContainer">
 				<div class="tutoria-welcome">
-					¡Hola! 👋 Soy TutorIA, tu asistente inteligente. ¿No sabes qué aprender? ¿Tienes alguna duda? ¡Estoy aquí para ayudarte!
+					<div class="font-bold text-base mb-1 text-blue-900">¡Hola! 👋 Soy TutorIA</div>
+					<div class="text-sm text-blue-800 mb-2">Tu asistente de aprendizaje en StudyBadge. Puedo ayudarte a:</div>
+					<ul class="text-xs list-disc pl-4 space-y-1 text-blue-800 mb-2">
+						<li>Elegir qué curso estudiar</li>
+						<li>Resolver dudas paso a paso</li>
+						<li>Explicarte temas difíciles con ejemplos</li>
+						<li>Revisar imágenes o capturas relacionadas con tus clases</li>
+					</ul>
+					<div class="text-sm font-medium mt-2 text-blue-900">¿Qué quieres aprender hoy?</div>
 				</div>
 
 				<div v-for="(msg, i) in messages" :key="i" 
@@ -40,7 +48,9 @@
 						<Sparkles class="w-3.5 h-3.5" />
 						TutorIA
 					</div>
-					<img v-if="msg.image_base64" :src="'data:image/jpeg;base64,' + msg.image_base64" class="max-w-full rounded-lg mb-2" />
+					<div v-if="msg.images_base64 && msg.images_base64.length > 0" class="flex flex-wrap gap-2 mb-2">
+						<img v-for="(img, idx) in msg.images_base64" :key="idx" :src="'data:image/jpeg;base64,' + img" class="h-24 w-auto object-contain rounded-lg border border-gray-200 bg-white" />
+					</div>
 					<div v-html="formatMessage(msg.content)" class="prose prose-sm max-w-none text-current"></div>
 				</div>
 
@@ -57,26 +67,29 @@
 					Leer texto de mi pantalla
 				</label>
 
-				<div v-if="selectedImagePreview" class="relative inline-block mb-3 ml-2">
-					<img :src="selectedImagePreview" class="h-16 w-16 object-cover rounded-lg border border-gray-200" />
-					<button @click="clearImage" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 cursor-pointer border-none flex items-center justify-center">
-						<X class="w-3 h-3" />
-					</button>
+				<div v-if="selectedImages.length > 0" class="flex flex-wrap gap-2 mb-3 ml-2">
+					<div v-for="(img, idx) in selectedImages" :key="idx" class="relative inline-block">
+						<img :src="img.preview" class="h-16 w-16 object-cover rounded-lg border border-gray-200" />
+						<button @click="removeImage(idx)" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 cursor-pointer border-none flex items-center justify-center shadow-sm">
+							<X class="w-3 h-3" />
+						</button>
+					</div>
 				</div>
 
 				<div class="tutoria-input-row">
-					<input type="file" ref="fileInput" accept="image/*" class="hidden" @change="handleImageUpload" />
+					<input type="file" ref="fileInput" accept="image/png, image/jpeg, image/webp" multiple class="hidden" @change="handleImageUpload" />
 					<button @click="$refs.fileInput.click()" class="text-gray-400 hover:text-blue-500 bg-transparent border-none cursor-pointer p-2 flex-shrink-0" title="Adjuntar imagen">
 						<Image class="w-5 h-5" />
 					</button>
 					<textarea 
 						v-model="inputMessage" 
-						placeholder="Pregúntale a TutorIA..." 
+						placeholder="Pregúntale a TutorIA (Ctrl+V para pegar imagen)..." 
 						@keydown.enter.prevent="sendMessage"
+						@paste="handlePaste"
 						:disabled="isLoading"
 						rows="1"
 					></textarea>
-					<button class="tutoria-send-btn" @click="sendMessage" :disabled="(!inputMessage.trim() && !selectedImageBase64) || isLoading">
+					<button class="tutoria-send-btn" @click="sendMessage" :disabled="(!inputMessage.trim() && selectedImages.length === 0) || isLoading">
 						<SendHorizontal class="w-5 h-5" />
 					</button>
 				</div>
@@ -103,8 +116,8 @@ const messages = ref([])
 const messagesContainer = ref(null)
 const remaining = ref(null)
 
-const selectedImageBase64 = ref('')
-const selectedImagePreview = ref('')
+const selectedImages = ref([])
+const totalImagesSent = ref(0)
 const fileInput = ref(null)
 
 onMounted(() => {
@@ -124,6 +137,15 @@ const checkConfig = () => {
 					const parsed = JSON.parse(res.history)
 					if (Array.isArray(parsed) && parsed.length > 0) {
 						messages.value = parsed
+						
+						let count = 0
+						parsed.forEach(m => {
+							if (m.images_base64 && Array.isArray(m.images_base64)) {
+								count += m.images_base64.length
+							}
+						})
+						totalImagesSent.value = count
+						
 						nextTick(scrollToBottom)
 					}
 				} catch (e) {
@@ -164,22 +186,54 @@ const scrollToBottom = () => {
 	}
 }
 
-const handleImageUpload = (event) => {
-	const file = event.target.files[0]
-	if (!file) return
+const addImageFile = (file) => {
+	if (!file.type.startsWith('image/')) {
+		toast.error('Solo puedes subir imágenes (PNG, JPG, WEBP)')
+		return
+	}
+	
+	if (selectedImages.value.length >= 5) {
+		toast.error('Solo puedes adjuntar hasta 5 imágenes por mensaje.')
+		return
+	}
+	
+	if (totalImagesSent.value + selectedImages.value.length >= 10) {
+		toast.error('Has alcanzado el límite de 10 imágenes por conversación.')
+		return
+	}
 	
 	const reader = new FileReader()
 	reader.onload = (e) => {
-		selectedImagePreview.value = e.target.result
-		selectedImageBase64.value = e.target.result.split(',')[1]
+		selectedImages.value.push({
+			preview: e.target.result,
+			base64: e.target.result.split(',')[1]
+		})
 	}
 	reader.readAsDataURL(file)
 }
 
-const clearImage = () => {
-	selectedImagePreview.value = ''
-	selectedImageBase64.value = ''
+const handleImageUpload = (event) => {
+	const files = event.target.files
+	if (!files) return
+	
+	Array.from(files).forEach(file => addImageFile(file))
 	if (fileInput.value) fileInput.value.value = ''
+}
+
+const handlePaste = (event) => {
+	const items = event.clipboardData?.items
+	if (!items) return
+	
+	for (let i = 0; i < items.length; i++) {
+		if (items[i].type.indexOf('image') !== -1) {
+			const blob = items[i].getAsFile()
+			addImageFile(blob)
+		}
+	}
+}
+
+const removeImage = (index) => {
+	selectedImages.value.splice(index, 1)
 }
 
 const clearHistory = () => {
@@ -187,6 +241,7 @@ const clearHistory = () => {
 	
 	call('studybadge_ai.ai_tutor.clear_tutor_history').then(() => {
 		messages.value = []
+		totalImagesSent.value = 0
 		toast.success('Chat borrado')
 	}).catch(() => {
 		toast.error('Error al borrar chat')
@@ -194,15 +249,17 @@ const clearHistory = () => {
 }
 
 const sendMessage = async () => {
-	if ((!inputMessage.value.trim() && !selectedImageBase64.value) || isLoading.value) return
+	if ((!inputMessage.value.trim() && selectedImages.value.length === 0) || isLoading.value) return
 
 	const msgText = inputMessage.value
-	const imgBase64 = selectedImageBase64.value
+	const imgsBase64 = selectedImages.value.map(img => img.base64)
 	
 	inputMessage.value = ''
-	clearImage()
+	selectedImages.value = []
+	if (fileInput.value) fileInput.value.value = ''
 	
-	messages.value.push({ role: 'user', content: msgText, image_base64: imgBase64 })
+	messages.value.push({ role: 'user', content: msgText, images_base64: imgsBase64 })
+	totalImagesSent.value += imgsBase64.length
 	isLoading.value = true
 	
 	await nextTick()
@@ -213,13 +270,14 @@ const sendMessage = async () => {
 	// Prepare history for API (last 10 messages before this new one)
 	const historyForApi = messages.value.slice(0, -1).slice(-10).map(m => ({
 		role: m.role === 'model' ? 'assistant' : m.role,
-		content: m.content
+		content: m.content,
+		images_base64: m.images_base64
 	}))
 
 	call('studybadge_ai.ai_tutor.chat_with_tutor', {
 		message: msgText,
 		screen_text: screenText,
-		image_base64: imgBase64,
+		images_base64: JSON.stringify(imgsBase64),
 		history: JSON.stringify(historyForApi)
 	}).then((res) => {
 		messages.value.push({ role: 'model', content: res.reply })
