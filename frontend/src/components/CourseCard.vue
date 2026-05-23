@@ -1,7 +1,7 @@
 <template>
 	<div
 		v-if="course.title"
-		class="flex flex-col h-full overflow-hidden text-ink-gray-9 sb-course-card bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100"
+		class="flex flex-col h-full overflow-hidden text-ink-gray-9 sb-course-card bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700"
 		style="min-height: 350px"
 	>
 		<div
@@ -18,14 +18,14 @@
 			<div class="flex items-center flex-wrap relative top-4 px-3 w-fit gap-1.5">
 				<div
 					v-if="course.featured"
-					class="flex items-center gap-x-1 text-[11px] font-bold tracking-wide uppercase text-amber-700 bg-amber-100 border border-amber-200 px-2.5 py-1 rounded-full shadow-sm"
+					class="flex items-center gap-x-1 text-[11px] font-bold tracking-wide uppercase text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 px-2.5 py-1 rounded-full shadow-sm"
 				>
 					<Star class="size-3 stroke-2" />
 					<span>{{ __('Más vendido') }}</span>
 				</div>
 				<div
 					v-if="course.enable_certification || course.paid_certificate"
-					class="flex items-center gap-x-1 text-[11px] font-bold tracking-wide uppercase text-blue-700 bg-blue-100 border border-blue-200 px-2.5 py-1 rounded-full shadow-sm"
+					class="flex items-center gap-x-1 text-[11px] font-bold tracking-wide uppercase text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 px-2.5 py-1 rounded-full shadow-sm"
 				>
 					<GraduationCap class="size-3 stroke-2" />
 					<span>{{ __('Certificado incluido') }}</span>
@@ -33,7 +33,7 @@
 				<div
 					v-if="course.tags"
 					v-for="tag in course.tags?.split(', ')"
-					class="flex items-center text-[11px] font-bold tracking-wide uppercase text-emerald-700 bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-full shadow-sm"
+					class="flex items-center text-[11px] font-bold tracking-wide uppercase text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800 px-2.5 py-1 rounded-full shadow-sm"
 				>
 					{{ tag }}
 				</div>
@@ -65,7 +65,7 @@
 			<div class="flex items-center gap-2 mb-3 text-sm font-medium flex-wrap">
 				<div v-if="course.lessons">
 					<Tooltip :text="__('Lecciones')">
-						<span class="flex items-center text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-1 rounded-lg">
+						<span class="flex items-center text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 px-2 py-1 rounded-lg">
 							<BookOpen class="h-3.5 w-3.5 stroke-2 me-1.5" />
 							{{ course.lessons }}
 						</span>
@@ -74,7 +74,7 @@
 
 				<div v-if="course.enrollments">
 					<Tooltip :text="__('Estudiantes inscritos')">
-						<span class="flex items-center text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-lg">
+						<span class="flex items-center text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 px-2 py-1 rounded-lg">
 							<Users class="h-3.5 w-3.5 stroke-2 me-1.5" />
 							{{ formatAmount(course.enrollments) }}
 						</span>
@@ -83,7 +83,7 @@
 
 				<div v-if="course.rating">
 					<Tooltip :text="__('Calificación Promedio')">
-						<span class="flex items-center text-amber-700 bg-amber-50 border border-amber-100 px-2 py-1 rounded-lg">
+						<span class="flex items-center text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 px-2 py-1 rounded-lg">
 							<Star class="h-3.5 w-3.5 stroke-2 me-1.5 text-amber-500 fill-amber-500" />
 							{{ course.rating }}
 						</span>
