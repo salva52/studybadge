@@ -29,21 +29,27 @@
 			</Dropdown>
 		</template>
 	</LayoutHeader>
-	<div class="p-5 pb-10">
-		<!-- Page Header -->
-		<div class="mb-6 flex items-center gap-4">
-			<div class="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-sb-primary/10 to-sb-medium/10 flex-shrink-0">
-				<BookOpen class="w-5 h-5 text-sb-primary" />
-			</div>
-			<div>
-				<h1 class="text-xl font-bold text-sb-dark">{{ __('Todos los Cursos') }}</h1>
-				<p class="text-sm text-gray-500">{{ __('Explora, filtra y gestiona tu catálogo de cursos') }}</p>
+	<div class="bg-slate-50 min-h-screen p-4 md:p-8 pb-12">
+		<!-- Page Header / Hero -->
+		<div class="mb-8 relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-purple-600 to-fuchsia-600 p-8 md:p-12 text-white shadow-lg">
+            <!-- Decorative background elements -->
+            <div class="absolute top-0 right-0 -mr-20 -mt-20 w-72 h-72 rounded-full bg-white opacity-10 blur-3xl"></div>
+            <div class="absolute bottom-0 left-10 w-48 h-48 rounded-full bg-white opacity-10 blur-2xl"></div>
+            
+			<div class="relative z-10 flex flex-col md:flex-row items-center gap-6">
+                <div class="flex-1">
+				    <h1 class="text-3xl md:text-5xl font-extrabold mb-4">{{ __('¡Descubre tu próximo gran logro!') }}</h1>
+				    <p class="text-indigo-100 text-lg max-w-xl leading-relaxed">{{ __('Explora nuestro catálogo de cursos, desarrolla nuevas habilidades y lleva tu carrera al siguiente nivel. Aprender nunca fue tan divertido.') }}</p>
+                </div>
+                <div class="hidden md:flex items-center justify-center w-32 h-32 rounded-full bg-white/20 backdrop-blur-md border border-white/30 shadow-xl">
+                    <BookOpen class="w-16 h-16 text-white" />
+                </div>
 			</div>
 		</div>
 
 		<!-- Filters -->
 		<div
-			class="mb-6 flex flex-col justify-between space-y-4 lg:flex-row lg:items-center lg:space-y-0"
+			class="mb-8 flex flex-col justify-between space-y-4 lg:flex-row lg:items-center lg:space-y-0 bg-white p-3 md:p-4 rounded-2xl shadow-sm border border-gray-100"
 		>
 			<TabButtons :buttons="courseTabs" v-model="currentTab" class="w-fit" />
 
@@ -79,7 +85,7 @@
 		</div>
 		<div
 			v-if="courses.data?.length"
-			class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+			class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
 		>
 			<router-link
 				v-for="course in courses.data"

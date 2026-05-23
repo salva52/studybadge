@@ -1,7 +1,7 @@
 <template>
 	<div
 		v-if="course.title"
-		class="flex flex-col h-full overflow-hidden text-ink-gray-9 sb-course-card bg-white"
+		class="flex flex-col h-full overflow-hidden text-ink-gray-9 sb-course-card bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100"
 		style="min-height: 350px"
 	>
 		<div
@@ -40,7 +40,7 @@
 			</div>
 			<div
 				v-if="!course.image"
-				class="flex items-center justify-center text-white flex-1 font-extrabold my-auto px-5 text-center leading-6 h-full"
+				class="flex items-center justify-center text-white flex-1 font-extrabold my-auto px-5 text-center leading-6 h-full relative overflow-hidden"
 				:class="
 					course.title.length > 32
 						? 'text-lg'
@@ -49,7 +49,8 @@
 						: 'text-2xl'
 				"
 			>
-				{{ course.title }}
+				<BookOpen class="absolute -right-6 -bottom-6 w-32 h-32 text-white/20 -rotate-12 transform" />
+				<span class="z-10 relative drop-shadow-md">{{ course.title }}</span>
 			</div>
 		</div>
 		<div
@@ -61,37 +62,33 @@
 			</span>
 		</div>
 		<div class="flex flex-col flex-auto p-5 border-0">
-			<div class="flex items-center justify-between mb-2">
+			<div class="flex items-center gap-2 mb-3 text-sm font-medium flex-wrap">
 				<div v-if="course.lessons">
-					<Tooltip :text="__('Lessons')">
-						<span class="flex items-center">
-							<BookOpen class="h-4 w-4 stroke-1.5 me-1" />
+					<Tooltip :text="__('Lecciones')">
+						<span class="flex items-center text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-1 rounded-lg">
+							<BookOpen class="h-3.5 w-3.5 stroke-2 me-1.5" />
 							{{ course.lessons }}
 						</span>
 					</Tooltip>
 				</div>
 
 				<div v-if="course.enrollments">
-					<Tooltip :text="__('Enrolled Students')">
-						<span class="flex items-center">
-							<Users class="h-4 w-4 stroke-1.5 me-1" />
+					<Tooltip :text="__('Estudiantes inscritos')">
+						<span class="flex items-center text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-lg">
+							<Users class="h-3.5 w-3.5 stroke-2 me-1.5" />
 							{{ formatAmount(course.enrollments) }}
 						</span>
 					</Tooltip>
 				</div>
 
 				<div v-if="course.rating">
-					<Tooltip :text="__('Average Rating')">
-						<span class="flex items-center">
-							<Star class="h-4 w-4 stroke-1.5 me-1" />
+					<Tooltip :text="__('Calificación Promedio')">
+						<span class="flex items-center text-amber-700 bg-amber-50 border border-amber-100 px-2 py-1 rounded-lg">
+							<Star class="h-3.5 w-3.5 stroke-2 me-1.5 text-amber-500 fill-amber-500" />
 							{{ course.rating }}
 						</span>
 					</Tooltip>
 				</div>
-
-				<Tooltip v-if="course.featured" :text="__('Featured')">
-					<Award class="size-4 stroke-2 text-ink-amber-3" />
-				</Tooltip>
 			</div>
 
 			<div
