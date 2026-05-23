@@ -45,7 +45,7 @@
 
 			<!-- Footer -->
 			<div class="tutoria-footer bg-white dark:bg-gray-800">
-				<label class="tutoria-screen-toggle">
+				<label class="tutoria-screen-toggle" style="display: none;">
 					<input type="checkbox" v-model="readScreen" />
 					<MonitorSmartphone class="w-3.5 h-3.5" />
 					Leer texto de mi pantalla
@@ -81,7 +81,7 @@ import DOMPurify from 'dompurify'
 const isOpen = ref(false)
 const inputMessage = ref('')
 const isLoading = ref(false)
-const readScreen = ref(false)
+const readScreen = ref(true)
 const messages = ref([])
 const messagesContainer = ref(null)
 const remaining = ref(null)
