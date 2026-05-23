@@ -18,9 +18,14 @@
 						<span class="text-xs text-blue-100">Tu asistente inteligente</span>
 					</div>
 				</div>
-				<button @click="toggleChat" class="text-white/80 hover:text-white transition-colors bg-transparent border-none cursor-pointer">
-					<X class="w-5 h-5" />
-				</button>
+				<div class="flex items-center gap-2">
+					<button @click="clearHistory" class="text-white/80 hover:text-white transition-colors bg-transparent border-none cursor-pointer flex items-center justify-center p-1" title="Limpiar chat">
+						<Trash2 class="w-4 h-4" />
+					</button>
+					<button @click="toggleChat" class="text-white/80 hover:text-white transition-colors bg-transparent border-none cursor-pointer flex items-center justify-center p-1" title="Cerrar">
+						<X class="w-5 h-5" />
+					</button>
+				</div>
 			</div>
 
 			<!-- Messages -->
@@ -35,6 +40,7 @@
 						<Sparkles class="w-3.5 h-3.5" />
 						TutorIA
 					</div>
+					<img v-if="msg.image_base64" :src="'data:image/jpeg;base64,' + msg.image_base64" class="max-w-full rounded-lg mb-2" />
 					<div v-html="formatMessage(msg.content)" class="prose prose-sm max-w-none text-current"></div>
 				</div>
 
@@ -51,7 +57,18 @@
 					Leer texto de mi pantalla
 				</label>
 
+				<div v-if="selectedImagePreview" class="relative inline-block mb-3 ml-2">
+					<img :src="selectedImagePreview" class="h-16 w-16 object-cover rounded-lg border border-gray-200" />
+					<button @click="clearImage" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 cursor-pointer border-none flex items-center justify-center">
+						<X class="w-3 h-3" />
+					</button>
+				</div>
+
 				<div class="tutoria-input-row">
+					<input type="file" ref="fileInput" accept="image/*" class="hidden" @change="handleImageUpload" />
+					<button @click="$refs.fileInput.click()" class="text-gray-400 hover:text-blue-500 bg-transparent border-none cursor-pointer p-2 flex-shrink-0" title="Adjuntar imagen">
+						<Image class="w-5 h-5" />
+					</button>
 					<textarea 
 						v-model="inputMessage" 
 						placeholder="Pregúntale a TutorIA..." 
@@ -59,7 +76,7 @@
 						:disabled="isLoading"
 						rows="1"
 					></textarea>
-					<button class="tutoria-send-btn" @click="sendMessage" :disabled="!inputMessage.trim() || isLoading">
+					<button class="tutoria-send-btn" @click="sendMessage" :disabled="(!inputMessage.trim() && !selectedImageBase64) || isLoading">
 						<SendHorizontal class="w-5 h-5" />
 					</button>
 				</div>
@@ -73,7 +90,7 @@
 
 <script setup>
 import { ref, onMounted, watch, nextTick } from 'vue'
-import { Bot, X, SendHorizontal, MonitorSmartphone, Sparkles } from 'lucide-vue-next'
+import { Bot, X, SendHorizontal, MonitorSmartphone, Sparkles, Trash2, Image } from 'lucide-vue-next'
 import { call, toast } from 'frappe-ui'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
@@ -86,13 +103,15 @@ const messages = ref([])
 const messagesContainer = ref(null)
 const remaining = ref(null)
 
+const selectedImageBase64 = ref('')
+const selectedImagePreview = ref('')
+const fileInput = ref(null)
+
 onMounted(() => {
-	loadHistory()
 	checkConfig()
 })
 
 watch(messages, () => {
-	saveHistory()
 	scrollToBottom()
 }, { deep: true })
 
@@ -100,6 +119,17 @@ const checkConfig = () => {
 	call('studybadge_ai.ai_tutor.get_tutor_config')
 		.then(res => {
 			remaining.value = res.remaining
+			if (res.history) {
+				try {
+					const parsed = JSON.parse(res.history)
+					if (Array.isArray(parsed) && parsed.length > 0) {
+						messages.value = parsed
+						nextTick(scrollToBottom)
+					}
+				} catch (e) {
+					console.error('Error parsing history from DB')
+				}
+			}
 		})
 }
 
@@ -134,30 +164,45 @@ const scrollToBottom = () => {
 	}
 }
 
-const saveHistory = () => {
-	if (messages.value.length > 0) {
-		localStorage.setItem('tutoria_chat_history', JSON.stringify(messages.value.slice(-50)))
+const handleImageUpload = (event) => {
+	const file = event.target.files[0]
+	if (!file) return
+	
+	const reader = new FileReader()
+	reader.onload = (e) => {
+		selectedImagePreview.value = e.target.result
+		selectedImageBase64.value = e.target.result.split(',')[1]
 	}
+	reader.readAsDataURL(file)
 }
 
-const loadHistory = () => {
-	const saved = localStorage.getItem('tutoria_chat_history')
-	if (saved) {
-		try {
-			messages.value = JSON.parse(saved)
-		} catch (e) {
-			console.error('Error parsing chat history')
-		}
-	}
+const clearImage = () => {
+	selectedImagePreview.value = ''
+	selectedImageBase64.value = ''
+	if (fileInput.value) fileInput.value.value = ''
+}
+
+const clearHistory = () => {
+	if (!confirm('¿Estás seguro de que quieres borrar el historial de este chat?')) return
+	
+	call('studybadge_ai.ai_tutor.clear_tutor_history').then(() => {
+		messages.value = []
+		toast.success('Chat borrado')
+	}).catch(() => {
+		toast.error('Error al borrar chat')
+	})
 }
 
 const sendMessage = async () => {
-	if (!inputMessage.value.trim() || isLoading.value) return
+	if ((!inputMessage.value.trim() && !selectedImageBase64.value) || isLoading.value) return
 
 	const msgText = inputMessage.value
-	inputMessage.value = ''
+	const imgBase64 = selectedImageBase64.value
 	
-	messages.value.push({ role: 'user', content: msgText })
+	inputMessage.value = ''
+	clearImage()
+	
+	messages.value.push({ role: 'user', content: msgText, image_base64: imgBase64 })
 	isLoading.value = true
 	
 	await nextTick()
@@ -165,8 +210,8 @@ const sendMessage = async () => {
 
 	const screenText = getScreenText()
 	
-	// Prepare history for API (last 10 messages)
-	const historyForApi = messages.value.slice(-10).map(m => ({
+	// Prepare history for API (last 10 messages before this new one)
+	const historyForApi = messages.value.slice(0, -1).slice(-10).map(m => ({
 		role: m.role === 'model' ? 'assistant' : m.role,
 		content: m.content
 	}))
@@ -174,6 +219,7 @@ const sendMessage = async () => {
 	call('studybadge_ai.ai_tutor.chat_with_tutor', {
 		message: msgText,
 		screen_text: screenText,
+		image_base64: imgBase64,
 		history: JSON.stringify(historyForApi)
 	}).then((res) => {
 		messages.value.push({ role: 'model', content: res.reply })
