@@ -81,7 +81,7 @@ const props = defineProps({
 	lessonContent: { type: String, default: '' }
 })
 
-const isOpen = ref(false)
+const isOpen = ref(true)
 const inputMessage = ref('')
 const isLoading = ref(false)
 const messages = ref([])

@@ -5,7 +5,7 @@
 		</Layout>
 		<InstallPrompt v-if="isMobile && !settings.data?.disable_pwa" />
 		<Dialogs />
-		<TutorIABubble v-if="isLoggedIn" />
+		<TutorIABubble v-if="showGlobalTutor" />
 	</FrappeUIProvider>
 </template>
 <script setup>
@@ -24,9 +24,33 @@ import InstallPrompt from './components/InstallPrompt.vue'
 
 const { isMobile } = useScreenSize()
 const router = useRouter()
+const route = useRoute()
 const noSidebar = ref(false)
 const { settings } = useSettings()
 const { isLoggedIn } = sessionStore()
+
+const hiddenGlobalTutorRoutes = [
+	'Lesson', 
+	'LessonForm',
+	'SCORMChapter',
+	'Assignments', 
+	'AssignmentSubmission', 
+	'AssignmentSubmissionList',
+	'Quizzes', 
+	'QuizPage', 
+	'QuizForm',
+	'QuizSubmission',
+	'QuizSubmissionList',
+	'ProgrammingExercises',
+	'ProgrammingExerciseSubmissions',
+	'ProgrammingExerciseSubmission'
+]
+
+const showGlobalTutor = computed(() => {
+	if (!isLoggedIn) return false
+	if (hiddenGlobalTutorRoutes.includes(route.name)) return false
+	return true
+})
 
 router.beforeEach((to, from, next) => {
 	if (to.query.fromLesson || to.path === '/persona') {
