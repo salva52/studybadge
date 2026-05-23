@@ -31,7 +31,7 @@
 	</LayoutHeader>
 	<div class="bg-gray-50 dark:bg-gray-900 min-h-screen p-4 md:p-8 pb-12">
 		<!-- Page Header / Hero -->
-		<div class="mb-8 relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 p-8 md:p-12 text-white shadow-lg">
+		<div class="mb-8 relative overflow-hidden rounded-xl bg-blue-950 dark:bg-gray-800 p-8 md:p-12 text-white shadow-md">
             <!-- Decorative background elements -->
             <div class="absolute top-0 right-0 -mr-20 -mt-20 w-72 h-72 rounded-full bg-white opacity-10 blur-3xl"></div>
             <div class="absolute bottom-0 left-10 w-48 h-48 rounded-full bg-white opacity-10 blur-2xl"></div>
@@ -39,7 +39,7 @@
 			<div class="relative z-10 flex flex-col md:flex-row items-center gap-6">
                 <div class="flex-1">
 				    <h1 class="text-3xl md:text-5xl font-extrabold mb-4 text-white">{{ __('¡Descubre tu próximo gran logro!') }}</h1>
-				    <p class="text-blue-100 text-lg max-w-xl leading-relaxed">{{ __('Explora nuestro catálogo de cursos, desarrolla nuevas habilidades y lleva tu carrera al siguiente nivel. Aprender nunca fue tan divertido.') }}</p>
+				    <p class="text-blue-100 dark:text-gray-300 text-lg max-w-xl leading-relaxed">{{ __('Explora nuestro catálogo de cursos, desarrolla nuevas habilidades y lleva tu carrera al siguiente nivel. Aprender nunca fue tan divertido.') }}</p>
                 </div>
                 <div class="hidden md:flex items-center justify-center w-32 h-32 rounded-full bg-white/20 backdrop-blur-md border border-white/30 shadow-xl">
                     <BookOpen class="w-16 h-16 text-white" />

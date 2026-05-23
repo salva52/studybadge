@@ -88,6 +88,19 @@
 	background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
+/* Fix text and hover colors inside dropdowns/popovers in dark mode */
+:root[data-theme="dark"] .text-gray-700, .dark .text-gray-700,
+:root[data-theme="dark"] .text-gray-800, .dark .text-gray-800,
+:root[data-theme="dark"] .text-gray-900, .dark .text-gray-900,
+:root[data-theme="dark"] .text-gray-600, .dark .text-gray-600 {
+	color: #f3f4f6 !important;
+}
+
+:root[data-theme="dark"] .hover\:bg-gray-50:hover, .dark .hover\:bg-gray-50:hover,
+:root[data-theme="dark"] .hover\:bg-gray-100:hover, .dark .hover\:bg-gray-100:hover {
+	background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
 /* ============================================
    Global Typography & Body
    ============================================ */
