@@ -315,6 +315,13 @@
 					:getProgress="lesson.data.membership ? true : false"
 					:completedLesson="completedLesson"
 				/>
+				<CourseTutor
+					v-if="lesson.data?.studybadge_tutor_enabled && user?.data"
+					:courseName="courseName"
+					:courseTitle="lesson.data?.course_title || ''"
+					:lessonTitle="lesson.data?.title || ''"
+					:lessonContent="getLessonTextContent()"
+				/>
 			</div>
 		</div>
 	</div>
@@ -384,6 +391,7 @@ import CourseOutline from '@/components/CourseOutline.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import Notes from '@/components/Notes/Notes.vue'
 import InlineLessonMenu from '@/components/Notes/InlineLessonMenu.vue'
+import CourseTutor from '@/components/TutorIA/CourseTutor.vue'
 import { getLmsRoute } from '@/utils/basePath'
 
 const user = inject('$user')
@@ -435,6 +443,21 @@ onMounted(() => {
 		}
 	})
 })
+
+const getLessonTextContent = () => {
+	if (lesson.data?.content) {
+		try {
+			const blocks = JSON.parse(lesson.data.content)?.blocks || []
+			return blocks.map(b => {
+				if (b.type === 'paragraph') return b.data?.text || ''
+				if (b.type === 'header') return b.data?.text || ''
+				if (b.type === 'list') return (b.data?.items || []).join('\n')
+				return ''
+			}).filter(Boolean).join('\n').substring(0, 3000)
+		} catch { return '' }
+	}
+	return lesson.data?.body?.substring(0, 3000) || ''
+}
 
 const attachFullscreenEvent = () => {
 	if (document.fullscreenElement) {

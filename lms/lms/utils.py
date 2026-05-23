@@ -1204,6 +1204,7 @@ def get_lesson(course: str, chapter: int, lesson: int) -> dict:
 	lesson_details.paid_certificate = course_info.paid_certificate
 	lesson_details.disable_self_learning = course_info.disable_self_learning
 	lesson_details.videos = get_video_details(lesson_name)
+	lesson_details.studybadge_tutor_enabled = frappe.db.get_value("LMS Course", course, "studybadge_tutor_enabled") or 0
 	return lesson_details
 
 

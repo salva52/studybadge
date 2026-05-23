@@ -5,9 +5,12 @@
 		</Layout>
 		<InstallPrompt v-if="isMobile && !settings.data?.disable_pwa" />
 		<Dialogs />
+		<TutorIABubble v-if="isLoggedIn" />
 	</FrappeUIProvider>
 </template>
 <script setup>
+import TutorIABubble from '@/components/TutorIA/TutorIABubble.vue'
+import { sessionStore } from '@/stores/session'
 import { FrappeUIProvider } from 'frappe-ui'
 import { Dialogs } from '@/utils/dialogs'
 import { computed, onUnmounted, ref } from 'vue'
@@ -23,6 +26,7 @@ const { isMobile } = useScreenSize()
 const router = useRouter()
 const noSidebar = ref(false)
 const { settings } = useSettings()
+const { isLoggedIn } = sessionStore()
 
 router.beforeEach((to, from, next) => {
 	if (to.query.fromLesson || to.path === '/persona') {

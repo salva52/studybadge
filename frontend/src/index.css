@@ -319,3 +319,60 @@ button[aria-selected="true"],
 ::-webkit-scrollbar-thumb:hover {
 	background: rgba(6, 27, 73, 0.25);
 }
+
+/* ============================================
+   TutorIA — AI Tutor Chat
+   ============================================ */
+
+@keyframes tutoria-pulse {
+	0% { transform: scale(1); opacity: 0.5; }
+	100% { transform: scale(1.6); opacity: 0; }
+}
+
+@keyframes tutoria-bounce {
+	0%, 80%, 100% { transform: translateY(0); }
+	40% { transform: translateY(-8px); }
+}
+
+@keyframes tutoria-fade-in {
+	0% { opacity: 0; transform: translateY(8px); }
+	100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Dark mode overrides for TutorIA */
+:root[data-theme="dark"] .tutoria-panel,
+:root[data-theme="dark"] .course-tutor-chat {
+	background: #1f2937 !important;
+	border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+:root[data-theme="dark"] .tutoria-msg-user {
+	background: rgba(255, 255, 255, 0.08) !important;
+	color: #f3f4f6 !important;
+}
+
+:root[data-theme="dark"] .tutoria-msg-ai,
+:root[data-theme="dark"] .course-tutor-msg-ai {
+	background: rgba(59, 130, 246, 0.1) !important;
+	border-color: rgba(59, 130, 246, 0.2) !important;
+	color: #f3f4f6 !important;
+}
+
+:root[data-theme="dark"] .tutoria-input-row textarea,
+:root[data-theme="dark"] .course-tutor-input textarea {
+	background: rgba(255, 255, 255, 0.05) !important;
+	border-color: rgba(255, 255, 255, 0.1) !important;
+	color: #f3f4f6 !important;
+}
+
+:root[data-theme="dark"] .tutoria-welcome,
+:root[data-theme="dark"] .course-tutor-welcome {
+	background: rgba(59, 130, 246, 0.1) !important;
+	color: #e5e7eb !important;
+}
+
+:root[data-theme="dark"] .course-tutor-toggle {
+	background: rgba(255, 255, 255, 0.05) !important;
+	color: #f3f4f6 !important;
+	border-color: rgba(255, 255, 255, 0.1) !important;
+}
