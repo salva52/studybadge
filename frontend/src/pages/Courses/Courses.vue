@@ -1,6 +1,6 @@
 <template>
 	<!-- ═══════════════════════════════════════════════════════════════
-	     PUBLIC VIEW — Full marketing page for unauthenticated users
+	     PUBLIC VIEW — Course catalog for unauthenticated users
 	     ═══════════════════════════════════════════════════════════════ -->
 	<div v-if="!isLoggedIn" class="sb-public-page">
 		<!-- Top Navbar -->
@@ -11,187 +11,96 @@
 					<span class="sb-navbar-name">StudyBadge</span>
 				</div>
 				<div class="sb-navbar-links">
-					<a href="#cursos" class="sb-nav-link">Cursos</a>
-					<a href="#certificados" class="sb-nav-link">Certificados</a>
-					<a href="#beneficios" class="sb-nav-link">Beneficios</a>
 					<a href="/login" class="sb-nav-link sb-nav-login">Iniciar sesión</a>
 					<a href="/login#signup" class="sb-nav-cta">Registrarse</a>
 				</div>
-				<!-- Mobile menu toggle -->
 				<button class="sb-mobile-menu-btn" @click="mobileMenuOpen = !mobileMenuOpen">
 					<Menu v-if="!mobileMenuOpen" class="w-6 h-6" />
 					<X v-else class="w-6 h-6" />
 				</button>
 			</div>
-			<!-- Mobile dropdown -->
 			<Transition name="sb-menu-slide">
 				<div v-if="mobileMenuOpen" class="sb-mobile-menu">
-					<a href="#cursos" class="sb-mobile-link" @click="mobileMenuOpen = false">Cursos</a>
-					<a href="#certificados" class="sb-mobile-link" @click="mobileMenuOpen = false">Certificados</a>
-					<a href="#beneficios" class="sb-mobile-link" @click="mobileMenuOpen = false">Beneficios</a>
 					<a href="/login" class="sb-mobile-link">Iniciar sesión</a>
 					<a href="/login#signup" class="sb-mobile-cta">Registrarse</a>
 				</div>
 			</Transition>
 		</nav>
 
-		<!-- Hero Section -->
-		<section class="sb-hero">
-			<div class="sb-hero-bg-1"></div>
-			<div class="sb-hero-bg-2"></div>
-			<div class="sb-hero-content">
-				<span class="sb-hero-badge">🎓 Plataforma de aprendizaje profesional</span>
-				<h1 class="sb-hero-title">
-					Aprende habilidades reales.<br/>
-					<span class="sb-hero-gradient">Obtén certificados verificables.</span>
-				</h1>
-				<p class="sb-hero-subtitle">
-					Explora cursos cortos, prácticos y diseñados para ayudarte a crecer profesionalmente, mejorar tu CV y avanzar a tu ritmo.
-				</p>
-				<div class="sb-hero-actions">
-					<a href="#cursos" class="sb-btn-primary">Explorar cursos</a>
-					<a href="#certificados" class="sb-btn-secondary">Ver certificados</a>
-				</div>
-				<!-- Feature pills -->
-				<div class="sb-hero-pills">
-					<div class="sb-pill"><GraduationCap class="w-4 h-4" /> Certificado incluido</div>
-					<div class="sb-pill"><Sparkles class="w-4 h-4" /> TutorIA disponible</div>
-					<div class="sb-pill"><Clock class="w-4 h-4" /> Curso corto</div>
-					<div class="sb-pill"><FileCheck class="w-4 h-4" /> Proyecto final</div>
-				</div>
+		<!-- Page Content -->
+		<div class="sb-catalog">
+			<!-- Compact Header -->
+			<div class="sb-catalog-header">
+				<h1 class="sb-catalog-title">Nuestros Cursos</h1>
+				<p class="sb-catalog-desc">Elige un curso, inscríbete y empieza a aprender a tu ritmo. Todos incluyen actividades prácticas y certificado digital.</p>
 			</div>
-		</section>
 
-		<!-- Category Chips -->
-		<section class="sb-section" id="cursos">
-			<div class="sb-section-inner">
-				<h2 class="sb-section-title">Explora por categoría</h2>
-				<div class="sb-chips">
-					<button
-						v-for="cat in categoryChips"
-						:key="cat"
-						class="sb-chip"
-						:class="{ 'sb-chip-active': currentCategory === cat }"
-						@click="selectCategory(cat)"
-					>
-						{{ cat }}
-					</button>
-				</div>
+			<!-- Search Bar -->
+			<div class="sb-search-bar">
+				<Search class="sb-search-icon" />
+				<input
+					v-model="title"
+					type="text"
+					class="sb-search-input"
+					:placeholder="__('Buscar IA, Excel, ventas, marketing...')"
+					@input="updateCourses()"
+				/>
 			</div>
-		</section>
 
-		<!-- Search + Courses Grid -->
-		<section class="sb-section sb-section-light">
-			<div class="sb-section-inner">
-				<!-- Search bar -->
-				<div class="sb-search-bar">
-					<Search class="sb-search-icon" />
-					<input
-						v-model="title"
-						type="text"
-						class="sb-search-input"
-						:placeholder="__('Buscar IA, Excel, ventas, marketing...')"
-						@input="updateCourses()"
-					/>
-				</div>
-
-				<!-- Courses Grid -->
-				<div
-					v-if="courses.data?.length"
-					class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 mt-8"
+			<!-- Category Chips -->
+			<div class="sb-chips">
+				<button
+					class="sb-chip"
+					:class="{ 'sb-chip-active': !currentCategory }"
+					@click="currentCategory = null; updateCourses()"
 				>
-					<router-link
-						v-for="course in courses.data"
-						:to="{ name: 'CourseDetail', params: { courseName: course.name } }"
-					>
-						<CourseCard :course="course" />
-					</router-link>
-				</div>
-				<div v-else-if="!courses.list.loading" class="sb-empty">
-					<BookOpen class="w-12 h-12 text-gray-300 mb-3" />
-					<p class="text-gray-500">No se encontraron cursos.</p>
-				</div>
-				<div
-					v-if="!courses.list.loading && courses.hasNextPage"
-					class="flex justify-center mt-8"
+					Todos
+				</button>
+				<button
+					v-for="cat in categoryChips"
+					:key="cat"
+					class="sb-chip"
+					:class="{ 'sb-chip-active': currentCategory === cat }"
+					@click="selectCategory(cat)"
 				>
-					<button class="sb-btn-outline" @click="courses.next()">
-						{{ __('Cargar más cursos') }}
-					</button>
-				</div>
+					{{ cat }}
+				</button>
 			</div>
-		</section>
 
-		<!-- Benefits Section -->
-		<section class="sb-section" id="beneficios">
-			<div class="sb-section-inner">
-				<h2 class="sb-section-title">Todo lo que necesitas para aprender mejor</h2>
-				<p class="sb-section-desc">Nuestra plataforma está diseñada para que aprendas de manera eficiente, práctica y motivadora.</p>
-				<div class="sb-benefits-grid">
-					<div class="sb-benefit-card">
-						<div class="sb-benefit-icon sb-icon-blue"><BookOpen class="w-6 h-6" /></div>
-						<h3>Cursos cortos y prácticos</h3>
-						<p>Aprende lo esencial en módulos concisos, sin relleno innecesario.</p>
-					</div>
-					<div class="sb-benefit-card">
-						<div class="sb-benefit-icon sb-icon-gold"><Award class="w-6 h-6" /></div>
-						<h3>Certificados verificables</h3>
-						<p>Cada certificado incluye un código QR y enlace único de validación.</p>
-					</div>
-					<div class="sb-benefit-card">
-						<div class="sb-benefit-icon sb-icon-purple"><Sparkles class="w-6 h-6" /></div>
-						<h3>TutorIA para resolver dudas</h3>
-						<p>Un asistente con IA disponible 24/7 para guiarte en cada lección.</p>
-					</div>
-					<div class="sb-benefit-card">
-						<div class="sb-benefit-icon sb-icon-green"><FileCheck class="w-6 h-6" /></div>
-						<h3>Tareas, quizzes y proyectos</h3>
-						<p>Pon en práctica lo aprendido con actividades evaluadas por IA.</p>
-					</div>
-					<div class="sb-benefit-card">
-						<div class="sb-benefit-icon sb-icon-teal"><Clock class="w-6 h-6" /></div>
-						<h3>Aprende a tu ritmo</h3>
-						<p>Sin horarios fijos. Avanza cuando quieras, desde donde quieras.</p>
-					</div>
-					<div class="sb-benefit-card">
-						<div class="sb-benefit-icon sb-icon-red"><Target class="w-6 h-6" /></div>
-						<h3>Enfocado en habilidades reales</h3>
-						<p>Contenido diseñado para el mundo real, no solo teoría.</p>
-					</div>
-				</div>
+			<!-- Courses Grid -->
+			<div
+				v-if="courses.data?.length"
+				class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 mt-8"
+			>
+				<router-link
+					v-for="course in courses.data"
+					:to="{ name: 'CourseDetail', params: { courseName: course.name } }"
+				>
+					<CourseCard :course="course" />
+				</router-link>
 			</div>
-		</section>
+			<div v-else-if="!courses.list.loading" class="sb-empty">
+				<BookOpen class="w-12 h-12 mb-3" style="color: #cbd5e1;" />
+				<p style="color: #64748b;">No se encontraron cursos.</p>
+			</div>
+			<div
+				v-if="!courses.list.loading && courses.hasNextPage"
+				class="flex justify-center mt-8"
+			>
+				<button class="sb-btn-outline" @click="courses.next()">
+					{{ __('Cargar más cursos') }}
+				</button>
+			</div>
 
-		<!-- Certificates Section -->
-		<section class="sb-section sb-section-dark" id="certificados">
-			<div class="sb-section-inner sb-cert-content">
-				<div class="sb-cert-text">
-					<h2 class="sb-section-title sb-title-white">Demuestra lo que sabes</h2>
-					<p class="sb-cert-desc">
-						Completa cursos, supera actividades y obtén certificados digitales que puedes compartir en tu CV, LinkedIn o portafolio. Cada certificado es verificable con un código QR único.
-					</p>
-					<a href="/login" class="sb-btn-gold">Obtener mi primer certificado</a>
+			<!-- Small Registration Banner -->
+			<div class="sb-register-banner">
+				<div class="sb-register-text">
+					<GraduationCap class="w-5 h-5" style="color: #F5B301;" />
+					<span>¿Listo para empezar? Regístrate gratis y accede a todos los cursos con certificado.</span>
 				</div>
-				<div class="sb-cert-visual">
-					<div class="sb-cert-card">
-						<Award class="w-16 h-16 text-amber-400" />
-						<div class="sb-cert-card-text">
-							<span class="sb-cert-label">Certificado Digital</span>
-							<span class="sb-cert-sublabel">Verificable • Compartible • Profesional</span>
-						</div>
-					</div>
-				</div>
+				<a href="/login#signup" class="sb-btn-primary">Crear cuenta gratis</a>
 			</div>
-		</section>
-
-		<!-- Final CTA -->
-		<section class="sb-section sb-cta-section">
-			<div class="sb-section-inner" style="text-align: center;">
-				<h2 class="sb-cta-title">Empieza hoy con una habilidad nueva.</h2>
-				<p class="sb-cta-desc">Únete a nuestra comunidad de estudiantes y transforma tu carrera profesional.</p>
-				<a href="/login" class="sb-btn-primary sb-btn-lg">Explorar cursos</a>
-			</div>
-		</section>
+		</div>
 
 		<!-- Footer -->
 		<footer class="sb-footer">
@@ -731,213 +640,76 @@ usePageMeta(() => {
 	.sb-mobile-menu { display: flex; }
 }
 
-/* ─── Hero ─── */
-.sb-hero {
-	position: relative;
-	overflow: hidden;
-	padding: 80px 24px 100px;
-	text-align: center;
-	background: #ffffff;
-}
-.sb-hero-bg-1 {
-	position: absolute;
-	top: -120px;
-	right: -80px;
-	width: 500px;
-	height: 500px;
-	border-radius: 50%;
-	background: radial-gradient(circle, rgba(0, 123, 255, 0.06) 0%, transparent 70%);
-}
-.sb-hero-bg-2 {
-	position: absolute;
-	bottom: -120px;
-	left: -80px;
-	width: 400px;
-	height: 400px;
-	border-radius: 50%;
-	background: radial-gradient(circle, rgba(245, 179, 1, 0.06) 0%, transparent 70%);
-}
-.sb-hero-content {
-	position: relative;
-	z-index: 1;
-	max-width: 800px;
+/* ─── Catalog Layout ─── */
+.sb-catalog {
+	max-width: 1280px;
 	margin: 0 auto;
-}
-.sb-hero-badge {
-	display: inline-block;
-	font-size: 13px;
-	font-weight: 600;
-	color: #007BFF;
-	background: rgba(0, 123, 255, 0.08);
-	border: 1px solid rgba(0, 123, 255, 0.15);
-	border-radius: 100px;
-	padding: 6px 18px;
-	margin-bottom: 28px;
-}
-.sb-hero-title {
-	font-size: clamp(32px, 5vw, 56px);
-	font-weight: 800;
-	color: #061B49;
-	line-height: 1.15;
-	letter-spacing: -0.03em;
-	margin-bottom: 24px;
-}
-.sb-hero-gradient {
-	background: linear-gradient(135deg, #007BFF, #6366f1);
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-	background-clip: text;
-}
-.sb-hero-subtitle {
-	font-size: 18px;
-	line-height: 1.7;
-	color: #64748b;
-	max-width: 600px;
-	margin: 0 auto 36px;
-}
-.sb-hero-actions {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 12px;
-	flex-wrap: wrap;
-	margin-bottom: 48px;
-}
-.sb-hero-pills {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 12px;
-	flex-wrap: wrap;
-}
-.sb-pill {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	font-size: 13px;
-	font-weight: 500;
-	color: #64748b;
-	background: #F5F7FB;
-	border: 1px solid rgba(0, 0, 0, 0.06);
-	border-radius: 100px;
-	padding: 8px 16px;
+	padding: 32px 24px 64px;
 }
 
-/* ─── Buttons ─── */
-.sb-btn-primary {
-	display: inline-block;
-	padding: 14px 32px;
-	font-size: 15px;
-	font-weight: 600;
-	color: #ffffff;
-	background: #007BFF;
-	border-radius: 10px;
-	text-decoration: none;
-	transition: all 0.25s;
-	border: none;
-	cursor: pointer;
+/* ─── Compact Header ─── */
+.sb-catalog-header {
+	margin-bottom: 32px;
 }
-.sb-btn-primary:hover {
-	background: #0069d9;
-	transform: translateY(-2px);
-	box-shadow: 0 8px 24px rgba(0, 123, 255, 0.25);
-}
-.sb-btn-lg {
-	padding: 18px 40px;
-	font-size: 17px;
-}
-.sb-btn-secondary {
-	display: inline-block;
-	padding: 14px 32px;
-	font-size: 15px;
-	font-weight: 600;
-	color: #061B49;
-	background: #ffffff;
-	border: 1.5px solid rgba(0, 0, 0, 0.1);
-	border-radius: 10px;
-	text-decoration: none;
-	transition: all 0.25s;
-}
-.sb-btn-secondary:hover {
-	border-color: #007BFF;
-	color: #007BFF;
-	transform: translateY(-2px);
-}
-.sb-btn-outline {
-	padding: 12px 28px;
-	font-size: 14px;
-	font-weight: 600;
-	color: #007BFF;
-	background: #ffffff;
-	border: 1.5px solid #007BFF;
-	border-radius: 10px;
-	cursor: pointer;
-	transition: all 0.2s;
-}
-.sb-btn-outline:hover {
-	background: #007BFF;
-	color: #ffffff;
-}
-.sb-btn-gold {
-	display: inline-block;
-	padding: 14px 32px;
-	font-size: 15px;
-	font-weight: 600;
-	color: #061B49;
-	background: #F5B301;
-	border-radius: 10px;
-	text-decoration: none;
-	transition: all 0.25s;
-}
-.sb-btn-gold:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 8px 24px rgba(245, 179, 1, 0.3);
-}
-
-/* ─── Sections ─── */
-.sb-section {
-	padding: 80px 24px;
-}
-.sb-section-light {
-	background: #ffffff;
-}
-.sb-section-dark {
-	background: #061B49;
-}
-.sb-section-inner {
-	max-width: 1200px;
-	margin: 0 auto;
-}
-.sb-section-title {
-	font-size: clamp(24px, 3vw, 36px);
+.sb-catalog-title {
+	font-size: 32px;
 	font-weight: 800;
 	color: #061B49;
-	text-align: center;
 	letter-spacing: -0.02em;
-	margin-bottom: 12px;
+	margin-bottom: 8px;
 }
-.sb-title-white { color: #ffffff !important; }
-.sb-section-desc {
+.sb-catalog-desc {
 	font-size: 16px;
 	color: #64748b;
-	text-align: center;
-	max-width: 560px;
-	margin: 0 auto 48px;
-	line-height: 1.7;
+	line-height: 1.6;
+	max-width: 600px;
+}
+
+/* ─── Search Bar ─── */
+.sb-search-bar {
+	position: relative;
+	max-width: 480px;
+	margin-bottom: 20px;
+}
+.sb-search-icon {
+	position: absolute;
+	left: 16px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 18px;
+	height: 18px;
+	color: #94a3b8;
+}
+.sb-search-input {
+	width: 100%;
+	padding: 12px 16px 12px 46px;
+	font-size: 15px;
+	color: #1a1a2e;
+	background: #ffffff;
+	border: 1.5px solid rgba(0, 0, 0, 0.08);
+	border-radius: 12px;
+	outline: none;
+	transition: all 0.2s;
+}
+.sb-search-input:focus {
+	border-color: #007BFF;
+	box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.08);
+}
+.sb-search-input::placeholder {
+	color: #94a3b8;
 }
 
 /* ─── Category Chips ─── */
 .sb-chips {
 	display: flex;
 	align-items: center;
-	justify-content: center;
-	gap: 10px;
+	gap: 8px;
 	flex-wrap: wrap;
-	margin-top: 24px;
+	margin-bottom: 8px;
 }
 .sb-chip {
-	padding: 10px 22px;
-	font-size: 14px;
+	padding: 8px 18px;
+	font-size: 13px;
 	font-weight: 500;
 	color: #64748b;
 	background: #ffffff;
@@ -956,40 +728,6 @@ usePageMeta(() => {
 	border-color: #007BFF !important;
 }
 
-/* ─── Search Bar ─── */
-.sb-search-bar {
-	position: relative;
-	max-width: 640px;
-	margin: 0 auto;
-}
-.sb-search-icon {
-	position: absolute;
-	left: 18px;
-	top: 50%;
-	transform: translateY(-50%);
-	width: 20px;
-	height: 20px;
-	color: #64748b;
-}
-.sb-search-input {
-	width: 100%;
-	padding: 16px 20px 16px 52px;
-	font-size: 16px;
-	color: #1a1a2e;
-	background: #F5F7FB;
-	border: 1.5px solid rgba(0, 0, 0, 0.08);
-	border-radius: 14px;
-	outline: none;
-	transition: all 0.2s;
-}
-.sb-search-input:focus {
-	border-color: #007BFF;
-	box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
-}
-.sb-search-input::placeholder {
-	color: #94a3b8;
-}
-
 /* ─── Empty State ─── */
 .sb-empty {
 	display: flex;
@@ -999,134 +737,71 @@ usePageMeta(() => {
 	padding: 64px 0;
 }
 
-/* ─── Benefits Grid ─── */
-.sb-benefits-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-	gap: 24px;
-}
-.sb-benefit-card {
-	background: #ffffff;
-	border: 1px solid rgba(0, 0, 0, 0.06);
-	border-radius: 12px;
-	padding: 32px 28px;
-	transition: all 0.25s;
-}
-.sb-benefit-card:hover {
-	transform: translateY(-4px);
-	box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
-}
-.sb-benefit-card h3 {
-	font-size: 17px;
-	font-weight: 700;
-	color: #061B49;
-	margin: 16px 0 8px;
-}
-.sb-benefit-card p {
+/* ─── Buttons ─── */
+.sb-btn-primary {
+	display: inline-block;
+	padding: 12px 24px;
 	font-size: 14px;
-	color: #64748b;
-	line-height: 1.6;
-	margin: 0;
+	font-weight: 600;
+	color: #ffffff;
+	background: #007BFF;
+	border-radius: 10px;
+	text-decoration: none;
+	transition: all 0.2s;
+	border: none;
+	cursor: pointer;
+	white-space: nowrap;
 }
-.sb-benefit-icon {
-	width: 48px;
-	height: 48px;
-	border-radius: 12px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+.sb-btn-primary:hover {
+	background: #0069d9;
+	transform: translateY(-1px);
+	box-shadow: 0 4px 16px rgba(0, 123, 255, 0.25);
 }
-.sb-icon-blue { background: rgba(0, 123, 255, 0.1); color: #007BFF; }
-.sb-icon-gold { background: rgba(245, 179, 1, 0.12); color: #d4980b; }
-.sb-icon-purple { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
-.sb-icon-green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-.sb-icon-teal { background: rgba(20, 184, 166, 0.1); color: #14b8a6; }
-.sb-icon-red { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
-
-/* ─── Certificates Section ─── */
-.sb-cert-content {
-	display: flex;
-	align-items: center;
-	gap: 64px;
-	flex-wrap: wrap;
+.sb-btn-outline {
+	padding: 12px 28px;
+	font-size: 14px;
+	font-weight: 600;
+	color: #007BFF;
+	background: #ffffff;
+	border: 1.5px solid #007BFF;
+	border-radius: 10px;
+	cursor: pointer;
+	transition: all 0.2s;
 }
-.sb-cert-text {
-	flex: 1;
-	min-width: 300px;
-}
-.sb-cert-text .sb-section-title {
-	text-align: left;
-}
-.sb-cert-desc {
-	font-size: 16px;
-	color: rgba(255, 255, 255, 0.75);
-	line-height: 1.8;
-	margin: 16px 0 32px;
-}
-.sb-cert-visual {
-	flex: 1;
-	min-width: 300px;
-	display: flex;
-	justify-content: center;
-}
-.sb-cert-card {
-	background: rgba(255, 255, 255, 0.08);
-	backdrop-filter: blur(12px);
-	border: 1px solid rgba(255, 255, 255, 0.12);
-	border-radius: 20px;
-	padding: 48px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 20px;
-	text-align: center;
-	transition: all 0.3s;
-}
-.sb-cert-card:hover {
-	transform: translateY(-4px);
-	background: rgba(255, 255, 255, 0.12);
-}
-.sb-cert-card-text {
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
-}
-.sb-cert-label {
-	font-size: 20px;
-	font-weight: 700;
+.sb-btn-outline:hover {
+	background: #007BFF;
 	color: #ffffff;
 }
-.sb-cert-sublabel {
-	font-size: 13px;
-	color: rgba(255, 255, 255, 0.5);
-}
 
-/* ─── CTA Section ─── */
-.sb-cta-section {
+/* ─── Registration Banner ─── */
+.sb-register-banner {
+	margin-top: 48px;
+	padding: 24px 32px;
 	background: #ffffff;
+	border: 1.5px solid rgba(0, 123, 255, 0.12);
+	border-radius: 14px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 24px;
+	flex-wrap: wrap;
 }
-.sb-cta-title {
-	font-size: clamp(28px, 4vw, 42px);
-	font-weight: 800;
-	color: #061B49;
-	letter-spacing: -0.03em;
-	margin-bottom: 16px;
-}
-.sb-cta-desc {
-	font-size: 17px;
-	color: #64748b;
-	margin-bottom: 36px;
-	line-height: 1.7;
+.sb-register-text {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	font-size: 15px;
+	font-weight: 500;
+	color: #1a1a2e;
 }
 
 /* ─── Footer ─── */
 .sb-footer {
 	text-align: center;
-	padding: 32px 24px;
+	padding: 24px;
 	font-size: 13px;
-	color: #64748b;
-	border-top: 1px solid rgba(0, 0, 0, 0.06);
-	background: #ffffff;
+	color: #94a3b8;
+	border-top: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 /* ─── Transitions ─── */
