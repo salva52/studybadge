@@ -614,22 +614,11 @@ usePageMeta(() => {
 })
 </script>
 <style scoped>
-/* ─── Design Tokens ─── */
-:root {
-	--sb-navy: #061B49;
-	--sb-blue: #007BFF;
-	--sb-gold: #F5B301;
-	--sb-bg: #F5F7FB;
-	--sb-text: #1a1a2e;
-	--sb-text-muted: #64748b;
-	--sb-radius: 12px;
-}
-
 /* ─── Public Page Shell ─── */
 .sb-public-page {
 	font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-	color: var(--sb-text);
-	background: var(--sb-bg);
+	color: #1a1a2e;
+	background: #F5F7FB;
 	min-height: 100vh;
 }
 
@@ -664,7 +653,7 @@ usePageMeta(() => {
 .sb-navbar-name {
 	font-size: 20px;
 	font-weight: 800;
-	color: var(--sb-navy);
+	color: #061B49;
 	letter-spacing: -0.02em;
 }
 .sb-navbar-links {
@@ -676,25 +665,25 @@ usePageMeta(() => {
 	padding: 8px 14px;
 	font-size: 14px;
 	font-weight: 500;
-	color: var(--sb-text-muted);
+	color: #64748b;
 	text-decoration: none;
 	border-radius: 8px;
 	transition: all 0.2s;
 }
 .sb-nav-link:hover {
-	color: var(--sb-navy);
+	color: #061B49;
 	background: rgba(0, 0, 0, 0.04);
 }
 .sb-nav-login {
 	font-weight: 600;
-	color: var(--sb-navy);
+	color: #061B49;
 }
 .sb-nav-cta {
 	padding: 8px 20px;
 	font-size: 14px;
 	font-weight: 600;
 	color: white;
-	background: var(--sb-blue);
+	background: #007BFF;
 	border-radius: 8px;
 	text-decoration: none;
 	transition: all 0.2s;
@@ -709,7 +698,7 @@ usePageMeta(() => {
 	background: none;
 	border: none;
 	cursor: pointer;
-	color: var(--sb-navy);
+	color: #061B49;
 }
 .sb-mobile-menu {
 	display: none;
@@ -721,7 +710,7 @@ usePageMeta(() => {
 	display: block;
 	padding: 10px 0;
 	font-size: 15px;
-	color: var(--sb-text-muted);
+	color: #64748b;
 	text-decoration: none;
 	border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 }
@@ -732,7 +721,7 @@ usePageMeta(() => {
 	padding: 12px;
 	font-weight: 600;
 	color: white;
-	background: var(--sb-blue);
+	background: #007BFF;
 	border-radius: 8px;
 	text-decoration: none;
 }
@@ -748,7 +737,7 @@ usePageMeta(() => {
 	overflow: hidden;
 	padding: 80px 24px 100px;
 	text-align: center;
-	background: white;
+	background: #ffffff;
 }
 .sb-hero-bg-1 {
 	position: absolute;
@@ -778,7 +767,7 @@ usePageMeta(() => {
 	display: inline-block;
 	font-size: 13px;
 	font-weight: 600;
-	color: var(--sb-blue);
+	color: #007BFF;
 	background: rgba(0, 123, 255, 0.08);
 	border: 1px solid rgba(0, 123, 255, 0.15);
 	border-radius: 100px;
@@ -788,13 +777,13 @@ usePageMeta(() => {
 .sb-hero-title {
 	font-size: clamp(32px, 5vw, 56px);
 	font-weight: 800;
-	color: var(--sb-navy);
+	color: #061B49;
 	line-height: 1.15;
 	letter-spacing: -0.03em;
 	margin-bottom: 24px;
 }
 .sb-hero-gradient {
-	background: linear-gradient(135deg, var(--sb-blue), #6366f1);
+	background: linear-gradient(135deg, #007BFF, #6366f1);
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 	background-clip: text;
@@ -802,7 +791,7 @@ usePageMeta(() => {
 .sb-hero-subtitle {
 	font-size: 18px;
 	line-height: 1.7;
-	color: var(--sb-text-muted);
+	color: #64748b;
 	max-width: 600px;
 	margin: 0 auto 36px;
 }
@@ -827,8 +816,8 @@ usePageMeta(() => {
 	gap: 6px;
 	font-size: 13px;
 	font-weight: 500;
-	color: var(--sb-text-muted);
-	background: var(--sb-bg);
+	color: #64748b;
+	background: #F5F7FB;
 	border: 1px solid rgba(0, 0, 0, 0.06);
 	border-radius: 100px;
 	padding: 8px 16px;
@@ -840,8 +829,8 @@ usePageMeta(() => {
 	padding: 14px 32px;
 	font-size: 15px;
 	font-weight: 600;
-	color: white;
-	background: var(--sb-blue);
+	color: #ffffff;
+	background: #007BFF;
 	border-radius: 10px;
 	text-decoration: none;
 	transition: all 0.25s;
@@ -862,40 +851,40 @@ usePageMeta(() => {
 	padding: 14px 32px;
 	font-size: 15px;
 	font-weight: 600;
-	color: var(--sb-navy);
-	background: white;
+	color: #061B49;
+	background: #ffffff;
 	border: 1.5px solid rgba(0, 0, 0, 0.1);
 	border-radius: 10px;
 	text-decoration: none;
 	transition: all 0.25s;
 }
 .sb-btn-secondary:hover {
-	border-color: var(--sb-blue);
-	color: var(--sb-blue);
+	border-color: #007BFF;
+	color: #007BFF;
 	transform: translateY(-2px);
 }
 .sb-btn-outline {
 	padding: 12px 28px;
 	font-size: 14px;
 	font-weight: 600;
-	color: var(--sb-blue);
-	background: white;
-	border: 1.5px solid var(--sb-blue);
+	color: #007BFF;
+	background: #ffffff;
+	border: 1.5px solid #007BFF;
 	border-radius: 10px;
 	cursor: pointer;
 	transition: all 0.2s;
 }
 .sb-btn-outline:hover {
-	background: var(--sb-blue);
-	color: white;
+	background: #007BFF;
+	color: #ffffff;
 }
 .sb-btn-gold {
 	display: inline-block;
 	padding: 14px 32px;
 	font-size: 15px;
 	font-weight: 600;
-	color: var(--sb-navy);
-	background: var(--sb-gold);
+	color: #061B49;
+	background: #F5B301;
 	border-radius: 10px;
 	text-decoration: none;
 	transition: all 0.25s;
@@ -910,10 +899,10 @@ usePageMeta(() => {
 	padding: 80px 24px;
 }
 .sb-section-light {
-	background: white;
+	background: #ffffff;
 }
 .sb-section-dark {
-	background: var(--sb-navy);
+	background: #061B49;
 }
 .sb-section-inner {
 	max-width: 1200px;
@@ -922,15 +911,15 @@ usePageMeta(() => {
 .sb-section-title {
 	font-size: clamp(24px, 3vw, 36px);
 	font-weight: 800;
-	color: var(--sb-navy);
+	color: #061B49;
 	text-align: center;
 	letter-spacing: -0.02em;
 	margin-bottom: 12px;
 }
-.sb-title-white { color: white; }
+.sb-title-white { color: #ffffff !important; }
 .sb-section-desc {
 	font-size: 16px;
-	color: var(--sb-text-muted);
+	color: #64748b;
 	text-align: center;
 	max-width: 560px;
 	margin: 0 auto 48px;
@@ -950,21 +939,21 @@ usePageMeta(() => {
 	padding: 10px 22px;
 	font-size: 14px;
 	font-weight: 500;
-	color: var(--sb-text-muted);
-	background: white;
+	color: #64748b;
+	background: #ffffff;
 	border: 1.5px solid rgba(0, 0, 0, 0.08);
 	border-radius: 100px;
 	cursor: pointer;
 	transition: all 0.2s;
 }
 .sb-chip:hover {
-	border-color: var(--sb-blue);
-	color: var(--sb-blue);
+	border-color: #007BFF;
+	color: #007BFF;
 }
 .sb-chip-active {
-	background: var(--sb-blue);
-	color: white !important;
-	border-color: var(--sb-blue) !important;
+	background: #007BFF !important;
+	color: #ffffff !important;
+	border-color: #007BFF !important;
 }
 
 /* ─── Search Bar ─── */
@@ -980,21 +969,21 @@ usePageMeta(() => {
 	transform: translateY(-50%);
 	width: 20px;
 	height: 20px;
-	color: var(--sb-text-muted);
+	color: #64748b;
 }
 .sb-search-input {
 	width: 100%;
 	padding: 16px 20px 16px 52px;
 	font-size: 16px;
-	color: var(--sb-text);
-	background: var(--sb-bg);
+	color: #1a1a2e;
+	background: #F5F7FB;
 	border: 1.5px solid rgba(0, 0, 0, 0.08);
 	border-radius: 14px;
 	outline: none;
 	transition: all 0.2s;
 }
 .sb-search-input:focus {
-	border-color: var(--sb-blue);
+	border-color: #007BFF;
 	box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
 }
 .sb-search-input::placeholder {
@@ -1017,9 +1006,9 @@ usePageMeta(() => {
 	gap: 24px;
 }
 .sb-benefit-card {
-	background: white;
+	background: #ffffff;
 	border: 1px solid rgba(0, 0, 0, 0.06);
-	border-radius: var(--sb-radius);
+	border-radius: 12px;
 	padding: 32px 28px;
 	transition: all 0.25s;
 }
@@ -1030,12 +1019,12 @@ usePageMeta(() => {
 .sb-benefit-card h3 {
 	font-size: 17px;
 	font-weight: 700;
-	color: var(--sb-navy);
+	color: #061B49;
 	margin: 16px 0 8px;
 }
 .sb-benefit-card p {
 	font-size: 14px;
-	color: var(--sb-text-muted);
+	color: #64748b;
 	line-height: 1.6;
 	margin: 0;
 }
@@ -1047,7 +1036,7 @@ usePageMeta(() => {
 	align-items: center;
 	justify-content: center;
 }
-.sb-icon-blue { background: rgba(0, 123, 255, 0.1); color: var(--sb-blue); }
+.sb-icon-blue { background: rgba(0, 123, 255, 0.1); color: #007BFF; }
 .sb-icon-gold { background: rgba(245, 179, 1, 0.12); color: #d4980b; }
 .sb-icon-purple { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
 .sb-icon-green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
@@ -1105,7 +1094,7 @@ usePageMeta(() => {
 .sb-cert-label {
 	font-size: 20px;
 	font-weight: 700;
-	color: white;
+	color: #ffffff;
 }
 .sb-cert-sublabel {
 	font-size: 13px;
@@ -1114,18 +1103,18 @@ usePageMeta(() => {
 
 /* ─── CTA Section ─── */
 .sb-cta-section {
-	background: white;
+	background: #ffffff;
 }
 .sb-cta-title {
 	font-size: clamp(28px, 4vw, 42px);
 	font-weight: 800;
-	color: var(--sb-navy);
+	color: #061B49;
 	letter-spacing: -0.03em;
 	margin-bottom: 16px;
 }
 .sb-cta-desc {
 	font-size: 17px;
-	color: var(--sb-text-muted);
+	color: #64748b;
 	margin-bottom: 36px;
 	line-height: 1.7;
 }
@@ -1135,9 +1124,9 @@ usePageMeta(() => {
 	text-align: center;
 	padding: 32px 24px;
 	font-size: 13px;
-	color: var(--sb-text-muted);
+	color: #64748b;
 	border-top: 1px solid rgba(0, 0, 0, 0.06);
-	background: white;
+	background: #ffffff;
 }
 
 /* ─── Transitions ─── */
@@ -1151,3 +1140,4 @@ usePageMeta(() => {
 	transform: translateY(-8px);
 }
 </style>
+
