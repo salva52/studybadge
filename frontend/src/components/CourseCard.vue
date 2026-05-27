@@ -89,6 +89,24 @@
 						</span>
 					</Tooltip>
 				</div>
+
+				<!-- Placeholders for Duration and Level (Custom fields to be added later) -->
+				<div v-if="isPublic">
+					<Tooltip :text="__('Duración aproximada')">
+						<span class="flex items-center text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 px-2 py-1 rounded-lg">
+							<Clock class="h-3.5 w-3.5 stroke-2 me-1.5" />
+							2 hrs
+						</span>
+					</Tooltip>
+				</div>
+				<div v-if="isPublic">
+					<Tooltip :text="__('Nivel del curso')">
+						<span class="flex items-center text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-900/20 border border-teal-100 dark:border-teal-800 px-2 py-1 rounded-lg">
+							<BarChart class="h-3.5 w-3.5 stroke-2 me-1.5" />
+							Principiante
+						</span>
+					</Tooltip>
+				</div>
 			</div>
 
 			<div
@@ -139,11 +157,17 @@
 					</Tooltip>
 				</div>
 			</div>
+			
+			<div v-if="isPublic" class="mt-5 w-full">
+				<button class="w-full py-2.5 bg-gray-50 hover:bg-[#007BFF] text-[#007BFF] hover:text-white dark:bg-gray-700 dark:text-blue-400 dark:hover:bg-[#007BFF] dark:hover:text-white font-bold rounded-xl transition-colors border border-gray-200 dark:border-gray-600 hover:border-[#007BFF]">
+					Ver curso
+				</button>
+			</div>
 		</div>
 	</div>
 </template>
 <script setup>
-import { Award, BookOpen, GraduationCap, Star, Users } from 'lucide-vue-next'
+import { Award, BookOpen, GraduationCap, Star, Users, Clock, BarChart } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
 import { Tooltip } from 'frappe-ui'
 import { formatAmount } from '@/utils'
@@ -161,6 +185,10 @@ const props = defineProps({
 		type: Object,
 		default: null,
 	},
+	isPublic: {
+		type: Boolean,
+		default: false,
+	}
 })
 
 const gradientColor = computed(() => {
