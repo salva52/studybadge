@@ -15,6 +15,7 @@ ALLOWED_PATHS = [
 	"/api/method/frappe.integrations.oauth2.approve",
 	"/api/method/frappe.integrations.oauth2.get_token",
 	"/api/method/frappe.www.login.login_via_google",
+	"/api/method/frappe.integrations.oauth2_logins.login_via_google",
 	"/api/method/frappe.www.login.login_via_github",
 	"/api/method/frappe.www.login.login_via_facebook",
 	"/api/method/frappe.www.login.login_via_frappe",
