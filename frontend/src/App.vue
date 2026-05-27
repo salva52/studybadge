@@ -53,7 +53,7 @@ const showGlobalTutor = computed(() => {
 })
 
 router.beforeEach((to, from, next) => {
-	if (!isLoggedIn || to.query.fromLesson || to.path === '/persona') {
+	if (to.query.fromLesson || to.path === '/persona' || (!isLoggedIn && to.name === 'Courses')) {
 		noSidebar.value = true
 	} else {
 		noSidebar.value = false

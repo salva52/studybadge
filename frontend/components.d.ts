@@ -92,7 +92,6 @@ declare module 'vue' {
     PaymentGateways: typeof import('./src/components/Settings/PaymentGateways.vue')['default']
     Play: typeof import('./src/components/Icons/Play.vue')['default']
     ProgressBar: typeof import('./src/components/ProgressBar.vue')['default']
-    PublicNavbar: typeof import('./src/components/PublicNavbar.vue')['default']
     Question: typeof import('./src/components/Modals/Question.vue')['default']
     Quiz: typeof import('./src/components/Quiz.vue')['default']
     QuizBlock: typeof import('./src/components/QuizBlock.vue')['default']
