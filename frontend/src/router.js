@@ -11,11 +11,6 @@ const routes = [
 		component: () => import('@/pages/Home/Home.vue'),
 	},
 	{
-		path: '/landing',
-		name: 'Landing',
-		component: () => import('@/pages/Home/Landing.vue'),
-	},
-	{
 		path: '/courses',
 		name: 'Courses',
 		component: () => import('@/pages/Courses/Courses.vue'),
@@ -272,7 +267,7 @@ router.beforeEach(async (to, from, next) => {
 	}
 
 	if (!isLoggedIn) {
-		if (to.name == 'Home') router.push({ name: 'Landing' })
+		if (to.name == 'Home') router.push({ name: 'Courses' })
 
 		await settings.promise
 		if (!settings.data.allow_guest_access) {

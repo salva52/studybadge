@@ -39,7 +39,10 @@
 			<div class="relative z-10 flex flex-col md:flex-row items-center gap-6">
                 <div class="flex-1">
 				    <h1 class="text-3xl md:text-5xl font-extrabold mb-4 text-white">{{ __('¡Descubre tu próximo gran logro!') }}</h1>
-				    <p class="text-blue-100 dark:text-gray-300 text-lg max-w-xl leading-relaxed">{{ __('Explora nuestro catálogo de cursos, desarrolla nuevas habilidades y lleva tu carrera al siguiente nivel. Aprender nunca fue tan divertido.') }}</p>
+				    <p class="text-blue-100 dark:text-gray-300 text-lg max-w-xl leading-relaxed mb-6">{{ __('Explora nuestro catálogo de cursos, desarrolla nuevas habilidades y lleva tu carrera al siguiente nivel. Aprender nunca fue tan divertido.') }}</p>
+					<a v-if="!isLoggedIn" href="/login" class="inline-block bg-white text-blue-900 font-bold px-6 py-3 rounded-lg shadow-lg hover:bg-blue-50 transition-colors">
+						{{ __('Iniciar Sesión') }}
+					</a>
                 </div>
                 <div class="hidden md:flex items-center justify-center w-32 h-32 rounded-full bg-white/20 backdrop-blur-md border border-white/30 shadow-xl">
                     <BookOpen class="w-16 h-16 text-white" />
@@ -154,7 +157,7 @@ const title = ref('')
 const certification = ref(false)
 const filters = ref({})
 const currentTab = ref('live')
-const { brand } = sessionStore()
+const { brand, isLoggedIn } = sessionStore()
 const courseCount = ref(0)
 const router = useRouter()
 const showCourseModal = ref(false)
