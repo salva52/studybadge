@@ -65,7 +65,7 @@
 				</router-link>
 			</div>
 		</header>
-		<div class="grid md:grid-cols-[72%,28%] h-[94vh]">
+		<div class="lesson-layout">
 			<div v-if="lesson.data.no_preview" class="border-e">
 				<div class="shadow rounded-md w-3/4 mt-10 mx-auto text-center p-4">
 					<div class="flex items-center justify-center mt-4 gap-x-2">
@@ -107,25 +107,25 @@
 			<div
 				v-else
 				ref="lessonContainer"
-				class="bg-surface-white"
+				class="lesson-content-area"
 				:class="{
 					'overflow-y-auto': zenModeEnabled,
 				}"
 			>
 				<div
-					class="border-e pt-6 pb-10 h-full"
+					class="lesson-content-inner"
 					:class="{
 						'w-full md:w-3/5 mx-auto border-none !pt-10': zenModeEnabled,
 					}"
 				>
-					<div class="px-5 max-w-4xl mx-auto w-full">
+					<div class="lesson-article">
 						<div
 							class="flex flex-col space-y-3 md:space-y-0 md:flex-row md:items-center justify-between"
 						>
 							<div class="flex flex-col">
-								<div class="text-3xl font-bold text-ink-gray-9 leading-tight">
+								<h1 class="lesson-title">
 									{{ lesson.data.title }}
-								</div>
+								</h1>
 
 								<div
 									v-if="zenModeEnabled"
@@ -202,7 +202,7 @@
 							</div>
 						</div>
 
-						<div v-if="!zenModeEnabled" class="flex items-center mt-4 md:mt-2">
+						<div v-if="!zenModeEnabled" class="lesson-meta">
 							<span
 								class="h-6 me-1"
 								:class="{
@@ -246,13 +246,13 @@
 						<div
 							v-if="lesson.data.content"
 							@mouseup="toggleInlineMenu"
-							class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal mt-8"
+							class="lesson-body ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal"
 						>
 							<div id="editor"></div>
 						</div>
 						<div
 							v-else
-							class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal mt-8"
+							class="lesson-body ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal"
 						>
 							<LessonContent
 								v-if="lesson.data?.body"
@@ -264,7 +264,7 @@
 					</div>
 					<div
 						v-if="lesson.data && (allowDiscussions || tabs.length > 1)"
-						class="mt-10 pb-20 pt-5 border-t px-5"
+						class="lesson-discussions"
 						ref="discussionsContainer"
 					>
 						<TabButtons
@@ -292,37 +292,42 @@
 					</div>
 				</div>
 			</div>
-			<div class="sticky top-10">
-				<div class="bg-surface-menu-bar p-5 border-b">
-					<div class="text-lg font-bold text-ink-gray-9 leading-tight">
-						{{ lesson.data.course_title }}
+			<aside class="lesson-sidebar">
+				<div class="lesson-sidebar-inner">
+					<div class="sidebar-course-header">
+						<div class="sidebar-course-title">
+							{{ lesson.data.course_title }}
+						</div>
+						<div
+							v-if="user && lesson.data.membership"
+							class="sidebar-progress-section"
+						>
+							<div class="sidebar-progress-label">
+								<span>{{ __('Tu progreso') }}</span>
+								<span class="sidebar-progress-value">{{ Math.ceil(lessonProgress) }}%</span>
+							</div>
+							<ProgressBar
+								:progress="lessonProgress"
+							/>
+						</div>
 					</div>
-					<div
-						v-if="user && lesson.data.membership"
-						class="text-sm mt-4 mb-2 text-ink-gray-5"
-					>
-						{{ Math.ceil(lessonProgress) }}% {{ __('completado') }}
+					<div class="sidebar-outline-scroll">
+						<CourseOutline
+							:courseName="courseName"
+							:key="chapterNumber"
+							:getProgress="lesson.data.membership ? true : false"
+							:completedLesson="completedLesson"
+						/>
 					</div>
-
-					<ProgressBar
-						v-if="user && lesson.data.membership"
-						:progress="lessonProgress"
+					<CourseTutor
+						v-if="lesson.data?.studybadge_tutor_enabled && user?.data"
+						:courseName="courseName"
+						:courseTitle="lesson.data?.course_title || ''"
+						:lessonTitle="lesson.data?.title || ''"
+						:lessonContent="getLessonTextContent()"
 					/>
 				</div>
-				<CourseOutline
-					:courseName="courseName"
-					:key="chapterNumber"
-					:getProgress="lesson.data.membership ? true : false"
-					:completedLesson="completedLesson"
-				/>
-				<CourseTutor
-					v-if="lesson.data?.studybadge_tutor_enabled && user?.data"
-					:courseName="courseName"
-					:courseTitle="lesson.data?.course_title || ''"
-					:lessonTitle="lesson.data?.title || ''"
-					:lessonContent="getLessonTextContent()"
-				/>
-			</div>
+			</aside>
 		</div>
 	</div>
 	<InlineLessonMenu
@@ -985,6 +990,293 @@ usePageMeta(() => {
 })
 </script>
 <style>
+/* ==============================================
+   LESSON PAGE — Layout
+   ============================================== */
+
+.lesson-layout {
+	display: grid;
+	grid-template-columns: 1fr;
+	height: calc(100vh - 53px);
+}
+
+@media (min-width: 768px) {
+	.lesson-layout {
+		grid-template-columns: 1fr 340px;
+	}
+}
+
+@media (min-width: 1280px) {
+	.lesson-layout {
+		grid-template-columns: 1fr 380px;
+	}
+}
+
+/* ==============================================
+   LESSON PAGE — Content Area
+   ============================================== */
+
+.lesson-content-area {
+	background: var(--sb-white, #fff);
+	overflow-y: auto;
+	scroll-behavior: smooth;
+}
+
+.lesson-content-inner {
+	border-inline-end: 1px solid rgba(6, 27, 73, 0.06);
+	padding-top: 2.5rem;
+	padding-bottom: 5rem;
+	min-height: 100%;
+}
+
+.lesson-article {
+	padding: 0 2rem;
+	max-width: 52rem;
+	margin: 0 auto;
+	width: 100%;
+}
+
+@media (min-width: 768px) {
+	.lesson-article {
+		padding: 0 3rem;
+	}
+}
+
+/* ==============================================
+   LESSON PAGE — Title & Meta
+   ============================================== */
+
+.lesson-title {
+	font-size: 2rem;
+	font-weight: 800;
+	color: var(--sb-dark, #061B49);
+	line-height: 1.2;
+	letter-spacing: -0.02em;
+	margin: 0;
+}
+
+@media (min-width: 768px) {
+	.lesson-title {
+		font-size: 2.25rem;
+	}
+}
+
+.lesson-meta {
+	display: flex;
+	align-items: center;
+	margin-top: 1rem;
+	padding-bottom: 1.75rem;
+	border-bottom: 1px solid rgba(6, 27, 73, 0.08);
+	margin-bottom: 0.5rem;
+}
+
+/* ==============================================
+   LESSON PAGE — Body (EditorJS / Markdown)
+   ============================================== */
+
+.lesson-body {
+	margin-top: 2rem;
+}
+
+/* Headings inside EditorJS */
+.lesson-body .ce-header {
+	font-weight: 700;
+	color: var(--sb-dark, #061B49);
+	line-height: 1.3;
+	margin-top: 2.5rem;
+	margin-bottom: 0.75rem;
+	padding-bottom: 0.5rem;
+	border-bottom: 2px solid rgba(0, 123, 255, 0.1);
+}
+
+.lesson-body .ce-header[data-placeholder]::before {
+	color: #9ca3af;
+}
+
+.lesson-body h2.ce-header {
+	font-size: 1.5rem;
+}
+
+.lesson-body h3.ce-header {
+	font-size: 1.25rem;
+	border-bottom: none;
+}
+
+.lesson-body h4.ce-header {
+	font-size: 1.1rem;
+	border-bottom: none;
+}
+
+/* Paragraphs */
+.lesson-body .ce-paragraph {
+	font-size: 1.0625rem;
+	line-height: 1.85;
+	color: #374151;
+	margin-bottom: 0.25rem;
+}
+
+/* Lists */
+.lesson-body .cdx-list {
+	padding-left: 1.5rem;
+	margin: 1rem 0;
+}
+
+.lesson-body .cdx-list__item {
+	font-size: 1.0625rem;
+	line-height: 1.85;
+	color: #374151;
+	padding: 0.15rem 0;
+}
+
+/* Quote/callout blocks */
+.lesson-body .cdx-quote {
+	border-left: 4px solid var(--sb-primary, #007BFF);
+	background: rgba(0, 123, 255, 0.04);
+	padding: 1rem 1.25rem;
+	border-radius: 0 8px 8px 0;
+	margin: 1.5rem 0;
+}
+
+.lesson-body .cdx-quote__text {
+	font-size: 1.0625rem;
+	line-height: 1.75;
+	color: #374151;
+	font-style: italic;
+}
+
+/* Images */
+.lesson-body .image-tool__image-picture img,
+.lesson-body .cdx-simple-image img {
+	border-radius: 12px;
+	border: 1px solid rgba(6, 27, 73, 0.08);
+	box-shadow: 0 2px 8px rgba(6, 27, 73, 0.06);
+	margin: 1.5rem 0;
+}
+
+/* Links */
+.lesson-body a {
+	color: var(--sb-primary, #007BFF);
+	text-decoration: underline;
+	text-decoration-color: rgba(0, 123, 255, 0.3);
+	text-underline-offset: 3px;
+	font-weight: 500;
+	transition: all 0.15s ease;
+}
+
+.lesson-body a:hover {
+	color: var(--sb-medium, #0A84FF);
+	text-decoration-color: var(--sb-medium, #0A84FF);
+}
+
+/* Bold text */
+.lesson-body b,
+.lesson-body strong {
+	color: var(--sb-dark, #061B49);
+	font-weight: 600;
+}
+
+/* ==============================================
+   LESSON PAGE — Discussions Section
+   ============================================== */
+
+.lesson-discussions {
+	margin-top: 3rem;
+	padding: 2rem 0 5rem;
+	border-top: 2px solid rgba(6, 27, 73, 0.06);
+	padding-left: 2rem;
+	padding-right: 2rem;
+}
+
+@media (min-width: 768px) {
+	.lesson-discussions {
+		padding-left: 3rem;
+		padding-right: 3rem;
+	}
+}
+
+/* ==============================================
+   LESSON PAGE — Sidebar
+   ============================================== */
+
+.lesson-sidebar {
+	display: none;
+	background: linear-gradient(180deg, #f9fafb 0%, #f3f4f6 100%);
+	border-inline-start: 1px solid rgba(6, 27, 73, 0.06);
+	overflow: hidden;
+}
+
+@media (min-width: 768px) {
+	.lesson-sidebar {
+		display: block;
+	}
+}
+
+.lesson-sidebar-inner {
+	position: sticky;
+	top: 0;
+	height: calc(100vh - 53px);
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.sidebar-course-header {
+	padding: 1.25rem 1.25rem 1rem;
+	background: white;
+	border-bottom: 1px solid rgba(6, 27, 73, 0.06);
+	flex-shrink: 0;
+}
+
+.sidebar-course-title {
+	font-size: 1.05rem;
+	font-weight: 700;
+	color: var(--sb-dark, #061B49);
+	line-height: 1.3;
+	letter-spacing: -0.01em;
+}
+
+.sidebar-progress-section {
+	margin-top: 0.875rem;
+}
+
+.sidebar-progress-label {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 0.8125rem;
+	color: #6b7280;
+	margin-bottom: 0.375rem;
+}
+
+.sidebar-progress-value {
+	font-weight: 600;
+	color: var(--sb-primary, #007BFF);
+}
+
+.sidebar-outline-scroll {
+	flex: 1;
+	overflow-y: auto;
+	padding: 0.5rem 0;
+	scroll-behavior: smooth;
+}
+
+.sidebar-outline-scroll::-webkit-scrollbar {
+	width: 4px;
+}
+
+.sidebar-outline-scroll::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.sidebar-outline-scroll::-webkit-scrollbar-thumb {
+	background: rgba(6, 27, 73, 0.12);
+	border-radius: 4px;
+}
+
+/* ==============================================
+   Legacy styles (preserved)
+   ============================================== */
+
 .avatar-group {
 	display: inline-flex;
 	align-items: center;
@@ -1173,5 +1465,80 @@ usePageMeta(() => {
 :root {
 	--plyr-range-fill-background: white;
 	--plyr-video-control-background-hover: transparent;
+}
+
+/* ==============================================
+   Dark Mode — Lesson Page Overrides
+   ============================================== */
+
+:root[data-theme="dark"] .lesson-title,
+.dark .lesson-title {
+	color: #f3f4f6;
+}
+
+:root[data-theme="dark"] .lesson-body .ce-paragraph,
+.dark .lesson-body .ce-paragraph {
+	color: #d1d5db;
+}
+
+:root[data-theme="dark"] .lesson-body .ce-header,
+.dark .lesson-body .ce-header {
+	color: #f3f4f6;
+	border-bottom-color: rgba(59, 130, 246, 0.15);
+}
+
+:root[data-theme="dark"] .lesson-body .cdx-list__item,
+.dark .lesson-body .cdx-list__item {
+	color: #d1d5db;
+}
+
+:root[data-theme="dark"] .lesson-body b,
+:root[data-theme="dark"] .lesson-body strong,
+.dark .lesson-body b,
+.dark .lesson-body strong {
+	color: #f3f4f6;
+}
+
+:root[data-theme="dark"] .lesson-meta,
+.dark .lesson-meta {
+	border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme="dark"] .lesson-content-inner,
+.dark .lesson-content-inner {
+	border-inline-end-color: rgba(255, 255, 255, 0.06);
+}
+
+:root[data-theme="dark"] .lesson-sidebar,
+.dark .lesson-sidebar {
+	background: linear-gradient(180deg, #111827 0%, #0f172a 100%);
+	border-inline-start-color: rgba(255, 255, 255, 0.06);
+}
+
+:root[data-theme="dark"] .sidebar-course-header,
+.dark .sidebar-course-header {
+	background: rgba(255, 255, 255, 0.03);
+	border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+:root[data-theme="dark"] .sidebar-course-title,
+.dark .sidebar-course-title {
+	color: #f3f4f6;
+}
+
+:root[data-theme="dark"] .lesson-discussions,
+.dark .lesson-discussions {
+	border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+:root[data-theme="dark"] .lesson-body .cdx-quote,
+.dark .lesson-body .cdx-quote {
+	background: rgba(59, 130, 246, 0.08);
+	border-left-color: var(--sb-primary, #3b82f6);
+}
+
+:root[data-theme="dark"] .lesson-body .cdx-quote__text,
+.dark .lesson-body .cdx-quote__text {
+	color: #d1d5db;
 }
 </style>

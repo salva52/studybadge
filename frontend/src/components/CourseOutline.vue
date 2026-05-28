@@ -42,7 +42,7 @@
 						>
 							<DisclosureButton
 								ref=""
-								class="flex items-center w-full p-2 group"
+								class="flex items-center w-full p-2.5 group rounded-lg hover:bg-white/60 transition-colors"
 							>
 								<ChevronRight
 									:class="{
@@ -54,7 +54,7 @@
 									class="h-4 w-4 text-ink-gray-9 stroke-1 transform duration-200"
 								/>
 								<div
-									class="text-base text-start text-ink-gray-9 font-medium leading-5 ms-2"
+									class="text-sm text-start text-ink-gray-9 font-semibold leading-5 ms-2"
 									@click="redirectToChapter(chapter)"
 								>
 									{{ chapter.title }}
@@ -94,9 +94,9 @@
 								>
 									<template #item="{ element: lesson }">
 										<div
-											class="outline-lesson ps-8 py-2 pe-4 rounded-lg transition-colors mb-1"
+											class="outline-lesson ps-8 py-1.5 pe-3 rounded-md transition-all duration-150 mb-0.5"
 											:class="
-												isActiveLesson(lesson.number) ? 'bg-blue-50 dark:bg-blue-900/30 !text-blue-700 dark:!text-blue-300 font-semibold' : 'text-ink-gray-9 hover:bg-gray-50 dark:hover:bg-gray-800'
+												isActiveLesson(lesson.number) ? 'bg-blue-50 dark:bg-blue-900/30 !text-blue-700 dark:!text-blue-300 font-semibold shadow-sm' : 'text-ink-gray-7 hover:bg-white/80 dark:hover:bg-gray-800 hover:text-ink-gray-9'
 											"
 										>
 											<router-link
@@ -109,7 +109,7 @@
 													},
 												}"
 											>
-												<div class="flex items-center text-sm leading-5 group">
+												<div class="flex items-center text-xs leading-5 group">
 													<MonitorPlay
 														v-if="lesson.icon === 'icon-youtube'"
 														class="h-4 w-4 stroke-1 me-2"
