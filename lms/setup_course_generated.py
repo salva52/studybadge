@@ -620,8 +620,11 @@ def create_or_update_course(course_data, category_name):
     set_value_if_field_exists(doc, "studybadge_ai_enabled", course_data.get("studybadge_ai_enabled", 1))
     set_value_if_field_exists(doc, "ai_rubric", course_data.get("ai_rubric", ""))
     
+    has_instructor = any(i.instructor == INSTRUCTOR_NAME for i in doc.get("instructors", []))
+    if not has_instructor:
+        doc.append("instructors", {"instructor": INSTRUCTOR_NAME})
+        
     doc.save(ignore_permissions=True)
-    add_instructor_if_missing(doc.name, INSTRUCTOR_NAME)
     return doc.name
 
 def create_or_update_assignment(assignment_data, course_name):
