@@ -1,53 +1,45 @@
 <template>
 	<div class="course-overview-page">
-		<!-- Hero Section -->
-		<div class="course-hero">
-			<div class="course-hero-content">
-				<div class="course-hero-left">
-					<h1 class="course-hero-title">
-						{{ course.data.title }}
-					</h1>
-					<p class="course-hero-subtitle">
-						{{ course.data.short_introduction }}
-					</p>
-					<div class="course-hero-meta">
-						<div
-							v-if="parseInt(course.data.rating) > 0"
-							class="course-hero-meta-item"
-						>
-							<Star class="size-4 text-transparent fill-yellow-400" />
-							<span>{{ course.data.rating }}</span>
-						</div>
-						<div
-							v-if="course.data.enrollment_count"
-							class="course-hero-meta-item"
-						>
-							<Users class="size-4 opacity-70" />
-							<span>{{ course.data.enrollment_count_formatted }} estudiantes</span>
-						</div>
-						<div class="course-hero-meta-item">
-							<span
-								class="h-6 me-1"
-								:class="{
-									'avatar-group overlap': course.data.instructors.length > 1,
-								}"
-							>
-								<UserAvatar
-									v-for="instructor in course.data.instructors"
-									:user="instructor"
-								/>
-							</span>
-							<CourseInstructors :instructors="course.data.instructors" />
-						</div>
+		<!-- Header Section -->
+		<div class="course-header-section">
+			<div class="course-header-content">
+				<h1 class="course-header-title">
+					{{ course.data.title }}
+				</h1>
+				<p class="course-header-subtitle">
+					{{ course.data.short_introduction }}
+				</p>
+				<div class="course-header-meta">
+					<div
+						v-if="parseInt(course.data.rating) > 0"
+						class="course-meta-pill"
+					>
+						<Star class="size-3.5 text-transparent fill-yellow-500" />
+						<span>{{ course.data.rating }}</span>
 					</div>
-					<div v-if="course.data.tags" class="course-hero-tags">
-						<span
-							v-for="tag in course.data.tags.split(', ')"
-							class="course-tag"
-						>
-							{{ tag }}
-						</span>
+					<div
+						v-if="course.data.enrollment_count"
+						class="course-meta-pill"
+					>
+						<Users class="size-3.5" />
+						<span>{{ course.data.enrollment_count_formatted }} estudiantes</span>
 					</div>
+					<div class="course-meta-pill course-meta-instructor">
+						<UserAvatar
+							v-for="instructor in course.data.instructors"
+							:user="instructor"
+							class="course-meta-avatar"
+						/>
+						<CourseInstructors :instructors="course.data.instructors" />
+					</div>
+				</div>
+				<div v-if="course.data.tags" class="course-header-tags">
+					<span
+						v-for="tag in course.data.tags.split(', ')"
+						class="course-tag-pill"
+					>
+						{{ tag }}
+					</span>
 				</div>
 			</div>
 		</div>
@@ -123,7 +115,7 @@ const props = defineProps<{
 </script>
 <style>
 /* ==============================================
-   COURSE OVERVIEW — Page Layout
+   COURSE OVERVIEW — Page
    ============================================== */
 
 .course-overview-page {
@@ -132,124 +124,108 @@ const props = defineProps<{
 }
 
 /* ==============================================
-   COURSE OVERVIEW — Hero Section
+   COURSE OVERVIEW — Header (clean, no hero)
    ============================================== */
 
-.course-hero {
-	background: linear-gradient(135deg, var(--sb-dark, #061B49) 0%, #0D2B5E 50%, #1a3a6e 100%);
-	padding: 2.5rem 2rem 2rem;
-	position: relative;
-	overflow: hidden;
+.course-header-section {
+	padding: 2rem 1.5rem 1.5rem;
+	border-bottom: 1px solid rgba(6, 27, 73, 0.06);
 }
 
-.course-hero::before {
-	content: '';
-	position: absolute;
-	top: -40%;
-	right: -20%;
-	width: 60%;
-	height: 180%;
-	background: radial-gradient(circle, rgba(245, 179, 1, 0.06) 0%, transparent 70%);
-	pointer-events: none;
+@media (min-width: 768px) {
+	.course-header-section {
+		padding: 2.5rem 2.5rem 2rem;
+	}
 }
 
-.course-hero::after {
-	content: '';
-	position: absolute;
-	bottom: -30%;
-	left: -5%;
-	width: 30%;
-	height: 60%;
-	background: radial-gradient(circle, rgba(0, 123, 255, 0.08) 0%, transparent 70%);
-	pointer-events: none;
-}
-
-.course-hero-content {
+.course-header-content {
 	max-width: 72rem;
 	margin: 0 auto;
-	position: relative;
-	z-index: 1;
 }
 
-.course-hero-left {
-	max-width: 65%;
-}
-
-@media (max-width: 768px) {
-	.course-hero-left {
-		max-width: 100%;
-	}
-	.course-hero {
-		padding: 1.75rem 1.25rem 1.5rem;
-	}
-}
-
-.course-hero-title {
+.course-header-title {
 	font-size: 1.75rem;
 	font-weight: 800;
-	color: #ffffff;
+	color: var(--sb-dark, #061B49);
 	line-height: 1.2;
-	letter-spacing: -0.02em;
-	margin: 0 0 0.75rem;
+	letter-spacing: -0.025em;
+	margin: 0 0 0.625rem;
 }
 
 @media (min-width: 768px) {
-	.course-hero-title {
-		font-size: 2.25rem;
+	.course-header-title {
+		font-size: 2.125rem;
 	}
 }
 
-.course-hero-subtitle {
+.course-header-subtitle {
 	font-size: 1rem;
 	line-height: 1.65;
-	color: rgba(255, 255, 255, 0.82);
+	color: #6b7280;
 	margin: 0 0 1.25rem;
-	max-width: 600px;
+	max-width: 680px;
 }
 
-@media (min-width: 768px) {
-	.course-hero-subtitle {
-		font-size: 1.05rem;
-	}
-}
-
-.course-hero-meta {
+/* Meta pills row */
+.course-header-meta {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
-	gap: 1rem;
-	color: rgba(255, 255, 255, 0.85);
-	font-size: 0.875rem;
-}
-
-.course-hero-meta-item {
-	display: flex;
-	align-items: center;
-	gap: 0.375rem;
-}
-
-.course-hero-meta-item .avatar {
-	border: 2px solid rgba(255, 255, 255, 0.2) !important;
-}
-
-.course-hero-tags {
-	display: flex;
-	flex-wrap: wrap;
 	gap: 0.5rem;
-	margin-top: 1rem;
 }
 
-.course-tag {
-	display: inline-block;
-	padding: 0.2rem 0.75rem;
-	font-size: 0.75rem;
-	font-weight: 600;
-	letter-spacing: 0.02em;
-	color: rgba(255, 255, 255, 0.9);
-	background: rgba(255, 255, 255, 0.12);
-	border: 1px solid rgba(255, 255, 255, 0.1);
+.course-meta-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	padding: 0.3rem 0.75rem;
+	background: #f3f4f6;
 	border-radius: 20px;
-	backdrop-filter: blur(4px);
+	font-size: 0.8125rem;
+	font-weight: 500;
+	color: #374151;
+	border: 1px solid rgba(6, 27, 73, 0.04);
+}
+
+.course-meta-pill svg {
+	color: #6b7280;
+}
+
+.course-meta-instructor {
+	gap: 0.5rem;
+	padding-left: 0.3rem;
+}
+
+.course-meta-instructor .avatar {
+	width: 22px !important;
+	height: 22px !important;
+}
+
+.course-meta-avatar {
+	width: 22px !important;
+	height: 22px !important;
+	flex-shrink: 0;
+}
+
+/* Tags */
+.course-header-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.375rem;
+	margin-top: 0.875rem;
+}
+
+.course-tag-pill {
+	display: inline-block;
+	padding: 0.2rem 0.65rem;
+	font-size: 0.6875rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--sb-primary, #007BFF);
+	background: rgba(0, 123, 255, 0.06);
+	border: 1px solid rgba(0, 123, 255, 0.12);
+	border-radius: 6px;
 }
 
 /* ==============================================
@@ -266,7 +242,7 @@ const props = defineProps<{
 
 @media (min-width: 768px) {
 	.course-overview-body {
-		padding: 2rem 2rem;
+		padding: 2rem 2.5rem;
 	}
 }
 
@@ -306,7 +282,7 @@ const props = defineProps<{
 	gap: 0.625rem;
 	margin-bottom: 1.25rem;
 	padding-bottom: 0.75rem;
-	border-bottom: 2px solid rgba(0, 123, 255, 0.1);
+	border-bottom: 2px solid rgba(0, 123, 255, 0.08);
 }
 
 .course-section-icon {
@@ -318,7 +294,7 @@ const props = defineProps<{
 }
 
 .course-section-title {
-	font-size: 1.25rem;
+	font-size: 1.2rem;
 	font-weight: 700;
 	color: var(--sb-dark, #061B49);
 	margin: 0;
@@ -361,12 +337,41 @@ const props = defineProps<{
 }
 
 /* ==============================================
-   COURSE OVERVIEW — Dark Mode Overrides
+   Dark Mode
    ============================================== */
 
-:root[data-theme="dark"] .course-hero,
-.dark .course-hero {
-	background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1a2744 100%);
+:root[data-theme="dark"] .course-header-section,
+.dark .course-header-section {
+	border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+:root[data-theme="dark"] .course-header-title,
+.dark .course-header-title {
+	color: #f3f4f6;
+}
+
+:root[data-theme="dark"] .course-header-subtitle,
+.dark .course-header-subtitle {
+	color: #9ca3af;
+}
+
+:root[data-theme="dark"] .course-meta-pill,
+.dark .course-meta-pill {
+	background: rgba(255, 255, 255, 0.06);
+	color: #d1d5db;
+	border-color: rgba(255, 255, 255, 0.06);
+}
+
+:root[data-theme="dark"] .course-meta-pill svg,
+.dark .course-meta-pill svg {
+	color: #9ca3af;
+}
+
+:root[data-theme="dark"] .course-tag-pill,
+.dark .course-tag-pill {
+	color: #60a5fa;
+	background: rgba(59, 130, 246, 0.1);
+	border-color: rgba(59, 130, 246, 0.15);
 }
 
 :root[data-theme="dark"] .course-section-title,
@@ -376,7 +381,7 @@ const props = defineProps<{
 
 :root[data-theme="dark"] .course-section-header,
 .dark .course-section-header {
-	border-bottom-color: rgba(59, 130, 246, 0.15);
+	border-bottom-color: rgba(59, 130, 246, 0.12);
 }
 
 :root[data-theme="dark"] .course-description,
