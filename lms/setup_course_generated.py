@@ -582,12 +582,12 @@ def get_existing_name(doctype, filters):
     return frappe.db.get_value(doctype, filters, "name")
 
 def create_or_update_category(category_name):
-    name = get_existing_name("LMS Category", {"title": category_name})
+    name = get_existing_name("LMS Category", {"category": category_name})
     if name:
         return name
     doc = frappe.get_doc({
         "doctype": "LMS Category",
-        "title": category_name
+        "category": category_name
     })
     doc.insert(ignore_permissions=True)
     return doc.name
