@@ -1,16 +1,16 @@
 <template>
-	<div class="rounded-sb shadow-sb-card min-w-80 max-w-sm border border-gray-100">
+	<div class="course-card-overlay">
 		<iframe
 			v-if="course.data.video_link"
 			:src="video_link"
-			class="rounded-t-md min-h-56 w-full"
+			class="course-card-video"
 		/>
-		<div class="p-5">
-			<div v-if="course.data.paid_course" class="text-2xl font-semibold mb-3">
+		<div class="course-card-body">
+			<div v-if="course.data.paid_course" class="course-card-price">
 				{{ course.data.price }}
 			</div>
 			<div v-if="!readOnlyMode">
-				<div v-if="course.data.membership" class="space-y-2 mb-8">
+				<div v-if="course.data.membership" class="space-y-2 mb-6">
 					<router-link
 						:to="{
 							name: 'Lesson',
@@ -30,7 +30,7 @@
 								<BookText class="size-4 stroke-1.5" />
 							</template>
 							<span>
-								{{ __('Continue Learning') }}
+								{{ __('Continuar Aprendiendo') }}
 							</span>
 						</Button>
 					</router-link>
@@ -46,12 +46,12 @@
 						},
 					}"
 				>
-					<Button variant="solid" size="md" class="w-full mb-8">
+					<Button variant="solid" size="md" class="w-full mb-6">
 						<template #prefix>
 							<CreditCard class="size-4 stroke-1.5" />
 						</template>
 						<span>
-							{{ __('Buy this course') }}
+							{{ __('Comprar este curso') }}
 						</span>
 					</Button>
 				</router-link>
@@ -61,20 +61,20 @@
 					size="lg"
 					class="mb-4"
 				>
-					{{ __('Contact the Administrator to enroll for this course') }}
+					{{ __('Contacta al administrador para inscribirte en este curso.') }}
 				</Badge>
 				<Button
 					v-else-if="!isAdmin"
 					@click="enrollStudent()"
 					variant="solid"
-					class="w-full mb-8"
+					class="w-full mb-6"
 					size="md"
 				>
 					<template #prefix>
 						<BookText class="size-4 stroke-1.5" />
 					</template>
 					<span>
-						{{ __('Start Learning') }}
+						{{ __('Empezar a Aprender') }}
 					</span>
 				</Button>
 				<Button
@@ -87,56 +87,57 @@
 					<template #prefix>
 						<GraduationCap class="size-4 stroke-1.5" />
 					</template>
-					{{ __('Get Certificate') }}
+					{{ __('Obtener Certificado') }}
 				</Button>
 			</div>
-			<div class="space-y-3">
-				<div class="font-medium text-ink-gray-9">
-					{{ __('This course has:') }}
+
+			<div class="course-card-stats">
+				<div class="course-card-stats-title">
+					{{ __('Este curso incluye:') }}
 				</div>
-				<div class="flex items-center text-ink-gray-9">
-					<BookOpen class="h-4 w-4 stroke-1.5" />
-					<span class="ms-2">
+				<div class="course-card-stat-item">
+					<BookOpen class="course-card-stat-icon" />
+					<span>
 						{{ course.data.lessons }}
-						{{ course.data.lessons > 1 ? __('lessons') : __('lesson') }}
+						{{ course.data.lessons > 1 ? __('lecciones') : __('lección') }}
 					</span>
 				</div>
-				<div class="flex items-center text-ink-gray-9">
-					<Users class="h-4 w-4 stroke-1.5" />
-					<span class="ms-2">
+				<div class="course-card-stat-item">
+					<Users class="course-card-stat-icon" />
+					<span>
 						{{ formatAmount(course.data.enrollments) }}
 						{{
 							course.data.enrollments > 1
-								? __('enrolled students')
-								: __('enrolled student')
+								? __('estudiantes inscritos')
+								: __('estudiante inscrito')
 						}}
 					</span>
 				</div>
 				<div
 					v-if="parseInt(course.data.rating) > 0"
-					class="flex items-center text-ink-gray-9"
+					class="course-card-stat-item"
 				>
-					<Star class="size-4 stroke-1.5 fill-yellow-500 text-transparent" />
-					<span class="ms-2">
-						{{ course.data.rating }} {{ __('average rating') }}
+					<Star class="course-card-stat-icon fill-yellow-500 !text-transparent" />
+					<span>
+						{{ course.data.rating }} {{ __('calificación promedio') }}
 					</span>
 				</div>
 				<div
 					v-if="course.data.enable_certification"
-					class="flex items-center font-semibold text-ink-gray-9"
+					class="course-card-stat-item course-card-stat-highlight"
 				>
-					<GraduationCap class="h-4 w-4 stroke-2" />
-					<span class="ms-2">
-						{{ __('Certificate of Completion') }}
+					<GraduationCap class="course-card-stat-icon !text-green-600" />
+					<span>
+						{{ __('Certificado de Finalización') }}
 					</span>
 				</div>
 				<div
 					v-if="course.data.paid_certificate"
-					class="flex items-center font-semibold text-ink-gray-9"
+					class="course-card-stat-item course-card-stat-highlight"
 				>
-					<GraduationCap class="h-4 w-4 stroke-2" />
-					<span class="ms-2">
-						{{ __('Paid Certificate after Evaluation') }}
+					<GraduationCap class="course-card-stat-icon !text-green-600" />
+					<span>
+						{{ __('Certificado con Evaluación') }}
 					</span>
 				</div>
 			</div>
@@ -265,3 +266,103 @@ const isAdmin = computed(() => {
 	return user.data?.is_moderator || is_instructor()
 })
 </script>
+<style>
+.course-card-overlay {
+	border-radius: var(--sb-radius, 12px);
+	box-shadow: var(--sb-shadow-card, 0 2px 12px rgba(6, 27, 73, 0.08));
+	border: 1px solid rgba(6, 27, 73, 0.06);
+	background: white;
+	overflow: hidden;
+	min-width: 280px;
+	max-width: 380px;
+}
+
+.course-card-video {
+	border-radius: var(--sb-radius, 12px) var(--sb-radius, 12px) 0 0;
+	min-height: 14rem;
+	width: 100%;
+	border: none;
+}
+
+.course-card-body {
+	padding: 1.25rem;
+}
+
+.course-card-price {
+	font-size: 1.75rem;
+	font-weight: 700;
+	color: var(--sb-dark, #061B49);
+	margin-bottom: 0.75rem;
+}
+
+.course-card-stats {
+	background: rgba(6, 27, 73, 0.025);
+	border-radius: 10px;
+	padding: 1rem 1.1rem;
+	border: 1px solid rgba(6, 27, 73, 0.04);
+}
+
+.course-card-stats-title {
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: var(--sb-dark, #061B49);
+	margin-bottom: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.course-card-stat-item {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 0.875rem;
+	color: #4b5563;
+	padding: 0.35rem 0;
+}
+
+.course-card-stat-icon {
+	width: 1rem;
+	height: 1rem;
+	stroke-width: 1.5;
+	color: var(--sb-primary, #007BFF);
+	flex-shrink: 0;
+}
+
+.course-card-stat-highlight {
+	font-weight: 600;
+	color: var(--sb-dark, #061B49);
+}
+
+/* Dark mode */
+:root[data-theme="dark"] .course-card-overlay,
+.dark .course-card-overlay {
+	background: #1f2937;
+	border-color: rgba(255, 255, 255, 0.06);
+}
+
+:root[data-theme="dark"] .course-card-price,
+.dark .course-card-price {
+	color: #f3f4f6;
+}
+
+:root[data-theme="dark"] .course-card-stats,
+.dark .course-card-stats {
+	background: rgba(255, 255, 255, 0.04);
+	border-color: rgba(255, 255, 255, 0.06);
+}
+
+:root[data-theme="dark"] .course-card-stats-title,
+.dark .course-card-stats-title {
+	color: #f3f4f6;
+}
+
+:root[data-theme="dark"] .course-card-stat-item,
+.dark .course-card-stat-item {
+	color: #d1d5db;
+}
+
+:root[data-theme="dark"] .course-card-stat-highlight,
+.dark .course-card-stat-highlight {
+	color: #f3f4f6;
+}
+</style>
