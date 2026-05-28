@@ -470,6 +470,15 @@ const getSidebarItems = (forMobile = false) => {
 					],
 				},
 				{
+					label: 'Estudio IA',
+					icon: 'Brain',
+					to: 'Study',
+					activeFor: ['Study'],
+					condition: () => {
+						return userResource?.data
+					},
+				},
+				{
 					label: 'Programs',
 					icon: 'Route',
 					to: 'Programs',
