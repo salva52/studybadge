@@ -471,6 +471,108 @@
 		font-size: 0.8rem;
 		font-weight: 500;
 	}
+
+	/* ==========================================
+	   Premium Input & Icon Styles (Login & Signup)
+	   ========================================== */
+	.email-field, .password-field, .name-field, .category-field {
+		position: relative;
+		width: 100%;
+	}
+
+	.email-field .field-icon, 
+	.password-field .field-icon, 
+	.name-field .field-icon,
+	.category-field .field-icon {
+		position: absolute;
+		top: 50%;
+		left: 14px;
+		transform: translateY(-50%);
+		color: #9CA3AF;
+		pointer-events: none;
+		transition: all 0.2s ease;
+		z-index: 10;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	/* Target focus events to animate icon color */
+	.sb-login-input:focus ~ .field-icon,
+	.sb-login-input:focus ~ svg,
+	.form-control:focus ~ .field-icon,
+	.form-control:focus ~ svg {
+		color: var(--sb-primary) !important;
+		stroke: var(--sb-primary) !important;
+	}
+
+	/* Password toggle position adjustment */
+	.password-field .toggle-password {
+		position: absolute;
+		right: 14px;
+		top: 50%;
+		transform: translateY(-50%);
+		cursor: pointer;
+		user-select: none;
+		z-index: 11;
+		font-size: 0.8rem;
+		font-weight: 600;
+		color: #6B7280;
+		transition: color 0.2s ease;
+	}
+	.password-field .toggle-password:hover {
+		color: var(--sb-primary);
+	}
+
+	/* Signup form layout polish */
+	.signup-form {
+		margin-top: 0.5rem;
+	}
+
+	.signup-form select.sb-login-input {
+		appearance: none !important;
+		-webkit-appearance: none !important;
+		background: #F9FAFB url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 14px center !important;
+		background-size: 16px !important;
+		padding-right: 40px !important;
+	}
+
+	.signup-form select.sb-login-input:focus {
+		background-color: #fff !important;
+		background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23007BFF' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+	}
+
+	/* Terms and Conditions checkbox styling */
+	.terms-group {
+		margin-top: 1rem;
+		margin-bottom: 1.25rem;
+	}
+
+	.sb-checkbox-label {
+		display: flex !important;
+		align-items: flex-start !important;
+		gap: 8px;
+		cursor: pointer;
+		font-size: 0.85rem;
+		color: #4B5563;
+		line-height: 1.4;
+	}
+
+	.sb-checkbox-label input[type="checkbox"] {
+		width: 16px;
+		height: 16px;
+		border: 1.5px solid #D1D5DB;
+		border-radius: 4px;
+		margin-top: 2px;
+		cursor: pointer;
+		accent-color: var(--sb-primary);
+	}
+
+	/* Header spacing */
+	.sb-login-form-header {
+		text-align: center;
+		margin-bottom: 1.75rem;
+	}
 </style>
 {% endblock %}
 
