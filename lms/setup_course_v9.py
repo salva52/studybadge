@@ -924,15 +924,23 @@ def image_block(image_data, lesson_doc=None):
     image_data = image_data or {}
     url = _resolve_local_image_url(image_data, lesson_doc)
     if not url:
+        print("[IMAGE][SKIP] No hay URL de imagen para esta lección.")
         return None
 
     caption = str(image_data.get("caption") or image_data.get("alt") or "").strip()
+
+    # IMPORTANTE:
+    # Frappe LMS renderiza este bloque con el tool SimpleImage de EditorJS.
+    # Ese tool espera data.url directamente.
+    # Si le pasas data.file.url, el HTML queda como:
+    # <div class="cdx-simple-image"><div class="cdx-loader"></div></div>
+    # y se queda cargando para siempre.
+    print(f"[IMAGE][BLOCK] Insertando imagen en EditorJS SimpleImage: {url}")
+
     return {
         "type": "image",
         "data": {
-            "file": {
-                "url": url
-            },
+            "url": url,
             "caption": caption,
             "withBorder": False,
             "withBackground": False,
