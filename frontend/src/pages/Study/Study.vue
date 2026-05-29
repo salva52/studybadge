@@ -903,8 +903,12 @@ function normalizeLessonPack(pack = {}) {
 }
 
 async function deleteSession(name) {
+	if (!window.confirm(__('¿Borrar este curso IA y sus explicaciones guardadas?'))) return
 	await api('delete_session', { name })
+	toast.success(__('Curso borrado.'))
+	if (currentSession.value?.name === name) currentSession.value = null
 	await loadDashboard()
+	if (route.params.sessionId === name) router.push({ name: 'StudyHome' })
 }
 
 async function deleteExplanation(name) {
