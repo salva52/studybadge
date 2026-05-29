@@ -1976,36 +1976,30 @@ def _get_ranking_activity():
 	return [
 		*[
 			("completed_lessons", row.member, cint(row.count))
-			for row in frappe.get_all(
-				"LMS Course Progress",
-				filters={"status": "Complete"},
-				fields=["member", "count(distinct lesson) as count"],
-				group_by="member",
+			for row in frappe.db.sql(
+				"SELECT member, count(distinct lesson) as count FROM `tabLMS Course Progress` WHERE status = 'Complete' GROUP BY member",
+				as_dict=True,
 			)
 		],
 		*[
 			("completed_courses", row.member, cint(row.count))
-			for row in frappe.get_all(
-				"LMS Enrollment",
-				filters={"progress": [">=", 100]},
-				fields=["member", "count(name) as count"],
-				group_by="member",
+			for row in frappe.db.sql(
+				"SELECT member, count(name) as count FROM `tabLMS Enrollment` WHERE progress >= 100 GROUP BY member",
+				as_dict=True,
 			)
 		],
 		*[
 			("certificates", row.member, cint(row.count))
-			for row in frappe.get_all(
-				"LMS Certificate",
-				fields=["member", "count(name) as count"],
-				group_by="member",
+			for row in frappe.db.sql(
+				"SELECT member, count(name) as count FROM `tabLMS Certificate` GROUP BY member",
+				as_dict=True,
 			)
 		],
 		*[
 			("badges", row.member, cint(row.count))
-			for row in frappe.get_all(
-				"LMS Badge Assignment",
-				fields=["member", "count(name) as count"],
-				group_by="member",
+			for row in frappe.db.sql(
+				"SELECT member, count(name) as count FROM `tabLMS Badge Assignment` GROUP BY member",
+				as_dict=True,
 			)
 		],
 		*[
