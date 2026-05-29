@@ -1835,27 +1835,38 @@ def get_pwa_manifest():
 
 @frappe.whitelist()
 def get_profile_details(username: str):
+	hide_from_rankings_field = bool(
+		frappe.get_meta("User").has_field("hide_from_rankings")
+	)
+	fields = [
+		"first_name",
+		"last_name",
+		"full_name",
+		"name",
+		"username",
+		"user_image",
+		"bio",
+		"headline",
+		"language",
+		"cover_image",
+		"open_to",
+		"linkedin",
+		"github",
+		"twitter",
+	]
+	if hide_from_rankings_field:
+		fields.append("hide_from_rankings")
+
 	details = frappe.db.get_value(
 		"User",
 		{"username": username},
-		[
-			"first_name",
-			"last_name",
-			"full_name",
-			"name",
-			"username",
-			"user_image",
-			"bio",
-			"headline",
-			"language",
-			"cover_image",
-			"open_to",
-			"linkedin",
-			"github",
-			"twitter",
-		],
+		fields,
 		as_dict=True,
 	)
+	if not details:
+		frappe.throw(_("User not found."), frappe.DoesNotExistError)
+	if details:
+		details.can_set_ranking_privacy = hide_from_rankings_field
 	roles = frappe.get_roles(details.name)
 	if not has_lms_role():
 		frappe.throw(
@@ -1863,6 +1874,269 @@ def get_profile_details(username: str):
 		)
 	details.roles = roles
 	return details
+
+
+RANKING_COIN_RULES = {
+	"lesson": 10,
+	"course": 120,
+	"certificate": 150,
+	"badge": 35,
+	"created_course": 90,
+}
+
+
+@frappe.whitelist()
+def get_rankings(limit: int = 50):
+	limit = cint(limit) or 50
+	limit = min(max(limit, 10), 100)
+
+	stats = {}
+	for activity, member, count in _get_ranking_activity():
+		if not member:
+			continue
+		user_stats = stats.setdefault(member, _get_empty_ranking_stats())
+		user_stats[activity] = count
+
+	if frappe.session.user != "Guest":
+		stats.setdefault(frappe.session.user, _get_empty_ranking_stats())
+
+	user_names = list(stats.keys())
+	if not user_names:
+		return _empty_rankings_response()
+
+	hide_from_rankings_field = bool(
+		frappe.get_meta("User").has_field("hide_from_rankings")
+	)
+	user_fields = ["name", "username", "full_name", "user_image", "headline", "enabled"]
+	if hide_from_rankings_field:
+		user_fields.append("hide_from_rankings")
+
+	users = frappe.get_all(
+		"User",
+		filters={"name": ["in", user_names], "enabled": 1},
+		fields=user_fields,
+	)
+	users_by_name = {user.name: user for user in users}
+	entries = []
+
+	for member, member_stats in stats.items():
+		user = users_by_name.get(member)
+		if not user:
+			continue
+
+		is_hidden = bool(cint(user.get("hide_from_rankings"))) if hide_from_rankings_field else False
+		entry = _build_ranking_entry(user, member_stats, is_hidden)
+		if member == frappe.session.user:
+			entry.is_current_user = True
+		if not is_hidden and entry.coins > 0:
+			entries.append(entry)
+
+	entries.sort(
+		key=lambda entry: (
+			-entry.coins,
+			-entry.stats.completed_courses,
+			entry.full_name or "",
+		)
+	)
+	for index, entry in enumerate(entries, start=1):
+		entry.rank = index
+
+	current_user = None
+	if frappe.session.user != "Guest" and frappe.session.user in users_by_name:
+		current_user_data = users_by_name[frappe.session.user]
+		current_user = _build_ranking_entry(
+			current_user_data,
+			stats.get(frappe.session.user, _get_empty_ranking_stats()),
+			bool(cint(current_user_data.get("hide_from_rankings")))
+			if hide_from_rankings_field
+			else False,
+		)
+		current_user.is_current_user = True
+		for entry in entries:
+			if entry.name == frappe.session.user:
+				current_user = entry
+				break
+
+	leaderboard = entries[:limit]
+
+	return {
+		"leaderboard": leaderboard,
+		"current_user": current_user,
+		"rewards": _get_ranking_rewards(),
+		"rules": _get_ranking_rules(),
+		"summary": {
+			"visible_members": len(entries),
+			"total_coins": sum(entry.coins for entry in entries),
+			"top_prize_slots": 3,
+		},
+	}
+
+
+def _get_ranking_activity():
+	return [
+		*[
+			("completed_lessons", row.member, cint(row.count))
+			for row in frappe.get_all(
+				"LMS Course Progress",
+				filters={"status": "Complete"},
+				fields=["member", "count(distinct lesson) as count"],
+				group_by="member",
+			)
+		],
+		*[
+			("completed_courses", row.member, cint(row.count))
+			for row in frappe.get_all(
+				"LMS Enrollment",
+				filters={"progress": [">=", 100]},
+				fields=["member", "count(name) as count"],
+				group_by="member",
+			)
+		],
+		*[
+			("certificates", row.member, cint(row.count))
+			for row in frappe.get_all(
+				"LMS Certificate",
+				fields=["member", "count(name) as count"],
+				group_by="member",
+			)
+		],
+		*[
+			("badges", row.member, cint(row.count))
+			for row in frappe.get_all(
+				"LMS Badge Assignment",
+				fields=["member", "count(name) as count"],
+				group_by="member",
+			)
+		],
+		*[
+			("created_courses", instructor, count)
+			for instructor, count in _get_created_courses_by_instructor().items()
+		],
+	]
+
+
+def _get_created_courses_by_instructor():
+	published_courses = set(
+		frappe.get_all("LMS Course", filters={"published": 1}, pluck="name")
+	)
+	course_counts = {}
+	if not published_courses:
+		return course_counts
+
+	for row in frappe.get_all(
+		"Course Instructor",
+		filters={
+			"parenttype": "LMS Course",
+			"parent": ["in", list(published_courses)],
+		},
+		fields=["instructor", "parent"],
+	):
+		if not row.instructor:
+			continue
+		course_counts.setdefault(row.instructor, set()).add(row.parent)
+
+	return {instructor: len(courses) for instructor, courses in course_counts.items()}
+
+
+def _get_empty_ranking_stats():
+	return frappe._dict(
+		completed_lessons=0,
+		completed_courses=0,
+		certificates=0,
+		badges=0,
+		created_courses=0,
+	)
+
+
+def _build_ranking_entry(user, stats, is_hidden=False):
+	coins = (
+		stats.completed_lessons * RANKING_COIN_RULES["lesson"]
+		+ stats.completed_courses * RANKING_COIN_RULES["course"]
+		+ stats.certificates * RANKING_COIN_RULES["certificate"]
+		+ stats.badges * RANKING_COIN_RULES["badge"]
+		+ stats.created_courses * RANKING_COIN_RULES["created_course"]
+	)
+
+	entry = frappe._dict(
+		name=user.name,
+		username=user.username,
+		full_name=user.full_name,
+		user_image=user.user_image,
+		headline=user.headline,
+		coins=coins,
+		rank=None,
+		level=_get_ranking_level(coins),
+		stats=stats,
+		highlights=_get_ranking_highlights(stats),
+		is_hidden=is_hidden,
+		is_current_user=False,
+	)
+	return entry
+
+
+def _get_ranking_level(coins):
+	if coins >= 1500:
+		return _("Leyenda StudyBadge")
+	if coins >= 800:
+		return _("Maestro")
+	if coins >= 300:
+		return _("Constante")
+	return _("Explorador")
+
+
+def _get_ranking_highlights(stats):
+	highlights = []
+	if stats.completed_lessons:
+		highlights.append(_("{0} lecciones completadas").format(stats.completed_lessons))
+	if stats.completed_courses:
+		highlights.append(_("{0} cursos completados").format(stats.completed_courses))
+	if stats.created_courses:
+		highlights.append(_("{0} cursos creados").format(stats.created_courses))
+	if stats.certificates:
+		highlights.append(_("{0} certificados ganados").format(stats.certificates))
+	if stats.badges:
+		highlights.append(_("{0} insignias ganadas").format(stats.badges))
+	return highlights[:3]
+
+
+def _get_ranking_rewards():
+	return [
+		{
+			"place": "1",
+			"title": _("Primer lugar"),
+			"description": _("Premio principal y reconocimiento destacado."),
+		},
+		{
+			"place": "2",
+			"title": _("Segundo lugar"),
+			"description": _("Premio especial por constancia."),
+		},
+		{
+			"place": "3",
+			"title": _("Tercer lugar"),
+			"description": _("Premio de logro y visibilidad en StudyBadge."),
+		},
+	]
+
+
+def _get_ranking_rules():
+	return [
+		{"label": _("Completar una lección"), "coins": RANKING_COIN_RULES["lesson"]},
+		{"label": _("Completar un curso"), "coins": RANKING_COIN_RULES["course"]},
+		{"label": _("Ganar un certificado"), "coins": RANKING_COIN_RULES["certificate"]},
+		{"label": _("Ganar una insignia"), "coins": RANKING_COIN_RULES["badge"]},
+		{"label": _("Crear un curso publicado"), "coins": RANKING_COIN_RULES["created_course"]},
+	]
+
+
+def _empty_rankings_response():
+	return {
+		"leaderboard": [],
+		"current_user": None,
+		"rewards": _get_ranking_rewards(),
+		"rules": _get_ranking_rules(),
+		"summary": {"visible_members": 0, "total_coins": 0, "top_prize_slots": 3},
+	}
 
 
 @frappe.whitelist()

@@ -513,6 +513,15 @@ const getSidebarItems = (forMobile = false) => {
 					},
 				},
 				{
+					label: 'Rankings',
+					icon: 'Trophy',
+					to: 'Rankings',
+					activeFor: ['Rankings'],
+					condition: () => {
+						return userResource?.data
+					},
+				},
+				{
 					label: 'Jobs',
 					icon: 'Briefcase',
 					to: 'Jobs',

@@ -65,6 +65,15 @@
 							:label="__('Open to')"
 							:placeholder="__('Looking for new work or hiring talent?')"
 						/>
+						<FormControl
+							v-if="hasRankingPrivacyField"
+							v-model="profile.show_in_rankings"
+							type="checkbox"
+							:label="__('Mostrarme en rankings')"
+							:description="
+								__('Permite que tu perfil y monedas aparezcan en la tabla de rankings.')
+							"
+						/>
 						<Link
 							:label="__('Language')"
 							v-model="profile.language"
@@ -98,7 +107,7 @@ import {
 	TextEditor,
 	toast,
 } from 'frappe-ui'
-import { ref, reactive, watch } from 'vue'
+import { computed, ref, reactive, watch } from 'vue'
 import { sanitizeHTML } from '@/utils'
 import Link from '@/components/Controls/Link.vue'
 
@@ -124,18 +133,25 @@ const profile = reactive({
 	linkedin: '',
 	github: '',
 	twitter: '',
+	show_in_rankings: true,
 })
 
 const updateProfile = createResource({
 	url: 'frappe.client.set_value',
 	makeParams(values) {
+		let fieldname = {
+			user_image: profile.image || null,
+			...profile,
+		}
+		if (hasRankingPrivacyField.value) {
+			fieldname.hide_from_rankings = profile.show_in_rankings ? 0 : 1
+		}
+		delete fieldname.image
+		delete fieldname.show_in_rankings
 		return {
 			doctype: 'User',
 			name: props.profile.data.name,
-			fieldname: {
-				user_image: profile.image || null,
-				...profile,
-			},
+			fieldname,
 		}
 	},
 	onSuccess(data) {
@@ -185,8 +201,9 @@ watch(
 	() => profile,
 	(newVal) => {
 		if (!props.profile.data) return
-		let keys = Object.keys(newVal)
-		keys.splice(keys.indexOf('image'), 1)
+		let keys = Object.keys(newVal).filter(
+			(key) => !['image', 'show_in_rankings'].includes(key)
+		)
 		for (let key of keys) {
 			if (newVal[key] !== props.profile.data[key]) {
 				isDirty.value = true
@@ -194,6 +211,13 @@ watch(
 			}
 		}
 		if (profile.image !== props.profile.data.user_image) {
+			isDirty.value = true
+			return
+		}
+		if (
+			hasRankingPrivacyField.value &&
+			profile.show_in_rankings !== !props.profile.data.hide_from_rankings
+		) {
 			isDirty.value = true
 			return
 		}
@@ -216,10 +240,15 @@ watch(
 			profile.github = newVal.github
 			profile.twitter = newVal.twitter
 			profile.image = newVal.user_image
+			profile.show_in_rankings = !newVal.hide_from_rankings
 			isDirty.value = false
 		}
 	}
 )
+
+const hasRankingPrivacyField = computed(() => {
+	return props.profile.data?.can_set_ranking_privacy
+})
 
 watch(
 	() => profile.language,
