@@ -1,208 +1,241 @@
 <template>
-	<div class="min-h-screen bg-surface-gray-1 text-ink-gray-9">
-		<div class="mx-auto flex w-full max-w-[1500px] flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8">
-			<header class="study-hero flex flex-col gap-5 rounded-xl border border-outline-gray-1 bg-surface-white p-5 shadow-sm lg:flex-row lg:items-end lg:justify-between">
-				<div>
-					<div class="flex flex-wrap items-center gap-2 text-sm text-ink-gray-6">
-						<router-link :to="{ name: 'Study' }" class="font-medium text-ink-blue-4">
-							{{ __('Estudio IA') }}
-						</router-link>
-						<span v-if="pageTitle">/</span>
-						<span v-if="pageTitle">{{ pageTitle }}</span>
-					</div>
-					<h1 class="mt-2 text-3xl font-semibold tracking-normal text-ink-gray-9 sm:text-4xl">
-						{{ headerTitle }}
-					</h1>
-					<p class="mt-2 max-w-3xl text-base leading-7 text-ink-gray-7">
-						{{ headerSubtitle }}
-					</p>
+	<div class="study-page">
+		<div class="mx-auto flex w-full max-w-[1500px] flex-col gap-6 px-4 py-5 sm:px-6 lg:px-8">
+			<!-- ═══════════ HERO HEADER ═══════════ -->
+			<header class="study-hero">
+				<div class="hero-decoration">
+					<div class="hero-orb hero-orb--1"></div>
+					<div class="hero-orb hero-orb--2"></div>
+					<div class="hero-orb hero-orb--3"></div>
 				</div>
-				<div class="flex flex-col gap-3">
-					<Button v-if="isDashboard" variant="solid" :label="__('Crear curso IA')" @click="startFlow('parcial')">
-						<template #prefix><BookOpen class="h-4 w-4 stroke-1.5" /></template>
-					</Button>
-					<nav class="flex flex-wrap gap-2">
-						<router-link
-							v-for="item in topNav"
-							:key="item.name"
-							:to="{ name: item.name }"
-							class="inline-flex min-h-9 items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition"
-							:class="route.name === item.name ? 'border-blue-200 bg-surface-blue-2 text-ink-blue-4' : 'border-outline-gray-1 bg-surface-white text-ink-gray-7 hover:bg-surface-gray-2'"
-						>
-							<component :is="item.icon" class="h-4 w-4 stroke-1.5" />
-							{{ item.label }}
-						</router-link>
-					</nav>
+				<div class="hero-content">
+					<div class="hero-text">
+						<div class="hero-breadcrumb">
+							<router-link :to="{ name: 'Study' }" class="hero-breadcrumb-link">
+								{{ __('Estudio IA') }}
+							</router-link>
+							<span v-if="pageTitle" class="hero-breadcrumb-sep">/</span>
+							<span v-if="pageTitle" class="hero-breadcrumb-current">{{ pageTitle }}</span>
+						</div>
+						<h1 class="hero-title">{{ headerTitle }}</h1>
+						<p class="hero-subtitle">{{ headerSubtitle }}</p>
+					</div>
+					<div class="hero-actions">
+						<Button v-if="isDashboard" variant="solid" :label="__('Crear curso IA')" @click="startFlow('parcial')" class="hero-cta">
+							<template #prefix><BookOpen class="h-4 w-4 stroke-1.5" /></template>
+						</Button>
+						<nav class="hero-nav">
+							<router-link
+								v-for="item in topNav"
+								:key="item.name"
+								:to="{ name: item.name }"
+								class="nav-pill"
+								:class="route.name === item.name ? 'nav-pill--active' : ''"
+							>
+								<component :is="item.icon" class="h-4 w-4 stroke-1.5" />
+								<span class="nav-pill-label">{{ item.label }}</span>
+							</router-link>
+						</nav>
+					</div>
 				</div>
 			</header>
 
-			<section v-if="isDashboard" class="grid gap-5 xl:grid-cols-[1fr_360px]">
-				<div class="flex flex-col gap-5">
-					<div class="study-panel p-5">
-						<div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+			<!-- ═══════════ DASHBOARD ═══════════ -->
+			<section v-if="isDashboard" class="grid gap-6 xl:grid-cols-[1fr_360px]">
+				<div class="flex flex-col gap-6">
+					<!-- FLOW CARDS -->
+					<div class="s-panel s-panel--flush">
+						<div class="s-panel-header">
 							<div>
-								<div class="study-kicker">{{ __('Empieza en 4 pasos') }}</div>
-								<h2 class="mt-1 text-2xl font-semibold">{{ __('Mis cursos IA') }}</h2>
-								<p class="mt-2 max-w-2xl text-sm leading-6 text-ink-gray-6">
-									{{ __('Crea un curso desde tus apuntes, deja que la IA lo ordene en módulos y continúa cada lección con práctica guiada.') }}
-								</p>
+								<div class="s-kicker"><Sparkles class="h-3.5 w-3.5 stroke-1.5" /> {{ __('Empieza en 4 pasos') }}</div>
+								<h2 class="s-panel-title">{{ __('Mis cursos IA') }}</h2>
+								<p class="s-panel-desc">{{ __('Crea un curso desde tus apuntes, deja que la IA lo ordene en módulos y continúa cada lección con práctica guiada.') }}</p>
 							</div>
 							<Button variant="solid" :label="__('Crear mi primer curso')" @click="startFlow('parcial')" />
 						</div>
-						<div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+						<div class="flow-grid">
 							<button
 								v-for="flow in flows"
 								:key="flow.id"
-								class="study-action-card group"
+								class="flow-card group"
 								@click="startFlow(flow.id)"
 							>
-								<div class="flex items-start gap-3">
-									<div class="study-icon">
-										<component :is="flow.icon" class="h-5 w-5 stroke-1.5" />
-									</div>
-									<div>
-										<h3 class="text-sm font-semibold text-ink-gray-9">{{ flow.label }}</h3>
-										<p class="mt-1 text-sm leading-5 text-ink-gray-6">{{ flow.description }}</p>
-									</div>
+								<div class="flow-icon" :class="`flow-icon--${flow.id}`">
+									<component :is="flow.icon" class="h-5 w-5 stroke-1.5" />
 								</div>
+								<div class="flow-info">
+									<h3 class="flow-card-title">{{ flow.label }}</h3>
+									<p class="flow-card-desc">{{ flow.description }}</p>
+								</div>
+								<ArrowRight class="flow-arrow" />
 							</button>
 						</div>
 					</div>
 
-					<div class="study-panel p-5">
-						<div class="flex flex-wrap items-center justify-between gap-3">
+					<!-- RECENT COURSES -->
+					<div class="s-panel s-panel--flush">
+						<div class="s-panel-header">
 							<div>
-								<div class="study-kicker">{{ __('Continúa aprendiendo') }}</div>
-								<h2 class="mt-1 text-xl font-semibold">{{ __('Cursos recientes') }}</h2>
+								<div class="s-kicker"><Clock class="h-3.5 w-3.5 stroke-1.5" /> {{ __('Continúa aprendiendo') }}</div>
+								<h2 class="s-panel-title">{{ __('Cursos recientes') }}</h2>
 							</div>
-							<Button :label="__('Actualizar')" :loading="loading === 'dashboard'" @click="loadDashboard" />
+							<Button :label="__('Actualizar')" :loading="loading === 'dashboard'" @click="loadDashboard">
+								<template #prefix><RefreshCw class="h-4 w-4 stroke-1.5" /></template>
+							</Button>
 						</div>
-						<div class="mt-4 grid gap-4 lg:grid-cols-2">
-							<div v-for="session in sessions.slice(0, 6)" :key="session.name" class="study-course-card">
-								<div class="flex items-start justify-between gap-3">
+						<div class="courses-grid">
+							<div v-for="session in sessions.slice(0, 6)" :key="session.name" class="course-card">
+								<div class="course-card-top">
 									<div class="min-w-0">
-										<div class="text-xs font-medium text-ink-blue-4">{{ flowLabel(session.flow_id || session.goal) }}</div>
-										<h3 class="mt-1 truncate text-lg font-semibold">{{ session.title || session.name }}</h3>
-										<p class="mt-1 text-sm text-ink-gray-6">{{ __('Última actividad') }} · {{ formatDate(session.modified) }}</p>
+										<span class="course-tag" :class="`course-tag--${session.flow_id || session.goal || 'parcial'}`">{{ flowLabel(session.flow_id || session.goal) }}</span>
+										<h3 class="course-card-title">{{ session.title || session.name }}</h3>
+										<p class="course-card-date">
+											<Clock class="h-3.5 w-3.5 stroke-1.5" />
+											{{ __('Última actividad') }} · {{ formatDate(session.modified) }}
+										</p>
 									</div>
-									<span class="study-badge">{{ courseProgress(session) }}%</span>
-								</div>
-								<div class="mt-4">
-									<div class="flex items-center justify-between text-xs text-ink-gray-6">
-										<span>{{ __('Progreso del curso') }}</span>
-										<span>{{ courseProgress(session) }}% {{ __('completado') }}</span>
-									</div>
-									<div class="mt-2 h-2 overflow-hidden rounded-full bg-surface-gray-2">
-										<div class="h-full rounded-full bg-blue-500" :style="{ width: `${courseProgress(session)}%` }" />
-									</div>
-								</div>
-								<div class="mt-4 rounded-md bg-surface-gray-1 p-3">
-									<div class="text-xs text-ink-gray-6">{{ __('Siguiente lección') }}</div>
-									<div class="mt-1 truncate text-sm font-medium text-ink-gray-9">
-										{{ flattenLessons(session.course_structure || fallbackCourseStructure(session))[nextLessonIndex(session)]?.title || __('Abrir curso') }}
+									<div class="course-progress-ring">
+										<svg viewBox="0 0 36 36">
+											<path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+											<path class="ring-fill" :stroke-dasharray="`${courseProgress(session)}, 100`" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+										</svg>
+										<span class="ring-text">{{ courseProgress(session) }}%</span>
 									</div>
 								</div>
-								<div class="mt-4 flex flex-wrap gap-2">
+								<div class="course-progress-bar">
+									<div class="progress-track">
+										<div class="progress-fill" :style="{ width: `${courseProgress(session)}%` }" />
+									</div>
+									<span class="progress-label">{{ courseProgress(session) }}% {{ __('completado') }}</span>
+								</div>
+								<div class="course-next">
+									<div class="course-next-icon"><PlayCircle class="h-4 w-4 stroke-1.5" /></div>
+									<div class="min-w-0">
+										<div class="course-next-label">{{ __('Siguiente lección') }}</div>
+										<div class="course-next-title">{{ flattenLessons(session.course_structure || fallbackCourseStructure(session))[nextLessonIndex(session)]?.title || __('Abrir curso') }}</div>
+									</div>
+								</div>
+								<div class="course-actions">
 									<Button :label="__('Continuar')" variant="solid" @click="openRoom(session.name, nextLessonIndex(session))" />
 									<Button :label="__('Ver módulos')" @click="openPlan(session.name)" />
-									<Button :label="__('Borrar')" variant="subtle" @click="deleteSession(session.name)" />
+									<Button :label="__('Borrar')" variant="subtle" theme="red" @click="deleteSession(session.name)">
+										<template #prefix><Trash2 class="h-3.5 w-3.5 stroke-1.5" /></template>
+									</Button>
 								</div>
 							</div>
-							<div v-if="!sessions.length" class="study-empty lg:col-span-2">
-								<BookOpen class="mx-auto h-8 w-8 stroke-1.5 text-ink-gray-5" />
-								<h3 class="mt-3 text-base font-semibold text-ink-gray-9">{{ __('Aún no tienes cursos IA') }}</h3>
-								<p class="mt-1 text-sm text-ink-gray-6">{{ __('Crea uno con tus apuntes, PDFs o temas del parcial. Te guiaremos paso a paso.') }}</p>
+							<div v-if="!sessions.length" class="s-empty lg:col-span-2">
+								<div class="s-empty-icon"><BookOpen class="h-8 w-8 stroke-1.5" /></div>
+								<h3 class="s-empty-title">{{ __('Aún no tienes cursos IA') }}</h3>
+								<p class="s-empty-desc">{{ __('Crea uno con tus apuntes, PDFs o temas del parcial. Te guiaremos paso a paso.') }}</p>
 								<Button class="mt-4" variant="solid" :label="__('Crear curso IA')" @click="startFlow('parcial')" />
 							</div>
 						</div>
 					</div>
 				</div>
 
-				<aside class="flex flex-col gap-5">
-					<div class="study-panel p-4">
-						<h2 class="text-base font-semibold">{{ __('Tu avance') }}</h2>
-						<div class="mt-3 grid grid-cols-3 gap-2">
-							<div v-for="metric in dashboardMetrics" :key="metric.label" class="rounded-md bg-surface-gray-1 px-3 py-3 text-center">
-								<div class="text-xs text-ink-gray-6">{{ metric.label }}</div>
-								<div class="mt-1 text-xl font-semibold">{{ metric.value }}</div>
+				<!-- SIDEBAR -->
+				<aside class="flex flex-col gap-6">
+					<div class="s-panel s-panel--flush">
+						<div class="sidebar-header">
+							<BarChart3 class="h-4 w-4 stroke-1.5" />
+							<h2 class="sidebar-title">{{ __('Tu avance') }}</h2>
+						</div>
+						<div class="metrics-grid">
+							<div v-for="metric in dashboardMetrics" :key="metric.label" class="metric-card">
+								<div class="metric-value">{{ metric.value }}</div>
+								<div class="metric-label">{{ metric.label }}</div>
 							</div>
 						</div>
 					</div>
-					<div class="study-panel p-4">
-						<div class="flex items-center justify-between gap-3">
-							<h2 class="text-base font-semibold">{{ __('Explicaciones favoritas') }}</h2>
-							<router-link :to="{ name: 'StudyExplanations' }" class="text-sm font-medium text-ink-blue-4">{{ __('Ver') }}</router-link>
+					<div class="s-panel s-panel--flush">
+						<div class="sidebar-header">
+							<Star class="h-4 w-4 stroke-1.5" />
+							<h2 class="sidebar-title">{{ __('Explicaciones favoritas') }}</h2>
+							<router-link :to="{ name: 'StudyExplanations' }" class="sidebar-link">{{ __('Ver todas') }}</router-link>
 						</div>
-						<div class="mt-3 flex flex-col gap-2">
+						<div class="fav-list">
 							<router-link
 								v-for="explanation in explanations.slice(0, 5)"
 								:key="explanation.name"
 								:to="{ name: 'StudyExplanations' }"
-								class="rounded-md bg-surface-gray-1 p-3 text-sm hover:bg-surface-gray-2"
+								class="fav-item"
 							>
-								<div class="font-medium text-ink-gray-9">{{ explanation.topic || __('Sin tema') }}</div>
-								<div class="mt-1 text-xs text-ink-gray-6">{{ formatDate(explanation.creation) }}</div>
+								<BookMarked class="h-4 w-4 shrink-0 stroke-1.5" />
+								<div class="min-w-0">
+									<div class="fav-item-title">{{ explanation.topic || __('Sin tema') }}</div>
+									<div class="fav-item-date">{{ formatDate(explanation.creation) }}</div>
+								</div>
 							</router-link>
-							<div v-if="!explanations.length" class="study-mini-empty">{{ __('Guarda una explicación importante desde una lección para repasarla luego.') }}</div>
+							<div v-if="!explanations.length" class="s-mini-empty">
+								<BookMarked class="h-5 w-5 stroke-1.5" />
+								<span>{{ __('Guarda una explicación importante desde una lección para repasarla luego.') }}</span>
+							</div>
 						</div>
 					</div>
 				</aside>
 			</section>
 
-			<section v-else-if="isFlow" class="grid gap-5 xl:grid-cols-[340px_1fr]">
-				<aside class="study-panel h-fit p-4">
-					<div class="study-kicker">{{ __('Constructor guiado') }}</div>
-					<h2 class="mt-1 text-xl font-semibold">{{ __('Crea tu curso IA') }}</h2>
-					<p class="mt-2 text-sm leading-6 text-ink-gray-6">{{ __('Completa estos pasos. Cada avance desbloquea el siguiente sin perder tu progreso.') }}</p>
-					<div class="mt-5 flex flex-col gap-3">
-						<div class="study-step" :class="currentSession ? 'is-done' : 'is-active'">
-							<span>1</span>
+			<!-- ═══════════ FLOW BUILDER ═══════════ -->
+			<section v-else-if="isFlow" class="grid gap-6 xl:grid-cols-[340px_1fr]">
+				<aside class="s-panel s-panel--flush h-fit">
+					<div class="builder-header">
+						<Wand2 class="h-5 w-5 stroke-1.5" />
+						<div>
+							<div class="s-kicker">{{ __('Constructor guiado') }}</div>
+							<h2 class="s-panel-title">{{ __('Crea tu curso IA') }}</h2>
+						</div>
+					</div>
+					<p class="builder-desc">{{ __('Completa estos pasos. Cada avance desbloquea el siguiente sin perder tu progreso.') }}</p>
+					<div class="steps-list">
+						<div class="s-step" :class="currentSession ? 'is-done' : 'is-active'">
+							<span class="s-step-num">1</span>
 							<div>
-								<div class="font-medium">{{ __('Datos básicos') }}</div>
-								<p>{{ currentSession ? __('Curso creado') : __('Ponle nombre y contexto') }}</p>
+								<div class="s-step-title">{{ __('Datos básicos') }}</div>
+								<p class="s-step-desc">{{ currentSession ? __('Curso creado') : __('Ponle nombre y contexto') }}</p>
 							</div>
 						</div>
-						<div class="study-step" :class="currentSession?.topics?.length ? 'is-done' : currentSession ? 'is-active' : ''">
-							<span>2</span>
+						<div class="s-step" :class="currentSession?.topics?.length ? 'is-done' : currentSession ? 'is-active' : ''">
+							<span class="s-step-num">2</span>
 							<div>
-								<div class="font-medium">{{ __('Material y temas') }}</div>
-								<p>{{ __('Sube archivos o pega texto') }}</p>
+								<div class="s-step-title">{{ __('Material y temas') }}</div>
+								<p class="s-step-desc">{{ __('Sube archivos o pega texto') }}</p>
 							</div>
 						</div>
-						<div class="study-step" :class="currentSession?.profile_questions?.length ? 'is-done' : currentSession?.topics?.length ? 'is-active' : ''">
-							<span>3</span>
+						<div class="s-step" :class="currentSession?.profile_questions?.length ? 'is-done' : currentSession?.topics?.length ? 'is-active' : ''">
+							<span class="s-step-num">3</span>
 							<div>
-								<div class="font-medium">{{ __('Perfil') }}</div>
-								<p>{{ __('Adapta el curso a tu nivel') }}</p>
+								<div class="s-step-title">{{ __('Perfil') }}</div>
+								<p class="s-step-desc">{{ __('Adapta el curso a tu nivel') }}</p>
 							</div>
 						</div>
-						<div class="study-step" :class="currentSession?.course_structure?.modules?.length ? 'is-done' : currentSession?.profile_questions?.length ? 'is-active' : ''">
-							<span>4</span>
+						<div class="s-step" :class="currentSession?.course_structure?.modules?.length ? 'is-done' : currentSession?.profile_questions?.length ? 'is-active' : ''">
+							<span class="s-step-num">4</span>
 							<div>
-								<div class="font-medium">{{ __('Curso listo') }}</div>
-								<p>{{ __('Genera módulos y lecciones') }}</p>
+								<div class="s-step-title">{{ __('Curso listo') }}</div>
+								<p class="s-step-desc">{{ __('Genera módulos y lecciones') }}</p>
 							</div>
 						</div>
 					</div>
 				</aside>
 
-				<div class="flex flex-col gap-5">
-					<div class="study-panel p-5">
-						<div class="study-section-heading">
+				<div class="flex flex-col gap-6">
+					<!-- Step 1 -->
+					<div class="s-panel s-panel--flush">
+						<div class="s-panel-header">
 							<div>
-								<div class="study-kicker">{{ __('Paso 1') }}</div>
-								<h2>{{ __('Datos básicos del curso') }}</h2>
-								<p>{{ __('Con esto la IA entiende qué estás preparando y cuánto contexto tiene.') }}</p>
+								<div class="s-kicker">{{ __('Paso 1') }}</div>
+								<h2 class="s-panel-title">{{ __('Datos básicos del curso') }}</h2>
+								<p class="s-panel-desc">{{ __('Con esto la IA entiende qué estás preparando y cuánto contexto tiene.') }}</p>
 							</div>
 							<Button :label="currentSession ? __('Guardar cambios') : __('Crear curso')" variant="solid" :loading="loading === 'create'" @click="createOrUpdateSession" />
 						</div>
-						<div class="mt-4 grid gap-3 md:grid-cols-2">
+						<div class="form-grid">
 							<FormControl v-model="draft.title" :label="__('Nombre del curso')" :placeholder="__('Ej. Parcial de cálculo')" />
 							<FormControl v-model="draft.academic_context" :label="__('Curso o contexto')" :placeholder="__('Ej. Universidad, curso, ciclo')" />
 							<FormControl v-model="draft.exam_date" type="date" :label="__('Fecha objetivo')" />
 							<div>
-								<label class="mb-1 block text-sm text-ink-gray-7">{{ __('Nivel') }}</label>
-								<select v-model="draft.student_level" class="study-input">
+								<label class="s-label">{{ __('Nivel') }}</label>
+								<select v-model="draft.student_level" class="s-select">
 									<option value="colegio">{{ __('Colegio') }}</option>
 									<option value="preuniversitario">{{ __('Preuniversitario') }}</option>
 									<option value="universitario">{{ __('Universitario') }}</option>
@@ -211,34 +244,36 @@
 							</div>
 							<FormControl class="md:col-span-2" v-model="draft.desired_topics" :label="__('Temas obligatorios')" :placeholder="__('Separados por coma, opcional')" />
 							<div class="md:col-span-2">
-								<label class="mb-1 block text-sm text-ink-gray-7">{{ __('Texto manual') }}</label>
-								<textarea v-model="draft.manual_text" class="study-textarea" rows="7" :placeholder="__('Pega sílabos, apuntes, ejercicios o temas del parcial.')" />
+								<label class="s-label">{{ __('Texto manual') }}</label>
+								<textarea v-model="draft.manual_text" class="s-textarea" rows="7" :placeholder="__('Pega sílabos, apuntes, ejercicios o temas del parcial.')" />
 							</div>
 						</div>
 					</div>
 
-					<div v-if="flowId === 'admision'" class="study-panel p-5">
-						<div class="study-section-heading">
+					<!-- Admission search -->
+					<div v-if="flowId === 'admision'" class="s-panel s-panel--flush">
+						<div class="s-panel-header">
 							<div>
-								<div class="study-kicker">{{ __('Opcional') }}</div>
-								<h2>{{ __('Buscar temario de admisión') }}</h2>
-								<p>{{ __('La IA trae una base de temas para convertirla en curso.') }}</p>
+								<div class="s-kicker">{{ __('Opcional') }}</div>
+								<h2 class="s-panel-title">{{ __('Buscar temario de admisión') }}</h2>
+								<p class="s-panel-desc">{{ __('La IA trae una base de temas para convertirla en curso.') }}</p>
 							</div>
 						</div>
-						<div class="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+						<div class="form-grid form-grid--inline">
 							<FormControl v-model="university" :placeholder="__('Universidad')" />
 							<FormControl v-model="career" :placeholder="__('Carrera, opcional')" />
 							<Button :label="__('Buscar')" :loading="loading === 'search'" @click="searchTemario" />
 						</div>
-						<div v-if="searchResult" class="study-markdown mt-4 rounded-lg bg-surface-gray-1 p-4" v-html="renderMarkdown(searchResult)" />
+						<div v-if="searchResult" class="s-markdown-block" v-html="renderMarkdown(searchResult)" />
 					</div>
 
-					<div class="study-panel p-5">
-						<div class="study-section-heading">
+					<!-- Step 2 -->
+					<div class="s-panel s-panel--flush">
+						<div class="s-panel-header">
 							<div>
-								<div class="study-kicker">{{ __('Paso 2') }}</div>
-								<h2>{{ __('Materiales y temas') }}</h2>
-								<p>{{ __('Sube PDF, imágenes o Word. Luego analiza para detectar los temas del curso.') }}</p>
+								<div class="s-kicker">{{ __('Paso 2') }}</div>
+								<h2 class="s-panel-title">{{ __('Materiales y temas') }}</h2>
+								<p class="s-panel-desc">{{ __('Sube PDF, imágenes o Word. Luego analiza para detectar los temas del curso.') }}</p>
 							</div>
 							<div class="flex flex-wrap gap-2">
 								<FileUploader
@@ -255,57 +290,77 @@
 								<Button :label="__('Analizar material')" variant="solid" :disabled="!currentSession" :loading="loading === 'analyze'" @click="analyzeMaterial" />
 							</div>
 						</div>
-						<div v-if="loading === 'analyze'" class="study-loader mt-4">{{ __('Analizando material y ordenando temas...') }}</div>
-						<div class="mt-4 grid gap-2">
-							<div v-for="material in currentSession?.materials || []" :key="material.idx" class="flex items-center justify-between gap-3 rounded-md bg-surface-gray-1 px-3 py-3">
+						<div v-if="loading === 'analyze'" class="s-loader">
+							<div class="s-loader-spinner"></div>
+							{{ __('Analizando material y ordenando temas...') }}
+						</div>
+						<div class="materials-list">
+							<div v-for="material in currentSession?.materials || []" :key="material.idx" class="material-item">
+								<div class="material-icon"><FileText class="h-4 w-4 stroke-1.5" /></div>
 								<div class="min-w-0">
-									<div class="truncate text-sm font-medium">{{ material.file_name }}</div>
-									<div class="text-xs text-ink-gray-6">{{ material.file_type }} · {{ material.analysis_status }}</div>
+									<div class="material-name">{{ material.file_name }}</div>
+									<div class="material-meta">{{ material.file_type }} · {{ material.analysis_status }}</div>
 								</div>
-								<FileText class="h-4 w-4 shrink-0 stroke-1.5 text-ink-gray-5" />
 							</div>
-							<div v-if="!currentSession?.materials?.length" class="study-empty">
-								<Upload class="mx-auto h-7 w-7 stroke-1.5 text-ink-gray-5" />
-								<h3 class="mt-2 text-sm font-semibold">{{ currentSession ? __('Agrega material para mejorar el curso') : __('Primero crea el curso') }}</h3>
-								<p class="mt-1 text-sm text-ink-gray-6">{{ currentSession ? __('También puedes usar solo el texto manual del paso 1.') : __('Así se activará la subida de archivos.') }}</p>
+							<div v-if="!currentSession?.materials?.length" class="s-empty-sm">
+								<Upload class="h-6 w-6 stroke-1.5" />
+								<h3>{{ currentSession ? __('Agrega material para mejorar el curso') : __('Primero crea el curso') }}</h3>
+								<p>{{ currentSession ? __('También puedes usar solo el texto manual del paso 1.') : __('Así se activará la subida de archivos.') }}</p>
 							</div>
 						</div>
 					</div>
 
-					<div class="study-panel p-5">
-						<div class="study-section-heading">
+					<!-- Steps 3 & 4 -->
+					<div class="s-panel s-panel--flush">
+						<div class="s-panel-header">
 							<div>
-								<div class="study-kicker">{{ __('Pasos 3 y 4') }}</div>
-								<h2>{{ __('Perfil y creación del curso') }}</h2>
-								<p>{{ __('Responde unas preguntas rápidas y crea la malla de módulos y lecciones.') }}</p>
+								<div class="s-kicker">{{ __('Pasos 3 y 4') }}</div>
+								<h2 class="s-panel-title">{{ __('Perfil y creación del curso') }}</h2>
+								<p class="s-panel-desc">{{ __('Responde unas preguntas rápidas y crea la malla de módulos y lecciones.') }}</p>
 							</div>
 							<div class="flex flex-wrap gap-2">
 								<Button :label="__('Crear preguntas')" :disabled="!currentSession" :loading="loading === 'questions'" @click="generateQuestions" />
 								<Button :label="__('Crear curso completo')" variant="solid" :disabled="!currentSession" :loading="loading === 'plan'" @click="generatePlan" />
 							</div>
 						</div>
-						<div v-if="loading === 'plan'" class="study-loader mt-4">{{ __('Creando módulos, lecciones y ruta de estudio...') }}</div>
-						<div class="mt-4 grid gap-4 xl:grid-cols-2">
-							<div class="rounded-lg bg-surface-gray-1 p-4">
-								<h3 class="text-sm font-semibold text-ink-gray-8">{{ __('Temas detectados') }}</h3>
-								<div class="mt-3 flex flex-col gap-2">
-									<div v-for="topic in currentSession?.topics || []" :key="topic.title || topic" class="rounded-md bg-surface-green-1 px-3 py-2 text-sm text-ink-green-4">
+						<div v-if="loading === 'plan'" class="s-loader">
+							<div class="s-loader-spinner"></div>
+							{{ __('Creando módulos, lecciones y ruta de estudio...') }}
+						</div>
+						<div class="twin-grid">
+							<div class="twin-card">
+								<div class="twin-card-header">
+									<Layers class="h-4 w-4 stroke-1.5" />
+									<h3>{{ __('Temas detectados') }}</h3>
+								</div>
+								<div class="twin-card-body">
+									<div v-for="topic in currentSession?.topics || []" :key="topic.title || topic" class="topic-chip">
+										<CheckCircle2 class="h-3.5 w-3.5 stroke-1.5" />
 										{{ topic.title || topic }}
 									</div>
-									<div v-if="!currentSession?.topics?.length" class="study-mini-empty">{{ __('Cuando analices tu material, aquí aparecerán los temas base.') }}</div>
+									<div v-if="!currentSession?.topics?.length" class="s-mini-empty">
+										<Layers class="h-5 w-5 stroke-1.5" />
+										<span>{{ __('Cuando analices tu material, aquí aparecerán los temas base.') }}</span>
+									</div>
 								</div>
 							</div>
-							<div class="rounded-lg bg-surface-gray-1 p-4">
-								<h3 class="text-sm font-semibold text-ink-gray-8">{{ __('Perfil de aprendizaje') }}</h3>
-								<div class="mt-3 flex flex-col gap-3">
-									<div v-for="question in currentSession?.profile_questions || []" :key="question.id" class="rounded-md border border-outline-gray-1 bg-surface-white p-3">
-										<div class="text-sm font-medium">{{ question.question }}</div>
-										<select v-model="profileAnswers[question.id]" class="study-input mt-2">
+							<div class="twin-card">
+								<div class="twin-card-header">
+									<UserCog class="h-4 w-4 stroke-1.5" />
+									<h3>{{ __('Perfil de aprendizaje') }}</h3>
+								</div>
+								<div class="twin-card-body">
+									<div v-for="question in currentSession?.profile_questions || []" :key="question.id" class="profile-q">
+										<div class="profile-q-text">{{ question.question }}</div>
+										<select v-model="profileAnswers[question.id]" class="s-select s-select--sm">
 											<option value="">{{ __('Selecciona una opción') }}</option>
 											<option v-for="option in question.options || []" :key="option.label" :value="option.label">{{ option.label }}</option>
 										</select>
 									</div>
-									<div v-if="!currentSession?.profile_questions?.length" class="study-mini-empty">{{ __('Pulsa “Crear preguntas” cuando ya tengas temas detectados.') }}</div>
+									<div v-if="!currentSession?.profile_questions?.length" class="s-mini-empty">
+										<UserCog class="h-5 w-5 stroke-1.5" />
+										<span>{{ __('Pulsa "Crear preguntas" cuando ya tengas temas detectados.') }}</span>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -313,349 +368,401 @@
 				</div>
 			</section>
 
-			<section v-else-if="isPlan" class="grid gap-5 xl:grid-cols-[1fr_340px]">
-				<div class="study-panel p-5">
-					<div class="flex flex-wrap items-start justify-between gap-3">
+			<!-- ═══════════ PLAN VIEW ═══════════ -->
+			<section v-else-if="isPlan" class="grid gap-6 xl:grid-cols-[1fr_340px]">
+				<div class="s-panel s-panel--flush">
+					<div class="s-panel-header">
 						<div>
-							<div class="study-kicker">{{ __('Curso IA personal') }}</div>
-							<h2 class="mt-1 text-2xl font-semibold">{{ courseStructure.courseTitle || currentSession?.title }}</h2>
-							<p class="mt-2 max-w-3xl text-sm leading-6 text-ink-gray-6">{{ currentSession?.profile_summary || courseStructure.courseGoal || __('Malla curricular generada por TutorIA.') }}</p>
+							<div class="s-kicker">{{ __('Curso IA personal') }}</div>
+							<h2 class="s-panel-title">{{ courseStructure.courseTitle || currentSession?.title }}</h2>
+							<p class="s-panel-desc">{{ currentSession?.profile_summary || courseStructure.courseGoal || __('Malla curricular generada por TutorIA.') }}</p>
 						</div>
 						<div class="flex flex-wrap gap-2">
 							<Button :label="__('Continuar')" variant="solid" @click="openRoom(currentSession.name, nextLessonIndex(currentSession))" />
 							<Button :label="__('Rehacer plan')" :loading="loading === 'plan'" @click="generatePlan" />
 						</div>
 					</div>
-					<div class="mt-5 rounded-lg bg-surface-gray-1 p-4">
-						<div class="flex items-center justify-between text-sm">
-							<span class="font-medium">{{ __('Progreso total') }}</span>
-							<span class="text-ink-gray-6">{{ courseProgress(currentSession) }}%</span>
+					<div class="plan-progress">
+						<div class="plan-progress-header">
+							<span class="plan-progress-label">{{ __('Progreso total') }}</span>
+							<span class="plan-progress-pct">{{ courseProgress(currentSession) }}%</span>
 						</div>
-						<div class="mt-2 h-2 overflow-hidden rounded-full bg-surface-white">
-							<div class="h-full rounded-full bg-blue-500" :style="{ width: `${courseProgress(currentSession)}%` }" />
+						<div class="progress-track progress-track--lg">
+							<div class="progress-fill" :style="{ width: `${courseProgress(currentSession)}%` }" />
 						</div>
 					</div>
-					<div class="mt-5 grid gap-4">
-						<div v-for="(module, moduleIndex) in courseStructure.modules || []" :key="module.title || moduleIndex" class="study-module-card">
-							<div class="flex flex-wrap items-start justify-between gap-3">
+					<div class="modules-list">
+						<div v-for="(module, moduleIndex) in courseStructure.modules || []" :key="module.title || moduleIndex" class="module-card">
+							<div class="module-header">
 								<div>
-									<div class="study-kicker">{{ module.period || `${__('Módulo')} ${moduleIndex + 1}` }}</div>
-									<h3 class="mt-1 text-lg font-semibold">{{ module.title }}</h3>
-									<p class="mt-1 text-sm leading-6 text-ink-gray-6">{{ module.objective }}</p>
+									<div class="s-kicker">{{ module.period || `${__('Módulo')} ${moduleIndex + 1}` }}</div>
+									<h3 class="module-title">{{ module.title }}</h3>
+									<p class="module-obj">{{ module.objective }}</p>
 								</div>
-								<span class="study-badge">{{ module.lessons?.length || 0 }} {{ __('lecciones') }}</span>
+								<span class="module-badge">{{ module.lessons?.length || 0 }} {{ __('lecciones') }}</span>
 							</div>
-							<div class="mt-4 grid gap-2">
+							<div class="lessons-list">
 								<button
 									v-for="lesson in module.lessons || []"
 									:key="lesson.key || lesson.title"
-									class="study-lesson-row"
+									class="lesson-row"
 									@click="openRoom(currentSession.name, lessonGlobalIndex(lesson))"
 								>
-									<div class="flex min-w-0 items-start gap-3">
-										<div class="study-lesson-check" :class="isLessonDone(lesson) ? 'is-done' : ''">
+									<div class="lesson-left">
+										<div class="lesson-check" :class="isLessonDone(lesson) ? 'is-done' : ''">
 											<CheckCircle2 class="h-4 w-4 stroke-1.5" />
 										</div>
 										<div class="min-w-0">
-											<div class="truncate text-sm font-semibold text-ink-gray-9">{{ lesson.title }}</div>
-											<p class="mt-1 line-clamp-2 text-sm leading-5 text-ink-gray-6">{{ lesson.objective }}</p>
+											<div class="lesson-title">{{ lesson.title }}</div>
+											<p class="lesson-obj">{{ lesson.objective }}</p>
 										</div>
 									</div>
-									<div class="flex shrink-0 flex-col items-end gap-1">
-										<span class="rounded bg-surface-blue-1 px-2 py-1 text-xs text-ink-blue-4">{{ lesson.duration || __('30 min') }}</span>
-										<span class="text-xs text-ink-gray-5">{{ lesson.difficulty || __('medio') }}</span>
+									<div class="lesson-meta">
+										<span class="lesson-duration"><Clock class="h-3 w-3 stroke-1.5" /> {{ lesson.duration || __('30 min') }}</span>
+										<span class="lesson-diff">{{ lesson.difficulty || __('medio') }}</span>
 									</div>
 								</button>
 							</div>
 						</div>
-						<div v-if="!lessonsFlat.length" class="study-empty">
-							<ClipboardCheck class="mx-auto h-8 w-8 stroke-1.5 text-ink-gray-5" />
-							<h3 class="mt-2 text-base font-semibold">{{ __('El curso aún no tiene lecciones') }}</h3>
-							<p class="mt-1 text-sm text-ink-gray-6">{{ __('Vuelve al constructor y crea el plan completo.') }}</p>
+						<div v-if="!lessonsFlat.length" class="s-empty">
+							<div class="s-empty-icon"><ClipboardCheck class="h-8 w-8 stroke-1.5" /></div>
+							<h3 class="s-empty-title">{{ __('El curso aún no tiene lecciones') }}</h3>
+							<p class="s-empty-desc">{{ __('Vuelve al constructor y crea el plan completo.') }}</p>
 						</div>
 					</div>
 				</div>
-				<aside class="study-panel h-fit p-4">
-					<h2 class="text-base font-semibold">{{ __('Resumen del curso') }}</h2>
-					<div class="mt-3 flex flex-col gap-2">
-						<div class="rounded-md bg-surface-gray-1 p-3">
-							<div class="text-xs text-ink-gray-6">{{ __('Lecciones') }}</div>
-							<div class="mt-1 text-2xl font-semibold">{{ lessonsFlat.length }}</div>
+				<aside class="s-panel s-panel--flush h-fit">
+					<div class="sidebar-header">
+						<BarChart3 class="h-4 w-4 stroke-1.5" />
+						<h2 class="sidebar-title">{{ __('Resumen del curso') }}</h2>
+					</div>
+					<div class="summary-stats">
+						<div class="summary-stat">
+							<div class="summary-stat-label">{{ __('Lecciones') }}</div>
+							<div class="summary-stat-value">{{ lessonsFlat.length }}</div>
 						</div>
-						<div class="rounded-md bg-surface-gray-1 p-3">
-							<div class="text-xs text-ink-gray-6">{{ __('Progreso') }}</div>
-							<div class="mt-1 text-2xl font-semibold">{{ courseProgress(currentSession) }}%</div>
+						<div class="summary-stat">
+							<div class="summary-stat-label">{{ __('Progreso') }}</div>
+							<div class="summary-stat-value">{{ courseProgress(currentSession) }}%</div>
 						</div>
-						<div class="rounded-md bg-surface-blue-1 p-3">
-							<div class="text-xs text-ink-blue-4">{{ __('Siguiente paso') }}</div>
-							<div class="mt-1 text-sm font-medium text-ink-blue-4">{{ lessonsFlat[nextLessonIndex(currentSession)]?.title || __('Revisar módulos') }}</div>
+						<div class="summary-stat summary-stat--highlight">
+							<div class="summary-stat-label">{{ __('Siguiente paso') }}</div>
+							<div class="summary-stat-next">{{ lessonsFlat[nextLessonIndex(currentSession)]?.title || __('Revisar módulos') }}</div>
 						</div>
 					</div>
 				</aside>
 			</section>
 
-			<section v-else-if="isRoom" class="grid gap-5 xl:grid-cols-[1fr_360px]">
-				<div class="flex flex-col gap-5">
-					<div class="study-panel p-5">
-						<div class="flex flex-wrap items-start justify-between gap-3">
+			<!-- ═══════════ ROOM VIEW ═══════════ -->
+			<section v-else-if="isRoom" class="grid gap-6 xl:grid-cols-[1fr_360px]">
+				<div class="flex flex-col gap-6">
+					<!-- Room header -->
+					<div class="s-panel s-panel--flush">
+						<div class="s-panel-header">
 							<div>
-								<div class="study-kicker">{{ activeLesson.moduleTitle || __('Lección') }}</div>
-								<h2 class="mt-1 text-2xl font-semibold">{{ lessonPack.lessonTitle || activeTopicTitle }}</h2>
-								<p class="mt-2 max-w-3xl text-sm leading-6 text-ink-gray-6">{{ lessonPack.learningObjective || activeLesson.objective || __('Aprende con explicación, práctica, quiz, tutor y diagrama.') }}</p>
+								<div class="s-kicker">{{ activeLesson.moduleTitle || __('Lección') }}</div>
+								<h2 class="s-panel-title">{{ lessonPack.lessonTitle || activeTopicTitle }}</h2>
+								<p class="s-panel-desc">{{ lessonPack.learningObjective || activeLesson.objective || __('Aprende con explicación, práctica, quiz, tutor y diagrama.') }}</p>
 							</div>
 							<div class="flex flex-wrap gap-2">
-								<Button :label="__('Regenerar')" :loading="loading === 'pack'" @click="generatePack(true)" />
-								<Button :label="__('Diagrama')" :loading="loading === 'diagram'" @click="generateDiagram" />
-								<Button :label="__('Guardar favorito')" @click="saveCurrentExplanation" />
+								<Button :label="__('Regenerar')" :loading="loading === 'pack'" @click="generatePack(true)">
+									<template #prefix><RefreshCw class="h-4 w-4 stroke-1.5" /></template>
+								</Button>
+								<Button :label="__('Diagrama')" :loading="loading === 'diagram'" @click="generateDiagram">
+									<template #prefix><GitBranch class="h-4 w-4 stroke-1.5" /></template>
+								</Button>
+								<Button :label="__('Guardar favorito')" @click="saveCurrentExplanation">
+									<template #prefix><Star class="h-4 w-4 stroke-1.5" /></template>
+								</Button>
 							</div>
 						</div>
-						<div class="mt-5 grid gap-3 md:grid-cols-3">
-							<div class="study-room-step is-active">
-								<span>1</span>
+						<div class="room-steps">
+							<div class="room-step is-active">
+								<span class="room-step-num">1</span>
 								<div>
 									<strong>{{ __('Aprende') }}</strong>
 									<p>{{ __('Idea clave y explicación') }}</p>
 								</div>
 							</div>
-							<div class="study-room-step">
-								<span>2</span>
+							<div class="room-step">
+								<span class="room-step-num">2</span>
 								<div>
 									<strong>{{ __('Practica') }}</strong>
 									<p>{{ __('Ejercicios con feedback') }}</p>
 								</div>
 							</div>
-							<div class="study-room-step">
-								<span>3</span>
+							<div class="room-step">
+								<span class="room-step-num">3</span>
 								<div>
 									<strong>{{ __('Comprueba') }}</strong>
 									<p>{{ __('Quiz y checklist') }}</p>
 								</div>
 							</div>
 						</div>
-						<div v-if="loading === 'lesson'" class="study-loader mt-5">
+						<div v-if="loading === 'lesson'" class="s-loader">
+							<div class="s-loader-spinner"></div>
 							{{ __('Preparando tu lección personalizada...') }}
 						</div>
 					</div>
 
-					<div class="study-panel p-5" @mouseup="captureSelection">
-						<div class="study-section-heading">
+					<!-- Explanation -->
+					<div class="s-panel s-panel--flush" @mouseup="captureSelection">
+						<div class="s-panel-header">
 							<div>
-								<div class="study-kicker">{{ __('Paso 1') }}</div>
-								<h2>{{ __('Entiende el tema') }}</h2>
-								<p>{{ __('Lee de arriba hacia abajo. Si seleccionas un texto, el tutor puede explicarlo.') }}</p>
+								<div class="s-kicker">{{ __('Paso 1') }}</div>
+								<h2 class="s-panel-title">{{ __('Entiende el tema') }}</h2>
+								<p class="s-panel-desc">{{ __('Lee de arriba hacia abajo. Si seleccionas un texto, el tutor puede explicarlo.') }}</p>
 							</div>
 						</div>
-						<img v-if="diagramUrl" :src="diagramUrl" class="mt-4 w-full rounded-lg border border-outline-gray-1" />
-						<div v-if="lessonPack.lessonTitle || lessonPack.sections?.length" class="mt-5 grid gap-4">
-							<div class="rounded-lg bg-surface-blue-1 p-4">
-								<div class="text-xs font-semibold uppercase tracking-wide text-ink-blue-3">{{ __('Idea clave') }}</div>
-								<div class="mt-2 text-base font-medium leading-7 text-ink-blue-4">{{ lessonPack.keyIdea || __('Esta lección ya está lista para estudiar.') }}</div>
+						<img v-if="diagramUrl" :src="diagramUrl" class="diagram-img" />
+						<div v-if="lessonPack.lessonTitle || lessonPack.sections?.length" class="lesson-content">
+							<div class="key-idea">
+								<div class="key-idea-label"><Lightbulb class="h-4 w-4 stroke-1.5" /> {{ __('Idea clave') }}</div>
+								<div class="key-idea-text">{{ lessonPack.keyIdea || __('Esta lección ya está lista para estudiar.') }}</div>
 							</div>
-							<div v-if="lessonPack.conceptCards?.length" class="grid gap-3 md:grid-cols-2">
-								<div v-for="card in lessonPack.conceptCards" :key="card.title" class="study-concept-card">
-									<h3 class="text-base font-semibold">{{ card.title }}</h3>
-									<p class="mt-2 text-sm leading-6 text-ink-gray-7">{{ card.body }}</p>
-									<div v-if="card.formula" class="mt-3 rounded bg-surface-gray-1 px-3 py-2 font-mono text-sm">{{ card.formula }}</div>
+							<div v-if="lessonPack.conceptCards?.length" class="concept-grid">
+								<div v-for="card in lessonPack.conceptCards" :key="card.title" class="concept-card">
+									<h3 class="concept-title">{{ card.title }}</h3>
+									<p class="concept-body">{{ card.body }}</p>
+									<div v-if="card.formula" class="concept-formula">{{ card.formula }}</div>
 								</div>
 							</div>
-							<div v-for="(section, index) in lessonPack.sections || []" :key="section.title" class="study-content-block">
-								<div class="flex items-start gap-3">
-									<span class="study-number">{{ index + 1 }}</span>
+							<div v-for="(section, index) in lessonPack.sections || []" :key="section.title" class="content-block">
+								<div class="content-block-header">
+									<span class="content-num">{{ index + 1 }}</span>
 									<div>
-										<h3 class="text-lg font-semibold">{{ section.title }}</h3>
-										<p class="mt-2 text-sm leading-7 text-ink-gray-7">{{ section.summary }}</p>
+										<h3 class="content-title">{{ section.title }}</h3>
+										<p class="content-summary">{{ section.summary }}</p>
 									</div>
 								</div>
-								<ul class="mt-3 grid gap-2">
-									<li v-for="point in section.keyPoints || []" :key="point" class="flex gap-2 text-sm leading-6 text-ink-gray-7">
-										<span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
+								<ul class="content-points">
+									<li v-for="point in section.keyPoints || []" :key="point">
+										<span class="point-dot" />
 										<span>{{ point }}</span>
 									</li>
 								</ul>
 							</div>
-							<div v-if="lessonPack.workedExamples?.length" class="study-content-block">
-								<h3 class="text-lg font-semibold">{{ __('Ejemplo resuelto paso a paso') }}</h3>
-								<div v-for="example in lessonPack.workedExamples" :key="example.title || example.problem" class="mt-4 rounded-md bg-surface-gray-1 p-4">
-									<div class="text-sm font-semibold">{{ example.title || example.problem }}</div>
-									<p v-if="example.problem" class="mt-2 text-sm leading-6 text-ink-gray-7">{{ example.problem }}</p>
-									<ol class="mt-3 grid gap-2">
-										<li v-for="(step, index) in example.steps || []" :key="index" class="flex gap-3 text-sm leading-6">
-											<span class="study-number">{{ index + 1 }}</span>
+							<div v-if="lessonPack.workedExamples?.length" class="content-block">
+								<h3 class="content-title">{{ __('Ejemplo resuelto paso a paso') }}</h3>
+								<div v-for="example in lessonPack.workedExamples" :key="example.title || example.problem" class="worked-example">
+									<div class="example-title">{{ example.title || example.problem }}</div>
+									<p v-if="example.problem" class="example-problem">{{ example.problem }}</p>
+									<ol class="example-steps">
+										<li v-for="(step, index) in example.steps || []" :key="index">
+											<span class="content-num content-num--sm">{{ index + 1 }}</span>
 											<span>{{ step }}</span>
 										</li>
 									</ol>
-									<div v-if="example.answer" class="mt-3 rounded bg-surface-green-1 px-3 py-2 text-sm text-ink-green-4">{{ example.answer }}</div>
+									<div v-if="example.answer" class="example-answer">
+										<CheckCircle2 class="h-4 w-4 stroke-1.5" />
+										{{ example.answer }}
+									</div>
 								</div>
 							</div>
-							<div v-if="lessonPack.commonMistakes?.length" class="study-content-block">
-								<h3 class="text-lg font-semibold">{{ __('Errores frecuentes') }}</h3>
-								<div class="mt-3 grid gap-2">
-									<div v-for="mistake in lessonPack.commonMistakes" :key="mistake.mistake" class="rounded-md bg-surface-red-1 p-3 text-sm leading-6">
-										<strong>{{ mistake.mistake }}</strong>
-										<div class="mt-1 text-ink-gray-7">{{ mistake.fix }}</div>
+							<div v-if="lessonPack.commonMistakes?.length" class="content-block">
+								<h3 class="content-title">{{ __('Errores frecuentes') }}</h3>
+								<div class="mistakes-list">
+									<div v-for="mistake in lessonPack.commonMistakes" :key="mistake.mistake" class="mistake-item">
+										<div class="mistake-bad"><AlertTriangle class="h-3.5 w-3.5 stroke-1.5" /> {{ mistake.mistake }}</div>
+										<div class="mistake-fix">{{ mistake.fix }}</div>
 									</div>
 								</div>
 							</div>
 						</div>
-						<div v-else class="study-empty mt-4">
-							<RotateCcw class="mx-auto h-8 w-8 stroke-1.5 text-ink-gray-5" />
-							<h3 class="mt-2 text-base font-semibold">{{ __('Prepararemos esta lección automáticamente') }}</h3>
-							<p class="mt-1 text-sm text-ink-gray-6">{{ __('Si tarda, usa “Regenerar” para pedir una nueva versión.') }}</p>
+						<div v-else class="s-empty">
+							<div class="s-empty-icon"><RotateCcw class="h-8 w-8 stroke-1.5" /></div>
+							<h3 class="s-empty-title">{{ __('Prepararemos esta lección automáticamente') }}</h3>
+							<p class="s-empty-desc">{{ __('Si tarda, usa "Regenerar" para pedir una nueva versión.') }}</p>
 						</div>
 					</div>
 
-					<div class="grid gap-5 xl:grid-cols-2">
-						<div class="study-panel p-4">
-							<div class="study-section-heading">
+					<!-- Practice & Quiz -->
+					<div class="grid gap-6 xl:grid-cols-2">
+						<div class="s-panel s-panel--flush">
+							<div class="s-panel-header">
 								<div>
-									<div class="study-kicker">{{ __('Paso 2') }}</div>
-									<h2>{{ __('Practica') }}</h2>
-									<p>{{ __('Responde y revisa la explicación de cada opción.') }}</p>
+									<div class="s-kicker">{{ __('Paso 2') }}</div>
+									<h2 class="s-panel-title">{{ __('Practica') }}</h2>
+									<p class="s-panel-desc">{{ __('Responde y revisa la explicación de cada opción.') }}</p>
 								</div>
-								<Button :label="__('Generar')" :loading="loading === 'exercises'" @click="generateExercises" />
+								<Button :label="__('Generar')" :loading="loading === 'exercises'" @click="generateExercises">
+									<template #prefix><Zap class="h-4 w-4 stroke-1.5" /></template>
+								</Button>
 							</div>
 							<ExerciseList :items="lessonPack.practice?.length ? lessonPack.practice : exercises" @answer="handleAnswer" />
 						</div>
-						<div class="study-panel p-4">
-							<div class="study-section-heading">
+						<div class="s-panel s-panel--flush">
+							<div class="s-panel-header">
 								<div>
-									<div class="study-kicker">{{ __('Paso 3') }}</div>
-									<h2>{{ __('Quiz final') }}</h2>
-									<p>{{ __('Comprueba si puedes pasar a la siguiente lección.') }}</p>
+									<div class="s-kicker">{{ __('Paso 3') }}</div>
+									<h2 class="s-panel-title">{{ __('Quiz final') }}</h2>
+									<p class="s-panel-desc">{{ __('Comprueba si puedes pasar a la siguiente lección.') }}</p>
 								</div>
-								<Button :label="__('Generar')" :loading="loading === 'quiz'" @click="generateQuiz" />
+								<Button :label="__('Generar')" :loading="loading === 'quiz'" @click="generateQuiz">
+									<template #prefix><Trophy class="h-4 w-4 stroke-1.5" /></template>
+								</Button>
 							</div>
 							<ExerciseList :items="lessonPack.quiz?.length ? lessonPack.quiz : quiz" @answer="handleQuizAnswer" />
-							<div v-if="activeQuiz.length" class="mt-3 rounded-md bg-surface-blue-1 p-3 text-sm text-ink-blue-4">
-								{{ __('Puntaje') }}: {{ quizScore }}%
+							<div v-if="activeQuiz.length" class="quiz-score">
+								<Trophy class="h-5 w-5 stroke-1.5" />
+								<span>{{ __('Puntaje') }}: <strong>{{ quizScore }}%</strong></span>
 							</div>
 						</div>
 					</div>
 				</div>
 
-				<aside class="flex flex-col gap-5">
-					<div class="study-panel p-4">
-						<h2 class="text-base font-semibold">{{ __('Checklist de dominio') }}</h2>
-						<div v-if="lessonPack.masteryChecklist?.length" class="mt-3 grid gap-2">
-							<label v-for="item in lessonPack.masteryChecklist" :key="item" class="flex items-start gap-2 rounded-md bg-surface-gray-1 p-3 text-sm leading-6">
-								<input type="checkbox" class="mt-1 rounded border-outline-gray-3" @change="markProgress({ explanation_viewed: true })" />
+				<!-- Room sidebar -->
+				<aside class="flex flex-col gap-6">
+					<div class="s-panel s-panel--flush">
+						<div class="sidebar-header">
+							<ListChecks class="h-4 w-4 stroke-1.5" />
+							<h2 class="sidebar-title">{{ __('Checklist de dominio') }}</h2>
+						</div>
+						<div v-if="lessonPack.masteryChecklist?.length" class="checklist">
+							<label v-for="item in lessonPack.masteryChecklist" :key="item" class="checklist-item">
+								<input type="checkbox" class="checklist-box" @change="markProgress({ explanation_viewed: true })" />
 								<span>{{ item }}</span>
 							</label>
 						</div>
-						<div v-else class="study-mini-empty mt-3">{{ __('Termina la explicación para ver qué debes dominar.') }}</div>
+						<div v-else class="s-mini-empty">
+							<ListChecks class="h-5 w-5 stroke-1.5" />
+							<span>{{ __('Termina la explicación para ver qué debes dominar.') }}</span>
+						</div>
 					</div>
-					<div class="study-panel p-4">
-						<h2 class="text-base font-semibold">{{ __('Tutor contextual') }}</h2>
-						<p class="mt-1 text-sm text-ink-gray-6">{{ __('Pregunta dudas o selecciona texto de la lección para pedir una explicación.') }}</p>
-						<div ref="chatBox" class="mt-3 flex h-[360px] flex-col gap-3 overflow-y-auto rounded-md bg-surface-gray-1 p-3">
+					<div class="s-panel s-panel--flush">
+						<div class="sidebar-header">
+							<MessageCircle class="h-4 w-4 stroke-1.5" />
+							<h2 class="sidebar-title">{{ __('Tutor contextual') }}</h2>
+						</div>
+						<p class="chat-hint">{{ __('Pregunta dudas o selecciona texto de la lección para pedir una explicación.') }}</p>
+						<div ref="chatBox" class="chat-box">
 							<div
 								v-for="message in chatMessages"
 								:key="message.id || message.content"
-								class="rounded-md px-3 py-2 text-sm leading-6"
-								:class="message.role === 'user' ? 'self-end bg-surface-blue-2 text-ink-blue-4' : 'self-start bg-surface-white text-ink-gray-8'"
+								class="chat-msg"
+								:class="message.role === 'user' ? 'chat-msg--user' : 'chat-msg--ai'"
 								v-html="renderMarkdown(message.content)"
 							/>
 						</div>
-						<div class="mt-3 flex gap-2">
-							<textarea v-model="chatInput" class="study-textarea min-h-11 flex-1" rows="2" :placeholder="__('Pregunta sobre este tema')" @keydown.enter.exact.prevent="sendChat" />
+						<div class="chat-input-row">
+							<textarea v-model="chatInput" class="s-textarea s-textarea--sm" rows="2" :placeholder="__('Pregunta sobre este tema')" @keydown.enter.exact.prevent="sendChat" />
 							<Button :disabled="!chatInput.trim()" :loading="loading === 'chat'" @click="sendChat">
 								<template #icon><SendHorizontal class="h-4 w-4 stroke-1.5" /></template>
 							</Button>
 						</div>
 					</div>
-
-					<div class="study-panel p-4">
-						<h2 class="text-base font-semibold">{{ __('Notas rápidas') }}</h2>
-						<textarea v-model="whiteboardText" class="study-textarea mt-3" rows="8" :placeholder="__('Fórmulas, dudas, errores frecuentes...')" @input="saveWhiteboard" />
+					<div class="s-panel s-panel--flush">
+						<div class="sidebar-header">
+							<NotebookPen class="h-4 w-4 stroke-1.5" />
+							<h2 class="sidebar-title">{{ __('Notas rápidas') }}</h2>
+						</div>
+						<textarea v-model="whiteboardText" class="s-textarea" rows="8" :placeholder="__('Fórmulas, dudas, errores frecuentes...')" @input="saveWhiteboard" />
 					</div>
 				</aside>
 			</section>
 
-			<section v-else-if="isHistory" class="study-panel p-5">
-				<div class="flex flex-wrap items-center justify-between gap-3">
+			<!-- ═══════════ HISTORY ═══════════ -->
+			<section v-else-if="isHistory" class="s-panel s-panel--flush">
+				<div class="s-panel-header">
 					<div>
-						<div class="study-kicker">{{ __('Biblioteca') }}</div>
-						<h2 class="mt-1 text-xl font-semibold">{{ __('Todos tus cursos IA') }}</h2>
-						<p class="mt-1 text-sm text-ink-gray-6">{{ __('Reanuda, revisa módulos o elimina cursos que ya no necesites.') }}</p>
+						<div class="s-kicker"><History class="h-3.5 w-3.5 stroke-1.5" /> {{ __('Biblioteca') }}</div>
+						<h2 class="s-panel-title">{{ __('Todos tus cursos IA') }}</h2>
+						<p class="s-panel-desc">{{ __('Reanuda, revisa módulos o elimina cursos que ya no necesites.') }}</p>
 					</div>
-					<Button :label="__('Actualizar')" :loading="loading === 'dashboard'" @click="loadDashboard" />
+					<Button :label="__('Actualizar')" :loading="loading === 'dashboard'" @click="loadDashboard">
+						<template #prefix><RefreshCw class="h-4 w-4 stroke-1.5" /></template>
+					</Button>
 				</div>
-				<div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-					<div v-for="session in sessions" :key="session.name" class="study-course-card">
-						<div class="text-xs font-medium text-ink-blue-4">{{ flowLabel(session.flow_id || session.goal) }}</div>
-						<h3 class="mt-1 text-base font-semibold">{{ session.title || session.name }}</h3>
-						<p class="mt-1 text-sm text-ink-gray-6">{{ formatDate(session.modified) }}</p>
-						<div class="mt-3 h-2 overflow-hidden rounded-full bg-surface-gray-2">
-							<div class="h-full rounded-full bg-blue-500" :style="{ width: `${courseProgress(session)}%` }" />
+				<div class="courses-grid courses-grid--3">
+					<div v-for="session in sessions" :key="session.name" class="course-card">
+						<span class="course-tag" :class="`course-tag--${session.flow_id || session.goal || 'parcial'}`">{{ flowLabel(session.flow_id || session.goal) }}</span>
+						<h3 class="course-card-title">{{ session.title || session.name }}</h3>
+						<p class="course-card-date"><Clock class="h-3.5 w-3.5 stroke-1.5" /> {{ formatDate(session.modified) }}</p>
+						<div class="course-progress-bar">
+							<div class="progress-track">
+								<div class="progress-fill" :style="{ width: `${courseProgress(session)}%` }" />
+							</div>
 						</div>
-						<div class="mt-4 flex flex-wrap gap-2">
+						<div class="course-actions">
 							<Button :label="__('Continuar')" variant="solid" @click="openRoom(session.name, nextLessonIndex(session))" />
 							<Button :label="__('Módulos')" @click="openPlan(session.name)" />
-							<Button :label="__('Borrar')" variant="subtle" @click="deleteSession(session.name)" />
+							<Button :label="__('Borrar')" variant="subtle" theme="red" @click="deleteSession(session.name)">
+								<template #prefix><Trash2 class="h-3.5 w-3.5 stroke-1.5" /></template>
+							</Button>
 						</div>
 					</div>
-					<div v-if="!sessions.length" class="study-empty md:col-span-2 xl:col-span-3">
-						<History class="mx-auto h-8 w-8 stroke-1.5 text-ink-gray-5" />
-						<h3 class="mt-2 text-base font-semibold">{{ __('Aún no hay historial') }}</h3>
-						<p class="mt-1 text-sm text-ink-gray-6">{{ __('Tus cursos aparecerán aquí cuando crees el primero.') }}</p>
+					<div v-if="!sessions.length" class="s-empty md:col-span-2 xl:col-span-3">
+						<div class="s-empty-icon"><History class="h-8 w-8 stroke-1.5" /></div>
+						<h3 class="s-empty-title">{{ __('Aún no hay historial') }}</h3>
+						<p class="s-empty-desc">{{ __('Tus cursos aparecerán aquí cuando crees el primero.') }}</p>
 					</div>
 				</div>
 			</section>
 
-			<section v-else-if="isStatistics" class="grid gap-4 md:grid-cols-3">
-				<div v-for="metric in statisticsMetrics" :key="metric.label" class="study-panel p-5">
-					<div class="text-sm text-ink-gray-6">{{ metric.label }}</div>
-					<div class="mt-2 text-3xl font-semibold">{{ metric.value }}</div>
-					<div class="mt-3 h-1.5 rounded-full bg-surface-gray-2">
-						<div class="h-full w-1/2 rounded-full bg-blue-500" />
+			<!-- ═══════════ STATISTICS ═══════════ -->
+			<section v-else-if="isStatistics" class="stats-grid">
+				<div v-for="metric in statisticsMetrics" :key="metric.label" class="stat-card">
+					<div class="stat-card-label">{{ metric.label }}</div>
+					<div class="stat-card-value">{{ metric.value }}</div>
+					<div class="progress-track progress-track--sm">
+						<div class="progress-fill" style="width: 50%" />
 					</div>
 				</div>
 			</section>
 
-			<section v-else-if="isExplanations" class="study-panel p-5">
-				<div>
-					<div class="study-kicker">{{ __('Favoritos') }}</div>
-					<h2 class="mt-1 text-xl font-semibold">{{ __('Explicaciones guardadas') }}</h2>
-					<p class="mt-1 text-sm text-ink-gray-6">{{ __('Aquí quedan las lecciones o fragmentos que quieras repasar después.') }}</p>
+			<!-- ═══════════ EXPLANATIONS ═══════════ -->
+			<section v-else-if="isExplanations" class="s-panel s-panel--flush">
+				<div class="s-panel-header">
+					<div>
+						<div class="s-kicker"><Star class="h-3.5 w-3.5 stroke-1.5" /> {{ __('Favoritos') }}</div>
+						<h2 class="s-panel-title">{{ __('Explicaciones guardadas') }}</h2>
+						<p class="s-panel-desc">{{ __('Aquí quedan las lecciones o fragmentos que quieras repasar después.') }}</p>
+					</div>
 				</div>
-				<div class="mt-4 grid gap-3">
-					<div v-for="item in explanations" :key="item.name" class="rounded-lg border border-outline-gray-1 bg-surface-white p-4">
-						<div class="flex items-start justify-between gap-3">
+				<div class="explanations-list">
+					<div v-for="item in explanations" :key="item.name" class="explanation-card">
+						<div class="explanation-header">
 							<div>
-								<h3 class="text-base font-semibold">{{ item.topic }}</h3>
-								<p class="mt-1 text-sm text-ink-gray-6">{{ formatDate(item.creation) }}</p>
+								<h3 class="explanation-title">{{ item.topic }}</h3>
+								<p class="explanation-date">{{ formatDate(item.creation) }}</p>
 							</div>
-							<Button :label="__('Borrar')" variant="subtle" @click="deleteExplanation(item.name)" />
+							<Button :label="__('Borrar')" variant="subtle" theme="red" @click="deleteExplanation(item.name)">
+								<template #prefix><Trash2 class="h-3.5 w-3.5 stroke-1.5" /></template>
+							</Button>
 						</div>
-						<div class="study-markdown mt-3" v-html="renderMarkdown(item.content)" />
+						<div class="s-markdown-block" v-html="renderMarkdown(item.content)" />
 					</div>
-					<div v-if="!explanations.length" class="study-empty">
-						<LibraryBig class="mx-auto h-8 w-8 stroke-1.5 text-ink-gray-5" />
-						<h3 class="mt-2 text-base font-semibold">{{ __('No guardaste explicaciones todavía') }}</h3>
-						<p class="mt-1 text-sm text-ink-gray-6">{{ __('En una lección, usa “Guardar favorito” para traerla aquí.') }}</p>
+					<div v-if="!explanations.length" class="s-empty">
+						<div class="s-empty-icon"><LibraryBig class="h-8 w-8 stroke-1.5" /></div>
+						<h3 class="s-empty-title">{{ __('No guardaste explicaciones todavía') }}</h3>
+						<p class="s-empty-desc">{{ __('En una lección, usa "Guardar favorito" para traerla aquí.') }}</p>
 					</div>
 				</div>
 			</section>
 
-			<section v-else-if="isWhiteboard" class="grid gap-5 xl:grid-cols-[1fr_340px]">
-				<div class="study-panel p-5">
-					<div class="study-section-heading">
+			<!-- ═══════════ WHITEBOARD ═══════════ -->
+			<section v-else-if="isWhiteboard" class="grid gap-6 xl:grid-cols-[1fr_340px]">
+				<div class="s-panel s-panel--flush">
+					<div class="s-panel-header">
 						<div>
-							<div class="study-kicker">{{ __('Espacio libre') }}</div>
-							<h2>{{ __('Pizarra') }}</h2>
-							<p>{{ __('Escribe fórmulas, dudas, pasos de solución o un resumen rápido.') }}</p>
+							<div class="s-kicker">{{ __('Espacio libre') }}</div>
+							<h2 class="s-panel-title">{{ __('Pizarra') }}</h2>
+							<p class="s-panel-desc">{{ __('Escribe fórmulas, dudas, pasos de solución o un resumen rápido.') }}</p>
 						</div>
 					</div>
-					<textarea v-model="whiteboardText" class="study-textarea mt-4 min-h-[520px]" :placeholder="__('Escribe aquí tu resolución, fórmulas o lluvia de ideas.')" @input="saveWhiteboard" />
+					<textarea v-model="whiteboardText" class="s-textarea s-textarea--full" :placeholder="__('Escribe aquí tu resolución, fórmulas o lluvia de ideas.')" @input="saveWhiteboard" />
 				</div>
-				<aside class="study-panel h-fit p-4">
-					<h2 class="text-base font-semibold">{{ __('Acciones IA') }}</h2>
-					<p class="mt-1 text-sm text-ink-gray-6">{{ __('Convierte tus notas sueltas en una guía clara o revisa posibles errores.') }}</p>
-					<div class="mt-3 flex flex-col gap-2">
+				<aside class="s-panel s-panel--flush h-fit">
+					<div class="sidebar-header">
+						<Wand2 class="h-4 w-4 stroke-1.5" />
+						<h2 class="sidebar-title">{{ __('Acciones IA') }}</h2>
+					</div>
+					<p class="chat-hint">{{ __('Convierte tus notas sueltas en una guía clara o revisa posibles errores.') }}</p>
+					<div class="wb-actions">
 						<Button :label="__('Ordenar mis notas')" :loading="loading === 'whiteboard'" @click="askWhiteboard('organiza')" />
 						<Button :label="__('Encontrar errores')" :loading="loading === 'whiteboard'" @click="askWhiteboard('errores')" />
 					</div>
-					<div class="study-markdown mt-4 rounded-md bg-surface-gray-1 p-3" v-html="renderMarkdown(whiteboardResponse)" />
+					<div v-if="whiteboardResponse" class="s-markdown-block" v-html="renderMarkdown(whiteboardResponse)" />
 				</aside>
 			</section>
 		</div>
@@ -669,22 +776,40 @@ import { Button, FileUploader, FormControl, call, toast } from 'frappe-ui'
 import MarkdownIt from 'markdown-it'
 import DOMPurify from 'dompurify'
 import {
+	AlertTriangle,
+	ArrowRight,
 	BarChart3,
+	BookMarked,
 	BookOpen,
 	Brain,
 	CalendarDays,
-	ClipboardCheck,
 	CheckCircle2,
+	ClipboardCheck,
+	Clock,
 	FileQuestion,
 	FileText,
+	GitBranch,
 	GraduationCap,
 	History,
+	Layers,
 	LibraryBig,
+	Lightbulb,
+	ListChecks,
+	MessageCircle,
 	NotebookPen,
 	PanelTop,
+	PlayCircle,
+	RefreshCw,
 	RotateCcw,
 	SendHorizontal,
+	Sparkles,
+	Star,
+	Trash2,
+	Trophy,
 	Upload,
+	UserCog,
+	Wand2,
+	Zap,
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -1131,299 +1256,845 @@ const ExerciseList = defineComponent({
 	emits: ['answer'],
 	setup(props, { emit }) {
 		const cls = (item, index) => {
-			if (item.selected === undefined) return 'border-outline-gray-1 bg-surface-white hover:bg-surface-gray-1'
-			if (index === Number(item.correct || 0)) return 'border-green-500 bg-surface-green-1 text-ink-green-4'
-			if (index === item.selected) return 'border-red-400 bg-surface-red-1 text-ink-red-4'
-			return 'border-outline-gray-1 bg-surface-white text-ink-gray-6'
+			if (item.selected === undefined) return 'quiz-option quiz-option--default'
+			if (index === Number(item.correct || 0)) return 'quiz-option quiz-option--correct'
+			if (index === item.selected) return 'quiz-option quiz-option--wrong'
+			return 'quiz-option quiz-option--dimmed'
 		}
-		return () => h('div', { class: 'mt-3 flex flex-col gap-3' }, props.items.length
-			? props.items.map((item, itemIndex) => h('div', { class: 'rounded-lg border border-outline-gray-1 p-3' }, [
-				h('div', { class: 'text-sm font-semibold leading-6' }, `${itemIndex + 1}. ${item.question}`),
-				h('div', { class: 'mt-3 grid gap-2' }, (item.options || []).map((option, index) =>
+		return () => h('div', { class: 'exercise-list' }, props.items.length
+			? props.items.map((item, itemIndex) => h('div', { class: 'exercise-item' }, [
+				h('div', { class: 'exercise-question' }, `${itemIndex + 1}. ${item.question}`),
+				h('div', { class: 'exercise-options' }, (item.options || []).map((option, index) =>
 					h('button', {
-						class: `rounded-md border px-3 py-2 text-left text-sm transition ${cls(item, index)}`,
+						class: cls(item, index),
 						onClick: () => emit('answer', { item, index }),
-					}, option)
+					}, [
+						h('span', { class: 'quiz-option-letter' }, String.fromCharCode(65 + index)),
+						h('span', {}, option),
+					])
 				)),
-				item.selected !== undefined ? h('div', { class: 'mt-3 rounded-md bg-surface-gray-1 p-3 text-sm leading-6 text-ink-gray-7' }, item.explanation || '') : null,
+				item.selected !== undefined ? h('div', { class: 'exercise-explanation' }, item.explanation || '') : null,
 			]))
-			: h('div', { class: 'rounded-md border border-dashed border-outline-gray-2 p-6 text-center text-sm text-ink-gray-6' }, __('Genera contenido para empezar.')))
+			: h('div', { class: 's-empty-sm' }, [
+				h('span', { class: 'text-ink-gray-5' }, __('Genera contenido para empezar.')),
+			]))
 	},
 })
 </script>
 
 <style scoped>
+/* ═══════════════════════════════════════════════
+   STUDY PAGE — PREMIUM DESIGN SYSTEM
+   ═══════════════════════════════════════════════ */
+
+.study-page {
+	min-height: 100vh;
+	background: linear-gradient(180deg, #f0f4ff 0%, #f8fafc 30%, #f1f5f9 100%);
+	color: var(--ink-gray-9, #111827);
+}
+
+/* ─── HERO ─── */
 .study-hero {
-	background:
-		linear-gradient(135deg, rgba(239, 246, 255, 0.9), rgba(255, 255, 255, 0.96) 42%),
-		#ffffff;
+	position: relative;
+	overflow: hidden;
+	border-radius: 16px;
+	background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4f46e5 100%);
+	padding: 1.75rem 2rem;
+	color: white;
 }
 
-.study-panel {
-	border: 1px solid #e5e7eb;
-	border-radius: 0.75rem;
+.hero-decoration {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	overflow: hidden;
+}
+.hero-orb {
+	position: absolute;
+	border-radius: 50%;
+	filter: blur(60px);
+	opacity: 0.25;
+}
+.hero-orb--1 { top: -30px; right: -10px; width: 180px; height: 180px; background: #f59e0b; animation: float 8s ease-in-out infinite; }
+.hero-orb--2 { bottom: -40px; left: 8%; width: 160px; height: 160px; background: #8b5cf6; animation: float 10s ease-in-out infinite reverse; }
+.hero-orb--3 { top: 40%; right: 25%; width: 90px; height: 90px; background: #ec4899; animation: float 6s ease-in-out infinite 1s; }
+
+@keyframes float {
+	0%, 100% { transform: translateY(0) scale(1); }
+	50% { transform: translateY(-15px) scale(1.05); }
+}
+
+.hero-content {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+}
+@media (min-width: 1024px) {
+	.hero-content { flex-direction: row; align-items: flex-end; justify-content: space-between; }
+}
+
+.hero-text { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.hero-breadcrumb { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; }
+.hero-breadcrumb-link { color: #a5b4fc; text-decoration: none; font-weight: 500; transition: color 0.15s; }
+.hero-breadcrumb-link:hover { color: #c7d2fe; }
+.hero-breadcrumb-sep { color: rgba(165, 180, 252, 0.4); }
+.hero-breadcrumb-current { color: rgba(199, 210, 254, 0.7); }
+
+.hero-title {
+	font-size: 2rem;
+	font-weight: 800;
+	letter-spacing: -0.02em;
+	line-height: 1.15;
+	background: linear-gradient(135deg, #fff 0%, #e0e7ff 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+.hero-subtitle { font-size: 0.9rem; line-height: 1.6; color: rgba(199, 210, 254, 0.8); max-width: 480px; }
+
+.hero-actions { display: flex; flex-direction: column; gap: 0.75rem; align-items: flex-start; }
+@media (min-width: 1024px) { .hero-actions { align-items: flex-end; } }
+
+.hero-cta { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
+
+.hero-nav { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+
+.nav-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.375rem;
+	padding: 0.4rem 0.75rem;
+	border-radius: 9999px;
+	font-size: 0.8rem;
+	font-weight: 500;
+	text-decoration: none;
+	transition: all 0.2s ease;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	color: rgba(199, 210, 254, 0.8);
+	background: rgba(255, 255, 255, 0.06);
+	backdrop-filter: blur(8px);
+}
+.nav-pill:hover {
+	background: rgba(255, 255, 255, 0.12);
+	color: white;
+}
+.nav-pill--active {
+	background: rgba(255, 255, 255, 0.18);
+	border-color: rgba(255, 255, 255, 0.25);
+	color: white;
+	box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
+}
+.nav-pill-label { display: none; }
+@media (min-width: 640px) { .nav-pill-label { display: inline; } }
+
+/* ─── PANELS ─── */
+.s-panel {
+	border: 1px solid #e2e8f0;
+	border-radius: 14px;
 	background: #ffffff;
-	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+	transition: box-shadow 0.3s ease;
 }
+.s-panel:hover { box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06); }
+.s-panel--flush > * { padding-left: 1.25rem; padding-right: 1.25rem; }
+.s-panel--flush > *:first-child { padding-top: 1.25rem; }
+.s-panel--flush > *:last-child { padding-bottom: 1.25rem; }
 
-.study-kicker {
-	font-size: 0.75rem;
-	font-weight: 650;
-	letter-spacing: 0.04em;
-	text-transform: uppercase;
-	color: #2563eb;
-}
-
-.study-section-heading {
+.s-panel-header {
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
 	gap: 1rem;
+	padding-bottom: 1rem;
+	border-bottom: 1px solid #f1f5f9;
 }
+@media (max-width: 768px) { .s-panel-header { flex-direction: column; } }
 
-.study-section-heading h2 {
-	margin-top: 0.15rem;
-	font-size: 1.125rem;
-	font-weight: 650;
-	color: #111827;
-}
+.s-panel-title { font-size: 1.15rem; font-weight: 700; color: #0f172a; margin-top: 0.25rem; }
+.s-panel-desc { font-size: 0.85rem; line-height: 1.55; color: #64748b; margin-top: 0.25rem; max-width: 42rem; }
 
-.study-section-heading p {
-	margin-top: 0.25rem;
-	max-width: 42rem;
-	font-size: 0.875rem;
-	line-height: 1.55;
-	color: #4b5563;
-}
-
-.study-action-card,
-.study-course-card,
-.study-module-card,
-.study-concept-card,
-.study-content-block {
-	border: 1px solid #e5e7eb;
-	border-radius: 0.75rem;
-	background: #ffffff;
-}
-
-.study-action-card {
-	padding: 1rem;
-	text-align: left;
-	transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
-}
-
-.study-action-card:hover {
-	border-color: #93c5fd;
-	box-shadow: 0 10px 24px rgba(37, 99, 235, 0.08);
-	transform: translateY(-1px);
-}
-
-.study-course-card,
-.study-module-card,
-.study-content-block {
-	padding: 1rem;
-}
-
-.study-concept-card {
-	padding: 1rem;
-}
-
-.study-icon {
-	display: grid;
-	width: 2.5rem;
-	height: 2.5rem;
-	flex-shrink: 0;
-	place-items: center;
-	border-radius: 0.625rem;
-	background: #dbeafe;
-	color: #1d4ed8;
-}
-
-.study-badge {
+.s-kicker {
 	display: inline-flex;
 	align-items: center;
-	border-radius: 999px;
-	background: #eff6ff;
-	padding: 0.25rem 0.625rem;
-	font-size: 0.75rem;
-	font-weight: 600;
-	color: #1d4ed8;
+	gap: 0.375rem;
+	font-size: 0.7rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: #6366f1;
 }
 
-.study-empty {
-	border: 1px dashed #d1d5db;
-	border-radius: 0.75rem;
-	background: #f9fafb;
-	padding: 2rem;
-	text-align: center;
-}
+/* ─── FLOW CARDS ─── */
+.flow-grid { display: grid; gap: 0.75rem; padding-top: 1rem; }
+@media (min-width: 640px) { .flow-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1280px) { .flow-grid { grid-template-columns: repeat(4, 1fr); } }
 
-.study-mini-empty {
-	border-radius: 0.5rem;
-	background: #f9fafb;
-	padding: 0.75rem;
-	font-size: 0.875rem;
-	line-height: 1.5;
-	color: #6b7280;
-}
-
-.study-loader {
-	border: 1px solid #bfdbfe;
-	border-radius: 0.75rem;
-	background: #eff6ff;
-	padding: 1rem;
-	font-size: 0.875rem;
-	font-weight: 500;
-	color: #1d4ed8;
-}
-
-.study-step,
-.study-room-step {
+.flow-card {
 	display: flex;
 	align-items: flex-start;
 	gap: 0.75rem;
-	border: 1px solid #e5e7eb;
-	border-radius: 0.75rem;
-	background: #ffffff;
-	padding: 0.875rem;
-	color: #6b7280;
+	padding: 1rem;
+	border-radius: 12px;
+	border: 1px solid #e2e8f0;
+	background: #fff;
+	text-align: left;
+	transition: all 0.2s ease;
+	cursor: pointer;
+	position: relative;
+}
+.flow-card:hover {
+	border-color: #a5b4fc;
+	box-shadow: 0 8px 24px rgba(99, 102, 241, 0.08);
+	transform: translateY(-2px);
 }
 
-.study-step span,
-.study-room-step span,
-.study-number {
+.flow-icon {
 	display: grid;
-	width: 1.625rem;
-	height: 1.625rem;
+	width: 40px;
+	height: 40px;
 	flex-shrink: 0;
 	place-items: center;
-	border-radius: 999px;
-	background: #f3f4f6;
+	border-radius: 10px;
+}
+.flow-icon--parcial { background: #fef3c7; color: #d97706; }
+.flow-icon--admision { background: #dbeafe; color: #2563eb; }
+.flow-icon--recordar { background: #f3e8ff; color: #9333ea; }
+.flow-icon--cero { background: #dcfce7; color: #16a34a; }
+
+.flow-info { min-width: 0; flex: 1; }
+.flow-card-title { font-size: 0.875rem; font-weight: 700; color: #0f172a; }
+.flow-card-desc { font-size: 0.8rem; line-height: 1.45; color: #64748b; margin-top: 0.25rem; }
+
+.flow-arrow {
+	width: 16px;
+	height: 16px;
+	flex-shrink: 0;
+	color: #cbd5e1;
+	margin-top: 2px;
+	transition: transform 0.2s ease, color 0.2s ease;
+}
+.flow-card:hover .flow-arrow { transform: translateX(3px); color: #6366f1; }
+
+/* ─── COURSE CARDS ─── */
+.courses-grid { display: grid; gap: 1rem; padding-top: 1rem; }
+@media (min-width: 1024px) { .courses-grid { grid-template-columns: repeat(2, 1fr); } }
+.courses-grid--3 { }
+@media (min-width: 768px) { .courses-grid--3 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1280px) { .courses-grid--3 { grid-template-columns: repeat(3, 1fr); } }
+
+.course-card {
+	border: 1px solid #e2e8f0;
+	border-radius: 12px;
+	background: #fff;
+	padding: 1.125rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.875rem;
+	transition: all 0.2s ease;
+}
+.course-card:hover {
+	border-color: #c7d2fe;
+	box-shadow: 0 6px 24px rgba(99, 102, 241, 0.06);
+}
+
+.course-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; }
+
+.course-tag {
+	display: inline-block;
+	padding: 0.2rem 0.5rem;
+	border-radius: 6px;
+	font-size: 0.65rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+.course-tag--parcial { background: #fef3c7; color: #92400e; }
+.course-tag--admision { background: #dbeafe; color: #1e40af; }
+.course-tag--recordar { background: #f3e8ff; color: #7e22ce; }
+.course-tag--cero { background: #dcfce7; color: #166534; }
+
+.course-card-title {
+	font-size: 1.05rem;
+	font-weight: 700;
+	color: #0f172a;
+	margin-top: 0.375rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.course-card-date { display: flex; align-items: center; gap: 0.375rem; font-size: 0.8rem; color: #94a3b8; margin-top: 0.25rem; }
+
+.course-progress-ring { width: 48px; height: 48px; flex-shrink: 0; position: relative; }
+.course-progress-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring-bg { fill: none; stroke: #e2e8f0; stroke-width: 3; }
+.ring-fill { fill: none; stroke: #6366f1; stroke-width: 3; stroke-linecap: round; transition: stroke-dasharray 0.6s ease; }
+.ring-text { position: absolute; inset: 0; display: grid; place-items: center; font-size: 0.65rem; font-weight: 700; color: #4f46e5; }
+
+.course-progress-bar { display: flex; flex-direction: column; gap: 0.375rem; }
+.progress-label { font-size: 0.7rem; color: #94a3b8; text-align: right; }
+
+.progress-track { height: 6px; border-radius: 9999px; background: #e2e8f0; overflow: hidden; }
+.progress-track--lg { height: 8px; }
+.progress-track--sm { height: 4px; margin-top: 0.75rem; }
+.progress-fill {
+	height: 100%;
+	border-radius: 9999px;
+	background: linear-gradient(90deg, #6366f1, #8b5cf6);
+	transition: width 0.6s ease;
+}
+
+.course-next {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	padding: 0.75rem;
+	border-radius: 10px;
+	background: #f8fafc;
+	border: 1px solid #f1f5f9;
+}
+.course-next-icon {
+	display: grid;
+	width: 32px;
+	height: 32px;
+	flex-shrink: 0;
+	place-items: center;
+	border-radius: 8px;
+	background: #e0e7ff;
+	color: #4f46e5;
+}
+.course-next-label { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+.course-next-title { font-size: 0.85rem; font-weight: 600; color: #0f172a; margin-top: 0.125rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.course-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+/* ─── SIDEBAR ─── */
+.sidebar-header {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 1rem 1.25rem;
+	border-bottom: 1px solid #f1f5f9;
+	color: #6366f1;
+}
+.sidebar-title { font-size: 0.9rem; font-weight: 700; color: #0f172a; flex: 1; }
+.sidebar-link { font-size: 0.8rem; font-weight: 600; color: #6366f1; text-decoration: none; }
+.sidebar-link:hover { text-decoration: underline; }
+
+.metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; padding: 1rem 1.25rem; }
+.metric-card { text-align: center; padding: 0.875rem 0.5rem; border-radius: 10px; background: #f8fafc; border: 1px solid #f1f5f9; }
+.metric-value { font-size: 1.5rem; font-weight: 800; color: #0f172a; }
+.metric-label { font-size: 0.7rem; color: #94a3b8; margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+
+.fav-list { padding: 0.625rem 1.25rem; display: flex; flex-direction: column; gap: 0.375rem; }
+.fav-item {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.625rem;
+	padding: 0.625rem 0.75rem;
+	border-radius: 8px;
+	text-decoration: none;
+	color: #6366f1;
+	transition: background 0.15s;
+}
+.fav-item:hover { background: #f8fafc; }
+.fav-item-title { font-size: 0.85rem; font-weight: 600; color: #0f172a; }
+.fav-item-date { font-size: 0.7rem; color: #94a3b8; margin-top: 0.125rem; }
+
+/* ─── BUILDER STEPS ─── */
+.builder-header { display: flex; align-items: center; gap: 0.75rem; padding: 1.25rem; color: #6366f1; border-bottom: 1px solid #f1f5f9; }
+.builder-desc { font-size: 0.85rem; line-height: 1.55; color: #64748b; padding: 0.75rem 1.25rem 0; }
+
+.steps-list { display: flex; flex-direction: column; gap: 0.5rem; padding: 1rem 1.25rem; }
+
+.s-step {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.75rem;
+	padding: 0.75rem;
+	border-radius: 10px;
+	border: 1px solid #e2e8f0;
+	background: #fff;
+	color: #94a3b8;
+	transition: all 0.2s ease;
+}
+.s-step.is-active { border-color: #a5b4fc; background: #eef2ff; color: #1f2937; }
+.s-step.is-done { border-color: #86efac; background: #f0fdf4; color: #166534; }
+
+.s-step-num {
+	display: grid;
+	width: 26px;
+	height: 26px;
+	flex-shrink: 0;
+	place-items: center;
+	border-radius: 50%;
+	background: #f1f5f9;
 	font-size: 0.75rem;
 	font-weight: 700;
-	color: #4b5563;
+	color: #64748b;
+}
+.s-step.is-active .s-step-num { background: #6366f1; color: #fff; }
+.s-step.is-done .s-step-num { background: #22c55e; color: #fff; }
+
+.s-step-title { font-size: 0.85rem; font-weight: 600; color: inherit; }
+.s-step-desc { font-size: 0.75rem; color: #94a3b8; margin-top: 0.125rem; }
+.s-step.is-active .s-step-desc { color: #6366f1; }
+.s-step.is-done .s-step-desc { color: #16a34a; }
+
+/* ─── FORMS ─── */
+.form-grid { display: grid; gap: 0.875rem; padding-top: 1rem; }
+@media (min-width: 768px) { .form-grid { grid-template-columns: repeat(2, 1fr); } }
+.form-grid--inline { grid-template-columns: 1fr 1fr auto; padding-top: 1rem; }
+
+.s-label { display: block; font-size: 0.8rem; font-weight: 600; color: #475569; margin-bottom: 0.375rem; }
+
+.s-select, .s-textarea {
+	width: 100%;
+	border-radius: 8px;
+	border: 1px solid #e2e8f0;
+	background: #fff;
+	padding: 0.5rem 0.75rem;
+	font-size: 0.875rem;
+	outline: none;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.s-select:focus, .s-textarea:focus {
+	border-color: #6366f1;
+	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+.s-select--sm { padding: 0.375rem 0.625rem; font-size: 0.8rem; }
+.s-textarea { resize: vertical; line-height: 1.6; }
+.s-textarea--sm { min-height: 44px; }
+.s-textarea--full { min-height: 520px; border-radius: 0; border-left: 0; border-right: 0; border-bottom: 0; }
+
+/* ─── MATERIALS ─── */
+.materials-list { display: flex; flex-direction: column; gap: 0.5rem; padding-top: 0.75rem; }
+.material-item {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.75rem;
+	border-radius: 8px;
+	background: #f8fafc;
+	border: 1px solid #f1f5f9;
+}
+.material-icon { display: grid; width: 32px; height: 32px; flex-shrink: 0; place-items: center; border-radius: 8px; background: #e0e7ff; color: #6366f1; }
+.material-name { font-size: 0.85rem; font-weight: 600; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.material-meta { font-size: 0.7rem; color: #94a3b8; margin-top: 0.125rem; }
+
+/* ─── TWIN CARDS ─── */
+.twin-grid { display: grid; gap: 1rem; padding-top: 1rem; }
+@media (min-width: 1280px) { .twin-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.twin-card { border-radius: 10px; background: #f8fafc; border: 1px solid #f1f5f9; overflow: hidden; }
+.twin-card-header { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; color: #6366f1; }
+.twin-card-header h3 { font-size: 0.85rem; font-weight: 700; color: #0f172a; }
+.twin-card-body { padding: 0.75rem 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+
+.topic-chip {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 0.75rem;
+	border-radius: 8px;
+	background: #ecfdf5;
+	color: #065f46;
+	font-size: 0.8rem;
+	font-weight: 500;
 }
 
-.study-step p,
-.study-room-step p {
-	margin-top: 0.15rem;
-	font-size: 0.75rem;
-	line-height: 1.35;
-}
+.profile-q { padding: 0.75rem; border-radius: 8px; background: #fff; border: 1px solid #e2e8f0; }
+.profile-q-text { font-size: 0.85rem; font-weight: 600; color: #0f172a; margin-bottom: 0.5rem; }
 
-.study-step.is-active,
-.study-room-step.is-active {
-	border-color: #bfdbfe;
-	background: #eff6ff;
-	color: #1f2937;
-}
+/* ─── PLAN VIEW ─── */
+.plan-progress { padding-top: 1rem; }
+.plan-progress-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+.plan-progress-label { font-size: 0.85rem; font-weight: 600; color: #0f172a; }
+.plan-progress-pct { font-size: 0.85rem; font-weight: 700; color: #6366f1; }
 
-.study-step.is-done {
-	border-color: #bbf7d0;
-	background: #f0fdf4;
-	color: #166534;
-}
+.modules-list { display: flex; flex-direction: column; gap: 1rem; padding-top: 1rem; }
 
-.study-step.is-active span,
-.study-room-step.is-active span {
-	background: #2563eb;
-	color: #ffffff;
+.module-card {
+	border: 1px solid #e2e8f0;
+	border-radius: 12px;
+	background: #fff;
+	overflow: hidden;
 }
-
-.study-step.is-done span {
-	background: #16a34a;
-	color: #ffffff;
-}
-
-.study-lesson-row {
+.module-header {
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
 	gap: 0.75rem;
-	border: 1px solid #e5e7eb;
-	border-radius: 0.625rem;
-	background: #ffffff;
-	padding: 0.875rem;
+	padding: 1rem 1.25rem;
+	border-bottom: 1px solid #f1f5f9;
+	background: #fafbff;
+}
+.module-title { font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-top: 0.25rem; }
+.module-obj { font-size: 0.8rem; line-height: 1.5; color: #64748b; margin-top: 0.25rem; }
+.module-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.25rem 0.625rem;
+	border-radius: 9999px;
+	font-size: 0.7rem;
+	font-weight: 700;
+	background: #eef2ff;
+	color: #4f46e5;
+	white-space: nowrap;
+}
+
+.lessons-list { display: flex; flex-direction: column; gap: 0.375rem; padding: 0.75rem; }
+
+.lesson-row {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 0.75rem;
+	padding: 0.75rem;
+	border-radius: 10px;
+	border: 1px solid transparent;
 	text-align: left;
-	transition: border-color 0.18s ease, box-shadow 0.18s ease;
+	transition: all 0.15s ease;
+	cursor: pointer;
 }
+.lesson-row:hover { background: #f8fafc; border-color: #e2e8f0; }
 
-.study-lesson-row:hover {
-	border-color: #93c5fd;
-	box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
-}
+.lesson-left { display: flex; align-items: flex-start; gap: 0.75rem; min-width: 0; }
 
-.study-lesson-check {
+.lesson-check {
 	display: grid;
-	width: 1.75rem;
-	height: 1.75rem;
+	width: 28px;
+	height: 28px;
 	flex-shrink: 0;
 	place-items: center;
-	border-radius: 999px;
-	background: #f3f4f6;
-	color: #9ca3af;
+	border-radius: 50%;
+	background: #f1f5f9;
+	color: #cbd5e1;
+	transition: all 0.2s;
+}
+.lesson-check.is-done { background: #dcfce7; color: #22c55e; }
+
+.lesson-title { font-size: 0.875rem; font-weight: 600; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lesson-obj { font-size: 0.8rem; line-height: 1.4; color: #94a3b8; margin-top: 0.125rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+.lesson-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 0.25rem; flex-shrink: 0; }
+.lesson-duration { display: flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; font-weight: 500; padding: 0.2rem 0.5rem; border-radius: 6px; background: #eef2ff; color: #4f46e5; }
+.lesson-diff { font-size: 0.65rem; color: #94a3b8; }
+
+/* ─── SUMMARY SIDEBAR ─── */
+.summary-stats { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem 1.25rem; }
+.summary-stat { padding: 0.75rem; border-radius: 8px; background: #f8fafc; border: 1px solid #f1f5f9; }
+.summary-stat-label { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+.summary-stat-value { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-top: 0.25rem; }
+.summary-stat--highlight { background: #eef2ff; border-color: #c7d2fe; }
+.summary-stat-next { font-size: 0.85rem; font-weight: 600; color: #4f46e5; margin-top: 0.25rem; }
+
+/* ─── ROOM STEPS ─── */
+.room-steps { display: grid; gap: 0.5rem; padding-top: 1rem; }
+@media (min-width: 768px) { .room-steps { grid-template-columns: repeat(3, 1fr); } }
+
+.room-step {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.625rem;
+	padding: 0.75rem;
+	border-radius: 10px;
+	border: 1px solid #e2e8f0;
+	background: #fff;
+	color: #94a3b8;
+}
+.room-step.is-active { border-color: #a5b4fc; background: #eef2ff; color: #1f2937; }
+
+.room-step-num {
+	display: grid;
+	width: 24px;
+	height: 24px;
+	flex-shrink: 0;
+	place-items: center;
+	border-radius: 50%;
+	background: #f1f5f9;
+	font-size: 0.7rem;
+	font-weight: 700;
+	color: #64748b;
+}
+.room-step.is-active .room-step-num { background: #6366f1; color: #fff; }
+
+.room-step strong { font-size: 0.85rem; }
+.room-step p { font-size: 0.75rem; margin-top: 0.125rem; }
+
+/* ─── LESSON CONTENT ─── */
+.diagram-img { width: 100%; border-radius: 10px; border: 1px solid #e2e8f0; margin-top: 1rem; }
+
+.lesson-content { display: flex; flex-direction: column; gap: 1.25rem; padding-top: 1rem; }
+
+.key-idea {
+	padding: 1rem 1.25rem;
+	border-radius: 12px;
+	background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+	border: 1px solid #c7d2fe;
+}
+.key-idea-label { display: flex; align-items: center; gap: 0.375rem; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #4338ca; }
+.key-idea-text { font-size: 0.95rem; font-weight: 500; line-height: 1.6; color: #312e81; margin-top: 0.5rem; }
+
+.concept-grid { display: grid; gap: 0.75rem; }
+@media (min-width: 768px) { .concept-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.concept-card {
+	padding: 1rem;
+	border-radius: 10px;
+	border: 1px solid #e2e8f0;
+	background: #fff;
+}
+.concept-title { font-size: 0.95rem; font-weight: 700; color: #0f172a; }
+.concept-body { font-size: 0.85rem; line-height: 1.6; color: #475569; margin-top: 0.5rem; }
+.concept-formula { margin-top: 0.75rem; padding: 0.5rem 0.75rem; border-radius: 6px; background: #f8fafc; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #334155; border: 1px solid #f1f5f9; }
+
+.content-block {
+	padding: 1rem;
+	border-radius: 10px;
+	border: 1px solid #e2e8f0;
+	background: #fff;
+}
+.content-block-header { display: flex; align-items: flex-start; gap: 0.75rem; }
+.content-num {
+	display: grid;
+	width: 26px;
+	height: 26px;
+	flex-shrink: 0;
+	place-items: center;
+	border-radius: 50%;
+	background: #eef2ff;
+	font-size: 0.7rem;
+	font-weight: 700;
+	color: #4f46e5;
+}
+.content-num--sm { width: 22px; height: 22px; font-size: 0.65rem; }
+.content-title { font-size: 1rem; font-weight: 700; color: #0f172a; }
+.content-summary { font-size: 0.85rem; line-height: 1.6; color: #475569; margin-top: 0.375rem; }
+
+.content-points { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem; }
+.content-points li { display: flex; align-items: flex-start; gap: 0.625rem; font-size: 0.85rem; line-height: 1.55; color: #475569; }
+.point-dot { width: 6px; height: 6px; flex-shrink: 0; border-radius: 50%; background: #6366f1; margin-top: 7px; }
+
+.worked-example { margin-top: 1rem; padding: 1rem; border-radius: 10px; background: #f8fafc; border: 1px solid #f1f5f9; }
+.example-title { font-size: 0.9rem; font-weight: 700; color: #0f172a; }
+.example-problem { font-size: 0.85rem; line-height: 1.55; color: #475569; margin-top: 0.5rem; }
+.example-steps { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem; }
+.example-steps li { display: flex; align-items: flex-start; gap: 0.625rem; font-size: 0.85rem; line-height: 1.55; }
+.example-answer { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.75rem; padding: 0.625rem 0.75rem; border-radius: 8px; background: #ecfdf5; color: #065f46; font-size: 0.85rem; font-weight: 600; }
+
+.mistakes-list { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem; }
+.mistake-item { padding: 0.75rem; border-radius: 8px; background: #fef2f2; border: 1px solid #fecaca; }
+.mistake-bad { display: flex; align-items: center; gap: 0.375rem; font-size: 0.85rem; font-weight: 600; color: #dc2626; }
+.mistake-fix { font-size: 0.8rem; line-height: 1.5; color: #7f1d1d; margin-top: 0.25rem; }
+
+/* ─── EXERCISES & QUIZ ─── */
+.exercise-list { display: flex; flex-direction: column; gap: 0.875rem; padding-top: 0.75rem; }
+.exercise-item { padding: 1rem; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; }
+.exercise-question { font-size: 0.875rem; font-weight: 700; line-height: 1.5; color: #0f172a; }
+.exercise-options { display: flex; flex-direction: column; gap: 0.375rem; margin-top: 0.75rem; }
+.exercise-explanation { margin-top: 0.75rem; padding: 0.625rem 0.75rem; border-radius: 8px; background: #f8fafc; font-size: 0.8rem; line-height: 1.55; color: #475569; border: 1px solid #f1f5f9; }
+
+.quiz-option {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	padding: 0.625rem 0.75rem;
+	border-radius: 8px;
+	border: 1px solid transparent;
+	font-size: 0.85rem;
+	text-align: left;
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+.quiz-option-letter {
+	display: grid;
+	width: 24px;
+	height: 24px;
+	flex-shrink: 0;
+	place-items: center;
+	border-radius: 6px;
+	font-size: 0.7rem;
+	font-weight: 700;
+}
+.quiz-option--default { border-color: #e2e8f0; background: #fff; color: #334155; }
+.quiz-option--default:hover { border-color: #a5b4fc; background: #eef2ff; }
+.quiz-option--default .quiz-option-letter { background: #f1f5f9; color: #64748b; }
+.quiz-option--correct { border-color: #86efac; background: #f0fdf4; color: #166534; }
+.quiz-option--correct .quiz-option-letter { background: #22c55e; color: #fff; }
+.quiz-option--wrong { border-color: #fca5a5; background: #fef2f2; color: #991b1b; }
+.quiz-option--wrong .quiz-option-letter { background: #ef4444; color: #fff; }
+.quiz-option--dimmed { border-color: #f1f5f9; background: #fafafa; color: #94a3b8; }
+.quiz-option--dimmed .quiz-option-letter { background: #f1f5f9; color: #cbd5e1; }
+
+.quiz-score {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-top: 0.75rem;
+	padding: 0.75rem 1rem;
+	border-radius: 10px;
+	background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+	border: 1px solid #c7d2fe;
+	font-size: 0.9rem;
+	color: #4338ca;
 }
 
-.study-lesson-check.is-done {
-	background: #dcfce7;
-	color: #16a34a;
+/* ─── CHAT ─── */
+.chat-hint { font-size: 0.8rem; color: #94a3b8; line-height: 1.5; padding: 0.5rem 1.25rem 0; }
+
+.chat-box {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	height: 360px;
+	overflow-y: auto;
+	padding: 0.75rem 1.25rem;
+	margin-top: 0.5rem;
+	border-top: 1px solid #f1f5f9;
+	border-bottom: 1px solid #f1f5f9;
+	background: #fafbff;
+}
+.chat-msg { max-width: 85%; padding: 0.5rem 0.75rem; border-radius: 10px; font-size: 0.85rem; line-height: 1.55; }
+.chat-msg--user { align-self: flex-end; background: #6366f1; color: white; border-bottom-right-radius: 4px; }
+.chat-msg--ai { align-self: flex-start; background: #fff; color: #334155; border: 1px solid #e2e8f0; border-bottom-left-radius: 4px; }
+
+.chat-input-row { display: flex; gap: 0.5rem; padding: 0.75rem 1.25rem; }
+
+/* ─── CHECKLIST ─── */
+.checklist { display: flex; flex-direction: column; gap: 0.375rem; padding: 0.75rem 1.25rem; }
+.checklist-item {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.625rem;
+	padding: 0.625rem 0.75rem;
+	border-radius: 8px;
+	background: #f8fafc;
+	font-size: 0.85rem;
+	line-height: 1.5;
+	cursor: pointer;
+	transition: background 0.15s;
+}
+.checklist-item:hover { background: #f1f5f9; }
+.checklist-box { margin-top: 2px; accent-color: #6366f1; }
+
+/* ─── STATISTICS ─── */
+.stats-grid { display: grid; gap: 0.75rem; }
+@media (min-width: 768px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.stat-card {
+	padding: 1.25rem;
+	border-radius: 14px;
+	border: 1px solid #e2e8f0;
+	background: #fff;
+	box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+.stat-card-label { font-size: 0.85rem; color: #64748b; }
+.stat-card-value { font-size: 2rem; font-weight: 800; color: #0f172a; margin-top: 0.5rem; }
+
+/* ─── EXPLANATIONS ─── */
+.explanations-list { display: flex; flex-direction: column; gap: 0.75rem; padding-top: 0.75rem; }
+.explanation-card { border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; padding: 1rem; }
+.explanation-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; }
+.explanation-title { font-size: 1rem; font-weight: 700; color: #0f172a; }
+.explanation-date { font-size: 0.8rem; color: #94a3b8; margin-top: 0.25rem; }
+
+/* ─── WHITEBOARD ─── */
+.wb-actions { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem 1.25rem; }
+
+/* ─── EMPTY STATES ─── */
+.s-empty {
+	border: 2px dashed #e2e8f0;
+	border-radius: 12px;
+	padding: 2.5rem 2rem;
+	text-align: center;
+	background: #fafbff;
+}
+.s-empty-icon { display: grid; place-items: center; width: 56px; height: 56px; margin: 0 auto; border-radius: 50%; background: #eef2ff; color: #6366f1; }
+.s-empty-title { font-size: 1rem; font-weight: 700; color: #0f172a; margin-top: 0.75rem; }
+.s-empty-desc { font-size: 0.85rem; color: #64748b; margin-top: 0.25rem; }
+
+.s-empty-sm {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 1.5rem;
+	border: 1px dashed #e2e8f0;
+	border-radius: 10px;
+	text-align: center;
+	color: #94a3b8;
+	font-size: 0.85rem;
 }
 
-.study-input {
-	width: 100%;
-	border-radius: 0.375rem;
-	border: 1px solid #d1d5db;
-	background: #ffffff;
-	padding: 0.5rem 0.75rem;
-	font-size: 0.875rem;
-	outline: none;
+.s-mini-empty {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	padding: 0.75rem;
+	border-radius: 8px;
+	background: #f8fafc;
+	font-size: 0.8rem;
+	color: #94a3b8;
+	line-height: 1.5;
 }
 
-.study-textarea {
-	width: 100%;
-	resize: vertical;
-	border-radius: 0.375rem;
-	border: 1px solid #d1d5db;
-	background: #ffffff;
-	padding: 0.5rem 0.75rem;
-	font-size: 0.875rem;
-	line-height: 1.55;
-	outline: none;
+/* ─── LOADER ─── */
+.s-loader {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-top: 0.75rem;
+	padding: 0.875rem 1rem;
+	border-radius: 10px;
+	background: #eef2ff;
+	border: 1px solid #c7d2fe;
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: #4338ca;
 }
-
-.study-input:focus,
-.study-textarea:focus {
-	border-color: #3b82f6;
-	box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+.s-loader-spinner {
+	width: 20px;
+	height: 20px;
+	border: 2.5px solid #c7d2fe;
+	border-top-color: #6366f1;
+	border-radius: 50%;
+	animation: spin 0.7s linear infinite;
+	flex-shrink: 0;
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-.study-markdown :deep(h1),
-.study-markdown :deep(h2),
-.study-markdown :deep(h3) {
+/* ─── MARKDOWN ─── */
+.s-markdown-block {
+	margin-top: 0.75rem;
+	padding: 1rem;
+	border-radius: 10px;
+	background: #f8fafc;
+	border: 1px solid #f1f5f9;
+}
+.s-markdown-block :deep(h1),
+.s-markdown-block :deep(h2),
+.s-markdown-block :deep(h3) {
 	margin: 0.85rem 0 0.45rem;
-	font-weight: 650;
-	color: #111827;
+	font-weight: 700;
+	color: #0f172a;
 }
-
-.study-markdown :deep(p),
-.study-markdown :deep(li) {
-	font-size: 0.925rem;
+.s-markdown-block :deep(p),
+.s-markdown-block :deep(li) {
+	font-size: 0.9rem;
 	line-height: 1.7;
-	color: #374151;
+	color: #334155;
 }
-
-.study-markdown :deep(ul),
-.study-markdown :deep(ol) {
+.s-markdown-block :deep(ul),
+.s-markdown-block :deep(ol) {
 	margin: 0.5rem 0 0.75rem 1.25rem;
 }
 
 @media (max-width: 768px) {
-	.study-section-heading {
-		flex-direction: column;
-	}
-
-	.study-lesson-row {
-		flex-direction: column;
-	}
+	.s-panel-header { flex-direction: column; }
+	.lesson-row { flex-direction: column; }
+	.form-grid--inline { grid-template-columns: 1fr; }
 }
 </style>
