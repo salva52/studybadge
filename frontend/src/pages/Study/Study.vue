@@ -576,38 +576,6 @@
 						</div>
 					</div>
 
-					<!-- Practice & Quiz -->
-					<div class="grid gap-6 xl:grid-cols-2">
-						<div class="s-panel s-panel--flush">
-							<div class="s-panel-header">
-								<div>
-									<div class="s-kicker">{{ __('Paso 2') }}</div>
-									<h2 class="s-panel-title">{{ __('Practica') }}</h2>
-									<p class="s-panel-desc">{{ __('Responde y revisa la explicación de cada opción.') }}</p>
-								</div>
-								<Button :label="__('Generar')" :loading="loading === 'exercises'" @click="generateExercises">
-									<template #prefix><Zap class="h-4 w-4 stroke-1.5" /></template>
-								</Button>
-							</div>
-							<ExerciseList :items="lessonPack.practice?.length ? lessonPack.practice : exercises" @answer="handleAnswer" />
-						</div>
-						<div class="s-panel s-panel--flush">
-							<div class="s-panel-header">
-								<div>
-									<div class="s-kicker">{{ __('Paso 3') }}</div>
-									<h2 class="s-panel-title">{{ __('Quiz final') }}</h2>
-									<p class="s-panel-desc">{{ __('Comprueba si puedes pasar a la siguiente lección.') }}</p>
-								</div>
-								<Button :label="__('Generar')" :loading="loading === 'quiz'" @click="generateQuiz">
-									<template #prefix><Trophy class="h-4 w-4 stroke-1.5" /></template>
-								</Button>
-							</div>
-							<ExerciseList :items="lessonPack.quiz?.length ? lessonPack.quiz : quiz" @answer="handleQuizAnswer" />
-							<div v-if="activeQuiz.length" class="quiz-score">
-								<Trophy class="h-5 w-5 stroke-1.5" />
-								<span>{{ __('Puntaje') }}: <strong>{{ quizScore }}%</strong></span>
-							</div>
-						</div>
 					</div>
 				</div>
 
@@ -2096,5 +2064,67 @@ const ExerciseList = defineComponent({
 	.s-panel-header { flex-direction: column; }
 	.lesson-row { flex-direction: column; }
 	.form-grid--inline { grid-template-columns: 1fr; }
+}/* Practice Flow Layout */
+.practice-flow {
+	position: relative;
+}
+.practice-flow-header {
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 2.5rem 2rem;
+	background: linear-gradient(to bottom, rgba(249, 250, 251, 0), rgba(243, 244, 246, 0.6));
+	border-radius: 16px;
+	border: 1px dashed rgba(209, 213, 219, 0.8);
+}
+.practice-flow-icon {
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	background: rgba(99, 102, 241, 0.1);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 1.25rem;
+	box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.05);
+}
+.practice-flow-title {
+	font-size: 1.35rem;
+	font-weight: 700;
+	color: #111827;
+	margin-bottom: 0.5rem;
+}
+.practice-flow-desc {
+	color: #4b5563;
+	font-size: 0.95rem;
+	max-width: 480px;
+	line-height: 1.6;
+}
+.practice-card {
+	border: 1px solid rgba(229, 231, 235, 1);
+	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -2px rgba(0, 0, 0, 0.02);
+	overflow: hidden;
+	transition: all 0.3s ease;
+}
+.practice-card:hover {
+	box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+	border-color: rgba(209, 213, 219, 1);
+	transform: translateY(-2px);
+}
+.practice-card-header {
+	border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+	padding: 1.5rem 1.75rem !important;
+}
+.quiz-score-banner {
+	display: flex;
+	align-items: center;
+	gap: 1.25rem;
+	margin: 1.5rem;
+	padding: 1.25rem 1.5rem;
+	background: linear-gradient(to right, #fffbeb, #fef3c7);
+	border: 1px solid #fde68a;
+	border-radius: 12px;
+	box-shadow: inset 0 2px 4px rgba(255,255,255,0.5);
 }
 </style>
