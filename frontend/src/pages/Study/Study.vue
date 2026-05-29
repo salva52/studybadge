@@ -70,9 +70,15 @@
 										{{ topic.title || topic }}
 									</span>
 								</div>
+								<div class="mt-3 h-2 overflow-hidden rounded-full bg-surface-gray-2">
+									<div class="h-full rounded-full bg-blue-500" :style="{ width: `${courseProgress(session)}%` }" />
+								</div>
+								<div class="mt-2 text-xs text-ink-gray-6">
+									{{ courseProgress(session) }}% {{ __('completado') }}
+								</div>
 								<div class="mt-4 flex gap-2">
-									<Button :label="__('Abrir plan')" @click="openPlan(session.name)" />
-									<Button :label="__('Sala')" variant="subtle" @click="openRoom(session.name, 0)" />
+									<Button :label="__('Abrir curso')" @click="openPlan(session.name)" />
+									<Button :label="__('Continuar')" variant="solid" @click="openRoom(session.name, nextLessonIndex(session))" />
 								</div>
 							</div>
 							<div v-if="!sessions.length" class="rounded-lg border border-dashed border-outline-gray-2 p-8 text-center text-sm text-ink-gray-6 lg:col-span-2">
@@ -221,58 +227,140 @@
 				<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
 					<div class="flex flex-wrap items-center justify-between gap-3">
 						<div>
-							<h2 class="text-lg font-semibold">{{ currentSession?.title }}</h2>
-							<p class="mt-1 text-sm text-ink-gray-6">{{ currentSession?.profile_summary || __('Plan generado por TutorIA.') }}</p>
+							<div class="text-sm font-medium text-ink-blue-3">{{ __('Curso IA personal') }}</div>
+							<h2 class="mt-1 text-2xl font-semibold">{{ courseStructure.courseTitle || currentSession?.title }}</h2>
+							<p class="mt-1 text-sm text-ink-gray-6">{{ currentSession?.profile_summary || courseStructure.courseGoal || __('Malla curricular generada por TutorIA.') }}</p>
 						</div>
 						<Button :label="__('Rehacer plan')" :loading="loading === 'plan'" @click="generatePlan" />
 					</div>
-					<div class="mt-4 grid gap-3">
-						<div v-for="(item, index) in currentSession?.weekly_plan || []" :key="index" class="rounded-lg border border-outline-gray-1 p-4">
+					<div class="mt-4 h-2 overflow-hidden rounded-full bg-surface-gray-2">
+						<div class="h-full rounded-full bg-blue-500" :style="{ width: `${courseProgress(currentSession)}%` }" />
+					</div>
+					<div class="mt-5 grid gap-4">
+						<div v-for="(module, moduleIndex) in courseStructure.modules || []" :key="module.title || moduleIndex" class="rounded-lg border border-outline-gray-1 bg-surface-gray-1 p-4">
 							<div class="flex flex-wrap items-start justify-between gap-3">
 								<div>
-									<div class="text-sm font-medium text-ink-blue-3">{{ item.period || item.week || item.day || `${__('Bloque')} ${index + 1}` }}</div>
-									<h3 class="mt-1 text-base font-semibold">{{ item.title || item.objective }}</h3>
+									<div class="text-sm font-medium text-ink-blue-3">{{ module.period || `${__('Módulo')} ${moduleIndex + 1}` }}</div>
+									<h3 class="mt-1 text-lg font-semibold">{{ module.title }}</h3>
+									<p class="mt-1 text-sm leading-6 text-ink-gray-6">{{ module.objective }}</p>
 								</div>
-								<span class="rounded bg-surface-gray-2 px-2 py-1 text-xs text-ink-gray-7">{{ item.duration || item.hours || __('Flexible') }}</span>
+								<span class="rounded bg-surface-white px-2 py-1 text-xs text-ink-gray-7">{{ module.lessons?.length || 0 }} {{ __('lecciones') }}</span>
 							</div>
-							<p class="mt-2 text-sm leading-6 text-ink-gray-7">{{ item.objective }}</p>
-							<div class="mt-3 flex flex-wrap gap-2">
-								<span v-for="topic in item.topics || []" :key="topic" class="rounded bg-surface-green-1 px-2 py-1 text-xs text-ink-green-3">{{ topic }}</span>
+							<div class="mt-4 grid gap-2">
+								<button
+									v-for="lesson in module.lessons || []"
+									:key="lesson.key || lesson.title"
+									class="flex items-start justify-between gap-3 rounded-md border border-outline-gray-1 bg-surface-white p-3 text-left transition hover:border-blue-300 hover:shadow-sm"
+									@click="openRoom(currentSession.name, lessonGlobalIndex(lesson))"
+								>
+									<div class="min-w-0">
+										<div class="flex items-center gap-2">
+											<CheckCircle2
+												class="h-4 w-4 stroke-1.5"
+												:class="isLessonDone(lesson) ? 'text-green-600' : 'text-ink-gray-4'"
+											/>
+											<div class="truncate text-sm font-semibold text-ink-gray-9">{{ lesson.title }}</div>
+										</div>
+										<p class="mt-1 line-clamp-2 text-sm leading-5 text-ink-gray-6">{{ lesson.objective }}</p>
+									</div>
+									<div class="flex shrink-0 flex-col items-end gap-1">
+										<span class="rounded bg-surface-blue-1 px-2 py-1 text-xs text-ink-blue-4">{{ lesson.duration || __('30 min') }}</span>
+										<span class="text-xs text-ink-gray-5">{{ lesson.difficulty || __('medio') }}</span>
+									</div>
+								</button>
 							</div>
 						</div>
 					</div>
 				</div>
 				<aside class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
-					<h2 class="text-base font-semibold">{{ __('Temas') }}</h2>
+					<h2 class="text-base font-semibold">{{ __('Resumen del curso') }}</h2>
 					<div class="mt-3 flex flex-col gap-2">
-						<button
-							v-for="(topic, index) in currentSession?.topics || []"
-							:key="topic.title || topic"
-							class="rounded-md border border-outline-gray-1 p-3 text-left text-sm hover:bg-surface-gray-1"
-							@click="openRoom(currentSession.name, index)"
-						>
-							{{ topic.title || topic }}
-						</button>
+						<div class="rounded-md bg-surface-gray-1 p-3">
+							<div class="text-xs text-ink-gray-6">{{ __('Lecciones') }}</div>
+							<div class="mt-1 text-2xl font-semibold">{{ lessonsFlat.length }}</div>
+						</div>
+						<div class="rounded-md bg-surface-gray-1 p-3">
+							<div class="text-xs text-ink-gray-6">{{ __('Progreso') }}</div>
+							<div class="mt-1 text-2xl font-semibold">{{ courseProgress(currentSession) }}%</div>
+						</div>
 					</div>
 				</aside>
 			</section>
 
 			<section v-else-if="isRoom" class="grid gap-5 xl:grid-cols-[1fr_390px]">
 				<div class="flex flex-col gap-5">
-					<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
+					<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-5 shadow-sm">
 						<div class="flex flex-wrap items-center justify-between gap-3">
 							<div>
-								<h2 class="text-lg font-semibold">{{ activeTopicTitle }}</h2>
-								<p class="mt-1 text-sm text-ink-gray-6">{{ __('Explicación, práctica, simulacro y repaso visual.') }}</p>
+								<div class="text-sm font-medium text-ink-blue-3">{{ activeLesson.moduleTitle || __('Lección') }}</div>
+								<h2 class="mt-1 text-2xl font-semibold">{{ lessonPack.lessonTitle || activeTopicTitle }}</h2>
+								<p class="mt-1 text-sm text-ink-gray-6">{{ lessonPack.learningObjective || activeLesson.objective || __('Aprende con explicación, práctica, quiz, tutor y diagrama.') }}</p>
 							</div>
 							<div class="flex flex-wrap gap-2">
-								<Button :label="__('Generar pack')" :loading="loading === 'pack'" @click="generatePack" />
+								<Button :label="__('Regenerar lección')" :loading="loading === 'pack'" @click="generatePack(true)" />
 								<Button :label="__('Diagrama')" :loading="loading === 'diagram'" @click="generateDiagram" />
-								<Button :label="__('Guardar')" @click="saveCurrentExplanation" />
+								<Button :label="__('Guardar en explicaciones')" @click="saveCurrentExplanation" />
 							</div>
 						</div>
+						<div v-if="loading === 'lesson'" class="mt-5 rounded-lg border border-blue-100 bg-surface-blue-1 p-5 text-sm text-ink-blue-4">
+							{{ __('Preparando tu lección personalizada...') }}
+						</div>
 						<img v-if="diagramUrl" :src="diagramUrl" class="mt-4 w-full rounded-lg border border-outline-gray-1" />
-						<div class="study-markdown mt-4 rounded-lg bg-surface-gray-1 p-4" v-html="renderMarkdown(studyPackMarkdown)" @mouseup="captureSelection" />
+						<div v-if="lessonPack.lessonTitle || lessonPack.sections?.length" class="mt-5 grid gap-4" @mouseup="captureSelection">
+							<div class="rounded-lg bg-surface-blue-1 p-4">
+								<div class="text-xs font-semibold uppercase tracking-wide text-ink-blue-3">{{ __('Idea clave') }}</div>
+								<div class="mt-2 text-base font-medium leading-7 text-ink-blue-4">{{ lessonPack.keyIdea || __('Esta lección ya está lista para estudiar.') }}</div>
+							</div>
+							<div v-if="lessonPack.conceptCards?.length" class="grid gap-3 md:grid-cols-2">
+								<div v-for="card in lessonPack.conceptCards" :key="card.title" class="rounded-lg border border-outline-gray-1 p-4">
+									<h3 class="text-base font-semibold">{{ card.title }}</h3>
+									<p class="mt-2 text-sm leading-6 text-ink-gray-7">{{ card.body }}</p>
+									<div v-if="card.formula" class="mt-3 rounded bg-surface-gray-1 px-3 py-2 font-mono text-sm">{{ card.formula }}</div>
+								</div>
+							</div>
+							<div v-for="section in lessonPack.sections || []" :key="section.title" class="rounded-lg border border-outline-gray-1 p-4">
+								<h3 class="text-lg font-semibold">{{ section.title }}</h3>
+								<p class="mt-2 text-sm leading-7 text-ink-gray-7">{{ section.summary }}</p>
+								<ul class="mt-3 grid gap-2">
+									<li v-for="point in section.keyPoints || []" :key="point" class="flex gap-2 text-sm leading-6 text-ink-gray-7">
+										<span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
+										<span>{{ point }}</span>
+									</li>
+								</ul>
+							</div>
+							<div v-if="lessonPack.workedExamples?.length" class="rounded-lg border border-outline-gray-1 p-4">
+								<h3 class="text-lg font-semibold">{{ __('Ejemplo resuelto') }}</h3>
+								<div v-for="example in lessonPack.workedExamples" :key="example.title || example.problem" class="mt-4 rounded-md bg-surface-gray-1 p-4">
+									<div class="text-sm font-semibold">{{ example.title || example.problem }}</div>
+									<p v-if="example.problem" class="mt-2 text-sm leading-6 text-ink-gray-7">{{ example.problem }}</p>
+									<ol class="mt-3 grid gap-2">
+										<li v-for="(step, index) in example.steps || []" :key="index" class="flex gap-3 text-sm leading-6">
+											<span class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-blue-500 text-xs font-semibold text-white">{{ index + 1 }}</span>
+											<span>{{ step }}</span>
+										</li>
+									</ol>
+									<div v-if="example.answer" class="mt-3 rounded bg-surface-green-1 px-3 py-2 text-sm text-ink-green-4">{{ example.answer }}</div>
+								</div>
+							</div>
+							<div v-if="lessonPack.commonMistakes?.length" class="rounded-lg border border-outline-gray-1 p-4">
+								<h3 class="text-lg font-semibold">{{ __('Errores frecuentes') }}</h3>
+								<div class="mt-3 grid gap-2">
+									<div v-for="mistake in lessonPack.commonMistakes" :key="mistake.mistake" class="rounded-md bg-surface-red-1 p-3 text-sm leading-6">
+										<strong>{{ mistake.mistake }}</strong>
+										<div class="mt-1 text-ink-gray-7">{{ mistake.fix }}</div>
+									</div>
+								</div>
+							</div>
+							<div v-if="lessonPack.masteryChecklist?.length" class="rounded-lg border border-outline-gray-1 p-4">
+								<h3 class="text-lg font-semibold">{{ __('Checklist de dominio') }}</h3>
+								<div class="mt-3 grid gap-2">
+									<label v-for="item in lessonPack.masteryChecklist" :key="item" class="flex items-start gap-2 text-sm leading-6">
+										<input type="checkbox" class="mt-1 rounded border-outline-gray-3" @change="markProgress({ explanation_viewed: true })" />
+										<span>{{ item }}</span>
+									</label>
+								</div>
+							</div>
+						</div>
 					</div>
 
 					<div class="grid gap-5 xl:grid-cols-2">
@@ -281,15 +369,15 @@
 								<h2 class="text-lg font-semibold">{{ __('Ejercicios') }}</h2>
 								<Button :label="__('Generar')" :loading="loading === 'exercises'" @click="generateExercises" />
 							</div>
-							<ExerciseList :items="exercises" @answer="handleAnswer" />
+							<ExerciseList :items="lessonPack.practice?.length ? lessonPack.practice : exercises" @answer="handleAnswer" />
 						</div>
 						<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
 							<div class="flex items-center justify-between gap-3">
 								<h2 class="text-lg font-semibold">{{ __('Quiz final') }}</h2>
 								<Button :label="__('Generar')" :loading="loading === 'quiz'" @click="generateQuiz" />
 							</div>
-							<ExerciseList :items="quiz" @answer="handleQuizAnswer" />
-							<div v-if="quiz.length" class="mt-3 rounded-md bg-surface-blue-1 p-3 text-sm text-ink-blue-4">
+							<ExerciseList :items="lessonPack.quiz?.length ? lessonPack.quiz : quiz" @answer="handleQuizAnswer" />
+							<div v-if="activeQuiz.length" class="mt-3 rounded-md bg-surface-blue-1 p-3 text-sm text-ink-blue-4">
 								{{ __('Puntaje') }}: {{ quizScore }}%
 							</div>
 						</div>
@@ -393,6 +481,7 @@ import {
 	Brain,
 	CalendarDays,
 	ClipboardCheck,
+	CheckCircle2,
 	FileQuestion,
 	FileText,
 	GraduationCap,
@@ -436,6 +525,8 @@ const fileUploader = ref(null)
 const diagramUrl = ref('')
 const exercises = ref([])
 const quiz = ref([])
+const lessonPack = ref({})
+const activeLesson = ref({})
 const chatMessages = ref([])
 const chatInput = ref('')
 const chatBox = ref(null)
@@ -465,13 +556,16 @@ const isExplanations = computed(() => pageName.value === 'StudyExplanations')
 const isWhiteboard = computed(() => pageName.value === 'StudyWhiteboard')
 
 const activeTopic = computed(() => (currentSession.value?.topics || [])[topicIndex.value] || null)
-const activeTopicTitle = computed(() => activeTopic.value?.title || activeTopic.value || __('Tema de estudio'))
+const activeTopicTitle = computed(() => activeLesson.value?.title || activeTopic.value?.title || activeTopic.value || __('Tema de estudio'))
+const courseStructure = computed(() => currentSession.value?.course_structure || fallbackCourseStructure(currentSession.value))
+const lessonsFlat = computed(() => flattenLessons(courseStructure.value))
+const activeQuiz = computed(() => lessonPack.value?.quiz?.length ? lessonPack.value.quiz : quiz.value)
 const quizScore = computed(() => {
-	if (!quiz.value.length) return 0
-	const answered = quiz.value.filter((item) => item.selected !== undefined)
+	if (!activeQuiz.value.length) return 0
+	const answered = activeQuiz.value.filter((item) => item.selected !== undefined)
 	if (!answered.length) return 0
 	const correct = answered.filter((item) => item.selected === Number(item.correct || 0)).length
-	return Math.round((correct / quiz.value.length) * 100)
+	return Math.round((correct / activeQuiz.value.length) * 100)
 })
 const studyPackMarkdown = computed(() => {
 	const pack = currentSession.value?.study_pack || {}
@@ -564,7 +658,12 @@ async function loadRouteSession() {
 	applySessionToDraft()
 	exercises.value = markSelectable(currentSession.value.exercises || [])
 	quiz.value = markSelectable(currentSession.value.quiz_questions || [])
+	lessonPack.value = currentSession.value.study_pack || {}
+	activeLesson.value = lessonsFlat.value[topicIndex.value] || {}
 	chatMessages.value = (currentSession.value.chat_history || []).map((item, index) => ({ ...item, id: index }))
+	if (isRoom.value) {
+		await loadLesson()
+	}
 }
 
 function applySessionToDraft() {
@@ -600,6 +699,60 @@ function openPlan(name) {
 
 function openRoom(name, index = 0) {
 	router.push({ name: 'StudyRoom', params: { sessionId: name, topicIndex: index } })
+}
+
+function flattenLessons(structure = {}) {
+	const lessons = []
+	;(structure.modules || []).forEach((module, moduleIndex) => {
+		;(module.lessons || []).forEach((lesson, lessonIndex) => {
+			lessons.push({ ...lesson, moduleTitle: module.title, moduleIndex, lessonIndex })
+		})
+	})
+	return lessons
+}
+
+function fallbackCourseStructure(session) {
+	const topics = session?.topics || []
+	return {
+		courseTitle: session?.title || __('Curso IA personal'),
+		courseGoal: session?.goal || '',
+		modules: [
+			{
+				title: __('Módulo principal'),
+				objective: __('Dominar los temas detectados.'),
+				lessons: topics.map((topic, index) => ({
+					key: `lesson-${index + 1}`,
+					title: topic.title || topic,
+					objective: topic.why || __('Aprender y practicar este tema.'),
+					difficulty: topic.difficulty || __('medio'),
+					duration: __('30 min'),
+				})),
+			},
+		],
+	}
+}
+
+function lessonGlobalIndex(lesson) {
+	return Math.max(0, lessonsFlat.value.findIndex((item) => (item.key && item.key === lesson.key) || item.title === lesson.title))
+}
+
+function isLessonDone(lesson) {
+	return Boolean(currentSession.value?.lesson_progress?.[lesson.key]?.completed || currentSession.value?.completed_topics?.[lesson.key])
+}
+
+function courseProgress(session) {
+	const lessons = flattenLessons(session?.course_structure || fallbackCourseStructure(session))
+	if (!lessons.length) return 0
+	const progress = session?.lesson_progress || {}
+	const completed = lessons.filter((lesson) => progress[lesson.key]?.completed || session?.completed_topics?.[lesson.key]).length
+	return Math.round((completed / lessons.length) * 100)
+}
+
+function nextLessonIndex(session) {
+	const lessons = flattenLessons(session?.course_structure || fallbackCourseStructure(session))
+	const progress = session?.lesson_progress || {}
+	const index = lessons.findIndex((lesson) => !progress[lesson.key]?.completed && !session?.completed_topics?.[lesson.key])
+	return index >= 0 ? index : 0
 }
 
 function validateFile(file) {
@@ -646,9 +799,20 @@ async function generatePlan() {
 	router.push({ name: 'StudyPlan', params: { sessionId: currentSession.value.name } })
 }
 
-async function generatePack() {
-	const result = await api('generate_study_pack', { session: currentSession.value.name, topic: activeTopicTitle.value, level: currentSession.value.student_level }, 'pack')
-	currentSession.value.study_pack = result.study_pack
+async function loadLesson() {
+	if (!currentSession.value) return
+	const result = await api('get_lesson', { session: currentSession.value.name, topic_index: topicIndex.value, auto_generate: 1 }, 'lesson')
+	activeLesson.value = result.lesson || activeLesson.value
+	lessonPack.value = normalizeLessonPack(result.study_pack || {})
+	currentSession.value.study_pack = lessonPack.value
+	if (result.cached === false) toast.success(__('Lección preparada y guardada automáticamente.'))
+}
+
+async function generatePack(force = false) {
+	const result = await api('generate_study_pack', { session: currentSession.value.name, topic: activeTopicTitle.value, level: currentSession.value.student_level, topic_index: topicIndex.value, lesson_key: activeLesson.value?.key, force }, 'pack')
+	activeLesson.value = result.lesson || activeLesson.value
+	lessonPack.value = normalizeLessonPack(result.study_pack || {})
+	currentSession.value.study_pack = lessonPack.value
 }
 
 async function generateDiagram() {
@@ -659,11 +823,13 @@ async function generateDiagram() {
 async function generateExercises() {
 	const result = await api('generate_exercises', { session: currentSession.value.name, topic: activeTopicTitle.value, difficulty: 'medio' }, 'exercises')
 	exercises.value = markSelectable(result.exercises || [])
+	lessonPack.value.practice = exercises.value
 }
 
 async function generateQuiz() {
 	const result = await api('generate_quiz', { session: currentSession.value.name, topic: activeTopicTitle.value }, 'quiz')
 	quiz.value = markSelectable(result.quiz || [])
+	lessonPack.value.quiz = quiz.value
 }
 
 function markSelectable(items) {
@@ -672,14 +838,17 @@ function markSelectable(items) {
 
 function handleAnswer({ item, index }) {
 	item.selected = index
+	markProgress({ exercises_answered: true })
 }
 
 async function handleQuizAnswer({ item, index }) {
 	item.selected = index
+	const completed = activeQuiz.value.every((q) => q.selected !== undefined)
 	await api('update_session', {
 		name: currentSession.value.name,
-		data: { quiz_questions: quiz.value, quiz_score: quizScore.value, quiz_done: quiz.value.every((q) => q.selected !== undefined) },
+		data: { quiz_questions: activeQuiz.value, quiz_score: quizScore.value, quiz_done: completed },
 	})
+	if (completed) await markProgress({ quiz_completed: true, completed: true, quiz_score: quizScore.value })
 }
 
 async function sendChat() {
@@ -705,9 +874,32 @@ function captureSelection() {
 }
 
 async function saveCurrentExplanation() {
-	await api('save_explanation', { session: currentSession.value.name, topic: activeTopicTitle.value, content: studyPackMarkdown.value })
+	await api('save_explanation', { session: currentSession.value.name, topic: activeTopicTitle.value, content: JSON.stringify(lessonPack.value, null, 2) })
 	toast.success(__('Explicación guardada.'))
 	await loadDashboard()
+}
+
+async function markProgress(data) {
+	if (!currentSession.value || !activeLesson.value?.key) return
+	const result = await api('record_lesson_progress', { session: currentSession.value.name, lesson_key: activeLesson.value.key, data })
+	currentSession.value = result.session || currentSession.value
+}
+
+function normalizeLessonPack(pack = {}) {
+	return {
+		lessonTitle: pack.lessonTitle || pack.title || activeLesson.value?.title || activeTopicTitle.value,
+		learningObjective: pack.learningObjective || activeLesson.value?.objective || '',
+		difficulty: pack.difficulty || activeLesson.value?.difficulty || 'medio',
+		estimatedTime: pack.estimatedTime || activeLesson.value?.duration || '30 min',
+		keyIdea: pack.keyIdea || '',
+		conceptCards: pack.conceptCards || [],
+		sections: pack.sections || [],
+		workedExamples: pack.workedExamples || [],
+		commonMistakes: pack.commonMistakes || [],
+		practice: markSelectable(pack.practice || []),
+		quiz: markSelectable(pack.quiz || []),
+		masteryChecklist: pack.masteryChecklist || [],
+	}
 }
 
 async function deleteSession(name) {
