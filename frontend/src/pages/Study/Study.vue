@@ -580,7 +580,7 @@
 				</div>
 
 				<!-- Room sidebar -->
-				<aside class="flex flex-col gap-6">
+				<aside class="flex flex-col gap-6 room-sidebar">
 					<div class="s-panel s-panel--flush">
 						<div class="sidebar-header">
 							<ListChecks class="h-4 w-4 stroke-1.5" />
@@ -597,10 +597,17 @@
 							<span>{{ __('Termina la explicación para ver qué debes dominar.') }}</span>
 						</div>
 					</div>
-					<div class="s-panel s-panel--flush">
-						<div class="sidebar-header">
-							<MessageCircle class="h-4 w-4 stroke-1.5" />
-							<h2 class="sidebar-title">{{ __('Tutor contextual') }}</h2>
+					<div v-if="isTutorExpanded" class="tutor-backdrop" @click="isTutorExpanded = false"></div>
+					<div class="s-panel s-panel--flush tutor-panel" :class="{ 'is-expanded': isTutorExpanded }">
+						<div class="sidebar-header flex justify-between items-center w-full">
+							<div class="flex items-center gap-2">
+								<MessageCircle class="h-4 w-4 stroke-1.5" />
+								<h2 class="sidebar-title m-0">{{ __('Tutor contextual') }}</h2>
+							</div>
+							<button class="text-slate-400 hover:text-indigo-600 transition-colors bg-transparent border-none cursor-pointer" @click="isTutorExpanded = !isTutorExpanded" :title="__('Expandir/Contraer')">
+								<Minimize2 v-if="isTutorExpanded" class="h-4 w-4 stroke-1.5" />
+								<Maximize2 v-else class="h-4 w-4 stroke-1.5" />
+							</button>
 						</div>
 						<p class="chat-hint">{{ __('Pregunta dudas o selecciona texto de la lección para pedir una explicación.') }}</p>
 						<div ref="chatBox" class="chat-box">
@@ -763,7 +770,9 @@ import {
 	LibraryBig,
 	Lightbulb,
 	ListChecks,
+	Maximize2,
 	MessageCircle,
+	Minimize2,
 	NotebookPen,
 	PanelTop,
 	PlayCircle,
@@ -816,6 +825,7 @@ const activeLesson = ref({})
 const chatMessages = ref([])
 const chatInput = ref('')
 const chatBox = ref(null)
+const isTutorExpanded = ref(false)
 const whiteboardText = ref(localStorage.getItem('studybadge_whiteboard') || '')
 const whiteboardResponse = ref('')
 
@@ -2126,5 +2136,53 @@ const ExerciseList = defineComponent({
 	border: 1px solid #fde68a;
 	border-radius: 12px;
 	box-shadow: inset 0 2px 4px rgba(255,255,255,0.5);
+}
+
+/* Sidebar & Tutor Expansion */
+.room-sidebar {
+	position: sticky;
+	top: 1.5rem;
+	align-self: flex-start;
+	max-height: calc(100vh - 3rem);
+	overflow-y: auto;
+	scrollbar-width: thin;
+	scrollbar-color: #cbd5e1 transparent;
+	padding-right: 0.25rem;
+	margin-right: -0.25rem;
+}
+.room-sidebar::-webkit-scrollbar {
+	width: 4px;
+}
+.room-sidebar::-webkit-scrollbar-thumb {
+	background-color: #cbd5e1;
+	border-radius: 4px;
+}
+.tutor-panel {
+	transition: all 0.3s ease;
+}
+.tutor-panel.is-expanded {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 90vw;
+	max-width: 800px;
+	height: 85vh;
+	z-index: 50;
+	box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+	display: flex;
+	flex-direction: column;
+}
+.tutor-panel.is-expanded .chat-box {
+	max-height: none !important;
+	flex: 1;
+	overflow-y: auto;
+}
+.tutor-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(15, 23, 42, 0.5);
+	backdrop-filter: blur(4px);
+	z-index: 49;
 }
 </style>
