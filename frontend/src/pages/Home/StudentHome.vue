@@ -4,7 +4,7 @@
 			<UpcomingEvaluations :forHome="true" />
 			<div v-if="myLiveClasses.data?.length">
 				<div class="font-semibold text-lg mb-3 text-ink-gray-9">
-					{{ __('Upcoming Live Classes') }}
+					{{ __('Próximas Clases en Vivo') }}
 				</div>
 				<div class="grid grid-cols-1 md:grid-cols-4 gap-5">
 					<div
@@ -77,8 +77,8 @@
 				<span class="font-semibold text-lg text-ink-gray-9">
 					{{
 						myCourses.data[0].membership
-							? __('My Courses')
-							: __('Our Popular Courses')
+							? __('Mis Cursos')
+							: __('Cursos Populares')
 					}}
 				</span>
 				<router-link
@@ -88,7 +88,7 @@
 				>
 					<span class="flex items-center gap-x-1 text-ink-gray-5 text-xs">
 						<span>
-							{{ __('See all') }}
+							{{ __('Ver todos') }}
 						</span>
 						<MoveRight class="size-3 stroke-1.5 rtl:rotate-180" />
 					</span>
@@ -109,8 +109,8 @@
 				<span class="font-semibold text-lg text-ink-gray-9">
 					{{
 						myBatches.data?.[0].students?.includes(user.data?.name)
-							? __('My Batches')
-							: __('Our Upcoming Batches')
+							? __('Mis Grupos')
+							: __('Próximos Grupos')
 					}}
 				</span>
 				<router-link
@@ -120,7 +120,7 @@
 				>
 					<span class="flex items-center gap-x-1 text-ink-gray-5 text-xs">
 						<span>
-							{{ __('See all') }}
+							{{ __('Ver todos') }}
 						</span>
 						<MoveRight class="size-3 stroke-1.5 rtl:rotate-180" />
 					</span>
