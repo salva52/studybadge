@@ -418,7 +418,7 @@ usePageMeta(() => {
 	position: relative;
 	overflow: hidden;
 	border-radius: 16px;
-	background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%);
+	background: linear-gradient(135deg, #092150 0%, #12336e 100%);
 	padding: 2rem;
 	color: white;
 }
