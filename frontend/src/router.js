@@ -21,6 +21,44 @@ const routes = [
 		component: () => import('@/pages/Study/Study.vue'),
 	},
 	{
+		path: '/study/flow/:flowId',
+		name: 'StudyFlow',
+		component: () => import('@/pages/Study/Study.vue'),
+		props: true,
+	},
+	{
+		path: '/study/plan/:sessionId',
+		name: 'StudyPlan',
+		component: () => import('@/pages/Study/Study.vue'),
+		props: true,
+	},
+	{
+		path: '/study/room/:sessionId/:topicIndex',
+		name: 'StudyRoom',
+		component: () => import('@/pages/Study/Study.vue'),
+		props: true,
+	},
+	{
+		path: '/study/history',
+		name: 'StudyHistory',
+		component: () => import('@/pages/Study/Study.vue'),
+	},
+	{
+		path: '/study/statistics',
+		name: 'StudyStatistics',
+		component: () => import('@/pages/Study/Study.vue'),
+	},
+	{
+		path: '/study/explanations',
+		name: 'StudyExplanations',
+		component: () => import('@/pages/Study/Study.vue'),
+	},
+	{
+		path: '/study/whiteboard',
+		name: 'StudyWhiteboard',
+		component: () => import('@/pages/Study/Study.vue'),
+	},
+	{
 		path: '/courses/:courseName',
 		name: 'CourseDetail',
 		component: () => import('@/pages/Courses/CourseDetail.vue'),

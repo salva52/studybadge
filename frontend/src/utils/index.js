@@ -473,7 +473,16 @@ const getSidebarItems = (forMobile = false) => {
 					label: 'Estudio IA',
 					icon: 'Brain',
 					to: 'Study',
-					activeFor: ['Study'],
+					activeFor: [
+						'Study',
+						'StudyFlow',
+						'StudyPlan',
+						'StudyRoom',
+						'StudyHistory',
+						'StudyStatistics',
+						'StudyExplanations',
+						'StudyWhiteboard',
+					],
 					condition: () => {
 						return userResource?.data
 					},

@@ -1,930 +1,814 @@
 <template>
-	<div class="min-h-screen bg-surface-gray-1">
-		<div class="mx-auto flex w-full max-w-[1440px] flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8">
-			<header class="grid gap-4 border-b border-outline-gray-1 pb-5 lg:grid-cols-[1.15fr_0.85fr]">
-				<div class="flex min-w-0 flex-col gap-3">
-					<div class="flex flex-wrap items-center gap-2">
-						<span class="rounded bg-surface-blue-2 px-2 py-1 text-xs font-medium text-ink-blue-3">
-							{{ __('Nuevo espacio') }}
-						</span>
-						<span class="text-sm text-ink-gray-6">{{ __('Estudio con TutorIA') }}</span>
-					</div>
-					<div>
-						<h1 class="text-3xl font-semibold tracking-normal text-ink-gray-9 sm:text-4xl">
+	<div class="min-h-screen bg-surface-gray-1 text-ink-gray-9">
+		<div class="mx-auto flex w-full max-w-[1500px] flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8">
+			<header class="flex flex-col gap-4 border-b border-outline-gray-1 pb-5 lg:flex-row lg:items-end lg:justify-between">
+				<div>
+					<div class="flex flex-wrap items-center gap-2 text-sm text-ink-gray-6">
+						<router-link :to="{ name: 'Study' }" class="font-medium text-ink-blue-3">
 							{{ __('Estudio IA') }}
-						</h1>
-						<p class="mt-2 max-w-3xl text-base leading-7 text-ink-gray-7">
-							{{
-								__(
-									'Convierte tu temario, apuntes o dudas en un plan de estudio, explicaciones guiadas, práctica, flashcards y simulacros.'
-								)
-							}}
-						</p>
+						</router-link>
+						<span v-if="pageTitle">/</span>
+						<span v-if="pageTitle">{{ pageTitle }}</span>
 					</div>
+					<h1 class="mt-2 text-3xl font-semibold tracking-normal text-ink-gray-9 sm:text-4xl">
+						{{ headerTitle }}
+					</h1>
+					<p class="mt-2 max-w-3xl text-base leading-7 text-ink-gray-7">
+						{{ headerSubtitle }}
+					</p>
 				</div>
-				<div class="grid grid-cols-3 gap-2 rounded-lg border border-outline-gray-1 bg-surface-white p-3 shadow-sm">
-					<div v-for="metric in metrics" :key="metric.label" class="rounded-md bg-surface-gray-1 px-3 py-2">
-						<div class="text-xs text-ink-gray-6">{{ metric.label }}</div>
-						<div class="mt-1 text-xl font-semibold text-ink-gray-9">{{ metric.value }}</div>
-					</div>
-				</div>
+				<nav class="flex flex-wrap gap-2">
+					<router-link
+						v-for="item in topNav"
+						:key="item.name"
+						:to="{ name: item.name }"
+						class="inline-flex min-h-9 items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition"
+						:class="route.name === item.name ? 'bg-surface-blue-2 text-ink-blue-4' : 'bg-surface-white text-ink-gray-7 hover:bg-surface-gray-2'"
+					>
+						<component :is="item.icon" class="h-4 w-4 stroke-1.5" />
+						{{ item.label }}
+					</router-link>
+				</nav>
 			</header>
 
-			<section class="grid gap-4 lg:grid-cols-[360px_1fr]">
-				<aside class="flex flex-col gap-4">
-					<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
-						<div class="flex items-center justify-between gap-3">
-							<div>
-								<h2 class="text-base font-semibold text-ink-gray-9">{{ __('Objetivo') }}</h2>
-								<p class="mt-1 text-sm text-ink-gray-6">{{ __('Elige el modo y pega tu material.') }}</p>
+			<section v-if="isDashboard" class="grid gap-5 xl:grid-cols-[1fr_380px]">
+				<div class="flex flex-col gap-5">
+					<div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+						<button
+							v-for="flow in flows"
+							:key="flow.id"
+							class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md"
+							@click="startFlow(flow.id)"
+						>
+							<div class="grid h-10 w-10 place-items-center rounded-md bg-surface-blue-2 text-ink-blue-4">
+								<component :is="flow.icon" class="h-5 w-5 stroke-1.5" />
 							</div>
-							<Tooltip :text="__('Reiniciar')">
-								<button
-									class="grid h-9 w-9 place-items-center rounded-md text-ink-gray-7 hover:bg-surface-gray-2"
-									@click="resetWorkspace"
-								>
-									<RotateCcw class="h-4 w-4 stroke-1.5" />
-								</button>
-							</Tooltip>
-						</div>
-
-						<div class="mt-4 grid grid-cols-2 gap-2">
-							<button
-								v-for="goal in goals"
-								:key="goal.id"
-								class="flex min-h-20 flex-col justify-between rounded-md border p-3 text-left transition"
-								:class="
-									studyGoal === goal.id
-										? 'border-blue-500 bg-surface-blue-1 text-ink-blue-4'
-										: 'border-outline-gray-1 bg-surface-white text-ink-gray-8 hover:bg-surface-gray-1'
-								"
-								@click="studyGoal = goal.id"
-							>
-								<component :is="goal.icon" class="h-4 w-4 stroke-1.5" />
-								<span class="text-sm font-medium leading-5">{{ goal.label }}</span>
-							</button>
-						</div>
-
-						<div class="mt-4 grid gap-3">
-							<FormControl
-								v-model="subject"
-								:label="__('Curso o tema')"
-								:placeholder="__('Ej. Cálculo II, anatomía, finanzas')"
-							/>
-							<FormControl
-								v-model="examDate"
-								type="date"
-								:label="__('Fecha objetivo')"
-							/>
-							<div>
-								<label class="mb-1 block text-sm text-ink-gray-7">{{ __('Nivel') }}</label>
-								<select
-									v-model="studentLevel"
-									class="w-full rounded-md border border-outline-gray-2 bg-surface-white px-3 py-2 text-sm text-ink-gray-8 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-								>
-									<option value="colegio">{{ __('Colegio') }}</option>
-									<option value="preuniversitario">{{ __('Preuniversitario') }}</option>
-									<option value="universitario">{{ __('Universitario') }}</option>
-									<option value="profesional">{{ __('Profesional') }}</option>
-								</select>
-							</div>
-							<div>
-								<label class="mb-1 block text-sm text-ink-gray-7">{{ __('Temario, apuntes o consigna') }}</label>
-								<textarea
-									v-model="sourceMaterial"
-									rows="9"
-									class="w-full resize-y rounded-md border border-outline-gray-2 bg-surface-white px-3 py-2 text-sm leading-6 text-ink-gray-8 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-									:placeholder="__('Pega aquí sílabos, temas del parcial, apuntes, preguntas o lo que necesitas estudiar.')"
-								/>
-							</div>
-							<div class="grid grid-cols-2 gap-2">
-								<Button
-									:label="__('Detectar temas')"
-									:loading="loadingAction === 'topics'"
-									@click="detectTopics"
-								>
-									<template #prefix>
-										<ListChecks class="h-4 w-4 stroke-1.5" />
-									</template>
-								</Button>
-								<Button
-									:label="__('Crear plan')"
-									variant="solid"
-									:loading="loadingAction === 'plan'"
-									@click="generatePlan"
-								>
-									<template #prefix>
-										<CalendarDays class="h-4 w-4 stroke-1.5" />
-									</template>
-								</Button>
-							</div>
-						</div>
+							<h2 class="mt-4 text-base font-semibold text-ink-gray-9">{{ flow.label }}</h2>
+							<p class="mt-1 text-sm leading-6 text-ink-gray-6">{{ flow.description }}</p>
+						</button>
 					</div>
 
 					<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
 						<div class="flex items-center justify-between gap-3">
-							<h2 class="text-base font-semibold text-ink-gray-9">{{ __('Temas') }}</h2>
-							<button
-								class="text-sm font-medium text-ink-blue-3 hover:text-ink-blue-4"
-								@click="addManualTopic"
-							>
-								{{ __('Agregar') }}
-							</button>
-						</div>
-						<div class="mt-3 flex flex-col gap-2">
-							<label
-								v-for="topic in topics"
-								:key="topic.id"
-								class="flex cursor-pointer items-start gap-3 rounded-md border border-outline-gray-1 bg-surface-gray-1 p-3"
-							>
-								<input
-									v-model="topic.done"
-									type="checkbox"
-									class="mt-1 rounded border-outline-gray-3 text-blue-600 focus:ring-blue-500"
-									@change="persist"
-								/>
-								<span class="min-w-0 flex-1 text-sm leading-5 text-ink-gray-8">{{ topic.title }}</span>
-							</label>
-							<div v-if="!topics.length" class="rounded-md border border-dashed border-outline-gray-2 p-4 text-sm text-ink-gray-6">
-								{{ __('Los temas detectados aparecerán aquí.') }}
+							<div>
+								<h2 class="text-lg font-semibold">{{ __('Sesiones recientes') }}</h2>
+								<p class="mt-1 text-sm text-ink-gray-6">{{ __('Continúa donde te quedaste o crea un plan nuevo.') }}</p>
 							</div>
+							<Button :label="__('Actualizar')" :loading="loading === 'dashboard'" @click="loadDashboard" />
+						</div>
+						<div class="mt-4 grid gap-3 lg:grid-cols-2">
+							<div v-for="session in sessions.slice(0, 6)" :key="session.name" class="rounded-lg border border-outline-gray-1 p-4">
+								<div class="flex items-start justify-between gap-3">
+									<div class="min-w-0">
+										<h3 class="truncate text-base font-semibold">{{ session.title || session.name }}</h3>
+										<p class="mt-1 text-sm text-ink-gray-6">{{ flowLabel(session.flow_id || session.goal) }} · {{ formatDate(session.modified) }}</p>
+									</div>
+									<span class="rounded bg-surface-gray-2 px-2 py-1 text-xs text-ink-gray-7">{{ session.status || __('Draft') }}</span>
+								</div>
+								<div class="mt-3 flex flex-wrap gap-2">
+									<span v-for="topic in (session.topics || []).slice(0, 4)" :key="topic.title || topic" class="rounded bg-surface-green-1 px-2 py-1 text-xs text-ink-green-3">
+										{{ topic.title || topic }}
+									</span>
+								</div>
+								<div class="mt-4 flex gap-2">
+									<Button :label="__('Abrir plan')" @click="openPlan(session.name)" />
+									<Button :label="__('Sala')" variant="subtle" @click="openRoom(session.name, 0)" />
+								</div>
+							</div>
+							<div v-if="!sessions.length" class="rounded-lg border border-dashed border-outline-gray-2 p-8 text-center text-sm text-ink-gray-6 lg:col-span-2">
+								{{ __('Aún no tienes sesiones de estudio.') }}
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<aside class="flex flex-col gap-5">
+					<div class="grid grid-cols-3 gap-2 rounded-lg border border-outline-gray-1 bg-surface-white p-3 shadow-sm">
+						<div v-for="metric in dashboardMetrics" :key="metric.label" class="rounded-md bg-surface-gray-1 px-3 py-2">
+							<div class="text-xs text-ink-gray-6">{{ metric.label }}</div>
+							<div class="mt-1 text-xl font-semibold">{{ metric.value }}</div>
+						</div>
+					</div>
+					<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
+						<h2 class="text-base font-semibold">{{ __('Explicaciones guardadas') }}</h2>
+						<div class="mt-3 flex flex-col gap-2">
+							<router-link
+								v-for="explanation in explanations.slice(0, 5)"
+								:key="explanation.name"
+								:to="{ name: 'StudyExplanations' }"
+								class="rounded-md bg-surface-gray-1 p-3 text-sm hover:bg-surface-gray-2"
+							>
+								<div class="font-medium text-ink-gray-9">{{ explanation.topic || __('Sin tema') }}</div>
+								<div class="mt-1 text-xs text-ink-gray-6">{{ formatDate(explanation.creation) }}</div>
+							</router-link>
+							<div v-if="!explanations.length" class="text-sm text-ink-gray-6">{{ __('Todavía no guardaste explicaciones.') }}</div>
 						</div>
 					</div>
 				</aside>
+			</section>
 
-				<main class="flex min-w-0 flex-col gap-4">
-					<nav class="flex flex-wrap gap-2 rounded-lg border border-outline-gray-1 bg-surface-white p-2 shadow-sm">
+			<section v-else-if="isFlow" class="grid gap-5 xl:grid-cols-[420px_1fr]">
+				<aside class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
+					<h2 class="text-lg font-semibold">{{ __('Configura tu estudio') }}</h2>
+					<div class="mt-4 grid gap-3">
+						<FormControl v-model="draft.title" :label="__('Nombre del plan')" :placeholder="__('Ej. Parcial de cálculo')" />
+						<FormControl v-model="draft.academic_context" :label="__('Curso o contexto')" :placeholder="__('Ej. Universidad, curso, ciclo')" />
+						<FormControl v-model="draft.exam_date" type="date" :label="__('Fecha objetivo')" />
+						<div>
+							<label class="mb-1 block text-sm text-ink-gray-7">{{ __('Nivel') }}</label>
+							<select v-model="draft.student_level" class="study-input">
+								<option value="colegio">{{ __('Colegio') }}</option>
+								<option value="preuniversitario">{{ __('Preuniversitario') }}</option>
+								<option value="universitario">{{ __('Universitario') }}</option>
+								<option value="profesional">{{ __('Profesional') }}</option>
+							</select>
+						</div>
+						<FormControl v-model="draft.desired_topics" :label="__('Temas obligatorios')" :placeholder="__('Separados por coma, opcional')" />
+						<div>
+							<label class="mb-1 block text-sm text-ink-gray-7">{{ __('Texto manual') }}</label>
+							<textarea v-model="draft.manual_text" class="study-textarea" rows="8" :placeholder="__('Pega sílabos, apuntes, ejercicios o temas del parcial.')" />
+						</div>
+						<Button :label="currentSession ? __('Guardar cambios') : __('Crear sesión')" variant="solid" :loading="loading === 'create'" @click="createOrUpdateSession" />
+					</div>
+				</aside>
+
+				<div class="flex flex-col gap-5">
+					<div v-if="flowId === 'admision'" class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
+						<h2 class="text-lg font-semibold">{{ __('Buscar temario de admisión') }}</h2>
+						<div class="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+							<FormControl v-model="university" :placeholder="__('Universidad')" />
+							<FormControl v-model="career" :placeholder="__('Carrera, opcional')" />
+							<Button :label="__('Buscar')" :loading="loading === 'search'" @click="searchTemario" />
+						</div>
+						<div v-if="searchResult" class="study-markdown mt-4 rounded-lg bg-surface-gray-1 p-4" v-html="renderMarkdown(searchResult)" />
+					</div>
+
+					<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
+						<div class="flex flex-wrap items-center justify-between gap-3">
+							<div>
+								<h2 class="text-lg font-semibold">{{ __('Materiales') }}</h2>
+								<p class="mt-1 text-sm text-ink-gray-6">{{ __('Sube PDF, imágenes, DOC o DOCX. Luego la IA extrae y detecta temas.') }}</p>
+							</div>
+							<div class="flex gap-2">
+								<FileUploader
+									ref="fileUploader"
+									class="hidden"
+									:fileTypes="['.pdf', '.doc', '.docx', 'image/*', '.txt', '.md']"
+									:uploadArgs="{ private: true }"
+									:validateFile="validateFile"
+									@success="handleFileUploaded"
+								/>
+								<Button :label="__('Subir archivo')" :disabled="!currentSession" @click="openUploader">
+									<template #prefix><Upload class="h-4 w-4 stroke-1.5" /></template>
+								</Button>
+								<Button :label="__('Analizar')" variant="solid" :disabled="!currentSession" :loading="loading === 'analyze'" @click="analyzeMaterial" />
+							</div>
+						</div>
+						<div class="mt-4 grid gap-2">
+							<div v-for="material in currentSession?.materials || []" :key="material.idx" class="flex items-center justify-between gap-3 rounded-md bg-surface-gray-1 px-3 py-2">
+								<div class="min-w-0">
+									<div class="truncate text-sm font-medium">{{ material.file_name }}</div>
+									<div class="text-xs text-ink-gray-6">{{ material.file_type }} · {{ material.analysis_status }}</div>
+								</div>
+								<FileText class="h-4 w-4 shrink-0 stroke-1.5 text-ink-gray-5" />
+							</div>
+							<div v-if="!currentSession?.materials?.length" class="rounded-md border border-dashed border-outline-gray-2 p-6 text-center text-sm text-ink-gray-6">
+								{{ currentSession ? __('Sube tus materiales para empezar.') : __('Crea la sesión para activar la subida de archivos.') }}
+							</div>
+						</div>
+					</div>
+
+					<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
+						<div class="flex items-center justify-between gap-3">
+							<div>
+								<h2 class="text-lg font-semibold">{{ __('Temas y perfil') }}</h2>
+								<p class="mt-1 text-sm text-ink-gray-6">{{ __('Responde las preguntas y genera un plan personalizado.') }}</p>
+							</div>
+							<div class="flex gap-2">
+								<Button :label="__('Preguntas')" :disabled="!currentSession" :loading="loading === 'questions'" @click="generateQuestions" />
+								<Button :label="__('Crear plan')" variant="solid" :disabled="!currentSession" :loading="loading === 'plan'" @click="generatePlan" />
+							</div>
+						</div>
+						<div class="mt-4 grid gap-4 xl:grid-cols-2">
+							<div>
+								<h3 class="text-sm font-semibold text-ink-gray-8">{{ __('Temas detectados') }}</h3>
+								<div class="mt-2 flex flex-col gap-2">
+									<div v-for="topic in currentSession?.topics || []" :key="topic.title || topic" class="rounded-md bg-surface-green-1 px-3 py-2 text-sm text-ink-green-4">
+										{{ topic.title || topic }}
+									</div>
+									<div v-if="!currentSession?.topics?.length" class="text-sm text-ink-gray-6">{{ __('Analiza tu material para ver temas.') }}</div>
+								</div>
+							</div>
+							<div>
+								<h3 class="text-sm font-semibold text-ink-gray-8">{{ __('Perfil de aprendizaje') }}</h3>
+								<div class="mt-2 flex flex-col gap-3">
+									<div v-for="question in currentSession?.profile_questions || []" :key="question.id" class="rounded-md border border-outline-gray-1 p-3">
+										<div class="text-sm font-medium">{{ question.question }}</div>
+										<select v-model="profileAnswers[question.id]" class="study-input mt-2">
+											<option value="">{{ __('Selecciona una opción') }}</option>
+											<option v-for="option in question.options || []" :key="option.label" :value="option.label">{{ option.label }}</option>
+										</select>
+									</div>
+									<div v-if="!currentSession?.profile_questions?.length" class="text-sm text-ink-gray-6">{{ __('Genera preguntas después de detectar temas.') }}</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section v-else-if="isPlan" class="grid gap-5 xl:grid-cols-[1fr_360px]">
+				<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
+					<div class="flex flex-wrap items-center justify-between gap-3">
+						<div>
+							<h2 class="text-lg font-semibold">{{ currentSession?.title }}</h2>
+							<p class="mt-1 text-sm text-ink-gray-6">{{ currentSession?.profile_summary || __('Plan generado por TutorIA.') }}</p>
+						</div>
+						<Button :label="__('Rehacer plan')" :loading="loading === 'plan'" @click="generatePlan" />
+					</div>
+					<div class="mt-4 grid gap-3">
+						<div v-for="(item, index) in currentSession?.weekly_plan || []" :key="index" class="rounded-lg border border-outline-gray-1 p-4">
+							<div class="flex flex-wrap items-start justify-between gap-3">
+								<div>
+									<div class="text-sm font-medium text-ink-blue-3">{{ item.period || item.week || item.day || `${__('Bloque')} ${index + 1}` }}</div>
+									<h3 class="mt-1 text-base font-semibold">{{ item.title || item.objective }}</h3>
+								</div>
+								<span class="rounded bg-surface-gray-2 px-2 py-1 text-xs text-ink-gray-7">{{ item.duration || item.hours || __('Flexible') }}</span>
+							</div>
+							<p class="mt-2 text-sm leading-6 text-ink-gray-7">{{ item.objective }}</p>
+							<div class="mt-3 flex flex-wrap gap-2">
+								<span v-for="topic in item.topics || []" :key="topic" class="rounded bg-surface-green-1 px-2 py-1 text-xs text-ink-green-3">{{ topic }}</span>
+							</div>
+						</div>
+					</div>
+				</div>
+				<aside class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
+					<h2 class="text-base font-semibold">{{ __('Temas') }}</h2>
+					<div class="mt-3 flex flex-col gap-2">
 						<button
-							v-for="tab in tabs"
-							:key="tab.id"
-							class="inline-flex min-h-9 items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition"
-							:class="
-								activeTab === tab.id
-									? 'bg-surface-blue-2 text-ink-blue-4'
-									: 'text-ink-gray-7 hover:bg-surface-gray-1'
-							"
-							@click="activeTab = tab.id"
+							v-for="(topic, index) in currentSession?.topics || []"
+							:key="topic.title || topic"
+							class="rounded-md border border-outline-gray-1 p-3 text-left text-sm hover:bg-surface-gray-1"
+							@click="openRoom(currentSession.name, index)"
 						>
-							<component :is="tab.icon" class="h-4 w-4 stroke-1.5" />
-							{{ tab.label }}
+							{{ topic.title || topic }}
 						</button>
-					</nav>
+					</div>
+				</aside>
+			</section>
 
-					<section v-if="activeTab === 'plan'" class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
+			<section v-else-if="isRoom" class="grid gap-5 xl:grid-cols-[1fr_390px]">
+				<div class="flex flex-col gap-5">
+					<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
 						<div class="flex flex-wrap items-center justify-between gap-3">
 							<div>
-								<h2 class="text-lg font-semibold text-ink-gray-9">{{ __('Plan de estudio') }}</h2>
-								<p class="mt-1 text-sm text-ink-gray-6">{{ __('Organizado según tu objetivo, nivel y tiempo disponible.') }}</p>
+								<h2 class="text-lg font-semibold">{{ activeTopicTitle }}</h2>
+								<p class="mt-1 text-sm text-ink-gray-6">{{ __('Explicación, práctica, simulacro y repaso visual.') }}</p>
 							</div>
-							<Button
-								:label="__('Rehacer plan')"
-								:loading="loadingAction === 'plan'"
-								@click="generatePlan"
-							/>
+							<div class="flex flex-wrap gap-2">
+								<Button :label="__('Generar pack')" :loading="loading === 'pack'" @click="generatePack" />
+								<Button :label="__('Diagrama')" :loading="loading === 'diagram'" @click="generateDiagram" />
+								<Button :label="__('Guardar')" @click="saveCurrentExplanation" />
+							</div>
 						</div>
-						<div class="mt-4 grid gap-3">
+						<img v-if="diagramUrl" :src="diagramUrl" class="mt-4 w-full rounded-lg border border-outline-gray-1" />
+						<div class="study-markdown mt-4 rounded-lg bg-surface-gray-1 p-4" v-html="renderMarkdown(studyPackMarkdown)" @mouseup="captureSelection" />
+					</div>
+
+					<div class="grid gap-5 xl:grid-cols-2">
+						<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
+							<div class="flex items-center justify-between gap-3">
+								<h2 class="text-lg font-semibold">{{ __('Ejercicios') }}</h2>
+								<Button :label="__('Generar')" :loading="loading === 'exercises'" @click="generateExercises" />
+							</div>
+							<ExerciseList :items="exercises" @answer="handleAnswer" />
+						</div>
+						<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
+							<div class="flex items-center justify-between gap-3">
+								<h2 class="text-lg font-semibold">{{ __('Quiz final') }}</h2>
+								<Button :label="__('Generar')" :loading="loading === 'quiz'" @click="generateQuiz" />
+							</div>
+							<ExerciseList :items="quiz" @answer="handleQuizAnswer" />
+							<div v-if="quiz.length" class="mt-3 rounded-md bg-surface-blue-1 p-3 text-sm text-ink-blue-4">
+								{{ __('Puntaje') }}: {{ quizScore }}%
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<aside class="flex flex-col gap-5">
+					<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
+						<h2 class="text-base font-semibold">{{ __('Tutor contextual') }}</h2>
+						<div ref="chatBox" class="mt-3 flex h-[390px] flex-col gap-3 overflow-y-auto rounded-md bg-surface-gray-1 p-3">
 							<div
-								v-for="(item, index) in studyPlan"
-								:key="item.title + index"
-								class="rounded-lg border border-outline-gray-1 p-4"
-							>
-								<div class="flex flex-wrap items-start justify-between gap-3">
-									<div>
-										<div class="text-sm font-medium text-ink-blue-3">{{ item.period || __('Bloque') }}</div>
-										<h3 class="mt-1 text-base font-semibold text-ink-gray-9">{{ item.title }}</h3>
-									</div>
-									<span class="rounded bg-surface-gray-2 px-2 py-1 text-xs text-ink-gray-7">
-										{{ item.duration || __('Flexible') }}
-									</span>
-								</div>
-								<p class="mt-2 text-sm leading-6 text-ink-gray-7">{{ item.objective }}</p>
-								<div class="mt-3 flex flex-wrap gap-2">
-									<span
-										v-for="topic in item.topics"
-										:key="topic"
-										class="rounded bg-surface-green-1 px-2 py-1 text-xs text-ink-green-3"
-									>
-										{{ topic }}
-									</span>
-								</div>
-							</div>
-							<div v-if="!studyPlan.length" class="rounded-lg border border-dashed border-outline-gray-2 p-8 text-center">
-								<CalendarDays class="mx-auto h-8 w-8 stroke-1.5 text-ink-gray-5" />
-								<p class="mt-3 text-sm text-ink-gray-6">{{ __('Crea un plan para ver tu ruta de estudio aquí.') }}</p>
-							</div>
-						</div>
-					</section>
-
-					<section v-if="activeTab === 'learn'" class="grid gap-4 xl:grid-cols-[1fr_360px]">
-						<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
-							<div class="flex flex-wrap items-center justify-between gap-3">
-								<div>
-									<h2 class="text-lg font-semibold text-ink-gray-9">{{ __('Explicación guiada') }}</h2>
-									<p class="mt-1 text-sm text-ink-gray-6">{{ __('Elige un tema y genera una explicación con ejemplo.') }}</p>
-								</div>
-								<Button
-									:label="__('Generar')"
-									variant="solid"
-									:loading="loadingAction === 'explain'"
-									@click="generateExplanation"
-								>
-									<template #prefix>
-										<Sparkles class="h-4 w-4 stroke-1.5" />
-									</template>
-								</Button>
-							</div>
-							<div class="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
-								<select
-									v-model="selectedTopicId"
-									class="rounded-md border border-outline-gray-2 bg-surface-white px-3 py-2 text-sm text-ink-gray-8 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-								>
-									<option value="">{{ __('Selecciona un tema') }}</option>
-									<option v-for="topic in topics" :key="topic.id" :value="topic.id">
-										{{ topic.title }}
-									</option>
-								</select>
-								<Button :label="__('Marcar aprendido')" @click="markSelectedTopicDone">
-									<template #prefix>
-										<CheckCircle2 class="h-4 w-4 stroke-1.5" />
-									</template>
-								</Button>
-							</div>
-							<div class="study-markdown mt-5 rounded-lg border border-outline-gray-1 bg-surface-gray-1 p-4" v-html="renderMarkdown(explanation)" />
-						</div>
-
-						<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
-							<h2 class="text-base font-semibold text-ink-gray-9">{{ __('Flashcards') }}</h2>
-							<p class="mt-1 text-sm text-ink-gray-6">{{ __('Tarjetas rápidas del tema seleccionado.') }}</p>
-							<Button
-								class="mt-3 w-full"
-								:label="__('Crear flashcards')"
-								:loading="loadingAction === 'flashcards'"
-								@click="generateFlashcards"
-							/>
-							<div class="mt-4 flex flex-col gap-3">
-								<button
-									v-for="card in flashcards"
-									:key="card.id"
-									class="rounded-lg border border-outline-gray-1 bg-surface-gray-1 p-3 text-left"
-									@click="card.open = !card.open"
-								>
-									<div class="text-sm font-medium text-ink-gray-9">{{ card.front }}</div>
-									<div v-if="card.open" class="mt-2 text-sm leading-6 text-ink-gray-7">{{ card.back }}</div>
-								</button>
-							</div>
-						</div>
-					</section>
-
-					<section v-if="activeTab === 'practice'" class="grid gap-4 xl:grid-cols-[1fr_360px]">
-						<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
-							<div class="flex flex-wrap items-center justify-between gap-3">
-								<div>
-									<h2 class="text-lg font-semibold text-ink-gray-9">{{ __('Práctica y simulacro') }}</h2>
-									<p class="mt-1 text-sm text-ink-gray-6">{{ __('Genera ejercicios tipo parcial y recibe feedback inmediato.') }}</p>
-								</div>
-								<div class="flex gap-2">
-									<Button :label="__('Práctica')" :loading="loadingAction === 'practice'" @click="generatePractice" />
-									<Button :label="__('Quiz')" variant="solid" :loading="loadingAction === 'quiz'" @click="generateQuiz" />
-								</div>
-							</div>
-
-							<div class="mt-4 flex flex-col gap-3">
-								<div
-									v-for="(exercise, index) in exercises"
-									:key="exercise.id"
-									class="rounded-lg border border-outline-gray-1 p-4"
-								>
-									<div class="text-sm font-semibold text-ink-gray-9">
-										{{ index + 1 }}. {{ exercise.question }}
-									</div>
-									<div class="mt-3 grid gap-2">
-										<button
-											v-for="(option, optionIndex) in exercise.options"
-											:key="option"
-											class="rounded-md border px-3 py-2 text-left text-sm transition"
-											:class="answerClass(exercise, optionIndex)"
-											@click="answerExercise(exercise, optionIndex)"
-										>
-											{{ option }}
-										</button>
-									</div>
-									<div v-if="exercise.selected !== null" class="mt-3 rounded-md bg-surface-gray-1 p-3 text-sm leading-6 text-ink-gray-7">
-										{{ exercise.explanation }}
-									</div>
-								</div>
-								<div v-if="!exercises.length" class="rounded-lg border border-dashed border-outline-gray-2 p-8 text-center">
-									<ClipboardCheck class="mx-auto h-8 w-8 stroke-1.5 text-ink-gray-5" />
-									<p class="mt-3 text-sm text-ink-gray-6">{{ __('Tus ejercicios aparecerán aquí.') }}</p>
-								</div>
-							</div>
-						</div>
-
-						<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
-							<h2 class="text-base font-semibold text-ink-gray-9">{{ __('Notas de estudio') }}</h2>
-							<p class="mt-1 text-sm text-ink-gray-6">{{ __('Pizarra simple para fórmulas, dudas y repasos.') }}</p>
-							<textarea
-								v-model="studyNotes"
-								rows="16"
-								class="mt-3 w-full resize-y rounded-md border border-outline-gray-2 bg-surface-gray-1 px-3 py-2 text-sm leading-6 text-ink-gray-8 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-								:placeholder="__('Escribe tus notas, errores frecuentes o fórmulas clave.')"
-								@input="persist"
+								v-for="message in chatMessages"
+								:key="message.id || message.content"
+								class="rounded-md px-3 py-2 text-sm leading-6"
+								:class="message.role === 'user' ? 'self-end bg-surface-blue-2 text-ink-blue-4' : 'self-start bg-surface-white text-ink-gray-8'"
+								v-html="renderMarkdown(message.content)"
 							/>
 						</div>
-					</section>
-
-					<section v-if="activeTab === 'chat'" class="grid gap-4 xl:grid-cols-[1fr_360px]">
-						<div class="flex h-[680px] flex-col rounded-lg border border-outline-gray-1 bg-surface-white shadow-sm">
-							<div class="border-b border-outline-gray-1 p-4">
-								<h2 class="text-lg font-semibold text-ink-gray-9">{{ __('Tutor de estudio') }}</h2>
-								<p class="mt-1 text-sm text-ink-gray-6">{{ __('Pregunta sobre tu temario, tus ejercicios o tu estrategia para el parcial.') }}</p>
-							</div>
-							<div ref="chatScroller" class="flex-1 overflow-y-auto bg-surface-gray-1 p-4">
-								<div class="flex flex-col gap-3">
-									<div
-										v-for="message in chatMessages"
-										:key="message.id"
-										class="max-w-[86%] rounded-lg px-4 py-3 text-sm leading-6 shadow-sm"
-										:class="
-											message.role === 'user'
-												? 'self-end bg-surface-blue-2 text-ink-blue-4'
-												: 'self-start border border-outline-gray-1 bg-surface-white text-ink-gray-8'
-										"
-										v-html="renderMarkdown(message.content)"
-									/>
-									<div v-if="loadingAction === 'chat'" class="self-start rounded-lg border border-outline-gray-1 bg-surface-white px-4 py-3 text-sm text-ink-gray-6">
-										{{ __('TutorIA está pensando...') }}
-									</div>
-								</div>
-							</div>
-							<div class="border-t border-outline-gray-1 p-4">
-								<div class="flex gap-2">
-									<textarea
-										v-model="chatInput"
-										rows="2"
-										class="min-h-11 flex-1 resize-none rounded-md border border-outline-gray-2 px-3 py-2 text-sm leading-5 text-ink-gray-8 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-										:placeholder="__('Pregunta algo o pide un repaso express.')"
-										@keydown.enter.exact.prevent="sendChat"
-									/>
-									<Button variant="solid" :disabled="!chatInput.trim()" @click="sendChat">
-										<template #icon>
-											<SendHorizontal class="h-4 w-4 stroke-1.5" />
-										</template>
-									</Button>
-								</div>
-							</div>
-						</div>
-
-						<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
-							<h2 class="text-base font-semibold text-ink-gray-9">{{ __('Prompts rápidos') }}</h2>
-							<div class="mt-3 flex flex-col gap-2">
-								<button
-									v-for="prompt in quickPrompts"
-									:key="prompt"
-									class="rounded-md border border-outline-gray-1 bg-surface-gray-1 px-3 py-2 text-left text-sm leading-5 text-ink-gray-8 hover:bg-surface-gray-2"
-									@click="chatInput = prompt"
-								>
-									{{ prompt }}
-								</button>
-							</div>
-						</div>
-					</section>
-
-					<section v-if="activeTab === 'history'" class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
-						<div class="flex flex-wrap items-center justify-between gap-3">
-							<div>
-								<h2 class="text-lg font-semibold text-ink-gray-9">{{ __('Historial y estadísticas') }}</h2>
-								<p class="mt-1 text-sm text-ink-gray-6">{{ __('Registro local de tus sesiones de estudio en este navegador.') }}</p>
-							</div>
-							<Button :label="__('Guardar sesión')" @click="saveSessionSnapshot">
-								<template #prefix>
-									<Save class="h-4 w-4 stroke-1.5" />
-								</template>
+						<div class="mt-3 flex gap-2">
+							<textarea v-model="chatInput" class="study-textarea min-h-11 flex-1" rows="2" :placeholder="__('Pregunta sobre este tema')" @keydown.enter.exact.prevent="sendChat" />
+							<Button :disabled="!chatInput.trim()" :loading="loading === 'chat'" @click="sendChat">
+								<template #icon><SendHorizontal class="h-4 w-4 stroke-1.5" /></template>
 							</Button>
 						</div>
-						<div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-							<div
-								v-for="entry in history"
-								:key="entry.id"
-								class="rounded-lg border border-outline-gray-1 p-4"
-							>
-								<div class="text-sm font-semibold text-ink-gray-9">{{ entry.subject || __('Sesión de estudio') }}</div>
-								<div class="mt-1 text-xs text-ink-gray-6">{{ formatDate(entry.createdAt) }}</div>
-								<div class="mt-3 grid grid-cols-3 gap-2 text-center">
-									<div class="rounded bg-surface-gray-1 p-2">
-										<div class="text-base font-semibold text-ink-gray-9">{{ entry.topics }}</div>
-										<div class="text-xs text-ink-gray-6">{{ __('Temas') }}</div>
-									</div>
-									<div class="rounded bg-surface-gray-1 p-2">
-										<div class="text-base font-semibold text-ink-gray-9">{{ entry.score }}%</div>
-										<div class="text-xs text-ink-gray-6">{{ __('Quiz') }}</div>
-									</div>
-									<div class="rounded bg-surface-gray-1 p-2">
-										<div class="text-base font-semibold text-ink-gray-9">{{ entry.cards }}</div>
-										<div class="text-xs text-ink-gray-6">{{ __('Cards') }}</div>
-									</div>
-								</div>
+					</div>
+
+					<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
+						<h2 class="text-base font-semibold">{{ __('Notas rápidas') }}</h2>
+						<textarea v-model="whiteboardText" class="study-textarea mt-3" rows="9" :placeholder="__('Fórmulas, dudas, errores frecuentes...')" @input="saveWhiteboard" />
+					</div>
+				</aside>
+			</section>
+
+			<section v-else-if="isHistory" class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
+				<div class="flex items-center justify-between gap-3">
+					<h2 class="text-lg font-semibold">{{ __('Historial') }}</h2>
+					<Button :label="__('Actualizar')" :loading="loading === 'dashboard'" @click="loadDashboard" />
+				</div>
+				<div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+					<div v-for="session in sessions" :key="session.name" class="rounded-lg border border-outline-gray-1 p-4">
+						<h3 class="text-base font-semibold">{{ session.title || session.name }}</h3>
+						<p class="mt-1 text-sm text-ink-gray-6">{{ formatDate(session.modified) }}</p>
+						<div class="mt-4 flex gap-2">
+							<Button :label="__('Plan')" @click="openPlan(session.name)" />
+							<Button :label="__('Borrar')" variant="subtle" @click="deleteSession(session.name)" />
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section v-else-if="isStatistics" class="grid gap-4 md:grid-cols-3">
+				<div v-for="metric in statisticsMetrics" :key="metric.label" class="rounded-lg border border-outline-gray-1 bg-surface-white p-5 shadow-sm">
+					<div class="text-sm text-ink-gray-6">{{ metric.label }}</div>
+					<div class="mt-2 text-3xl font-semibold">{{ metric.value }}</div>
+				</div>
+			</section>
+
+			<section v-else-if="isExplanations" class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
+				<h2 class="text-lg font-semibold">{{ __('Explicaciones guardadas') }}</h2>
+				<div class="mt-4 grid gap-3">
+					<div v-for="item in explanations" :key="item.name" class="rounded-lg border border-outline-gray-1 p-4">
+						<div class="flex items-start justify-between gap-3">
+							<div>
+								<h3 class="text-base font-semibold">{{ item.topic }}</h3>
+								<p class="mt-1 text-sm text-ink-gray-6">{{ formatDate(item.creation) }}</p>
 							</div>
+							<Button :label="__('Borrar')" variant="subtle" @click="deleteExplanation(item.name)" />
 						</div>
-						<div v-if="!history.length" class="mt-4 rounded-lg border border-dashed border-outline-gray-2 p-8 text-center">
-							<History class="mx-auto h-8 w-8 stroke-1.5 text-ink-gray-5" />
-							<p class="mt-3 text-sm text-ink-gray-6">{{ __('Guarda una sesión para empezar tu historial.') }}</p>
-						</div>
-					</section>
-				</main>
+						<div class="study-markdown mt-3" v-html="renderMarkdown(item.content)" />
+					</div>
+				</div>
+			</section>
+
+			<section v-else-if="isWhiteboard" class="grid gap-5 xl:grid-cols-[1fr_360px]">
+				<div class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
+					<h2 class="text-lg font-semibold">{{ __('Pizarra') }}</h2>
+					<textarea v-model="whiteboardText" class="study-textarea mt-4 min-h-[520px]" :placeholder="__('Escribe aquí tu resolución, fórmulas o lluvia de ideas.')" @input="saveWhiteboard" />
+				</div>
+				<aside class="rounded-lg border border-outline-gray-1 bg-surface-white p-4 shadow-sm">
+					<h2 class="text-base font-semibold">{{ __('Acciones IA') }}</h2>
+					<div class="mt-3 flex flex-col gap-2">
+						<Button :label="__('Ordenar mis notas')" :loading="loading === 'whiteboard'" @click="askWhiteboard('organiza')" />
+						<Button :label="__('Encontrar errores')" :loading="loading === 'whiteboard'" @click="askWhiteboard('errores')" />
+					</div>
+					<div class="study-markdown mt-4 rounded-md bg-surface-gray-1 p-3" v-html="renderMarkdown(whiteboardResponse)" />
+				</aside>
 			</section>
 		</div>
 	</div>
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { Button, FormControl, Tooltip, call, toast } from 'frappe-ui'
+import { computed, defineComponent, h, nextTick, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { Button, FileUploader, FormControl, call, toast } from 'frappe-ui'
 import MarkdownIt from 'markdown-it'
 import DOMPurify from 'dompurify'
 import {
+	BarChart3,
 	BookOpen,
 	Brain,
 	CalendarDays,
-	CheckCircle2,
 	ClipboardCheck,
 	FileQuestion,
+	FileText,
 	GraduationCap,
 	History,
-	Layers,
-	ListChecks,
-	MessageSquareText,
+	LibraryBig,
 	NotebookPen,
+	PanelTop,
 	RotateCcw,
-	Save,
 	SendHorizontal,
-	Sparkles,
-	Target,
+	Upload,
 } from 'lucide-vue-next'
 
-const STORAGE_KEY = 'studybadge_study_workspace'
-const HISTORY_KEY = 'studybadge_study_history'
-
+const route = useRoute()
+const router = useRouter()
 const markdown = new MarkdownIt({ html: false, linkify: true, breaks: true })
 
-const goals = [
-	{ id: 'parcial', label: __('Parcial / Final'), icon: FileQuestion },
-	{ id: 'admision', label: __('Admisión'), icon: GraduationCap },
-	{ id: 'repaso', label: __('Recordar'), icon: Brain },
-	{ id: 'curso', label: __('Curso'), icon: BookOpen },
+const flows = [
+	{ id: 'parcial', label: __('Parcial / Final'), icon: FileQuestion, description: __('Plan intensivo, ejercicios tipo evaluación y quiz final.') },
+	{ id: 'admision', label: __('Admisión'), icon: GraduationCap, description: __('Busca temarios universitarios y arma preparación por áreas.') },
+	{ id: 'recordar', label: __('Recordar'), icon: Brain, description: __('Recupera temas olvidados con práctica y memoria activa.') },
+	{ id: 'cero', label: __('Desde cero'), icon: BookOpen, description: __('Construye una ruta desde tus apuntes o un tema inicial.') },
 ]
 
-const tabs = [
-	{ id: 'plan', label: __('Plan'), icon: CalendarDays },
-	{ id: 'learn', label: __('Aprender'), icon: NotebookPen },
-	{ id: 'practice', label: __('Practicar'), icon: ClipboardCheck },
-	{ id: 'chat', label: __('Tutor'), icon: MessageSquareText },
-	{ id: 'history', label: __('Historial'), icon: History },
+const topNav = [
+	{ name: 'Study', label: __('Inicio'), icon: PanelTop },
+	{ name: 'StudyHistory', label: __('Historial'), icon: History },
+	{ name: 'StudyStatistics', label: __('Estadísticas'), icon: BarChart3 },
+	{ name: 'StudyExplanations', label: __('Explicaciones'), icon: LibraryBig },
+	{ name: 'StudyWhiteboard', label: __('Pizarra'), icon: NotebookPen },
 ]
 
-const quickPrompts = [
-	__('Explícame este tema como si me fuera a tomar un parcial mañana.'),
-	__('Hazme 5 preguntas difíciles sobre mis temas y corrige mis respuestas.'),
-	__('Resume mis apuntes en conceptos clave, fórmulas y errores frecuentes.'),
-	__('Crea una estrategia de repaso para hoy con bloques de 25 minutos.'),
-]
-
-const activeTab = ref('plan')
-const studyGoal = ref('parcial')
-const subject = ref('')
-const examDate = ref('')
-const studentLevel = ref('universitario')
-const sourceMaterial = ref('')
-const topics = ref([])
-const selectedTopicId = ref('')
-const studyPlan = ref([])
-const explanation = ref('')
-const flashcards = ref([])
+const loading = ref('')
+const sessions = ref([])
+const explanations = ref([])
+const currentSession = ref(null)
+const profileAnswers = ref({})
+const university = ref('')
+const career = ref('')
+const searchResult = ref('')
+const fileUploader = ref(null)
+const diagramUrl = ref('')
 const exercises = ref([])
-const studyNotes = ref('')
-const chatMessages = ref([
-	{
-		id: Date.now(),
-		role: 'assistant',
-		content: __('Hola, soy TutorIA. Pega tu temario o cuéntame qué parcial estás preparando y armamos el estudio.'),
-	},
-])
+const quiz = ref([])
+const chatMessages = ref([])
 const chatInput = ref('')
-const history = ref([])
-const loadingAction = ref('')
-const chatScroller = ref(null)
+const chatBox = ref(null)
+const whiteboardText = ref(localStorage.getItem('studybadge_whiteboard') || '')
+const whiteboardResponse = ref('')
 
-const completedCount = computed(() => topics.value.filter((topic) => topic.done).length)
+const draft = ref({
+	title: '',
+	academic_context: '',
+	exam_date: '',
+	student_level: 'universitario',
+	desired_topics: '',
+	manual_text: '',
+})
+
+const pageName = computed(() => route.name)
+const flowId = computed(() => route.params.flowId || currentSession.value?.flow_id || 'parcial')
+const sessionId = computed(() => route.params.sessionId)
+const topicIndex = computed(() => Number(route.params.topicIndex || 0))
+const isDashboard = computed(() => pageName.value === 'Study')
+const isFlow = computed(() => pageName.value === 'StudyFlow')
+const isPlan = computed(() => pageName.value === 'StudyPlan')
+const isRoom = computed(() => pageName.value === 'StudyRoom')
+const isHistory = computed(() => pageName.value === 'StudyHistory')
+const isStatistics = computed(() => pageName.value === 'StudyStatistics')
+const isExplanations = computed(() => pageName.value === 'StudyExplanations')
+const isWhiteboard = computed(() => pageName.value === 'StudyWhiteboard')
+
+const activeTopic = computed(() => (currentSession.value?.topics || [])[topicIndex.value] || null)
+const activeTopicTitle = computed(() => activeTopic.value?.title || activeTopic.value || __('Tema de estudio'))
 const quizScore = computed(() => {
-	const answered = exercises.value.filter((exercise) => exercise.selected !== null)
+	if (!quiz.value.length) return 0
+	const answered = quiz.value.filter((item) => item.selected !== undefined)
 	if (!answered.length) return 0
-	const correct = answered.filter((exercise) => exercise.selected === exercise.correct).length
-	return Math.round((correct / answered.length) * 100)
+	const correct = answered.filter((item) => item.selected === Number(item.correct || 0)).length
+	return Math.round((correct / quiz.value.length) * 100)
 })
-const metrics = computed(() => [
-	{ label: __('Temas'), value: topics.value.length },
-	{ label: __('Aprendidos'), value: completedCount.value },
-	{ label: __('Quiz'), value: `${quizScore.value}%` },
+const studyPackMarkdown = computed(() => {
+	const pack = currentSession.value?.study_pack || {}
+	if (!pack.sections?.length) return __('Genera un pack de estudio para ver la explicación completa.')
+	return pack.sections.map((section, index) => {
+		const points = (section.keyPoints || []).map((point) => `- ${point}`).join('\n')
+		return `## ${index + 1}. ${section.title || __('Sección')}\n\n${section.summary || ''}\n\n${points}\n\n${section.workedExample ? `### ${__('Ejemplo resuelto')}\n${section.workedExample}` : ''}`
+	}).join('\n\n')
+})
+const dashboardMetrics = computed(() => [
+	{ label: __('Sesiones'), value: sessions.value.length },
+	{ label: __('Temas'), value: sessions.value.reduce((total, item) => total + (item.topics?.length || 0), 0) },
+	{ label: __('Horas'), value: Math.round(sessions.value.reduce((total, item) => total + (item.study_time_seconds || 0), 0) / 3600) },
 ])
+const statisticsMetrics = computed(() => [
+	...dashboardMetrics.value,
+	{ label: __('Explicaciones'), value: explanations.value.length },
+	{ label: __('Quiz promedio'), value: `${averageQuiz.value}%` },
+	{ label: __('Planes'), value: sessions.value.filter((item) => item.weekly_plan?.length).length },
+])
+const averageQuiz = computed(() => {
+	const scored = sessions.value.filter((item) => item.quiz_score)
+	if (!scored.length) return 0
+	return Math.round(scored.reduce((total, item) => total + Number(item.quiz_score || 0), 0) / scored.length)
+})
+const headerTitle = computed(() => {
+	if (isFlow.value) return flowLabel(flowId.value)
+	if (isPlan.value) return __('Plan de estudio')
+	if (isRoom.value) return __('Sala de estudio')
+	if (isHistory.value) return __('Historial')
+	if (isStatistics.value) return __('Estadísticas')
+	if (isExplanations.value) return __('Explicaciones guardadas')
+	if (isWhiteboard.value) return __('Pizarra IA')
+	return __('Estudio IA')
+})
+const headerSubtitle = computed(() => {
+	if (isDashboard.value) return __('Tu espacio para preparar parciales, admisión y repasos con IA, archivos y progreso guardado.')
+	if (isFlow.value) return __('Sube materiales, busca temarios, detecta temas y crea un plan personalizado.')
+	if (isRoom.value) return __('Aprende un tema con explicación, ejercicios, quiz, tutor y diagrama.')
+	return __('Todo se guarda en StudyBadge para que puedas retomarlo luego.')
+})
+const pageTitle = computed(() => (isDashboard.value ? '' : headerTitle.value))
 
-const currentTopic = computed(() => {
-	return topics.value.find((topic) => topic.id === selectedTopicId.value) || topics.value[0] || null
+onMounted(async () => {
+	await loadDashboard()
+	await loadRouteSession()
 })
 
-onMounted(() => {
-	restoreWorkspace()
-})
+watch(() => route.fullPath, loadRouteSession)
 
-watch(
-	[
-		studyGoal,
-		subject,
-		examDate,
-		studentLevel,
-		sourceMaterial,
-		topics,
-		selectedTopicId,
-		studyPlan,
-		explanation,
-		flashcards,
-		exercises,
-		studyNotes,
-		chatMessages,
-	],
-	persist,
-	{ deep: true }
-)
-
-const renderMarkdown = (text) => {
-	if (!text) return `<p class="text-sm text-ink-gray-6">${__('Aún no hay contenido generado.')}</p>`
+function renderMarkdown(text) {
+	if (!text) return ''
 	return DOMPurify.sanitize(markdown.render(String(text)))
 }
 
-const makeId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`
-
-const selectedGoalLabel = () => goals.find((goal) => goal.id === studyGoal.value)?.label || __('Estudiar')
-
-const daysLeft = () => {
-	if (!examDate.value) return null
-	const today = new Date()
-	const target = new Date(`${examDate.value}T23:59:59`)
-	return Math.max(1, Math.ceil((target - today) / 86400000))
+function flowLabel(id) {
+	return flows.find((flow) => flow.id === id)?.label || __('Estudiar')
 }
 
-const buildContext = () => {
-	const topicText = topics.value.map((topic) => `- ${topic.title}`).join('\n')
-	return [
-		`Objetivo: ${selectedGoalLabel()}`,
-		`Curso o tema: ${subject.value || 'No especificado'}`,
-		`Nivel: ${studentLevel.value}`,
-		examDate.value ? `Fecha objetivo: ${examDate.value} (${daysLeft()} dias aprox.)` : 'Sin fecha objetivo',
-		topicText ? `Temas actuales:\n${topicText}` : '',
-		sourceMaterial.value ? `Material del estudiante:\n${sourceMaterial.value}` : '',
-		studyNotes.value ? `Notas del estudiante:\n${studyNotes.value}` : '',
-	]
-		.filter(Boolean)
-		.join('\n\n')
+function formatDate(value) {
+	if (!value) return ''
+	return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(value))
 }
 
-const askTutor = async (prompt, action) => {
-	loadingAction.value = action
+async function api(method, params = {}, state = '') {
+	if (state) loading.value = state
 	try {
-		const response = await call('studybadge_ai.ai_tutor.chat_with_tutor', {
-			message: prompt,
-			screen_text: buildContext(),
-			history: JSON.stringify(
-				chatMessages.value.slice(-8).map((message) => ({
-					role: message.role === 'assistant' ? 'assistant' : 'user',
-					content: message.content,
-				}))
-			),
-		})
-		return response?.reply || ''
+		return await call(`studybadge_ai.ai_study.${method}`, params)
 	} catch (error) {
-		toast.error(error.messages?.[0] || __('No se pudo conectar con TutorIA.'))
-		return ''
+		toast.error(error.messages?.[0] || error.message || __('Ocurrió un error.'))
+		throw error
 	} finally {
-		loadingAction.value = ''
+		if (state) loading.value = ''
 	}
 }
 
-const parseJSONBlock = (text, fallback) => {
-	if (!text) return fallback
-	let value = text.trim()
-	const fenced = value.match(/```(?:json)?\s*([\s\S]*?)```/)
-	if (fenced) value = fenced[1].trim()
-	const startArray = value.indexOf('[')
-	const startObject = value.indexOf('{')
-	if (startArray >= 0 && (startArray < startObject || startObject === -1)) {
-		value = value.slice(startArray)
-	} else if (startObject >= 0) {
-		value = value.slice(startObject)
-	}
+async function loadDashboard() {
+	loading.value = 'dashboard'
 	try {
-		return JSON.parse(value)
-	} catch {
-		return fallback
+		sessions.value = await api('list_sessions')
+		explanations.value = await api('list_explanations')
+	} finally {
+		loading.value = ''
 	}
 }
 
-const normalizeTopics = (items) => {
-	return (Array.isArray(items) ? items : [])
-		.map((item) => (typeof item === 'string' ? item : item?.title || item?.tema || ''))
-		.filter(Boolean)
-		.slice(0, 14)
-		.map((title) => ({
-			id: makeId(),
-			title,
-			done: false,
-		}))
+async function loadRouteSession() {
+	if (!sessionId.value) return
+	currentSession.value = await api('get_session', { name: sessionId.value })
+	applySessionToDraft()
+	exercises.value = markSelectable(currentSession.value.exercises || [])
+	quiz.value = markSelectable(currentSession.value.quiz_questions || [])
+	chatMessages.value = (currentSession.value.chat_history || []).map((item, index) => ({ ...item, id: index }))
 }
 
-const detectTopics = async () => {
-	if (!sourceMaterial.value.trim() && !subject.value.trim()) {
-		toast.warning(__('Agrega un tema o material primero.'))
+function applySessionToDraft() {
+	if (!currentSession.value) return
+	draft.value = {
+		title: currentSession.value.title || '',
+		academic_context: currentSession.value.academic_context || '',
+		exam_date: currentSession.value.exam_date || '',
+		student_level: currentSession.value.student_level || 'universitario',
+		desired_topics: currentSession.value.desired_topics || '',
+		manual_text: currentSession.value.manual_text || '',
+	}
+	profileAnswers.value = currentSession.value.profile_answers || {}
+}
+
+function startFlow(id) {
+	router.push({ name: 'StudyFlow', params: { flowId: id } })
+}
+
+async function createOrUpdateSession() {
+	if (currentSession.value) {
+		currentSession.value = await api('update_session', { name: currentSession.value.name, data: draft.value }, 'create')
+		toast.success(__('Sesión actualizada.'))
 		return
 	}
-	const reply = await askTutor(
-		`Extrae de este material una lista de 6 a 12 temas concretos para estudiar. Devuelve SOLO JSON array de strings, sin markdown ni explicación.\n\n${buildContext()}`,
-		'topics'
-	)
-	const parsed = parseJSONBlock(reply, [])
-	const nextTopics = normalizeTopics(parsed)
-	if (!nextTopics.length) {
-		toast.error(__('No se pudieron detectar temas. Prueba con más contexto.'))
-		return
-	}
-	topics.value = nextTopics
-	selectedTopicId.value = topics.value[0]?.id || ''
-	toast.success(__('Temas detectados.'))
+	currentSession.value = await api('create_session', { data: { ...draft.value, flow_id: flowId.value, goal: flowId.value } }, 'create')
+	toast.success(__('Sesión creada.'))
 }
 
-const generatePlan = async () => {
-	if (!topics.value.length) {
-		await detectTopics()
-		if (!topics.value.length) return
-	}
-	const reply = await askTutor(
-		`Crea un plan de estudio personalizado para StudyBadge. Devuelve SOLO JSON array. Cada item debe tener:
-{
-  "period": "Dia 1" o "Semana 1",
-  "title": "titulo breve",
-  "duration": "tiempo estimado",
-  "objective": "objetivo concreto",
-  "topics": ["tema 1", "tema 2"]
+function openPlan(name) {
+	router.push({ name: 'StudyPlan', params: { sessionId: name } })
 }
 
-Usa el contexto y ajusta al objetivo ${selectedGoalLabel()}.\n\n${buildContext()}`,
-		'plan'
-	)
-	const parsed = parseJSONBlock(reply, [])
-	if (!Array.isArray(parsed) || !parsed.length) {
-		toast.error(__('No se pudo generar el plan.'))
-		return
+function openRoom(name, index = 0) {
+	router.push({ name: 'StudyRoom', params: { sessionId: name, topicIndex: index } })
+}
+
+function validateFile(file) {
+	const ext = file.name.split('.').pop().toLowerCase()
+	if (!['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'webp', 'txt', 'md'].includes(ext)) {
+		return __('Usa PDF, imágenes, Word o texto.')
 	}
-	studyPlan.value = parsed.slice(0, 14).map((item, index) => ({
-		period: item.period || item.week || item.day || `${__('Bloque')} ${index + 1}`,
-		title: item.title || item.objective || `${__('Sesión')} ${index + 1}`,
-		duration: item.duration || item.hours || '',
-		objective: item.objective || item.tip || '',
-		topics: Array.isArray(item.topics) ? item.topics.slice(0, 5) : [],
-	}))
-	activeTab.value = 'plan'
+	if (file.size > 25 * 1024 * 1024) return __('El archivo supera 25 MB.')
+}
+
+function openUploader() {
+	const input = fileUploader.value?.$el?.querySelector('input[type="file"]')
+	input?.click()
+}
+
+async function handleFileUploaded(file) {
+	if (!currentSession.value) return
+	currentSession.value = await api('upload_material', { session: currentSession.value.name, file_url: file.file_url })
+	toast.success(__('Archivo agregado.'))
+}
+
+async function searchTemario() {
+	const result = await api('search_university_temario', { university: university.value, career: career.value }, 'search')
+	searchResult.value = result.content
+	draft.value.manual_text = [draft.value.manual_text, result.content].filter(Boolean).join('\n\n')
+}
+
+async function analyzeMaterial() {
+	currentSession.value = await api('analyze_material', { session: currentSession.value.name }, 'analyze')
+	toast.success(__('Material analizado.'))
+}
+
+async function generateQuestions() {
+	const result = await api('generate_profile_questions', { session: currentSession.value.name }, 'questions')
+	currentSession.value.profile_questions = result.questions
+	toast.success(__('Preguntas generadas.'))
+}
+
+async function generatePlan() {
+	if (!currentSession.value) return
+	const result = await api('generate_plan', { session: currentSession.value.name, profile_answers: profileAnswers.value }, 'plan')
+	currentSession.value = result.session
 	toast.success(__('Plan creado.'))
+	router.push({ name: 'StudyPlan', params: { sessionId: currentSession.value.name } })
 }
 
-const generateExplanation = async () => {
-	if (!currentTopic.value) {
-		toast.warning(__('Selecciona o detecta un tema primero.'))
-		return
-	}
-	const reply = await askTutor(
-		`Explica el tema "${currentTopic.value.title}" para un estudiante de nivel ${studentLevel.value}.
-Formato markdown breve:
-1. Idea central.
-2. Conceptos clave.
-3. Ejemplo resuelto paso a paso.
-4. Errores frecuentes.
-5. Mini checklist para saber si ya lo domina.
-
-Contexto:\n${buildContext()}`,
-		'explain'
-	)
-	if (reply) explanation.value = reply
+async function generatePack() {
+	const result = await api('generate_study_pack', { session: currentSession.value.name, topic: activeTopicTitle.value, level: currentSession.value.student_level }, 'pack')
+	currentSession.value.study_pack = result.study_pack
 }
 
-const generateFlashcards = async () => {
-	if (!currentTopic.value) {
-		toast.warning(__('Selecciona un tema primero.'))
-		return
-	}
-	const reply = await askTutor(
-		`Crea 8 flashcards sobre "${currentTopic.value.title}". Devuelve SOLO JSON array con objetos {"front":"pregunta/concepto","back":"respuesta breve"}.\n\n${buildContext()}`,
-		'flashcards'
-	)
-	const parsed = parseJSONBlock(reply, [])
-	flashcards.value = (Array.isArray(parsed) ? parsed : [])
-		.slice(0, 12)
-		.map((card) => ({
-			id: makeId(),
-			front: card.front || card.question || '',
-			back: card.back || card.answer || '',
-			open: false,
-		}))
-		.filter((card) => card.front && card.back)
-	if (!flashcards.value.length) toast.error(__('No se pudieron crear flashcards.'))
+async function generateDiagram() {
+	const result = await api('generate_diagram_image', { session: currentSession.value.name, topic: activeTopicTitle.value }, 'diagram')
+	diagramUrl.value = `data:${result.mime_type};base64,${result.image_base64}`
 }
 
-const normalizeExercises = (items) => {
-	return (Array.isArray(items) ? items : [])
-		.slice(0, 10)
-		.map((item) => {
-			const options = Array.isArray(item.options) ? item.options.filter(Boolean).slice(0, 4) : []
-			return {
-				id: makeId(),
-				question: item.question || item.pregunta || '',
-				options,
-				correct: Math.max(0, Math.min(Number(item.correct ?? item.answerIndex ?? 0), Math.max(options.length - 1, 0))),
-				explanation: item.explanation || item.explicacion || '',
-				selected: null,
-			}
-		})
-		.filter((item) => item.question && item.options.length >= 2)
+async function generateExercises() {
+	const result = await api('generate_exercises', { session: currentSession.value.name, topic: activeTopicTitle.value, difficulty: 'medio' }, 'exercises')
+	exercises.value = markSelectable(result.exercises || [])
 }
 
-const generatePractice = async () => {
-	const reply = await askTutor(
-		`Genera 5 ejercicios de practica tipo ${selectedGoalLabel()} sobre estos temas. Devuelve SOLO JSON array con {"question":"...","options":["A","B","C","D"],"correct":0,"explanation":"..."}.\n\n${buildContext()}`,
-		'practice'
-	)
-	exercises.value = normalizeExercises(parseJSONBlock(reply, []))
-	if (!exercises.value.length) toast.error(__('No se pudo crear práctica.'))
+async function generateQuiz() {
+	const result = await api('generate_quiz', { session: currentSession.value.name, topic: activeTopicTitle.value }, 'quiz')
+	quiz.value = markSelectable(result.quiz || [])
 }
 
-const generateQuiz = async () => {
-	const reply = await askTutor(
-		`Genera un simulacro de 8 preguntas tipo ${selectedGoalLabel()} con dificultad realista. Devuelve SOLO JSON array con {"question":"...","options":["A","B","C","D"],"correct":0,"explanation":"..."}.\n\n${buildContext()}`,
-		'quiz'
-	)
-	exercises.value = normalizeExercises(parseJSONBlock(reply, []))
-	if (!exercises.value.length) toast.error(__('No se pudo crear el quiz.'))
+function markSelectable(items) {
+	return (items || []).map((item) => ({ ...item, selected: item.selected ?? undefined }))
 }
 
-const answerExercise = (exercise, optionIndex) => {
-	exercise.selected = optionIndex
-	persist()
+function handleAnswer({ item, index }) {
+	item.selected = index
 }
 
-const answerClass = (exercise, optionIndex) => {
-	if (exercise.selected === null) return 'border-outline-gray-1 bg-surface-white hover:bg-surface-gray-1 text-ink-gray-8'
-	if (optionIndex === exercise.correct) return 'border-green-500 bg-surface-green-1 text-ink-green-4'
-	if (optionIndex === exercise.selected) return 'border-red-400 bg-surface-red-1 text-ink-red-4'
-	return 'border-outline-gray-1 bg-surface-white text-ink-gray-6'
+async function handleQuizAnswer({ item, index }) {
+	item.selected = index
+	await api('update_session', {
+		name: currentSession.value.name,
+		data: { quiz_questions: quiz.value, quiz_score: quizScore.value, quiz_done: quiz.value.every((q) => q.selected !== undefined) },
+	})
 }
 
-const sendChat = async () => {
+async function sendChat() {
 	const text = chatInput.value.trim()
-	if (!text || loadingAction.value) return
+	if (!text) return
+	chatMessages.value.push({ id: Date.now(), role: 'user', content: text })
 	chatInput.value = ''
-	chatMessages.value.push({ id: makeId(), role: 'user', content: text })
 	await nextTick(scrollChat)
-	const reply = await askTutor(text, 'chat')
-	if (reply) {
-		chatMessages.value.push({ id: makeId(), role: 'assistant', content: reply })
-		await nextTick(scrollChat)
+	const result = await api('chat', { session: currentSession.value.name, message: text, history: chatMessages.value }, 'chat')
+	chatMessages.value = result.history.map((item, index) => ({ ...item, id: index }))
+	await nextTick(scrollChat)
+}
+
+function scrollChat() {
+	if (chatBox.value) chatBox.value.scrollTop = chatBox.value.scrollHeight
+}
+
+function captureSelection() {
+	const text = window.getSelection()?.toString()?.trim()
+	if (text && text.length > 12) {
+		chatInput.value = `${__('Explícame este fragmento')}: ${text}`
 	}
 }
 
-const scrollChat = () => {
-	if (chatScroller.value) chatScroller.value.scrollTop = chatScroller.value.scrollHeight
+async function saveCurrentExplanation() {
+	await api('save_explanation', { session: currentSession.value.name, topic: activeTopicTitle.value, content: studyPackMarkdown.value })
+	toast.success(__('Explicación guardada.'))
+	await loadDashboard()
 }
 
-const markSelectedTopicDone = () => {
-	if (!currentTopic.value) return
-	currentTopic.value.done = true
-	persist()
+async function deleteSession(name) {
+	await api('delete_session', { name })
+	await loadDashboard()
 }
 
-const addManualTopic = () => {
-	const title = window.prompt(__('Nuevo tema'))
-	if (!title?.trim()) return
-	topics.value.push({ id: makeId(), title: title.trim(), done: false })
-	if (!selectedTopicId.value) selectedTopicId.value = topics.value[0].id
+async function deleteExplanation(name) {
+	await api('delete_explanation', { name })
+	explanations.value = explanations.value.filter((item) => item.name !== name)
 }
 
-const saveSessionSnapshot = () => {
-	const entry = {
-		id: makeId(),
-		createdAt: new Date().toISOString(),
-		subject: subject.value,
-		topics: topics.value.length,
-		score: quizScore.value,
-		cards: flashcards.value.length,
+function saveWhiteboard() {
+	localStorage.setItem('studybadge_whiteboard', whiteboardText.value)
+}
+
+async function askWhiteboard(mode) {
+	const session = currentSession.value || sessions.value[0]
+	if (!session) {
+		toast.warning(__('Crea una sesión primero.'))
+		return
 	}
-	history.value = [entry, ...history.value].slice(0, 12)
-	localStorage.setItem(HISTORY_KEY, JSON.stringify(history.value))
-	toast.success(__('Sesión guardada.'))
+	const prompt = mode === 'errores'
+		? `${__('Encuentra errores o huecos en estas notas')}:\n${whiteboardText.value}`
+		: `${__('Organiza estas notas como guía de estudio')}:\n${whiteboardText.value}`
+	const result = await api('chat', { session: session.name, message: prompt, history: [] }, 'whiteboard')
+	whiteboardResponse.value = result.reply
 }
 
-const formatDate = (value) => {
-	return new Intl.DateTimeFormat(undefined, {
-		year: 'numeric',
-		month: 'short',
-		day: 'numeric',
-		hour: '2-digit',
-		minute: '2-digit',
-	}).format(new Date(value))
-}
-
-function persist() {
-	const payload = {
-		studyGoal: studyGoal.value,
-		subject: subject.value,
-		examDate: examDate.value,
-		studentLevel: studentLevel.value,
-		sourceMaterial: sourceMaterial.value,
-		topics: topics.value,
-		selectedTopicId: selectedTopicId.value,
-		studyPlan: studyPlan.value,
-		explanation: explanation.value,
-		flashcards: flashcards.value,
-		exercises: exercises.value,
-		studyNotes: studyNotes.value,
-		chatMessages: chatMessages.value,
-	}
-	localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
-}
-
-function restoreWorkspace() {
-	try {
-		const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}')
-		studyGoal.value = saved.studyGoal || studyGoal.value
-		subject.value = saved.subject || ''
-		examDate.value = saved.examDate || ''
-		studentLevel.value = saved.studentLevel || studentLevel.value
-		sourceMaterial.value = saved.sourceMaterial || ''
-		topics.value = saved.topics || []
-		selectedTopicId.value = saved.selectedTopicId || topics.value[0]?.id || ''
-		studyPlan.value = saved.studyPlan || []
-		explanation.value = saved.explanation || ''
-		flashcards.value = saved.flashcards || []
-		exercises.value = saved.exercises || []
-		studyNotes.value = saved.studyNotes || ''
-		if (saved.chatMessages?.length) chatMessages.value = saved.chatMessages
-	} catch {
-		// Ignore invalid local workspace state.
-	}
-
-	try {
-		history.value = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]')
-	} catch {
-		history.value = []
-	}
-}
-
-function resetWorkspace() {
-	subject.value = ''
-	examDate.value = ''
-	sourceMaterial.value = ''
-	topics.value = []
-	selectedTopicId.value = ''
-	studyPlan.value = []
-	explanation.value = ''
-	flashcards.value = []
-	exercises.value = []
-	studyNotes.value = ''
-	chatMessages.value = [
-		{
-			id: makeId(),
-			role: 'assistant',
-			content: __('Listo. Empecemos de nuevo con otro temario o parcial.'),
-		},
-	]
-	persist()
-}
+const ExerciseList = defineComponent({
+	props: { items: { type: Array, default: () => [] } },
+	emits: ['answer'],
+	setup(props, { emit }) {
+		const cls = (item, index) => {
+			if (item.selected === undefined) return 'border-outline-gray-1 bg-surface-white hover:bg-surface-gray-1'
+			if (index === Number(item.correct || 0)) return 'border-green-500 bg-surface-green-1 text-ink-green-4'
+			if (index === item.selected) return 'border-red-400 bg-surface-red-1 text-ink-red-4'
+			return 'border-outline-gray-1 bg-surface-white text-ink-gray-6'
+		}
+		return () => h('div', { class: 'mt-3 flex flex-col gap-3' }, props.items.length
+			? props.items.map((item, itemIndex) => h('div', { class: 'rounded-lg border border-outline-gray-1 p-3' }, [
+				h('div', { class: 'text-sm font-semibold leading-6' }, `${itemIndex + 1}. ${item.question}`),
+				h('div', { class: 'mt-3 grid gap-2' }, (item.options || []).map((option, index) =>
+					h('button', {
+						class: `rounded-md border px-3 py-2 text-left text-sm transition ${cls(item, index)}`,
+						onClick: () => emit('answer', { item, index }),
+					}, option)
+				)),
+				item.selected !== undefined ? h('div', { class: 'mt-3 rounded-md bg-surface-gray-1 p-3 text-sm leading-6 text-ink-gray-7' }, item.explanation || '') : null,
+			]))
+			: h('div', { class: 'rounded-md border border-dashed border-outline-gray-2 p-6 text-center text-sm text-ink-gray-6' }, __('Genera contenido para empezar.')))
+	},
+})
 </script>
 
 <style scoped>
+.study-input {
+	width: 100%;
+	border-radius: 0.375rem;
+	border: 1px solid #d1d5db;
+	background: #ffffff;
+	padding: 0.5rem 0.75rem;
+	font-size: 0.875rem;
+	outline: none;
+}
+
+.study-textarea {
+	width: 100%;
+	resize: vertical;
+	border-radius: 0.375rem;
+	border: 1px solid #d1d5db;
+	background: #ffffff;
+	padding: 0.5rem 0.75rem;
+	font-size: 0.875rem;
+	line-height: 1.55;
+	outline: none;
+}
+
+.study-input:focus,
+.study-textarea:focus {
+	border-color: #3b82f6;
+	box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
 .study-markdown :deep(h1),
 .study-markdown :deep(h2),
 .study-markdown :deep(h3) {
-	margin: 0.75rem 0 0.4rem;
+	margin: 0.85rem 0 0.45rem;
 	font-weight: 650;
-	color: theme('colors.gray.900');
+	color: #111827;
 }
 
 .study-markdown :deep(p),
 .study-markdown :deep(li) {
 	font-size: 0.925rem;
 	line-height: 1.7;
-	color: theme('colors.gray.700');
+	color: #374151;
 }
 
 .study-markdown :deep(ul),
 .study-markdown :deep(ol) {
 	margin: 0.5rem 0 0.75rem 1.25rem;
-}
-
-.study-markdown :deep(strong) {
-	color: theme('colors.gray.900');
 }
 </style>
