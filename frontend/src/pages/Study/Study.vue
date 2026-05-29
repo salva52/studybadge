@@ -574,8 +574,52 @@
 							<h3 class="s-empty-title">{{ __('Prepararemos esta lección automáticamente') }}</h3>
 							<p class="s-empty-desc">{{ __('Si tarda, usa "Regenerar" para pedir una nueva versión.') }}</p>
 						</div>
-					</div>
+					</div>					<!-- Practice Flow -->
+					<div class="practice-flow mt-12">
+						<div class="practice-flow-header">
+							<div class="practice-flow-icon">
+								<Zap class="h-6 w-6 stroke-1.5 text-indigo-500" />
+							</div>
+							<h3 class="practice-flow-title">{{ __('¿Estás preparado para practicar?') }}</h3>
+							<p class="practice-flow-desc">{{ __('Pon a prueba lo que acabas de aprender. Completa los ejercicios guiados y luego demuestra tu dominio en el Quiz Final.') }}</p>
+						</div>
 
+						<div class="practice-flow-steps flex flex-col gap-8 mt-8">
+							<div class="s-panel s-panel--flush practice-card">
+								<div class="s-panel-header practice-card-header bg-indigo-50/30">
+									<div>
+										<div class="s-kicker text-indigo-600">{{ __('Paso 2') }}</div>
+										<h2 class="s-panel-title text-indigo-900">{{ __('Práctica Guiada') }}</h2>
+										<p class="s-panel-desc text-indigo-700/80">{{ __('Responde y revisa la explicación de cada opción. Ideal para asentar conocimientos.') }}</p>
+									</div>
+									<Button :label="__('Generar Práctica')" :loading="loading === 'exercises'" @click="generateExercises" variant="solid" theme="indigo">
+										<template #prefix><Zap class="h-4 w-4 stroke-1.5" /></template>
+									</Button>
+								</div>
+								<ExerciseList :items="lessonPack.practice?.length ? lessonPack.practice : exercises" @answer="handleAnswer" />
+							</div>
+
+							<div class="s-panel s-panel--flush practice-card">
+								<div class="s-panel-header practice-card-header bg-violet-50/30">
+									<div>
+										<div class="s-kicker text-violet-600">{{ __('Paso 3') }}</div>
+										<h2 class="s-panel-title text-violet-900">{{ __('Quiz Final') }}</h2>
+										<p class="s-panel-desc text-violet-700/80">{{ __('Comprueba si puedes pasar a la siguiente lección respondiendo correctamente.') }}</p>
+									</div>
+									<Button :label="__('Generar Quiz')" :loading="loading === 'quiz'" @click="generateQuiz" variant="solid" theme="gray">
+										<template #prefix><Trophy class="h-4 w-4 stroke-1.5" /></template>
+									</Button>
+								</div>
+								<ExerciseList :items="lessonPack.quiz?.length ? lessonPack.quiz : quiz" @answer="handleQuizAnswer" />
+								<div v-if="activeQuiz.length" class="quiz-score-banner">
+									<Trophy class="h-7 w-7 stroke-1.5 text-amber-500" />
+									<div class="flex flex-col">
+										<span class="text-xs font-semibold text-amber-700/70 uppercase tracking-wider">{{ __('Puntaje final') }}</span>
+										<strong class="text-2xl font-black text-amber-900 leading-none mt-1">{{ quizScore }}%</strong>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 
