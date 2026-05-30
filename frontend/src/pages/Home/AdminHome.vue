@@ -1,6 +1,82 @@
 <template>
 	<div class="space-y-10">
-		<!-- ═══ 1. EVALUACIONES PRÓXIMAS ═══ -->
+
+		<!-- ═══ 1. STAT CARDS (TU PROGRESO COMO ADMIN) ═══ -->
+		<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+			<div v-for="stat in statCards" :key="stat.label" class="ah-stat-card group">
+				<div class="ah-stat-icon" :style="`--icon-bg: ${stat.bgColor}; --icon-color: ${stat.iconColor}`">
+					<component :is="stat.icon" class="size-5" />
+				</div>
+				<div class="min-w-0">
+					<div class="text-[10px] ah-text-muted font-bold uppercase tracking-wider">{{ stat.label }}</div>
+					<div class="text-xl sm:text-2xl font-extrabold ah-text-primary mt-0.5 truncate">
+						{{ stat.value }}
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ═══ 2. HERRAMIENTAS IA DISPONIBLES ═══ -->
+		<div>
+			<h3 class="ah-section-title">
+				<div class="ah-section-icon bg-indigo-500/10 text-indigo-500"><Sparkles class="size-5" /></div>
+				{{ __('Herramientas IA Disponibles') }}
+			</h3>
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+				<!-- Herramienta 1 -->
+				<div class="ah-tool-card group relative overflow-hidden flex flex-col justify-between">
+					<div class="absolute -right-10 -top-10 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all"></div>
+					<div class="relative z-10 p-6 flex flex-col h-full">
+						<div class="rounded-xl bg-indigo-50 dark:bg-indigo-900/20 w-fit p-3 mb-4 ring-1 ring-indigo-100 dark:ring-indigo-800/50 group-hover:scale-110 transition-transform">
+							<Wand2 class="size-6 text-indigo-600 dark:text-indigo-400" />
+						</div>
+						<h4 class="font-extrabold text-lg ah-text-primary mb-2">{{ __('Generador de Cursos IA') }}</h4>
+						<p class="text-sm ah-text-muted leading-relaxed mb-5">
+							{{ __('Crea la estructura, lecciones y contenido de tus cursos automáticamente usando nuestra Inteligencia Artificial.') }}
+						</p>
+						<router-link :to="{ name: 'Courses', query: { newCourse: '1' } }" class="ah-btn-outline w-full mt-auto">
+							<Plus class="size-4" /> {{ __('Crear nuevo curso') }}
+						</router-link>
+					</div>
+				</div>
+
+				<!-- Herramienta 2 -->
+				<div class="ah-tool-card group relative overflow-hidden flex flex-col justify-between">
+					<div class="absolute -right-10 -top-10 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/20 transition-all"></div>
+					<div class="relative z-10 p-6 flex flex-col h-full">
+						<div class="rounded-xl bg-amber-50 dark:bg-amber-900/20 w-fit p-3 mb-4 ring-1 ring-amber-100 dark:ring-amber-800/50 group-hover:scale-110 transition-transform">
+							<Bot class="size-6 text-amber-600 dark:text-amber-400" />
+						</div>
+						<h4 class="font-extrabold text-lg ah-text-primary mb-2">{{ __('Tutor IA Global') }}</h4>
+						<p class="text-sm ah-text-muted leading-relaxed mb-5">
+							{{ __('Configura el comportamiento del Tutor IA para que guíe a tus estudiantes de forma personalizada 24/7.') }}
+						</p>
+						<a href="/app/ai-tutor-settings" target="_blank" class="ah-btn-outline w-full mt-auto">
+							<Settings class="size-4" /> {{ __('Configurar Tutor') }}
+						</a>
+					</div>
+				</div>
+
+				<!-- Herramienta 3 -->
+				<div class="ah-tool-card group relative overflow-hidden flex flex-col justify-between">
+					<div class="absolute -right-10 -top-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all"></div>
+					<div class="relative z-10 p-6 flex flex-col h-full">
+						<div class="rounded-xl bg-emerald-50 dark:bg-emerald-900/20 w-fit p-3 mb-4 ring-1 ring-emerald-100 dark:ring-emerald-800/50 group-hover:scale-110 transition-transform">
+							<LineChart class="size-6 text-emerald-600 dark:text-emerald-400" />
+						</div>
+						<h4 class="font-extrabold text-lg ah-text-primary mb-2">{{ __('Analítica Avanzada') }}</h4>
+						<p class="text-sm ah-text-muted leading-relaxed mb-5">
+							{{ __('Revisa el progreso de tus grupos, evaluaciones pendientes y métricas de retención de los estudiantes.') }}
+						</p>
+						<router-link :to="{ name: 'Batches' }" class="ah-btn-outline w-full mt-auto">
+							<BarChart2 class="size-4" /> {{ __('Ver Reportes') }}
+						</router-link>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ═══ 3. EVALUACIONES PRÓXIMAS ═══ -->
 		<div v-if="evals?.data?.length">
 			<h3 class="ah-section-title">
 				<div class="ah-section-icon bg-amber-500/10 text-amber-600"><ClipboardCheck class="size-5" /></div>
@@ -37,7 +113,7 @@
 			</div>
 		</div>
 
-		<!-- ═══ 2. CLASES EN VIVO PRÓXIMAS ═══ -->
+		<!-- ═══ 4. CLASES EN VIVO PRÓXIMAS ═══ -->
 		<div v-if="liveClasses?.data?.length">
 			<h3 class="ah-section-title">
 				<div class="ah-section-icon bg-red-500/10 text-red-500"><Video class="size-5" /></div>
@@ -94,7 +170,7 @@
 			</div>
 		</div>
 
-		<!-- ═══ 3. CURSOS DESTACADOS ═══ -->
+		<!-- ═══ 5. CURSOS DESTACADOS ═══ -->
 		<div v-if="createdCourses.data?.length">
 			<div class="flex items-center justify-between mb-6">
 				<h3 class="ah-section-title mb-0">
@@ -116,7 +192,7 @@
 			</div>
 		</div>
 
-		<!-- ═══ 4. GRUPOS PRÓXIMOS ═══ -->
+		<!-- ═══ 6. GRUPOS PRÓXIMOS ═══ -->
 		<div v-if="createdBatches.data?.length">
 			<div class="flex items-center justify-between mb-6">
 				<h3 class="ah-section-title mb-0">
@@ -160,8 +236,8 @@
 </template>
 
 <script setup lang="ts">
+import { computed, inject, markRaw } from 'vue'
 import { Button, createResource, Tooltip } from 'frappe-ui'
-import { inject } from 'vue'
 import { useRouter } from 'vue-router'
 import {
 	Calendar,
@@ -175,7 +251,14 @@ import {
 	ClipboardCheck,
 	User,
 	BookOpen,
-	Users
+	Users,
+	Sparkles,
+	Bot,
+	Settings,
+	Wand2,
+	LineChart,
+	BarChart2,
+	Layers
 } from 'lucide-vue-next'
 import { formatTime } from '@/utils'
 import CourseCard from '@/components/CourseCard.vue'
@@ -199,6 +282,37 @@ const createdBatches = createResource({
 	url: 'lms.lms.api.get_created_batches',
 	auto: true,
 })
+
+const statCards = computed(() => [
+	{
+		icon: markRaw(BookOpen),
+		label: __('Cursos Creados'),
+		value: createdCourses.data?.length || 0,
+		bgColor: 'rgba(59, 130, 246, 0.08)',
+		iconColor: 'var(--sb-primary)',
+	},
+	{
+		icon: markRaw(Users),
+		label: __('Grupos Activos'),
+		value: createdBatches.data?.length || 0,
+		bgColor: 'rgba(139, 92, 246, 0.08)',
+		iconColor: '#8b5cf6',
+	},
+	{
+		icon: markRaw(ClipboardCheck),
+		label: __('Eval. Pendientes'),
+		value: props.evals?.data?.length || 0,
+		bgColor: 'rgba(245, 158, 11, 0.08)',
+		iconColor: '#f59e0b',
+	},
+	{
+		icon: markRaw(Video),
+		label: __('Clases Programadas'),
+		value: props.liveClasses?.data?.length || 0,
+		bgColor: 'rgba(239, 68, 68, 0.08)',
+		iconColor: '#ef4444',
+	},
+])
 
 const getClassEnd = (cls: { date: string; time: string; duration: number }) => {
 	const classStart = new Date(`${cls.date}T${cls.time}`)
@@ -276,10 +390,52 @@ const redirectToProfile = () => {
 }
 
 /* ═══════════════════════════════════════
-   CARDS
+   STAT CARDS
    ═══════════════════════════════════════ */
 
-.ah-card {
+.ah-stat-card {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 18px 20px;
+	background: var(--sb-white);
+	border: 1px solid rgba(6, 27, 73, 0.05);
+	border-radius: 18px;
+	box-shadow: 0 1px 3px rgba(6, 27, 73, 0.03);
+	transition: all 0.2s ease;
+}
+
+.ah-stat-card:hover {
+	box-shadow: 0 4px 16px rgba(6, 27, 73, 0.08);
+	transform: translateY(-1px);
+}
+
+:root[data-theme="dark"] .ah-stat-card {
+	border-color: rgba(255, 255, 255, 0.05);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+:root[data-theme="dark"] .ah-stat-card:hover {
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.ah-stat-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	border-radius: 14px;
+	background: var(--icon-bg);
+	color: var(--icon-color);
+	flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════
+   CARDS & TOOL CARDS
+   ═══════════════════════════════════════ */
+
+.ah-card, .ah-tool-card {
 	background: var(--sb-white);
 	border: 1px solid rgba(6, 27, 73, 0.05);
 	border-radius: 20px;
@@ -287,17 +443,19 @@ const redirectToProfile = () => {
 	transition: all 0.2s ease;
 }
 
-.ah-card:hover {
+.ah-card:hover, .ah-tool-card:hover {
 	transform: translateY(-2px);
 	box-shadow: 0 8px 24px rgba(6, 27, 73, 0.08);
 }
 
-:root[data-theme="dark"] .ah-card {
+:root[data-theme="dark"] .ah-card,
+:root[data-theme="dark"] .ah-tool-card {
 	border-color: rgba(255, 255, 255, 0.05);
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
-:root[data-theme="dark"] .ah-card:hover {
+:root[data-theme="dark"] .ah-card:hover,
+:root[data-theme="dark"] .ah-tool-card:hover {
 	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
