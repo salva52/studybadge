@@ -1,0 +1,181 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "hash",
+ "creation": "2026-05-30 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "receipt_number",
+  "member",
+  "subscription",
+  "column_break_main",
+  "status",
+  "status_detail",
+  "mercadopago_section",
+  "mp_authorized_payment_id",
+  "mp_payment_id",
+  "mp_preapproval_id",
+  "amount_section",
+  "amount",
+  "currency",
+  "column_break_amount",
+  "paid_at",
+  "date_created",
+  "last_modified",
+  "raw_response"
+ ],
+ "fields": [
+  {
+   "fieldname": "receipt_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Receipt Number",
+   "search_index": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "member",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Member",
+   "options": "User",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "subscription",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Subscription",
+   "options": "StudyBadge Plus Subscription",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Status"
+  },
+  {
+   "fieldname": "status_detail",
+   "fieldtype": "Data",
+   "label": "Status Detail"
+  },
+  {
+   "fieldname": "mercadopago_section",
+   "fieldtype": "Section Break",
+   "label": "Mercado Pago"
+  },
+  {
+   "fieldname": "mp_authorized_payment_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mercado Pago Authorized Payment ID",
+   "search_index": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "mp_payment_id",
+   "fieldtype": "Data",
+   "label": "Mercado Pago Payment ID",
+   "search_index": 1
+  },
+  {
+   "fieldname": "mp_preapproval_id",
+   "fieldtype": "Data",
+   "label": "Mercado Pago Preapproval ID",
+   "search_index": 1
+  },
+  {
+   "fieldname": "amount_section",
+   "fieldtype": "Section Break",
+   "label": "Amount"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "options": "currency"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "column_break_amount",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "paid_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Paid At"
+  },
+  {
+   "fieldname": "date_created",
+   "fieldtype": "Datetime",
+   "label": "Mercado Pago Created At"
+  },
+  {
+   "fieldname": "last_modified",
+   "fieldtype": "Datetime",
+   "label": "Mercado Pago Last Modified"
+  },
+  {
+   "fieldname": "raw_response",
+   "fieldtype": "Code",
+   "label": "Raw Response",
+   "options": "JSON"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-05-30 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "LMS",
+ "name": "StudyBadge Plus Receipt",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Moderator",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "paid_at",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "receipt_number",
+ "track_changes": 1
+}

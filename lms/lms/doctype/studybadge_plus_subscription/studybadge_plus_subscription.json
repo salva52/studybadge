@@ -15,12 +15,21 @@
   "amount",
   "currency",
   "column_break_billing",
+  "payment_method_id",
+  "payment_method_name",
+  "card_last_four",
+  "card_brand",
   "init_point",
+  "cancellation_section",
+  "cancel_at_period_end",
+  "cancel_requested_at",
+  "cancel_scheduled_for",
   "dates_section",
   "next_payment_date",
   "date_created",
   "last_modified",
   "last_synced_at",
+  "last_invoice_sync_at",
   "raw_response"
  ],
  "fields": [
@@ -40,7 +49,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "\npending\nauthorized\nactive\npaused\ncancelled\nexpired\nrejected\nunknown",
+   "options": "\npending\nauthorized\nactive\npaused\ncancelled\ncanceled\nexpired\nrejected\nunknown",
    "reqd": 1
   },
   {
@@ -84,9 +93,50 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "payment_method_id",
+   "fieldtype": "Data",
+   "label": "Payment Method ID"
+  },
+  {
+   "fieldname": "payment_method_name",
+   "fieldtype": "Data",
+   "label": "Payment Method Name"
+  },
+  {
+   "fieldname": "card_last_four",
+   "fieldtype": "Data",
+   "label": "Card Last Four"
+  },
+  {
+   "fieldname": "card_brand",
+   "fieldtype": "Data",
+   "label": "Card Brand"
+  },
+  {
    "fieldname": "init_point",
    "fieldtype": "Small Text",
    "label": "Checkout URL"
+  },
+  {
+   "fieldname": "cancellation_section",
+   "fieldtype": "Section Break",
+   "label": "Cancellation"
+  },
+  {
+   "default": "0",
+   "fieldname": "cancel_at_period_end",
+   "fieldtype": "Check",
+   "label": "Cancel at Period End"
+  },
+  {
+   "fieldname": "cancel_requested_at",
+   "fieldtype": "Datetime",
+   "label": "Cancel Requested At"
+  },
+  {
+   "fieldname": "cancel_scheduled_for",
+   "fieldtype": "Datetime",
+   "label": "Cancel Scheduled For"
   },
   {
    "fieldname": "dates_section",
@@ -112,6 +162,11 @@
    "fieldname": "last_synced_at",
    "fieldtype": "Datetime",
    "label": "Last Synced At"
+  },
+  {
+   "fieldname": "last_invoice_sync_at",
+   "fieldtype": "Datetime",
+   "label": "Last Invoice Sync At"
   },
   {
    "fieldname": "raw_response",

@@ -26,6 +26,10 @@ const routes = [
 		component: () => import('@/pages/Plus.vue'),
 	},
 	{
+		path: '/billing/plus',
+		redirect: { name: 'Plus' },
+	},
+	{
 		path: '/study/flow/:flowId',
 		name: 'StudyFlow',
 		component: () => import('@/pages/Study/Study.vue'),

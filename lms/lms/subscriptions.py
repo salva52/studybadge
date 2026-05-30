@@ -3,11 +3,12 @@ import hmac
 import json
 import uuid
 from datetime import datetime, timezone
+from urllib.parse import quote
 
 import frappe
 import requests
 from frappe import _
-from frappe.utils import flt, now_datetime
+from frappe.utils import cint, flt, format_datetime, now_datetime
 
 from lms.lms.utils import get_lms_path
 
@@ -19,6 +20,7 @@ KNOWN_SUBSCRIPTION_STATUSES = {
 	"active",
 	"paused",
 	"cancelled",
+	"canceled",
 	"expired",
 	"rejected",
 	"unknown",
@@ -129,6 +131,35 @@ def _safe_json(data: dict | list | None) -> str:
 	return json.dumps(data or {}, indent=2, sort_keys=True, default=str)
 
 
+def _clean(value):
+	return value if value not in ("", None) else None
+
+
+def _get_payment_status(payment: dict) -> str | None:
+	if isinstance(payment.get("payment"), dict):
+		return payment.get("payment", {}).get("status") or payment.get("status")
+	return payment.get("status")
+
+
+def _get_payment_status_detail(payment: dict) -> str | None:
+	if isinstance(payment.get("payment"), dict):
+		return payment.get("payment", {}).get("status_detail") or payment.get("status_detail")
+	return payment.get("status_detail")
+
+
+def _get_payment_id(payment: dict) -> str | None:
+	nested_payment = payment.get("payment") if isinstance(payment.get("payment"), dict) else {}
+	payment_id = _clean(nested_payment.get("id") or payment.get("payment_id") or payment.get("payment"))
+	return str(payment_id) if payment_id else None
+
+
+def _receipt_number(payment: dict) -> str:
+	identifier = str(payment.get("id") or _get_payment_id(payment) or uuid.uuid4().hex)
+	date_value = _parse_mp_datetime(payment.get("debit_date") or payment.get("date_created"))
+	date_part = str(date_value or now_datetime().date()).replace("-", "")[:8]
+	return f"SBP-{date_part}-{identifier[-8:]}"
+
+
 def _parse_mp_datetime(value: str | None):
 	if not value:
 		return None
@@ -203,14 +234,21 @@ def _sync_subscription(mp_subscription: dict):
 	if doc.is_new():
 		doc.member = payer_email
 
+	status = _normalize_status(mp_subscription.get("status"))
+	card = mp_subscription.get("card") if isinstance(mp_subscription.get("card"), dict) else {}
+	payment_method_id = mp_subscription.get("payment_method_id") or card.get("payment_method_id")
 	doc.update(
 		{
-			"status": _normalize_status(mp_subscription.get("status")),
+			"status": status,
 			"mp_preapproval_id": mp_subscription.get("id"),
 			"external_reference": mp_subscription.get("external_reference"),
 			"init_point": mp_subscription.get("init_point"),
 			"amount": auto_recurring.get("transaction_amount"),
 			"currency": auto_recurring.get("currency_id"),
+			"payment_method_id": payment_method_id,
+			"payment_method_name": mp_subscription.get("payment_method_id") or payment_method_id,
+			"card_last_four": card.get("last_four_digits") or card.get("last_four"),
+			"card_brand": card.get("payment_method_id") or payment_method_id,
 			"next_payment_date": _parse_mp_datetime(mp_subscription.get("next_payment_date")),
 			"date_created": _parse_mp_datetime(mp_subscription.get("date_created")),
 			"last_modified": _parse_mp_datetime(mp_subscription.get("last_modified")),
@@ -218,6 +256,8 @@ def _sync_subscription(mp_subscription: dict):
 			"raw_response": _safe_json(mp_subscription),
 		}
 	)
+	if status in {"cancelled", "canceled", "expired", "rejected"}:
+		doc.cancel_at_period_end = 0
 	doc.save(ignore_permissions=True)
 	return doc
 
@@ -252,13 +292,7 @@ def get_plus_status() -> dict:
 	}
 
 	if subscription:
-		data["subscription"] = {
-			"name": subscription.name,
-			"status": subscription.status,
-			"init_point": subscription.init_point,
-			"next_payment_date": subscription.next_payment_date,
-			"last_synced_at": subscription.last_synced_at,
-		}
+		data["subscription"] = _serialize_subscription(subscription)
 
 	return data
 
@@ -326,6 +360,390 @@ def create_plus_checkout() -> str:
 def get_lms_path_url(settings=None) -> str:
 	settings = settings or _get_settings()
 	return f"{_get_public_base_url(settings)}/{get_lms_path()}"
+
+
+def _get_support_email() -> str:
+	for doctype, fieldname in (
+		("Website Settings", "contact_email"),
+		("Website Settings", "email"),
+	):
+		try:
+			value = frappe.db.get_single_value(doctype, fieldname)
+			if value:
+				return value
+		except Exception:
+			continue
+	return frappe.conf.get("admin_email") or "soporte@studybadge.com"
+
+
+def _serialize_subscription(subscription) -> dict | None:
+	if not subscription:
+		return None
+
+	return {
+		"name": subscription.name,
+		"status": subscription.status,
+		"init_point": subscription.init_point,
+		"next_payment_date": subscription.next_payment_date,
+		"last_synced_at": subscription.last_synced_at,
+		"cancel_at_period_end": cint(getattr(subscription, "cancel_at_period_end", 0)),
+		"cancel_requested_at": getattr(subscription, "cancel_requested_at", None),
+		"cancel_scheduled_for": getattr(subscription, "cancel_scheduled_for", None),
+		"payment_method": {
+			"id": getattr(subscription, "payment_method_id", None),
+			"name": getattr(subscription, "payment_method_name", None),
+			"card_last_four": getattr(subscription, "card_last_four", None),
+			"card_brand": getattr(subscription, "card_brand", None),
+		},
+	}
+
+
+def _get_receipt_filters(subscription) -> dict:
+	return {
+		"member": subscription.member,
+		"subscription": subscription.name,
+	}
+
+
+def _serialize_receipts(subscription) -> list[dict]:
+	if not subscription:
+		return []
+
+	receipts = frappe.get_all(
+		"StudyBadge Plus Receipt",
+		_get_receipt_filters(subscription),
+		[
+			"name",
+			"receipt_number",
+			"status",
+			"status_detail",
+			"mp_authorized_payment_id",
+			"mp_payment_id",
+			"amount",
+			"currency",
+			"paid_at",
+			"date_created",
+		],
+		order_by="paid_at desc, creation desc",
+		limit=24,
+	)
+	for receipt in receipts:
+		receipt["download_url"] = (
+			"/api/method/lms.lms.subscriptions.download_plus_receipt"
+			f"?receipt={quote(str(receipt.name))}"
+		)
+	return receipts
+
+
+def _sync_receipt(payment: dict, subscription):
+	authorized_payment_id = str(payment.get("id")) if payment.get("id") else None
+	payment_id = _get_payment_id(payment)
+	filters = None
+	if authorized_payment_id:
+		filters = {"mp_authorized_payment_id": authorized_payment_id}
+	elif payment_id:
+		filters = {"mp_payment_id": payment_id, "subscription": subscription.name}
+
+	receipt_name = frappe.db.exists("StudyBadge Plus Receipt", filters) if filters else None
+	if receipt_name:
+		receipt = frappe.get_doc("StudyBadge Plus Receipt", receipt_name)
+	else:
+		receipt = frappe.new_doc("StudyBadge Plus Receipt")
+		receipt.member = subscription.member
+		receipt.subscription = subscription.name
+
+	receipt.update(
+		{
+			"receipt_number": receipt.receipt_number or _receipt_number(payment),
+			"status": _get_payment_status(payment),
+			"status_detail": _get_payment_status_detail(payment),
+			"mp_authorized_payment_id": authorized_payment_id,
+			"mp_payment_id": payment_id,
+			"mp_preapproval_id": payment.get("preapproval_id") or subscription.mp_preapproval_id,
+			"amount": payment.get("transaction_amount"),
+			"currency": payment.get("currency_id") or subscription.currency,
+			"paid_at": _parse_mp_datetime(payment.get("debit_date") or payment.get("date_created")),
+			"date_created": _parse_mp_datetime(payment.get("date_created")),
+			"last_modified": _parse_mp_datetime(payment.get("last_modified")),
+			"raw_response": _safe_json(payment),
+		}
+	)
+	receipt.save(ignore_permissions=True)
+	return receipt
+
+
+def _search_authorized_payments(params: dict, settings=None) -> list[dict]:
+	payload = _request(
+		"GET",
+		"/authorized_payments/search",
+		settings=settings,
+		params={key: value for key, value in params.items() if value},
+	)
+	return payload.get("results") or []
+
+
+def _sync_subscription_receipts(subscription, settings=None, raise_errors=False) -> list:
+	if not subscription or not subscription.mp_preapproval_id:
+		return []
+
+	try:
+		payments = _search_authorized_payments(
+			{"preapproval_id": subscription.mp_preapproval_id, "limit": 20},
+			settings=settings,
+		)
+	except Exception:
+		if raise_errors:
+			raise
+		frappe.log_error(frappe.get_traceback(), "StudyBadge Plus Receipt Sync Failed")
+		return []
+
+	receipts = [_sync_receipt(payment, subscription) for payment in payments]
+	subscription.last_invoice_sync_at = now_datetime()
+	subscription.save(ignore_permissions=True)
+	return receipts
+
+
+def _sync_authorized_payment_event(data_id: str | None, settings=None):
+	if not data_id:
+		return None, None
+
+	payments = []
+	for params in ({"id": data_id}, {"payment_id": data_id}):
+		try:
+			payments = _search_authorized_payments(params, settings=settings)
+		except Exception:
+			frappe.log_error(
+				frappe.get_traceback(),
+				"StudyBadge Plus Authorized Payment Lookup Failed",
+			)
+			continue
+		if payments:
+			break
+	if not payments:
+		return None, None
+
+	payment = payments[0]
+	preapproval_id = payment.get("preapproval_id")
+	subscription = None
+	subscription_name = preapproval_id and frappe.db.exists(
+		"StudyBadge Plus Subscription", {"mp_preapproval_id": preapproval_id}
+	)
+	if subscription_name:
+		subscription = frappe.get_doc("StudyBadge Plus Subscription", subscription_name)
+	if not subscription:
+		return None, None
+
+	return subscription, _sync_receipt(payment, subscription)
+
+
+def _is_authorized_payment_topic(topic: str | None, payload: dict) -> bool:
+	resource = _get_resource(payload) or ""
+	topic = topic or ""
+	return "authorized_payment" in topic or "authorized_payments" in str(resource)
+
+
+@frappe.whitelist()
+def get_plus_billing() -> dict:
+	if frappe.session.user == "Guest":
+		frappe.throw(_("Please login to view your Plus billing."), frappe.AuthenticationError)
+
+	settings = _get_settings()
+	subscription = _get_latest_subscription(frappe.session.user)
+	if subscription:
+		_sync_subscription_receipts(subscription, settings=settings)
+
+	return {
+		"active": has_active_plus(),
+		"plan": _get_plus_plan(settings),
+		"public_key": settings.public_key,
+		"support_email": _get_support_email(),
+		"subscription": _serialize_subscription(subscription),
+		"receipts": _serialize_receipts(subscription),
+	}
+
+
+def _get_manageable_subscription():
+	subscription = _get_latest_subscription(frappe.session.user)
+	if not subscription:
+		frappe.throw(_("You do not have a StudyBadge Plus subscription yet."))
+	if subscription.status not in PLUS_ACTIVE_STATUSES:
+		frappe.throw(_("Your StudyBadge Plus subscription is not active."))
+	if not subscription.mp_preapproval_id:
+		frappe.throw(_("This subscription is missing its Mercado Pago ID."))
+	return subscription
+
+
+@frappe.whitelist()
+def request_plus_cancellation() -> dict:
+	if frappe.session.user == "Guest":
+		frappe.throw(_("Please login to manage your Plus subscription."), frappe.AuthenticationError)
+
+	subscription = _get_manageable_subscription()
+	if not subscription.next_payment_date:
+		frappe.throw(_("We could not find your next billing date. Please contact support."))
+
+	subscription.cancel_at_period_end = 1
+	subscription.cancel_requested_at = now_datetime()
+	subscription.cancel_scheduled_for = subscription.next_payment_date
+	subscription.save(ignore_permissions=True)
+	frappe.db.commit()
+	return get_plus_billing()
+
+
+@frappe.whitelist()
+def reactivate_plus_subscription() -> dict:
+	if frappe.session.user == "Guest":
+		frappe.throw(_("Please login to manage your Plus subscription."), frappe.AuthenticationError)
+
+	subscription = _get_manageable_subscription()
+	subscription.cancel_at_period_end = 0
+	subscription.cancel_requested_at = None
+	subscription.cancel_scheduled_for = None
+	subscription.save(ignore_permissions=True)
+	frappe.db.commit()
+	return get_plus_billing()
+
+
+@frappe.whitelist()
+def update_plus_payment_method(card_token_id: str) -> dict:
+	if frappe.session.user == "Guest":
+		frappe.throw(_("Please login to manage your Plus subscription."), frappe.AuthenticationError)
+	if not card_token_id:
+		frappe.throw(_("Mercado Pago did not return a card token."))
+
+	settings = _get_settings()
+	subscription = _get_manageable_subscription()
+	response = _request(
+		"PUT",
+		f"/preapproval/{subscription.mp_preapproval_id}",
+		settings=settings,
+		data=json.dumps({"card_token_id": card_token_id}),
+	)
+	_sync_subscription(response)
+	return get_plus_billing()
+
+
+def _cancel_subscription_now(subscription, settings=None):
+	settings = settings or _get_settings()
+	response = _request(
+		"PUT",
+		f"/preapproval/{subscription.mp_preapproval_id}",
+		settings=settings,
+		data=json.dumps({"status": "canceled"}),
+	)
+	return _sync_subscription(response)
+
+
+def process_plus_cancellations():
+	try:
+		settings = _get_settings()
+	except Exception:
+		return
+	due = frappe.get_all(
+		"StudyBadge Plus Subscription",
+		{
+			"cancel_at_period_end": 1,
+			"status": ["in", list(PLUS_ACTIVE_STATUSES)],
+			"cancel_scheduled_for": ["<=", now_datetime()],
+		},
+		["name"],
+	)
+	for row in due:
+		try:
+			subscription = frappe.get_doc("StudyBadge Plus Subscription", row.name)
+			_cancel_subscription_now(subscription, settings=settings)
+			frappe.db.commit()
+		except Exception:
+			frappe.log_error(
+				frappe.get_traceback(),
+				f"StudyBadge Plus Cancellation Failed: {row.name}",
+			)
+
+
+def _render_receipt_html(receipt, subscription) -> str:
+	member_name = frappe.db.get_value("User", receipt.member, "full_name") or receipt.member
+	brand_name = frappe.db.get_single_value("Website Settings", "app_name") or "StudyBadge"
+	paid_at = format_datetime(receipt.paid_at or receipt.date_created) if (
+		receipt.paid_at or receipt.date_created
+	) else ""
+	next_payment = (
+		format_datetime(subscription.next_payment_date) if subscription.next_payment_date else ""
+	)
+	amount = f"{receipt.currency or subscription.currency or 'PEN'} {flt(receipt.amount):.2f}"
+	return frappe.render_template(
+		"""
+		<meta name="pdfkit-page-size" content="A4">
+		<meta name="pdfkit-margin-top" content="12mm">
+		<meta name="pdfkit-margin-bottom" content="12mm">
+		<meta name="pdfkit-margin-left" content="12mm">
+		<meta name="pdfkit-margin-right" content="12mm">
+		<style>
+			body { font-family: Inter, Arial, sans-serif; color: #111827; }
+			.receipt { border: 1px solid #d1d5db; border-radius: 12px; overflow: hidden; }
+			.header { background: #0f172a; color: white; padding: 28px; }
+			.brand { font-size: 24px; font-weight: 800; }
+			.badge { display: inline-block; margin-top: 10px; padding: 6px 10px; border-radius: 999px; background: #f59e0b; color: #111827; font-weight: 700; }
+			.content { padding: 28px; }
+			.grid { width: 100%; border-collapse: collapse; margin-top: 24px; }
+			.grid td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+			.label { color: #6b7280; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+			.value { font-size: 15px; font-weight: 650; }
+			.total { margin-top: 24px; padding: 18px; border-radius: 10px; background: #f8fafc; text-align: right; }
+			.total .amount { font-size: 30px; font-weight: 800; color: #0f172a; }
+			.footer { padding: 20px 28px; background: #f9fafb; color: #6b7280; font-size: 12px; }
+		</style>
+		<div class="receipt">
+			<div class="header">
+				<div class="brand">{{ brand_name }}</div>
+				<div class="badge">StudyBadge Plus</div>
+			</div>
+			<div class="content">
+				<h1>Recibo de pago</h1>
+				<p>Gracias por ser parte de StudyBadge Plus. Este recibo confirma el pago registrado por Mercado Pago.</p>
+				<table class="grid">
+					<tr><td><div class="label">Recibo</div><div class="value">{{ receipt.receipt_number }}</div></td><td><div class="label">Fecha de pago</div><div class="value">{{ paid_at }}</div></td></tr>
+					<tr><td><div class="label">Miembro</div><div class="value">{{ member_name }}</div></td><td><div class="label">Estado</div><div class="value">{{ receipt.status or "" }}</div></td></tr>
+					<tr><td><div class="label">Pago Mercado Pago</div><div class="value">{{ receipt.mp_payment_id or receipt.mp_authorized_payment_id }}</div></td><td><div class="label">Próxima facturación</div><div class="value">{{ next_payment }}</div></td></tr>
+				</table>
+				<div class="total">
+					<div class="label">Total pagado</div>
+					<div class="amount">{{ amount }}</div>
+				</div>
+			</div>
+			<div class="footer">
+				Este documento es un recibo comercial de StudyBadge basado en la información del pago procesado por Mercado Pago. No reemplaza una factura tributaria.
+			</div>
+		</div>
+		""",
+		{
+			"receipt": receipt,
+			"subscription": subscription,
+			"brand_name": brand_name,
+			"member_name": member_name,
+			"paid_at": paid_at,
+			"next_payment": next_payment,
+			"amount": amount,
+		},
+	)
+
+
+@frappe.whitelist()
+def download_plus_receipt(receipt: str):
+	if frappe.session.user == "Guest":
+		frappe.throw(_("Please login to download receipts."), frappe.AuthenticationError)
+
+	doc = frappe.get_doc("StudyBadge Plus Receipt", receipt)
+	if doc.member != frappe.session.user:
+		frappe.throw(_("You cannot download this receipt."), frappe.PermissionError)
+
+	subscription = frappe.get_doc("StudyBadge Plus Subscription", doc.subscription)
+	from frappe.utils.pdf import get_pdf
+
+	pdf = get_pdf(_render_receipt_html(doc, subscription))
+	frappe.local.response.filename = f"{doc.receipt_number or doc.name}.pdf"
+	frappe.local.response.filecontent = pdf
+	frappe.local.response.type = "download"
+	frappe.local.response.content_type = "application/pdf"
 
 
 def _get_request_json() -> dict:
@@ -481,6 +899,14 @@ def mercadopago_webhook():
 	if already_processed:
 		return {"status": "ok", "duplicate": True}
 
+	if _is_authorized_payment_topic(topic, payload):
+		subscription, receipt = _sync_authorized_payment_event(data_id, settings=settings)
+		if subscription:
+			event.subscription = subscription.name
+		event.processed = 1
+		event.save(ignore_permissions=True)
+		return {"status": "ok", "receipt": receipt.name if receipt else None}
+
 	preapproval_id = _get_mp_subscription_id(payload, data_id, topic)
 	if not preapproval_id:
 		frappe.throw(_("Mercado Pago webhook did not include a subscription ID."))
@@ -488,6 +914,7 @@ def mercadopago_webhook():
 	mp_subscription = _fetch_mp_subscription(preapproval_id, settings=settings)
 	subscription = _sync_subscription(mp_subscription)
 	if subscription:
+		_sync_subscription_receipts(subscription, settings=settings)
 		event.subscription = subscription.name
 	event.processed = 1
 	event.save(ignore_permissions=True)
