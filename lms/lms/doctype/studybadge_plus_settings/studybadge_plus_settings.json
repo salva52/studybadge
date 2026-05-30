@@ -1,0 +1,128 @@
+{
+ "actions": [],
+ "creation": "2026-05-30 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "enabled",
+  "plan_section",
+  "plan_name",
+  "amount",
+  "currency",
+  "column_break_plan",
+  "frequency",
+  "frequency_type",
+  "integration_section",
+  "public_base_url",
+  "public_key",
+  "access_token",
+  "webhook_secret"
+ ],
+ "fields": [
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "plan_section",
+   "fieldtype": "Section Break",
+   "label": "Plan"
+  },
+  {
+   "default": "StudyBadge Plus",
+   "fieldname": "plan_name",
+   "fieldtype": "Data",
+   "label": "Plan Name",
+   "reqd": 1
+  },
+  {
+   "default": "29",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Monthly Amount",
+   "reqd": 1
+  },
+  {
+   "default": "PEN",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_plan",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "frequency",
+   "fieldtype": "Int",
+   "label": "Frequency",
+   "reqd": 1
+  },
+  {
+   "default": "months",
+   "fieldname": "frequency_type",
+   "fieldtype": "Select",
+   "label": "Frequency Type",
+   "options": "days\nmonths",
+   "reqd": 1
+  },
+  {
+   "fieldname": "integration_section",
+   "fieldtype": "Section Break",
+   "label": "Mercado Pago"
+  },
+  {
+   "default": "https://academy.studybadge.com",
+   "fieldname": "public_base_url",
+   "fieldtype": "Data",
+   "label": "Public Base URL",
+   "reqd": 1
+  },
+  {
+   "fieldname": "public_key",
+   "fieldtype": "Data",
+   "label": "Public Key"
+  },
+  {
+   "fieldname": "access_token",
+   "fieldtype": "Password",
+   "label": "Access Token",
+   "reqd": 1
+  },
+  {
+   "fieldname": "webhook_secret",
+   "fieldtype": "Password",
+   "label": "Webhook Secret",
+   "reqd": 1
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-05-30 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "LMS",
+ "name": "StudyBadge Plus Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

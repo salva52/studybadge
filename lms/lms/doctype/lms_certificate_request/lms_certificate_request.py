@@ -20,10 +20,12 @@ from frappe.utils import (
 )
 
 from lms.lms.utils import get_evaluator
+from lms.lms.subscriptions import has_active_plus
 
 
 class LMSCertificateRequest(Document):
 	def validate(self):
+		self.validate_paid_certificate_access()
 		self.set_evaluator()
 		self.validate_unavailability()
 		self.validate_slot()
@@ -38,6 +40,26 @@ class LMSCertificateRequest(Document):
 		if not self.evaluator:
 			self.evaluator = get_evaluator(self.course, self.batch_name)
 			self.evaluator_name = get_fullname(self.evaluator)
+
+	def validate_paid_certificate_access(self):
+		if not self.course or not self.member:
+			return
+
+		paid_certificate = frappe.db.get_value("LMS Course", self.course, "paid_certificate")
+		if not paid_certificate:
+			return
+
+		enrollment = frappe.db.get_value(
+			"LMS Enrollment",
+			{"course": self.course, "member": self.member},
+			["name", "purchased_certificate"],
+			as_dict=True,
+		)
+		if not enrollment:
+			frappe.throw(_("You must be enrolled in the course to schedule an evaluation."))
+
+		if not enrollment.purchased_certificate and not has_active_plus(self.member):
+			frappe.throw(_("StudyBadge Plus is required to schedule this certificate evaluation."))
 
 	def validate_unavailability(self):
 		if self.evaluator:

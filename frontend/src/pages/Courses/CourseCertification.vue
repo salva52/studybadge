@@ -29,10 +29,16 @@
 				</div>
 			</div>
 		</div>
-		<div v-else>
-			<UpcomingEvaluations v-if="courses.length" :courses="courses" />
+			<div v-else>
+				<div
+					v-if="hasPlusAccess"
+					class="mb-4 rounded-md bg-surface-green-1 p-3 text-sm text-ink-green-3"
+				>
+					{{ __('Plus activo: puedes programar tu evaluacion de certificado.') }}
+				</div>
+				<UpcomingEvaluations v-if="courses.length" :courses="courses" />
+			</div>
 		</div>
-	</div>
 </template>
 <script setup>
 import { computed, inject, onMounted, ref } from 'vue'
@@ -43,6 +49,7 @@ import UpcomingEvaluations from '@/components/UpcomingEvaluations.vue'
 
 const courseTitle = ref(null)
 const evaluator = ref(null)
+const hasPlusAccess = ref(false)
 const { brand } = sessionStore()
 const courses = ref([])
 const user = inject('$user')
@@ -57,7 +64,7 @@ const props = defineProps({
 })
 
 onMounted(() => {
-	fetchEnrollmentDetails()
+	fetchCertificationDetails()
 	fetchCourseDetails()
 })
 
@@ -74,18 +81,27 @@ const certificate = createResource({
 	cache: [user.data?.name, props.courseName],
 })
 
-const fetchEnrollmentDetails = () => {
-	call('frappe.client.get_value', {
-		doctype: 'LMS Enrollment',
-		filters: { member: user.data?.name, course: props.courseName },
-		fieldname: ['purchased_certificate'],
+const fetchCertificationDetails = () => {
+	call('lms.lms.api.get_certification_details', {
+		course: props.courseName,
 	}).then((data) => {
-		if (data.purchased_certificate) {
-			certificate.reload()
-		} else {
+		const hasAccess =
+			data.certificate ||
+			!data.paid_certificate ||
+			data.membership?.purchased_certificate ||
+			data.has_plus
+		hasPlusAccess.value = Boolean(data.has_plus)
+		if (!data.membership) {
 			router.push({
 				name: 'CourseDetail',
 				params: { courseName: props.courseName },
+			})
+		} else if (hasAccess) {
+			certificate.reload()
+		} else {
+			router.push({
+				name: 'Plus',
+				query: { from: 'certificate', course: props.courseName },
 			})
 		}
 	})

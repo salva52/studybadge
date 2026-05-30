@@ -58,7 +58,10 @@
 							<SendHorizontal class="w-5 h-5" />
 						</button>
 					</div>
-					<div class="text-center text-[10px] text-gray-400 mt-2" v-if="remaining !== null">
+					<div class="text-center text-[10px] text-amber-600 mt-2" v-if="unlimited">
+						Plus: mensajes ilimitados
+					</div>
+					<div class="text-center text-[10px] text-gray-400 mt-2" v-else-if="remaining !== null">
 						Mensajes restantes en este curso hoy: {{ remaining }}
 					</div>
 				</div>
@@ -68,7 +71,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, onMounted } from 'vue'
 import { Bot, ChevronDown, ChevronUp, SendHorizontal, Sparkles } from 'lucide-vue-next'
 import { call, toast } from 'frappe-ui'
 import { marked } from 'marked'
@@ -87,6 +90,15 @@ const isLoading = ref(false)
 const messages = ref([])
 const messagesContainer = ref(null)
 const remaining = ref(null)
+const unlimited = ref(false)
+
+onMounted(() => {
+	call('lms.lms.subscriptions.get_plus_status')
+		.then((res) => {
+			unlimited.value = !!res.active
+		})
+		.catch(() => {})
+})
 
 // Reset messages when lesson changes
 watch(() => props.lessonTitle, () => {
@@ -128,10 +140,11 @@ const sendMessage = async () => {
 		lesson_name: props.lessonTitle,
 		lesson_content: props.lessonContent,
 		history: JSON.stringify(historyForApi)
-	}).then((res) => {
-		messages.value.push({ role: 'model', content: res.reply })
-		if (res.remaining !== undefined) {
-			remaining.value = res.remaining
+		}).then((res) => {
+			messages.value.push({ role: 'model', content: res.reply })
+			unlimited.value = !!res.unlimited
+			if (res.remaining !== undefined) {
+				remaining.value = res.remaining
 		}
 	}).catch((err) => {
 		toast.error(err.messages?.[0] || 'Error de conexión con el tutor.')

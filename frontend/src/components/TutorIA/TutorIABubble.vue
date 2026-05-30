@@ -93,9 +93,12 @@
 						<SendHorizontal class="w-5 h-5" />
 					</button>
 				</div>
-				<div class="text-center text-[10px] text-gray-400 mt-2" v-if="remaining !== null">
-					Mensajes restantes hoy: {{ remaining }}
-				</div>
+					<div class="text-center text-[10px] text-amber-600 mt-2" v-if="unlimited">
+						Plus: mensajes ilimitados
+					</div>
+					<div class="text-center text-[10px] text-gray-400 mt-2" v-else-if="remaining !== null">
+						Mensajes restantes hoy: {{ remaining }}
+					</div>
 			</div>
 		</div>
 	</Transition>
@@ -115,6 +118,7 @@ const readScreen = ref(true)
 const messages = ref([])
 const messagesContainer = ref(null)
 const remaining = ref(null)
+const unlimited = ref(false)
 
 const selectedImages = ref([])
 const totalImagesSent = ref(0)
@@ -129,10 +133,11 @@ watch(messages, () => {
 }, { deep: true })
 
 const checkConfig = () => {
-	call('studybadge_ai.ai_tutor.get_tutor_config')
-		.then(res => {
-			remaining.value = res.remaining
-			if (res.history) {
+		call('studybadge_ai.ai_tutor.get_tutor_config')
+			.then(res => {
+				remaining.value = res.remaining
+				unlimited.value = !!res.unlimited
+				if (res.history) {
 				try {
 					const parsed = JSON.parse(res.history)
 					if (Array.isArray(parsed) && parsed.length > 0) {
@@ -279,11 +284,12 @@ const sendMessage = async () => {
 		screen_text: screenText,
 		images_base64: JSON.stringify(imgsBase64),
 		history: JSON.stringify(historyForApi)
-	}).then((res) => {
-		messages.value.push({ role: 'model', content: res.reply })
-		if (res.remaining !== undefined) {
-			remaining.value = res.remaining
-		}
+		}).then((res) => {
+			messages.value.push({ role: 'model', content: res.reply })
+			unlimited.value = !!res.unlimited
+			if (res.remaining !== undefined) {
+				remaining.value = res.remaining
+			}
 	}).catch((err) => {
 		toast.error(err.messages?.[0] || 'Ocurrió un error al contactar al tutor.')
 		messages.value.push({ role: 'model', content: 'Lo siento, hubo un problema al procesar tu solicitud. Por favor intenta de nuevo.' })

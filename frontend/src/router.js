@@ -21,6 +21,11 @@ const routes = [
 		component: () => import('@/pages/Study/Study.vue'),
 	},
 	{
+		path: '/plus',
+		name: 'Plus',
+		component: () => import('@/pages/Plus.vue'),
+	},
+	{
 		path: '/study/flow/:flowId',
 		name: 'StudyFlow',
 		component: () => import('@/pages/Study/Study.vue'),

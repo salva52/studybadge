@@ -45,6 +45,7 @@ from lms.lms.utils import (
 	has_lms_role,
 	has_moderator_role,
 )
+from lms.lms.subscriptions import has_active_plus
 
 
 @frappe.whitelist()
@@ -65,6 +66,7 @@ def get_user_info():
 	user.is_student = not user.is_instructor and not user.is_moderator and not user.is_evaluator
 	user.is_fc_site = is_fc_site()
 	user.is_system_manager = "System Manager" in user.roles
+	user.is_plus = has_active_plus(user.name)
 	user.sitename = frappe.local.site
 	user.developer_mode = frappe.conf.developer_mode
 	if user.is_fc_site and user.is_system_manager:
@@ -193,6 +195,10 @@ def verify_billing_access(doctype, name, billing_type):
 			message = _("Batch has already started.")
 
 	elif access and billing_type == "certificate":
+		if has_active_plus():
+			access = False
+			message = _("You already have StudyBadge Plus. Your certificates are unlocked.")
+
 		purchased_certificate = frappe.db.exists(
 			"LMS Enrollment",
 			{
@@ -1497,6 +1503,7 @@ def get_certification_details(course: str):
 		"membership": membership,
 		"paid_certificate": paid_certificate,
 		"certificate": certificate,
+		"has_plus": has_active_plus(),
 	}
 
 
@@ -1870,9 +1877,11 @@ def get_profile_details(username: str):
 	roles = frappe.get_roles(details.name)
 	if not has_lms_role():
 		frappe.throw(
-			_("User does not have permission to access this user's profile details."), frappe.PermissionError
+			_("User does not have permission to access this user's profile details."),
+			frappe.PermissionError,
 		)
 	details.roles = roles
+	details.is_plus = has_active_plus(details.name)
 	return details
 
 

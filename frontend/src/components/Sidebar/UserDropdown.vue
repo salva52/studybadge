@@ -105,6 +105,7 @@ import LMSLogo from '@/components/Icons/LMSLogo.vue'
 import SettingsModal from '@/components/Settings/Settings.vue'
 import {
 	ChevronDown,
+	Crown,
 	LogIn,
 	LogOut,
 	Moon,
@@ -153,6 +154,16 @@ const userDropdownOptions = computed(() => {
 					label: 'Mi Perfil',
 					onClick: () => {
 						router.push(`/user/${userResource.data?.username}`)
+					},
+					condition: () => {
+						return isLoggedIn
+					},
+				},
+				{
+					icon: Crown,
+					label: userResource.data?.is_plus ? 'Mi Plus' : 'Activar Plus',
+					onClick: () => {
+						router.push({ name: 'Plus' })
 					},
 					condition: () => {
 						return isLoggedIn

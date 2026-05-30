@@ -91,9 +91,26 @@
 				<div class="ms-6 mt-5">
 					<h2 class="text-3xl font-semibold text-ink-gray-9">
 						{{ profile.data.full_name }}
+						<span
+							v-if="profile.data.is_plus"
+							class="ms-2 inline-flex align-middle items-center gap-1 rounded-md bg-surface-amber-2 px-2 py-1 text-xs font-semibold uppercase text-ink-amber-3"
+						>
+							<Crown class="size-3.5 stroke-1.5" />
+							Plus PRO
+						</span>
 					</h2>
 					<div class="text-base text-ink-gray-7 mt-1">
 						{{ profile.data.headline }}
+					</div>
+					<div
+						v-if="profile.data.is_plus"
+						class="mt-3 flex flex-wrap gap-2 text-xs text-ink-gray-7"
+					>
+						<span class="rounded-md border px-2 py-1">{{ __('Certificados') }}</span>
+						<span class="rounded-md border px-2 py-1">{{ __('TutorIA ilimitado') }}</span>
+						<span class="rounded-md border px-2 py-1">{{ __('IA motivacional') }}</span>
+						<span class="rounded-md border px-2 py-1">{{ __('Calendario') }}</span>
+						<span class="rounded-md border px-2 py-1">{{ __('Cursos propios') }}</span>
 					</div>
 					<div class="flex items-center gap-x-4 mt-2">
 						<Twitter
@@ -156,6 +173,7 @@ import { computed, inject, watch, ref, onMounted, watchEffect } from 'vue'
 import { sessionStore } from '@/stores/session'
 import {
 	BadgeCheckIcon,
+	Crown,
 	Edit,
 	Github,
 	Linkedin,
