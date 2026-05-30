@@ -6,64 +6,78 @@
 		}"
 	>
 		<template #body-header>
-			<div class="flex items-center justify-between mb-5">
-				<div class="text-2xl font-semibold leading-6 text-ink-gray-9">
-					{{ __('Edit Profile') }}
-				</div>
-				<div class="flex items-center gap-x-2">
-					<Badge v-if="isDirty" theme="orange">
-						{{ __('Not Saved') }}
-					</Badge>
-					<div class="pb-5 float-end">
-						<Button variant="solid" @click="saveProfile()">
-							{{ __('Save') }}
-						</Button>
+			<div class="flex items-center justify-between mb-6 pb-4 border-b border-surface-gray-2">
+				<div>
+					<div class="text-2xl font-bold leading-6 text-ink-gray-9">
+						{{ __('Editar Perfil') }}
 					</div>
+					<div class="text-sm text-ink-gray-5 mt-2">
+						Actualiza tu información personal y enlaces profesionales
+					</div>
+				</div>
+				<div class="flex items-center gap-x-3">
+					<Badge v-if="isDirty" theme="orange" class="animate-pulse">
+						{{ __('Sin guardar') }}
+					</Badge>
+					<Button variant="solid" @click="saveProfile()" class="shadow-sm">
+						{{ __('Guardar Cambios') }}
+					</Button>
 				</div>
 			</div>
 		</template>
 		<template #body-content>
 			<div class="text-base">
 				<div class="grid grid-cols-2 gap-10">
-					<div class="space-y-4">
-						<div class="space-y-4">
+					<div class="space-y-5">
+						<div class="bg-surface-gray-1 p-5 rounded-xl border border-surface-gray-2">
 							<Uploader
 								v-model="profile.image"
-								:label="__('Profile Image')"
+								:label="__('Foto de Perfil')"
 								:required="true"
 								shape="circle"
 							/>
+						</div>
 
+						<div class="grid grid-cols-2 gap-4">
 							<FormControl
 								v-model="profile.first_name"
-								:label="__('First Name')"
+								:label="__('Nombres')"
 								:required="true"
 							/>
 							<FormControl
 								v-model="profile.last_name"
-								:label="__('Last Name')"
+								:label="__('Apellidos')"
 								:required="true"
 							/>
-							<FormControl v-model="profile.headline" :label="__('Headline')" />
+						</div>
+						
+						<FormControl v-model="profile.headline" :label="__('Titular Profesional')" placeholder="Ej. Desarrollador Frontend, Estudiante de Ingeniería..." />
 
+						<div class="space-y-4 pt-2">
+							<div class="text-sm font-semibold text-ink-gray-8 border-b border-surface-gray-2 pb-2">Redes Sociales</div>
 							<FormControl
 								v-model="profile.linkedin"
-								:label="__('LinkedIn ID')"
+								:label="__('Perfil de LinkedIn')"
+								placeholder="https://linkedin.com/in/usuario"
 							/>
-							<FormControl v-model="profile.github" :label="__('GitHub ID')" />
+							<FormControl v-model="profile.github" :label="__('Usuario de GitHub')" placeholder="Ej. octocat" />
 							<FormControl
 								v-model="profile.twitter"
-								:label="__('Twitter ID')"
+								:label="__('Usuario de X (Twitter)')"
+								placeholder="Ej. usuario"
 							/>
 						</div>
 					</div>
-					<div class="space-y-4">
+					<div class="space-y-5">
 						<FormControl
 							v-model="profile.open_to"
 							type="select"
-							:options="[' ', 'Work', 'Hiring']"
-							:label="__('Open to')"
-							:placeholder="__('Looking for new work or hiring talent?')"
+							:options="[
+								{label: 'No especificar', value: ' '},
+								{label: 'Buscando oportunidades', value: 'Work'},
+								{label: 'Contratando talento', value: 'Hiring'}
+							]"
+							:label="__('Disponibilidad')"
 						/>
 						<FormControl
 							v-if="hasRankingPrivacyField"
@@ -75,13 +89,13 @@
 							"
 						/>
 						<Link
-							:label="__('Language')"
+							:label="__('Idioma Preferido')"
 							v-model="profile.language"
 							doctype="Language"
 						/>
-						<div>
-							<div class="mb-1.5 text-sm text-ink-gray-5">
-								{{ __('Bio') }}
+						<div class="pt-2">
+							<div class="mb-1.5 text-sm font-medium text-ink-gray-7">
+								{{ __('Acerca de ti (Biografía)') }}
 							</div>
 							<TextEditor
 								:fixedMenu="true"

@@ -121,7 +121,7 @@
 					<template #prefix>
 						<Edit class="w-4 h-4 stroke-1.5 text-ink-gray-7" />
 					</template>
-					{{ __('Edit Profile') }}
+					{{ __('Editar Perfil') }}
 				</Button>
 			</div>
 
@@ -265,16 +265,16 @@ const isEvaluatorOrModerator = () => {
 
 const getTabButtons = () => {
 	let buttons = [
-		{ label: __('About'), value: 'About' },
-		{ label: __('Certificates'), value: 'Certificates' },
+		{ label: __('Acerca de mí'), value: 'About' },
+		{ label: __('Certificados'), value: 'Certificates' },
 	]
 	if ($user.data?.is_moderator) {
 		buttons.push({ label: __('Roles'), value: 'Roles' })
 	}
 
 	if (currentUserHasHigherAccess() && isEvaluatorOrModerator()) {
-		buttons.push({ label: __('Slots'), value: 'Slots' })
-		buttons.push({ label: __('Schedule'), value: 'Schedule' })
+		buttons.push({ label: __('Horarios'), value: 'Slots' })
+		buttons.push({ label: __('Calendario'), value: 'Schedule' })
 	}
 	return buttons
 }
@@ -300,7 +300,7 @@ const navigateTo = (url) => {
 const breadcrumbs = computed(() => {
 	let crumbs = [
 		{
-			label: __('People'),
+			label: __('Directorio'),
 		},
 		{
 			label: profile.data?.full_name,

@@ -1,7 +1,7 @@
 <template>
 	<div class="mt-7 mb-10">
 		<h2 class="mb-3 text-lg font-semibold text-ink-gray-9">
-			{{ __('About') }}
+			{{ __('Acerca de mí') }}
 		</h2>
 		<div
 			v-if="profile.data.bio"
@@ -26,12 +26,12 @@
 			class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal"
 		></div>
 		<div v-else class="text-ink-gray-7 text-sm italic">
-			{{ __('No introduction') }}
+			{{ __('Aún no hay una biografía en este perfil.') }}
 		</div>
 	</div>
 	<div class="mt-7 mb-10" v-if="badges.data?.length">
 		<h2 class="mb-3 text-lg font-semibold text-ink-gray-9">
-			{{ __('Achievements') }}
+			{{ __('Insignias y Logros') }}
 		</h2>
 		<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
 			<div v-for="badge in badges.data">
@@ -72,7 +72,7 @@
 								</div>
 								<div class="flex flex-col">
 									<span class="text-xs text-ink-gray-7 font-medium mb-1">
-										{{ __('Issued on') }}:
+										{{ __('Obtenido el') }}:
 									</span>
 									{{ dayjs(badge.issued_on).format('DD MMM YYYY') }}
 								</div>
@@ -81,7 +81,7 @@
 									class="flex flex-col mt-4"
 								>
 									<span class="text-xs text-ink-gray-7 font-medium mb-1">
-										{{ __('Share on') }}:
+										{{ __('Compartir en') }}:
 									</span>
 									<div class="flex items-center gap-x-2">
 										<Button
@@ -164,7 +164,7 @@ const shareOnSocial = (badge, medium) => {
 		)}`
 	)
 	const summary = __(
-		'I am happy to announce that I earned the {0} badge on {1} at {2}'
+		'Me alegra compartir que he obtenido la insignia {0} el {1} en {2}'
 	).format(
 		badge.badge,
 		dayjs(badge.issued_on).format('DD MMM YYYY'),
