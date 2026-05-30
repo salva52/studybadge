@@ -51,7 +51,7 @@
 					<!-- Profile Header -->
 					<div class="p-4 border-b border-surface-gray-2 bg-surface-gray-1 flex items-center gap-3">
 						<img v-if="userResource.data?.user_image" :src="userResource.data.user_image" class="w-10 h-10 rounded-full object-cover shadow-sm flex-shrink-0 border border-surface-gray-2" />
-						<img v-else src="/assets/lms/images/instructor.png" class="w-10 h-10 rounded-full object-cover shadow-sm flex-shrink-0 border border-surface-gray-2 bg-surface-gray-2 p-0.5" />
+						<img v-else :src="'/assets/lms/images/instructor.png'" class="w-10 h-10 rounded-full object-cover shadow-sm flex-shrink-0 border border-surface-gray-2 bg-surface-gray-2 p-0.5" />
 						<div class="flex-1 min-w-0">
 							<div class="text-sm font-bold text-ink-gray-9 truncate">
 								{{ userResource.data?.full_name ? convertToTitleCase(userResource.data?.full_name) : 'Usuario' }}
