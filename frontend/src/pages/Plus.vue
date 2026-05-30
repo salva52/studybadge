@@ -1,122 +1,389 @@
 <template>
-	<div>
+	<div class="min-h-screen bg-surface-gray-2 pb-12">
 		<header
-			class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-white px-3 py-2.5 sm:px-5"
+			class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-white px-3 py-2.5 sm:px-5 shadow-sm"
 		>
 			<Breadcrumbs class="h-7" :items="breadcrumbs" />
-			<Badge v-if="billing.data?.active" theme="green">
+			<Badge v-if="billing.data?.active" theme="green" class="shadow-sm">
+				<Sparkles class="mr-1.5 size-3 inline-block align-text-bottom" />
 				{{ __('Plus activo') }}
 			</Badge>
 		</header>
 
-		<div class="mx-auto max-w-6xl px-5 py-8">
-			<div class="grid gap-8 lg:grid-cols-[1fr_360px]">
-				<section class="space-y-6">
-					<div class="flex items-center gap-3">
-						<div class="rounded-lg bg-surface-amber-2 p-2 text-ink-amber-3">
-							<Crown class="size-6 stroke-1.5" />
-						</div>
-						<div>
-							<h1 class="text-3xl font-semibold text-ink-gray-9">
-								StudyBadge Plus
-							</h1>
-							<p class="mt-1 text-base text-ink-gray-7">
-								{{ __('Facturacion, certificados e IA sin limites.') }}
-							</p>
-						</div>
+		<!-- Hero Section -->
+		<div class="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-12 px-5 sm:py-16 sm:px-8 border-b border-gray-700 shadow-inner relative overflow-hidden">
+			<!-- Subtle background decoration -->
+			<div class="absolute -top-24 -right-24 size-96 bg-blue-500 opacity-20 blur-3xl rounded-full"></div>
+			<div class="absolute top-1/2 -left-24 size-64 bg-amber-500 opacity-20 blur-3xl rounded-full"></div>
+			
+			<div class="mx-auto max-w-6xl relative z-10">
+				<div class="flex flex-col items-center text-center gap-4">
+					<div class="rounded-2xl bg-white/10 p-4 ring-1 ring-white/20 backdrop-blur-md shadow-lg">
+						<Crown class="size-10 stroke-1.5 text-amber-400" />
 					</div>
+					<div>
+						<h1 class="text-4xl sm:text-5xl font-bold tracking-tight">
+							StudyBadge <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-200">Plus</span>
+						</h1>
+						<p class="mt-4 text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto font-medium">
+							{{ __('Impulsa tu carrera al siguiente nivel con facturación, certificados e Inteligencia Artificial sin límites.') }}
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
 
-					<div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-						<div
-							v-for="benefit in benefits"
-							:key="benefit.label"
-							class="flex items-start gap-3 rounded-md border bg-surface-white p-4"
-						>
-							<component
-								:is="benefit.icon"
-								class="mt-0.5 size-5 shrink-0 stroke-1.5 text-ink-blue-3"
-							/>
-							<div>
-								<div class="font-medium text-ink-gray-9">
-									{{ benefit.label }}
+		<div class="mx-auto max-w-6xl px-5 py-10">
+			<div class="grid gap-10 lg:grid-cols-[1fr_380px] items-start">
+				
+				<!-- Main Content -->
+				<section class="space-y-10">
+					
+					<!-- Beneficios Comerciales -->
+					<div>
+						<h2 class="text-2xl font-bold text-ink-gray-9 mb-6 flex items-center gap-2">
+							<Sparkles class="size-6 text-amber-500" />
+							{{ __('Beneficios exclusivos') }}
+						</h2>
+						<div class="grid gap-4 sm:grid-cols-2">
+							<div
+								v-for="benefit in benefits"
+								:key="benefit.label"
+								class="group flex items-start gap-4 rounded-xl border border-gray-200 bg-surface-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-blue-200"
+							>
+								<div class="rounded-lg bg-blue-50 p-3 group-hover:bg-blue-100 transition-colors">
+									<component
+										:is="benefit.icon"
+										class="size-6 shrink-0 stroke-1.5 text-blue-600"
+									/>
 								</div>
-								<div class="mt-1 text-sm leading-5 text-ink-gray-6">
-									{{ benefit.description }}
+								<div>
+									<div class="font-semibold text-ink-gray-9 text-base">
+										{{ benefit.label }}
+									</div>
+									<div class="mt-1 text-sm leading-relaxed text-ink-gray-6">
+										{{ benefit.description }}
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
 
+					<!-- Facturación y Suscripción -->
 					<div
 						v-if="billing.data?.subscription"
-						class="rounded-md border bg-surface-white p-5"
+						class="rounded-xl border border-gray-200 bg-surface-white p-6 sm:p-8 shadow-sm transition-all"
 					>
-						<div class="flex flex-wrap items-center justify-between gap-3">
+						<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-5">
 							<div>
-								<h2 class="text-lg font-semibold text-ink-gray-9">
-									{{ __('Facturacion') }}
+								<h2 class="text-xl font-bold text-ink-gray-9 flex items-center gap-2">
+									<CreditCard class="size-5 text-gray-500" />
+									{{ __('Tu Suscripción') }}
 								</h2>
 								<p class="mt-1 text-sm text-ink-gray-6">
-									{{ __('Gestiona tu plan Plus y tus pagos recurrentes.') }}
+									{{ __('Gestiona tu plan y tus pagos de forma segura.') }}
 								</p>
 							</div>
-							<Badge :theme="billing.data.active ? 'green' : 'gray'">
-								{{ subscription.status }}
+							<Badge :theme="billing.data.active ? 'green' : 'gray'" class="w-fit px-3 py-1 text-sm">
+								<CheckCircle2 v-if="billing.data.active" class="mr-1 size-4 inline-block align-text-bottom" />
+								{{ formatSubscriptionStatus(subscription.status) }}
 							</Badge>
 						</div>
 
-						<div class="mt-5 grid gap-3 sm:grid-cols-3">
-							<div class="rounded-md bg-surface-gray-2 p-4">
-								<div class="text-xs font-medium uppercase text-ink-gray-5">
-									{{ __('Proximo cobro') }}
+						<div class="mt-6 grid gap-4 sm:grid-cols-3">
+							<div class="rounded-xl bg-gray-50 p-5 border border-gray-100">
+								<div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
+									<CalendarDays class="size-4" />
+									{{ __('Próximo cobro') }}
 								</div>
-								<div class="mt-2 text-sm font-semibold text-ink-gray-9">
+								<div class="mt-2 text-lg font-bold text-ink-gray-9">
 									{{ formatDate(subscription.next_payment_date) }}
 								</div>
 							</div>
-							<div class="rounded-md bg-surface-gray-2 p-4">
-								<div class="text-xs font-medium uppercase text-ink-gray-5">
-									{{ __('Metodo de pago') }}
+							<div class="rounded-xl bg-gray-50 p-5 border border-gray-100">
+								<div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
+									<CreditCard class="size-4" />
+									{{ __('Método de pago') }}
 								</div>
-								<div class="mt-2 text-sm font-semibold text-ink-gray-9">
+								<div class="mt-2 text-lg font-bold text-ink-gray-9 truncate">
 									{{ paymentMethodLabel }}
 								</div>
 							</div>
-							<div class="rounded-md bg-surface-gray-2 p-4">
-								<div class="text-xs font-medium uppercase text-ink-gray-5">
+							<div class="rounded-xl bg-gray-50 p-5 border border-gray-100">
+								<div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gray-500">
+									<Award class="size-4" />
 									{{ __('Plan') }}
 								</div>
-								<div class="mt-2 text-sm font-semibold text-ink-gray-9">
-									{{ formattedPrice }} / {{ __('mes') }}
+								<div class="mt-2 text-lg font-bold text-ink-gray-9">
+									{{ formattedPrice }} <span class="text-sm font-medium text-gray-500">/ {{ __('mes') }}</span>
 								</div>
 							</div>
 						</div>
 
 						<div
 							v-if="subscription.cancel_at_period_end"
-							class="mt-5 rounded-md border border-outline-amber-2 bg-surface-amber-1 p-4 text-sm text-ink-gray-8"
+							class="mt-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900"
 						>
-							<div class="font-medium">
-								{{ __('Tu plan se cancelara al final del periodo.') }}
-							</div>
-							<div class="mt-1">
-								{{
-									__('Mantienes Plus hasta {0}.', [
-										formatDate(subscription.cancel_scheduled_for),
-									])
-								}}
+							<XCircle class="mt-0.5 size-5 shrink-0 text-amber-600" />
+							<div>
+								<div class="font-bold">
+									{{ __('Cancelación programada') }}
+								</div>
+								<div class="mt-1">
+									{{
+										__('Tu suscripción se cancelará automáticamente, pero mantienes los beneficios Plus hasta el {0}.', [
+											formatDate(subscription.cancel_scheduled_for),
+										])
+									}}
+								</div>
 							</div>
 						</div>
 
-						<div class="mt-5 flex flex-wrap gap-3">
+						<div class="mt-8 flex flex-wrap gap-3">
 							<Button
 								v-if="billing.data.active && !subscription.cancel_at_period_end"
 								variant="outline"
+								class="hover:bg-gray-50"
 								@click="showPaymentMethodForm"
 							>
 								<template #prefix>
 									<CreditCard class="size-4 stroke-1.5" />
 								</template>
+								{{ __('Actualizar tarjeta') }}
+							</Button>
+							<Button
+								v-if="billing.data.active && !subscription.cancel_at_period_end"
+								variant="ghost"
+								class="text-red-600 hover:bg-red-50"
+								:loading="cancelResource.loading"
+								@click="requestCancellation"
+							>
+								{{ __('Cancelar suscripción') }}
+							</Button>
+							<Button
+								v-if="billing.data.active && subscription.cancel_at_period_end"
+								variant="solid"
+								theme="blue"
+								class="w-full sm:w-auto shadow-sm"
+								:loading="reactivateResource.loading"
+								@click="reactivateSubscription"
+							>
+								<template #prefix>
+									<RefreshCcw class="size-4 stroke-1.5" />
+								</template>
+								{{ __('Reactivar mi Plus') }}
+							</Button>
+						</div>
+
+						<div v-if="cardFormVisible" class="mt-8 overflow-hidden rounded-xl border border-gray-200 shadow-sm">
+							<div class="bg-gray-50 px-6 py-4 flex items-center justify-between border-b border-gray-200">
+								<div>
+									<div class="font-bold text-ink-gray-9 flex items-center gap-2">
+										<ShieldCheck class="size-5 text-green-600" />
+										{{ __('Actualizar método de pago') }}
+									</div>
+									<div class="mt-1 text-xs text-ink-gray-6">
+										{{ __('Procesado de forma segura por Mercado Pago') }}
+									</div>
+								</div>
+								<Button variant="ghost" class="shrink-0" @click="hidePaymentMethodForm">
+									{{ __('Cerrar') }}
+								</Button>
+							</div>
+							<div class="p-6">
+								<div
+									v-if="cardFormLoading"
+									class="flex justify-center py-8 text-sm text-ink-gray-6 animate-pulse"
+								>
+									{{ __('Estableciendo conexión segura...') }}
+								</div>
+								<div id="studybadge-mp-card-form"></div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Recibos -->
+					<div class="rounded-xl border border-gray-200 bg-surface-white p-6 sm:p-8 shadow-sm">
+						<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-5">
+							<div>
+								<h2 class="text-xl font-bold text-ink-gray-9 flex items-center gap-2">
+									<Download class="size-5 text-gray-500" />
+									{{ __('Historial de Recibos') }}
+								</h2>
+								<p class="mt-1 text-sm text-ink-gray-6">
+									{{ __('Descarga tus comprobantes de pago en PDF.') }}
+								</p>
+							</div>
+							<Button
+								variant="outline"
+								class="w-fit"
+								:loading="billing.loading"
+								@click="billing.reload()"
+							>
+								<template #prefix>
+									<RefreshCcw class="size-4 stroke-1.5" />
+								</template>
+								{{ __('Actualizar') }}
+							</Button>
+						</div>
+
+						<div v-if="receipts.length" class="mt-6 divide-y divide-gray-100 rounded-lg border border-gray-100 bg-gray-50/50">
+							<div
+								v-for="receipt in receipts"
+								:key="receipt.name"
+								class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 hover:bg-gray-50 transition-colors"
+							>
+								<div>
+									<div class="font-bold text-ink-gray-9">
+										{{ receipt.receipt_number || receipt.name }}
+									</div>
+									<div class="mt-1 flex items-center gap-2 text-sm text-ink-gray-6">
+										<CalendarDays class="size-3.5" />
+										{{ formatDate(receipt.paid_at || receipt.date_created) }}
+										<span v-if="receipt.status" class="inline-flex items-center rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-800">
+											{{ receipt.status }}
+										</span>
+									</div>
+								</div>
+								<div class="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
+									<div class="text-base font-bold text-ink-gray-9">
+										{{ formatMoney(receipt.amount, receipt.currency) }}
+									</div>
+									<Button variant="outline" class="shrink-0 bg-white" @click="downloadReceipt(receipt)">
+										<template #prefix>
+											<Download class="size-4 stroke-1.5" />
+										</template>
+										{{ __('PDF') }}
+									</Button>
+								</div>
+							</div>
+						</div>
+						<div
+							v-else
+							class="mt-6 flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-gray-50 py-12 text-center"
+						>
+							<div class="rounded-full bg-gray-100 p-3 mb-3">
+								<Download class="size-6 text-gray-400" />
+							</div>
+							<div class="text-sm font-medium text-ink-gray-9">
+								{{ __('Aún no hay recibos') }}
+							</div>
+							<div class="text-sm text-ink-gray-5 mt-1">
+								{{ __('Aquí aparecerán tus comprobantes cuando realices pagos.') }}
+							</div>
+						</div>
+					</div>
+
+					<!-- Soporte / Reembolsos -->
+					<div class="rounded-xl border border-blue-100 bg-blue-50/50 p-6 sm:p-8">
+						<div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+							<div class="rounded-full bg-blue-100 p-4 shrink-0">
+								<LifeBuoy class="size-8 stroke-1.5 text-blue-600" />
+							</div>
+							<div>
+								<h2 class="text-xl font-bold text-ink-gray-9">
+									{{ __('¿Necesitas ayuda? Estamos para ti') }}
+								</h2>
+								<p class="mt-2 text-sm leading-relaxed text-ink-gray-7 max-w-2xl">
+									{{
+										__(
+											'Ya sea un problema técnico, una consulta sobre tu suscripción o una solicitud de reembolso, nuestro equipo de soporte prioritario resolverá tus dudas rápidamente.'
+										)
+									}}
+								</p>
+								<a
+									class="mt-4 inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-bold text-blue-600 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors"
+									:href="`mailto:${billing.data?.support_email || 'soporte@studybadge.com'}`"
+								>
+									<Mail class="size-4" />
+									{{ __('Contactar Soporte') }}
+								</a>
+							</div>
+						</div>
+					</div>
+				</section>
+
+				<!-- Aside CTA -->
+				<aside class="sticky top-24 h-fit rounded-2xl border border-gray-200 bg-surface-white p-6 sm:p-8 shadow-xl shadow-gray-200/40">
+					<!-- Mercado Pago Badge -->
+					<div class="mb-6 flex justify-center">
+						<div class="flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 border border-blue-100">
+							<ShieldCheck class="size-4" />
+							{{ __('Pagos 100% seguros con Mercado Pago') }}
+						</div>
+					</div>
+
+					<div class="text-center mb-6">
+						<div class="text-sm font-bold uppercase tracking-wider text-amber-500 mb-2">
+							{{ __('Membresía Plus') }}
+						</div>
+						<div class="flex items-end justify-center gap-1">
+							<div class="text-5xl font-black text-ink-gray-9 tracking-tight">
+								{{ formattedPrice }}
+							</div>
+							<div class="pb-2 text-base font-medium text-gray-500">
+								/ {{ __('mes') }}
+							</div>
+						</div>
+					</div>
+
+					<div
+						v-if="subscription?.status"
+						class="mb-6 rounded-xl bg-gray-50 p-4 text-center border border-gray-100 shadow-inner"
+					>
+						<div class="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-1">{{ __('Estado Actual') }}</div>
+						<div class="font-bold text-lg text-ink-gray-9 flex items-center justify-center gap-2">
+							<span class="relative flex h-3 w-3" v-if="subscription.status === 'authorized'">
+								<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+								<span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+							</span>
+							{{ formatSubscriptionStatus(subscription.status) }}
+						</div>
+					</div>
+
+					<Button
+						class="w-full py-6 text-lg font-bold shadow-md transition-transform hover:-translate-y-0.5"
+						:variant="billing.data?.active ? 'outline' : 'solid'"
+						theme="blue"
+						size="lg"
+						:loading="activating"
+						:disabled="billing.data?.active"
+						@click="activatePlus"
+					>
+						<template #prefix>
+							<CreditCard class="size-5 mr-1" />
+						</template>
+						{{
+							billing.data?.active
+								? __('Tu plan ya está activo')
+								: __('Suscribirme ahora')
+						}}
+					</Button>
+
+					<Button
+						v-if="subscription?.init_point && !billing.data?.active"
+						class="mt-3 w-full py-5 font-bold"
+						variant="outline"
+						@click="openExistingCheckout"
+					>
+						{{ __('Continuar pago pendiente') }}
+					</Button>
+
+					<div class="mt-6 flex items-start gap-3 rounded-lg bg-amber-50 p-3 text-xs leading-relaxed text-amber-900 border border-amber-100">
+						<Info class="size-4 shrink-0 mt-0.5 text-amber-600" />
+						<p>
+							{{
+								__(
+									'Cancela cuando quieras. Sin compromisos a largo plazo. Todos tus pagos son encriptados y procesados mediante la tecnología segura de Mercado Pago.'
+								)
+							}}
+						</p>
+					</div>
+				</aside>
+			</div>
+		</div>
+	</div>
+</template>
 								{{ __('Cambiar metodo de pago') }}
 							</Button>
 							<Button
@@ -328,6 +595,9 @@ import {
 	RefreshCcw,
 	Sparkles,
 	XCircle,
+	ShieldCheck,
+	Mail,
+	Info,
 } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
 
@@ -584,6 +854,14 @@ function formatMoney(amount, currency) {
 		return `S/ ${Number(amount || 0).toFixed(2)}`
 	}
 	return `${currency} ${Number(amount || 0).toFixed(2)}`
+}
+
+function formatSubscriptionStatus(status) {
+	if (!status) return ''
+	if (status === 'authorized' || status === 'active') return __('Activa 🌟')
+	if (status === 'pending') return __('Pendiente de pago')
+	if (status === 'cancelled') return __('Cancelada')
+	return status.charAt(0).toUpperCase() + status.slice(1)
 }
 
 onBeforeUnmount(() => {
