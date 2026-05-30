@@ -10,7 +10,7 @@
 				</div>
 				<div class="hero-content">
 					<div class="hero-text">
-						<div class="hero-breadcrumb">
+						<div v-if="!isDashboard" class="hero-breadcrumb">
 							<router-link :to="{ name: 'Study' }" class="hero-breadcrumb-link">
 								{{ __('Estudio IA') }}
 							</router-link>
@@ -2088,6 +2088,10 @@ const ExerciseList = defineComponent({
 	.s-panel-header {
 		flex-direction: column;
 		gap: 0.75rem;
+		align-items: stretch;
+	}
+	.s-panel-header > *:last-child {
+		width: 100%;
 	}
 	.lesson-row {
 		flex-direction: column;
@@ -2133,8 +2137,7 @@ const ExerciseList = defineComponent({
 		gap: 0.5rem;
 	}
 	.course-progress-ring {
-		width: 40px;
-		height: 40px;
+		display: none;
 	}
 	.course-actions {
 		flex-direction: column;
@@ -2207,8 +2210,20 @@ const ExerciseList = defineComponent({
 	}
 	/* Tutor expand */
 	.tutor-panel.is-expanded {
-		width: 96vw;
-		height: 90vh;
+		top: 0 !important;
+		left: 0 !important;
+		transform: none !important;
+		width: 100vw !important;
+		height: 100dvh !important;
+		max-width: none !important;
+		border-radius: 0 !important;
+		z-index: 1000 !important;
+	}
+	.tutor-panel.is-expanded .chat-box {
+		height: 0;
+	}
+	.tutor-panel.is-expanded .chat-input-row {
+		padding-bottom: env(safe-area-inset-bottom, 1rem) !important;
 	}
 	/* Twin grid */
 	.twin-grid {
