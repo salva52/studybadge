@@ -1,5 +1,5 @@
 <template>
-	<div class="space-y-10">
+	<div class="space-y-8">
 
 		<!-- ═══ 1. STAT CARDS (TU PROGRESO COMO ADMIN) ═══ -->
 		<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">

@@ -34,13 +34,17 @@
 					<!-- Mini Stats in Hero -->
 					<div class="hidden md:flex gap-5 items-center" v-if="!isAdmin">
 						<div class="home-hero-stat cursor-pointer hover:scale-105 transition-transform" @click="showStreakModal = true">
-							<div class="text-4xl font-black text-amber-400 drop-shadow-md">{{ streakInfo.data?.current_streak || 0 }}</div>
-							<div class="text-[10px] uppercase tracking-widest text-blue-200/70 font-bold mt-1">{{ __('Racha') }} 🔥</div>
+							<div class="text-3xl font-black text-amber-400 drop-shadow-md">{{ streakInfo.data?.current_streak || 0 }}</div>
+							<div class="flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-widest text-blue-200/70 font-bold mt-1">
+								<Flame class="size-3 text-amber-400" /> {{ __('Racha') }}
+							</div>
 						</div>
-						<div class="w-px h-14 bg-white/10"></div>
+						<div class="w-px h-10 bg-white/10"></div>
 						<div class="home-hero-stat">
-							<div class="text-4xl font-black text-white drop-shadow-md">{{ evalCount || 0 }}</div>
-							<div class="text-[10px] uppercase tracking-widest text-blue-200/70 font-bold mt-1">{{ __('Evaluaciones') }} 📝</div>
+							<div class="text-3xl font-black text-white drop-shadow-md">{{ evalCount || 0 }}</div>
+							<div class="flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-widest text-blue-200/70 font-bold mt-1">
+								<ClipboardCheck class="size-3 text-blue-300" /> {{ __('Evaluaciones') }}
+							</div>
 						</div>
 					</div>
 				</div>
@@ -65,6 +69,7 @@ import { computed, inject, onMounted, ref } from 'vue'
 import { call, createResource, usePageMeta } from 'frappe-ui'
 import { sessionStore } from '@/stores/session'
 import { useRouter } from 'vue-router'
+import { Flame, ClipboardCheck } from 'lucide-vue-next'
 import StudentHome from '@/pages/Home/StudentHome.vue'
 import AdminHome from '@/pages/Home/AdminHome.vue'
 import Streak from '@/pages/Home/Streak.vue'

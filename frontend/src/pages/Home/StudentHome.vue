@@ -1,5 +1,5 @@
 <template>
-	<div class="space-y-10">
+	<div class="space-y-8">
 
 		<!-- ═══ 1. STAT CARDS ═══ -->
 		<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -21,15 +21,15 @@
 		<div v-if="continueCourse" class="sh-continue-card overflow-hidden">
 			<div class="flex flex-col md:flex-row">
 				<!-- Image Side -->
-				<div class="w-full md:w-2/5 h-52 md:h-auto relative overflow-hidden">
+				<div class="w-full md:w-2/5 h-48 md:h-auto relative overflow-hidden">
 					<div
 						class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
 						:style="continueCourse.image
-							? `background-image: url('${encodeURI(continueCourse.image)}')`
+							? `background-image: url('${continueCourse.image}')`
 							: 'background: linear-gradient(135deg, #061B49, #0b2f73, #0d6efd)'
 						"
 					></div>
-					<div class="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent md:bg-gradient-to-l md:from-transparent md:to-transparent"></div>
+					<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent md:bg-gradient-to-r md:from-black/10 md:to-transparent"></div>
 					<!-- Progress overlay on mobile -->
 					<div class="absolute bottom-0 left-0 right-0 md:hidden">
 						<div class="h-1 bg-black/20">
@@ -38,12 +38,12 @@
 					</div>
 				</div>
 				<!-- Content Side -->
-				<div class="w-full md:w-3/5 p-7 sm:p-9 flex flex-col justify-center sh-card-bg">
-					<div class="flex items-center gap-2 text-xs font-extrabold uppercase tracking-widest mb-3" style="color: var(--sb-primary);">
-						<PlayCircle class="size-4" /> {{ __('Continúa donde lo dejaste') }}
+				<div class="w-full md:w-3/5 p-6 sm:p-7 flex flex-col justify-center sh-card-bg">
+					<div class="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-widest mb-2" style="color: var(--sb-primary);">
+						<PlayCircle class="size-3.5" /> {{ __('Continúa donde lo dejaste') }}
 					</div>
-					<h2 class="text-xl sm:text-2xl font-extrabold sh-text-primary mb-2 leading-tight">{{ continueCourse.title }}</h2>
-					<p class="sh-text-muted text-sm mb-6 line-clamp-2 leading-relaxed">{{ continueCourse.short_introduction }}</p>
+					<h2 class="text-xl font-extrabold sh-text-primary mb-2 leading-tight">{{ continueCourse.title }}</h2>
+					<p class="sh-text-muted text-sm mb-5 line-clamp-2 leading-relaxed">{{ continueCourse.short_introduction }}</p>
 
 					<!-- Progress Bar (desktop) -->
 					<div class="hidden md:block mb-6">
@@ -129,14 +129,14 @@
 					<div class="sh-section-icon bg-amber-500/10 text-amber-500"><Award class="size-5" /></div>
 					{{ __('Certificados y Logros') }}
 				</h3>
-				<div class="sh-card p-8 text-center">
+				<div class="sh-card p-6 text-center">
 					<div class="sh-empty-icon mx-auto mb-4" :class="certCount ? 'bg-amber-500/10 text-amber-500' : ''">
-						<Award class="size-9" />
+						<Award class="size-8" />
 					</div>
-					<h4 class="font-bold text-lg sh-text-primary mb-2">
+					<h4 class="font-bold text-base sh-text-primary mb-2">
 						{{ certCount ? __('Tienes {0} certificado(s)').replace('{0}', certCount) : __('Aún no tienes certificados') }}
 					</h4>
-					<p class="sh-text-muted text-sm max-w-sm mx-auto mb-6 leading-relaxed">
+					<p class="sh-text-muted text-sm max-w-sm mx-auto mb-5 leading-relaxed">
 						{{ __('Completa cursos y aprueba evaluaciones para obtener certificados verificables.') }}
 					</p>
 					<router-link
@@ -157,16 +157,16 @@
 				<div class="sh-plus-promo relative overflow-hidden h-full flex flex-col">
 					<div class="absolute -top-16 -right-16 w-48 h-48 bg-blue-500/15 rounded-full blur-3xl"></div>
 					<div class="absolute bottom-0 left-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
-					<div class="relative z-10 p-7 flex flex-col flex-1">
-						<Crown class="size-8 text-amber-400 mb-4 drop-shadow-md" />
-						<h4 class="font-extrabold text-xl text-white mb-2">StudyBadge Plus</h4>
-						<p class="text-blue-100/70 text-sm mb-6 flex-1 leading-relaxed">
+					<div class="relative z-10 p-6 flex flex-col flex-1">
+						<Crown class="size-7 text-amber-400 mb-3 drop-shadow-md" />
+						<h4 class="font-extrabold text-lg text-white mb-2">StudyBadge Plus</h4>
+						<p class="text-blue-100/70 text-sm mb-5 flex-1 leading-relaxed">
 							{{ __('Tutor IA ilimitado, certificados, herramientas de estudio premium y más.') }}
 						</p>
-						<ul class="space-y-2.5 mb-7 text-sm font-medium text-blue-50/90">
-							<li class="flex items-center gap-2.5"><CheckCircle2 class="size-4 text-amber-400 shrink-0" /> {{ __('Tutor IA ilimitado') }}</li>
-							<li class="flex items-center gap-2.5"><CheckCircle2 class="size-4 text-amber-400 shrink-0" /> {{ __('Generación de cursos') }}</li>
-							<li class="flex items-center gap-2.5"><CheckCircle2 class="size-4 text-amber-400 shrink-0" /> {{ __('Certificados incluidos') }}</li>
+						<ul class="space-y-2 mb-6 text-sm font-medium text-blue-50/90">
+							<li class="flex items-center gap-2"><CheckCircle2 class="size-3.5 text-amber-400 shrink-0" /> {{ __('Tutor IA ilimitado') }}</li>
+							<li class="flex items-center gap-2"><CheckCircle2 class="size-3.5 text-amber-400 shrink-0" /> {{ __('Generación de cursos') }}</li>
+							<li class="flex items-center gap-2"><CheckCircle2 class="size-3.5 text-amber-400 shrink-0" /> {{ __('Certificados incluidos') }}</li>
 						</ul>
 						<router-link :to="{ name: 'Plus' }" class="sh-btn-gold w-full">
 							{{ billing.data?.active ? __('Gestionar mi Plus') : __('Desbloquear Plus') }}
