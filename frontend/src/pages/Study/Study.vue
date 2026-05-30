@@ -232,7 +232,7 @@
 						<div class="form-grid">
 							<FormControl v-model="draft.title" :label="__('Nombre del curso')" :placeholder="__('Ej. Parcial de cálculo')" />
 							<FormControl v-model="draft.academic_context" :label="__('Curso o contexto')" :placeholder="__('Ej. Universidad, curso, ciclo')" />
-							<FormControl v-model="draft.exam_date" type="date" :label="__('Fecha objetivo')" />
+							<FormControl v-model="draft.exam_date" type="date" :label="__('Fecha objetivo (Opcional)')" />
 							<div>
 								<label class="s-label">{{ __('Nivel') }}</label>
 								<select v-model="draft.student_level" class="s-select">
