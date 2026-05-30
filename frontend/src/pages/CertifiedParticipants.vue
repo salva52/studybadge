@@ -15,7 +15,7 @@
 		</template>
 	</LayoutHeader>
 
-	<div class="cm-page mx-auto flex min-h-0 w-full flex-1 flex-col pb-12">
+	<div class="cm-page mx-auto flex min-h-0 w-full flex-1 flex-col pb-12 mt-12 md:mt-14">
 		<!-- ═══ HERO SECTION ═══ -->
 		<div class="cm-hero relative overflow-hidden px-6 py-14 sm:py-20 mb-8">
 			<div class="cm-hero-glow-1"></div>
