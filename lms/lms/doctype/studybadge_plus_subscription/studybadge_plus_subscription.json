@@ -30,6 +30,8 @@
   "last_modified",
   "last_synced_at",
   "last_invoice_sync_at",
+  "welcome_email_sent",
+  "welcome_email_sent_at",
   "raw_response"
  ],
  "fields": [
@@ -167,6 +169,17 @@
    "fieldname": "last_invoice_sync_at",
    "fieldtype": "Datetime",
    "label": "Last Invoice Sync At"
+  },
+  {
+   "default": "0",
+   "fieldname": "welcome_email_sent",
+   "fieldtype": "Check",
+   "label": "Welcome Email Sent"
+  },
+  {
+   "fieldname": "welcome_email_sent_at",
+   "fieldtype": "Datetime",
+   "label": "Welcome Email Sent At"
   },
   {
    "fieldname": "raw_response",

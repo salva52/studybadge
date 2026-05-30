@@ -220,6 +220,66 @@ def _find_subscription(mp_subscription: dict):
 		return frappe.new_doc("StudyBadge Plus Subscription")
 
 
+def _get_card_details(mp_subscription: dict) -> dict:
+	card = mp_subscription.get("card") if isinstance(mp_subscription.get("card"), dict) else {}
+	payment_method = (
+		mp_subscription.get("payment_method")
+		if isinstance(mp_subscription.get("payment_method"), dict)
+		else {}
+	)
+	payment_method_id = (
+		mp_subscription.get("payment_method_id")
+		or card.get("payment_method_id")
+		or payment_method.get("id")
+	)
+	return {
+		"payment_method_id": payment_method_id,
+		"payment_method_name": payment_method.get("name") or payment_method_id,
+		"card_last_four": card.get("last_four_digits") or card.get("last_four"),
+		"card_brand": card.get("payment_method_id") or payment_method_id,
+	}
+
+
+def _send_plus_welcome_email(subscription, settings=None):
+	if cint(getattr(subscription, "welcome_email_sent", 0)):
+		return
+	if subscription.status not in PLUS_ACTIVE_STATUSES:
+		return
+
+	settings = settings or _get_settings()
+	member_name = frappe.db.get_value("User", subscription.member, "full_name") or subscription.member
+	next_payment = (
+		format_datetime(subscription.next_payment_date) if subscription.next_payment_date else _("pending")
+	)
+	try:
+		frappe.sendmail(
+			recipients=[subscription.member],
+			subject=_("Welcome to StudyBadge Plus"),
+			message=frappe.render_template(
+				"""
+				<p>Hola {{ member_name }},</p>
+				<p>Tu suscripcion a <strong>{{ plan_name }}</strong> ya esta activa.</p>
+				<p>Desde ahora tienes certificados desbloqueados, TutorIA ilimitado e insignia Plus/PRO en tu perfil.</p>
+				<p>Proximo cobro: <strong>{{ next_payment }}</strong></p>
+				<p>Puedes gestionar tu plan desde <a href="{{ billing_url }}">StudyBadge Plus</a>.</p>
+				<p>Gracias por ser parte de StudyBadge.</p>
+				""",
+				{
+					"member_name": member_name,
+					"plan_name": settings.plan_name or "StudyBadge Plus",
+					"next_payment": next_payment,
+					"billing_url": f"{get_lms_path_url(settings)}/plus",
+				},
+			),
+			now=True,
+		)
+		subscription.welcome_email_sent = 1
+		subscription.welcome_email_sent_at = now_datetime()
+		subscription.save(ignore_permissions=True)
+	except Exception:
+		frappe.log_error(frappe.get_traceback(), "StudyBadge Plus Welcome Email Failed")
+
+
 def _sync_subscription(mp_subscription: dict):
 	doc = _find_subscription(mp_subscription)
 	if not doc:
@@ -235,8 +295,7 @@ def _sync_subscription(mp_subscription: dict):
 		doc.member = payer_email
 
 	status = _normalize_status(mp_subscription.get("status"))
-	card = mp_subscription.get("card") if isinstance(mp_subscription.get("card"), dict) else {}
-	payment_method_id = mp_subscription.get("payment_method_id") or card.get("payment_method_id")
+	card_details = _get_card_details(mp_subscription)
 	doc.update(
 		{
 			"status": status,
@@ -245,10 +304,10 @@ def _sync_subscription(mp_subscription: dict):
 			"init_point": mp_subscription.get("init_point"),
 			"amount": auto_recurring.get("transaction_amount"),
 			"currency": auto_recurring.get("currency_id"),
-			"payment_method_id": payment_method_id,
-			"payment_method_name": mp_subscription.get("payment_method_id") or payment_method_id,
-			"card_last_four": card.get("last_four_digits") or card.get("last_four"),
-			"card_brand": card.get("payment_method_id") or payment_method_id,
+			"payment_method_id": card_details.get("payment_method_id"),
+			"payment_method_name": card_details.get("payment_method_name"),
+			"card_last_four": card_details.get("card_last_four"),
+			"card_brand": card_details.get("card_brand"),
 			"next_payment_date": _parse_mp_datetime(mp_subscription.get("next_payment_date")),
 			"date_created": _parse_mp_datetime(mp_subscription.get("date_created")),
 			"last_modified": _parse_mp_datetime(mp_subscription.get("last_modified")),
@@ -259,7 +318,23 @@ def _sync_subscription(mp_subscription: dict):
 	if status in {"cancelled", "canceled", "expired", "rejected"}:
 		doc.cancel_at_period_end = 0
 	doc.save(ignore_permissions=True)
+	_send_plus_welcome_email(doc)
 	return doc
+
+
+def _refresh_subscription_from_mercadopago(subscription, settings=None):
+	if not subscription or not subscription.mp_preapproval_id:
+		return subscription
+	settings = settings or _get_settings()
+	try:
+		mp_subscription = _fetch_mp_subscription(subscription.mp_preapproval_id, settings=settings)
+		return _sync_subscription(mp_subscription) or subscription
+	except Exception:
+		frappe.log_error(
+			frappe.get_traceback(),
+			f"StudyBadge Plus Subscription Refresh Failed: {subscription.name}",
+		)
+		return subscription
 
 
 def has_active_plus(user: str | None = None) -> bool:
@@ -285,6 +360,8 @@ def get_plus_status() -> dict:
 
 	plan = _get_plus_plan()
 	subscription = _get_latest_subscription(frappe.session.user)
+	if subscription:
+		subscription = _refresh_subscription_from_mercadopago(subscription)
 	data = {
 		"active": has_active_plus(),
 		"plan": plan,
@@ -308,6 +385,9 @@ def create_plus_checkout() -> str:
 
 	pending = _get_pending_subscription(frappe.session.user)
 	if pending and pending.init_point:
+		pending = _refresh_subscription_from_mercadopago(pending, settings=settings)
+		if pending.status in PLUS_ACTIVE_STATUSES:
+			return f"{get_lms_path_url(settings)}/plus?status=active"
 		return pending.init_point
 
 	base_url = _get_public_base_url(settings)
@@ -550,6 +630,7 @@ def get_plus_billing() -> dict:
 	settings = _get_settings()
 	subscription = _get_latest_subscription(frappe.session.user)
 	if subscription:
+		subscription = _refresh_subscription_from_mercadopago(subscription, settings=settings)
 		_sync_subscription_receipts(subscription, settings=settings)
 
 	return {
