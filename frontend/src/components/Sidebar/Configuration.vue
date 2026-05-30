@@ -2,17 +2,15 @@
 	<Popover placement="right-start" trigger="hover" class="flex w-full">
 		<template #target="{ togglePopover }">
 			<button
-				:class="[
-					'group w-full flex h-7 items-center justify-between rounded px-2 text-base text-ink-gray-7 hover:bg-surface-gray-2',
-				]"
+				class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group"
 			>
-				<div class="flex gap-2">
-					<Wrench class="size-4 stroke-1.5" />
+				<div class="flex items-center gap-3">
+					<Wrench class="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
 					<span class="whitespace-nowrap">
 						{{ __('Configuración') }}
 					</span>
 				</div>
-				<ChevronRight class="h-4 w-4 stroke-1.5" />
+				<ChevronRight class="h-4 w-4 text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
 			</button>
 		</template>
 		<template #body>

@@ -1,23 +1,18 @@
 <template>
-	<div class="p-2">
-		<Dropdown :options="userDropdownOptions">
-			<template v-slot="{ open, close }">
+	<div class="p-2 w-full">
+		<Popover placement="bottom-start" class="w-full">
+			<template #target="{ togglePopover }">
 				<button
-					class="flex h-12 py-2 items-center rounded-lg duration-300 ease-in-out"
-					:class="
-						isCollapsed
-							? 'px-0 w-auto'
-							: open
-							? 'bg-white/15 shadow-sm px-3 w-full'
-							: 'hover:bg-white/10 px-3 w-full'
-					"
+					@click="togglePopover()"
+					class="flex h-12 py-2 items-center rounded-lg duration-300 ease-in-out hover:bg-white/15 px-3 w-full"
+					:class="isCollapsed ? 'px-0 w-auto' : ''"
 				>
 					<img
 						v-if="branding.data?.banner_image"
 						:src="branding.data?.banner_image.file_url"
-						class="w-9 h-9 rounded-lg flex-shrink-0 object-contain"
+						class="w-9 h-9 rounded-lg flex-shrink-0 object-contain bg-white/10"
 					/>
-					<img v-else :src="'/assets/lms/images/studybadge/studybadge-logo.png'" class="w-9 h-9 rounded-lg flex-shrink-0 object-contain" alt="StudyBadge" />
+					<img v-else :src="'/assets/lms/images/studybadge/studybadge-logo.png'" class="w-9 h-9 rounded-lg flex-shrink-0 object-contain bg-white/10 p-0.5" alt="StudyBadge" />
 					<div
 						class="flex flex-1 flex-col text-start duration-300 ease-in-out"
 						:class="
@@ -27,18 +22,14 @@
 						"
 					>
 						<div class="text-base font-medium text-white leading-none">
-							<span
-								v-if="
-									branding.data?.app_name && branding.data?.app_name != 'Frappe'
-								"
-							>
+							<span v-if="branding.data?.app_name && branding.data?.app_name != 'Frappe'">
 								{{ branding.data?.app_name }}
 							</span>
 							<span v-else> StudyBadge </span>
 						</div>
 						<div
 							v-if="userResource.data"
-							class="mt-1 text-sm text-blue-200/70 leading-none"
+							class="mt-1 text-sm text-blue-200/70 leading-none truncate max-w-[140px]"
 						>
 							{{ convertToTitleCase(userResource.data?.full_name) }}
 						</div>
@@ -55,7 +46,42 @@
 					</div>
 				</button>
 			</template>
-		</Dropdown>
+			<template #body="{ close }">
+				<div class="my-2 w-64 rounded-xl bg-white shadow-[0_8px_30px_rgb(0,0,0,0.12)] ring-1 ring-slate-900/5 dark:bg-slate-900 dark:ring-white/10 overflow-hidden flex flex-col z-50">
+					<!-- Profile Header -->
+					<div class="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center gap-3">
+						<div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-sm flex-shrink-0">
+							{{ userResource.data?.full_name ? convertToTitleCase(userResource.data.full_name).charAt(0) : 'U' }}
+						</div>
+						<div class="flex-1 min-w-0">
+							<div class="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+								{{ userResource.data?.full_name ? convertToTitleCase(userResource.data?.full_name) : 'Usuario' }}
+							</div>
+							<div class="text-xs text-slate-500 dark:text-slate-400 truncate">
+								@{{ userResource.data?.username }}
+							</div>
+						</div>
+					</div>
+					
+					<!-- Menu Items -->
+					<div class="p-2 flex flex-col gap-0.5">
+						<template v-for="(item, idx) in userDropdownOptions[0].items" :key="idx">
+							<template v-if="!item.condition || item.condition()">
+								<component v-if="item.component" :is="item.component" />
+								<button
+									v-else
+									@click="item.onClick ? item.onClick() : null; close()"
+									class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group"
+								>
+									<component :is="item.icon" class="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
+									<span>{{ item.label }}</span>
+								</button>
+							</template>
+						</template>
+					</div>
+				</div>
+			</template>
+		</Popover>
 	</div>
 	<SettingsModal
 		v-if="userResource.data?.is_moderator"
@@ -65,7 +91,7 @@
 
 <script setup>
 import { sessionStore } from '@/stores/session'
-import { call, Dropdown, toast } from 'frappe-ui'
+import { call, Popover, toast } from 'frappe-ui'
 import { useRouter } from 'vue-router'
 import { convertToTitleCase } from '@/utils'
 import { applyTheme, toggleTheme, theme } from '@/utils/theme'
