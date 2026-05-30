@@ -83,7 +83,7 @@
 					</button>
 					<textarea 
 						v-model="inputMessage" 
-						placeholder="Pregúntale a TutorIA (Ctrl+V para pegar imagen)..." 
+						placeholder="Pregúntale a TutorIA..." 
 						@keydown.enter.prevent="sendMessage"
 						@paste="handlePaste"
 						:disabled="isLoading"
