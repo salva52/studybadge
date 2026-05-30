@@ -2,6 +2,7 @@ import hashlib
 import hmac
 import json
 import uuid
+from datetime import datetime, timezone
 
 import frappe
 import requests
@@ -128,6 +129,19 @@ def _safe_json(data: dict | list | None) -> str:
 	return json.dumps(data or {}, indent=2, sort_keys=True, default=str)
 
 
+def _parse_mp_datetime(value: str | None):
+	if not value:
+		return None
+
+	try:
+		parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+		if parsed.tzinfo:
+			parsed = parsed.astimezone(timezone.utc).replace(tzinfo=None)
+		return parsed.strftime("%Y-%m-%d %H:%M:%S")
+	except ValueError:
+		return value
+
+
 def _get_latest_subscription(member: str):
 	subscription = frappe.get_all(
 		"StudyBadge Plus Subscription",
@@ -197,9 +211,9 @@ def _sync_subscription(mp_subscription: dict):
 			"init_point": mp_subscription.get("init_point"),
 			"amount": auto_recurring.get("transaction_amount"),
 			"currency": auto_recurring.get("currency_id"),
-			"next_payment_date": mp_subscription.get("next_payment_date"),
-			"date_created": mp_subscription.get("date_created"),
-			"last_modified": mp_subscription.get("last_modified"),
+			"next_payment_date": _parse_mp_datetime(mp_subscription.get("next_payment_date")),
+			"date_created": _parse_mp_datetime(mp_subscription.get("date_created")),
+			"last_modified": _parse_mp_datetime(mp_subscription.get("last_modified")),
 			"last_synced_at": now_datetime(),
 			"raw_response": _safe_json(mp_subscription),
 		}
@@ -294,9 +308,9 @@ def create_plus_checkout() -> str:
 			"init_point": response.get("init_point"),
 			"amount": flt(settings.amount),
 			"currency": settings.currency,
-			"next_payment_date": response.get("next_payment_date"),
-			"date_created": response.get("date_created"),
-			"last_modified": response.get("last_modified"),
+			"next_payment_date": _parse_mp_datetime(response.get("next_payment_date")),
+			"date_created": _parse_mp_datetime(response.get("date_created")),
+			"last_modified": _parse_mp_datetime(response.get("last_modified")),
 			"last_synced_at": now_datetime(),
 			"raw_response": _safe_json(response),
 		}
