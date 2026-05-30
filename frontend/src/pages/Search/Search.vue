@@ -60,10 +60,10 @@
 					class="group bg-white rounded-xl p-4 cursor-pointer border border-gray-100 transition-all duration-300 hover:shadow-sb-card-hover hover:border-sb-primary/20 hover:-translate-y-0.5"
 				>
 					<div class="flex gap-x-3.5 items-start">
-						<Tooltip :text="result.author_info.full_name">
+						<Tooltip :text="result.author_info?.full_name || ''">
 							<Avatar
-								:label="result.author_info.full_name"
-								:image="result.author_info.user_image"
+								:label="result.author_info?.full_name || 'StudyBadge'"
+								:image="result.author_info?.user_image"
 								size="lg"
 								class="flex-shrink-0 ring-2 ring-white shadow-sm"
 							/>
