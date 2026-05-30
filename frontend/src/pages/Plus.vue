@@ -1,356 +1,382 @@
 <template>
-	<div class="min-h-screen bg-[#f5f7fb] pb-12 font-sans">
+	<div class="plus-page min-h-screen pb-16">
 		<header
-			class="sticky top-0 z-10 flex items-center justify-between border-b bg-white px-4 py-3 shadow-sm"
+			class="sticky top-0 z-10 flex items-center justify-between border-b px-4 py-3 shadow-sm plus-header"
 		>
 			<Breadcrumbs class="h-7" :items="breadcrumbs" />
 		</header>
 
-		<div v-if="billing.data === undefined" class="flex justify-center items-center py-20">
-			<!-- Loading state -->
-			<div class="animate-pulse flex flex-col items-center">
-				<div class="h-12 w-12 bg-gray-200 rounded-full mb-4"></div>
-				<div class="h-4 w-32 bg-gray-200 rounded"></div>
+		<!-- Loading State -->
+		<div v-if="billing.data === undefined" class="flex justify-center items-center py-24">
+			<div class="flex flex-col items-center gap-4">
+				<div class="relative">
+					<div class="size-16 rounded-full plus-loading-ring animate-spin"></div>
+					<Crown class="size-6 text-amber-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+				</div>
+				<span class="text-sm font-medium plus-text-muted animate-pulse">{{ __('Cargando tu plan...') }}</span>
 			</div>
 		</div>
+
 		<div v-else>
-			<!-- ESTADO 2: CON PLAN ACTIVO -->
+
+			<!-- ═══════════════════════════════════════════
+			     ESTADO 2: PLAN ACTIVO
+			     ═══════════════════════════════════════════ -->
 			<div v-if="billing.data?.active">
-				<!-- Hero Section (Activo) -->
-				<div class="bg-[#08204e] text-white py-12 px-5 sm:py-16 sm:px-8 relative overflow-hidden">
-					<div class="absolute -top-24 -right-24 size-96 bg-[#0b2f73] opacity-50 blur-3xl rounded-full"></div>
-					<div class="mx-auto max-w-5xl relative z-10 flex flex-col sm:flex-row items-center sm:items-start gap-6">
-						<div class="rounded-2xl bg-white/10 p-4 ring-1 ring-white/20 backdrop-blur-md shadow-lg shrink-0">
-							<Crown class="size-12 text-amber-400" />
-						</div>
-						<div class="text-center sm:text-left">
-							<h1 class="text-3xl sm:text-4xl font-bold tracking-tight">
-								{{ __('Tu membresía StudyBadge Plus está activa') }}
-							</h1>
-							<p class="mt-3 text-lg text-blue-100 max-w-2xl font-medium">
-								{{ __('Gestiona tu plan, revisa tus beneficios y descarga tus recibos.') }}
-							</p>
+
+				<!-- Hero Activo -->
+				<div class="plus-hero-active relative overflow-hidden">
+					<div class="plus-hero-glow-1"></div>
+					<div class="plus-hero-glow-2"></div>
+					<div class="plus-hero-grid"></div>
+					<div class="mx-auto max-w-5xl relative z-10 px-6 py-14 sm:py-20">
+						<div class="flex flex-col sm:flex-row items-center sm:items-start gap-8">
+							<div class="plus-crown-badge shrink-0">
+								<Crown class="size-10 sm:size-12 text-amber-400 drop-shadow-lg" />
+							</div>
+							<div class="text-center sm:text-left">
+								<div class="inline-flex items-center gap-2 rounded-full bg-green-500/20 border border-green-400/30 px-4 py-1.5 text-xs font-bold text-green-300 uppercase tracking-wider mb-4 backdrop-blur-sm">
+									<span class="relative flex h-2 w-2">
+										<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+										<span class="relative inline-flex rounded-full h-2 w-2 bg-green-400"></span>
+									</span>
+									{{ __('Plan activo') }}
+								</div>
+								<h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+									{{ __('Tu membresía') }}
+									<span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400">Plus</span>
+								</h1>
+								<p class="mt-4 text-base sm:text-lg text-blue-100/80 max-w-xl font-medium">
+									{{ __('Gestiona tu plan, revisa tus beneficios y descarga tus recibos.') }}
+								</p>
+							</div>
 						</div>
 					</div>
 				</div>
 
+				<!-- Contenido Activo -->
 				<div class="mx-auto max-w-5xl px-5 py-10">
 					<div class="grid gap-8 lg:grid-cols-3 items-start">
-						<!-- Main Column -->
+
+						<!-- Main: Beneficios + Recibos -->
 						<div class="lg:col-span-2 space-y-8">
+
 							<!-- Beneficios Activos -->
-							<div class="rounded-2xl border border-gray-100 bg-white p-6 sm:p-8 shadow-sm">
-								<h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-									<Sparkles class="size-6 text-[#0d6efd]" />
+							<div class="plus-card p-6 sm:p-8">
+								<h2 class="text-xl font-bold plus-text-primary mb-6 flex items-center gap-3">
+									<div class="plus-icon-badge bg-blue-500/10 text-blue-500">
+										<Sparkles class="size-5" />
+									</div>
 									{{ __('Tus beneficios activos') }}
 								</h2>
-								<div class="grid gap-4 sm:grid-cols-2">
+								<div class="grid gap-3 sm:grid-cols-2">
 									<div
 										v-for="benefit in benefits"
 										:key="benefit.label"
-										class="flex items-start gap-3 rounded-xl border border-blue-50 bg-blue-50/30 p-4 transition-all hover:bg-blue-50/50"
+										class="plus-benefit-item group"
 									>
-										<div class="rounded-full bg-blue-100 p-2 shrink-0">
-											<component
-												:is="benefit.icon"
-												class="size-5 text-[#0d6efd]"
-											/>
+										<div class="plus-benefit-icon">
+											<component :is="benefit.icon" class="size-5" />
 										</div>
-										<div>
-											<div class="font-bold text-gray-900 text-sm">
-												{{ benefit.label }}
-											</div>
-											<div class="mt-1 text-xs text-gray-600">
-												{{ benefit.description }}
-											</div>
+										<div class="min-w-0">
+											<div class="font-bold text-sm plus-text-primary">{{ benefit.label }}</div>
+											<div class="mt-0.5 text-xs plus-text-muted leading-relaxed">{{ benefit.description }}</div>
 										</div>
+										<CheckCircle2 class="size-4 text-green-500 shrink-0 ml-auto opacity-60" />
 									</div>
 								</div>
 							</div>
 
-							<!-- Historial de Recibos (Activo) -->
-							<div class="rounded-2xl border border-gray-100 bg-white p-6 sm:p-8 shadow-sm">
-								<div class="flex items-center justify-between gap-4 border-b border-gray-100 pb-5 mb-5">
-									<h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
-										<Download class="size-5 text-gray-500" />
+							<!-- Historial de Pagos -->
+							<div class="plus-card p-6 sm:p-8">
+								<div class="flex items-center justify-between gap-4 border-b plus-border pb-5 mb-5">
+									<h2 class="text-xl font-bold plus-text-primary flex items-center gap-3">
+										<div class="plus-icon-badge bg-gray-500/10 text-gray-500">
+											<Download class="size-5" />
+										</div>
 										{{ __('Historial de pagos') }}
 									</h2>
-									<Button
-										variant="ghost"
-										class="text-sm"
-										:loading="billing.loading"
+									<button
+										class="plus-btn-ghost text-xs"
 										@click="billing.reload()"
 									>
-										<RefreshCcw class="size-4 mr-1.5" /> {{ __('Actualizar') }}
-									</Button>
+										<RefreshCcw class="size-3.5" :class="{'animate-spin': billing.loading}" />
+										{{ __('Actualizar') }}
+									</button>
 								</div>
-								
-								<div v-if="receipts.length" class="divide-y divide-gray-100">
+
+								<!-- Receipts List -->
+								<div v-if="receipts.length" class="space-y-3">
 									<div
 										v-for="receipt in receipts"
 										:key="receipt.name"
-										class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4"
+										class="plus-receipt-row"
 									>
-										<div>
-											<div class="font-bold text-gray-900">
-												{{ formatMoney(receipt.amount, receipt.currency) }} • {{ receipt.receipt_number || receipt.name }}
+										<div class="min-w-0 flex-1">
+											<div class="font-bold text-sm plus-text-primary truncate">
+												{{ receipt.receipt_number || receipt.name }}
 											</div>
-											<div class="mt-1 flex items-center gap-2 text-sm text-gray-500">
-												<CalendarDays class="size-4" />
+											<div class="flex items-center gap-2 mt-1 text-xs plus-text-muted">
+												<CalendarDays class="size-3.5 shrink-0" />
 												{{ formatDate(receipt.paid_at || receipt.date_created) }}
-												<Badge :theme="receipt.status === 'paid' ? 'green' : 'gray'" class="ml-2">
+												<span class="plus-status-pill" :class="receipt.status === 'paid' ? 'plus-status-paid' : 'plus-status-default'">
 													{{ receipt.status }}
-												</Badge>
+												</span>
 											</div>
 										</div>
-										<Button variant="outline" @click="downloadReceipt(receipt)">
-											<Download class="size-4 mr-1.5" /> {{ __('Descargar PDF') }}
-										</Button>
+										<div class="flex items-center gap-4 shrink-0">
+											<span class="font-bold text-sm plus-text-primary">{{ formatMoney(receipt.amount, receipt.currency) }}</span>
+											<button class="plus-btn-outline text-xs" @click="downloadReceipt(receipt)">
+												<Download class="size-3.5" /> PDF
+											</button>
+										</div>
 									</div>
 								</div>
-								<div v-else class="flex flex-col items-center justify-center py-10 text-center">
-									<div class="rounded-full bg-gray-50 p-4 mb-4">
-										<Download class="size-8 text-gray-300" />
+
+								<!-- Empty Receipts -->
+								<div v-else class="plus-empty-state py-12">
+									<div class="plus-empty-icon">
+										<Download class="size-8" />
 									</div>
-									<h3 class="text-base font-bold text-gray-900">{{ __('Todavía no hay recibos disponibles') }}</h3>
-									<p class="mt-1 text-sm text-gray-500 max-w-sm">{{ __('Cuando Mercado Pago confirme un cobro, aparecerá aquí tu comprobante.') }}</p>
+									<h3 class="text-base font-bold plus-text-primary mt-4">{{ __('Todavía no hay recibos') }}</h3>
+									<p class="text-sm plus-text-muted mt-1 max-w-xs">{{ __('Cuando Mercado Pago confirme un cobro, aparecerá aquí tu comprobante.') }}</p>
 								</div>
 							</div>
 						</div>
 
-						<!-- Sidebar Column -->
+						<!-- Sidebar -->
 						<div class="space-y-6">
-							<!-- Estado del plan -->
-							<div class="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm relative overflow-hidden">
-								<div class="absolute top-0 left-0 w-full h-1 bg-[#0d6efd]"></div>
-								<div class="flex justify-between items-start mb-4">
-									<div>
-										<h3 class="font-bold text-gray-900 text-lg">{{ __('StudyBadge Plus') }}</h3>
-										<div class="text-sm text-gray-500 mt-0.5">{{ formattedPrice }} / {{ __('mes') }}</div>
-									</div>
-									<Badge theme="green" class="font-bold">
-										<CheckCircle2 class="size-3 mr-1" /> {{ __('Activo') }}
-									</Badge>
-								</div>
 
-								<div class="space-y-4 mt-6">
-									<div class="bg-gray-50 rounded-lg p-3">
-										<div class="text-xs text-gray-500 font-semibold uppercase mb-1">{{ __('Próximo cobro') }}</div>
-										<div class="font-medium text-gray-900">{{ formatDate(subscription.next_payment_date) }}</div>
+							<!-- Estado del Plan -->
+							<div class="plus-card relative overflow-hidden">
+								<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400"></div>
+								<div class="p-6">
+									<div class="flex justify-between items-start mb-5">
+										<div>
+											<h3 class="font-bold text-lg plus-text-primary">StudyBadge Plus</h3>
+											<div class="text-sm plus-text-muted mt-0.5">{{ formattedPrice }} / {{ __('mes') }}</div>
+										</div>
+										<Badge theme="green" class="font-bold text-xs">
+											<CheckCircle2 class="size-3 mr-1" /> {{ __('Activo') }}
+										</Badge>
 									</div>
-									<div class="bg-gray-50 rounded-lg p-3">
-										<div class="text-xs text-gray-500 font-semibold uppercase mb-1">{{ __('Método de pago') }}</div>
-										<div class="font-medium text-gray-900 truncate">{{ paymentMethodLabel }}</div>
+
+									<div class="space-y-3">
+										<div class="plus-info-row">
+											<CalendarDays class="size-4 plus-text-muted shrink-0" />
+											<div class="min-w-0">
+												<div class="text-[10px] plus-text-muted font-bold uppercase tracking-wider">{{ __('Próximo cobro') }}</div>
+												<div class="text-sm font-semibold plus-text-primary mt-0.5">{{ formatDate(subscription.next_payment_date) }}</div>
+											</div>
+										</div>
+										<div class="plus-info-row">
+											<CreditCard class="size-4 plus-text-muted shrink-0" />
+											<div class="min-w-0">
+												<div class="text-[10px] plus-text-muted font-bold uppercase tracking-wider">{{ __('Método de pago') }}</div>
+												<div class="text-sm font-semibold plus-text-primary mt-0.5 truncate">{{ paymentMethodLabel }}</div>
+											</div>
+										</div>
 									</div>
-								</div>
 
-								<div
-									v-if="subscription.cancel_at_period_end"
-									class="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900 border border-amber-100"
-								>
-									<span class="font-bold block mb-1">{{ __('Cancelación programada') }}</span>
-									{{ __('Tu suscripción se cancelará el {0}.', [formatDate(subscription.cancel_scheduled_for)]) }}
-								</div>
+									<!-- Cancellation Warning -->
+									<div v-if="subscription.cancel_at_period_end" class="mt-5 rounded-xl bg-amber-500/10 border border-amber-500/20 p-4 text-sm">
+										<span class="font-bold text-amber-600 dark:text-amber-400 block mb-1">{{ __('Cancelación programada') }}</span>
+										<span class="text-amber-700 dark:text-amber-300 text-xs">
+											{{ __('Tu suscripción se cancelará el {0}.', [formatDate(subscription.cancel_scheduled_for)]) }}
+										</span>
+									</div>
 
-								<div class="mt-6 space-y-3">
-									<Button
-										v-if="!subscription.cancel_at_period_end"
-										variant="solid"
-										class="w-full justify-center bg-[#0d6efd] hover:bg-[#0b2f73] text-white"
-										@click="showPaymentMethodForm"
-									>
-										{{ __('Gestionar suscripción') }}
-									</Button>
-									<Button
-										v-if="!subscription.cancel_at_period_end"
-										variant="ghost"
-										class="w-full justify-center text-gray-500 hover:text-red-600 hover:bg-red-50"
-										:loading="cancelResource.loading"
-										@click="requestCancellation"
-									>
-										{{ __('Cancelar plan') }}
-									</Button>
-									<Button
-										v-if="subscription.cancel_at_period_end"
-										variant="solid"
-										theme="blue"
-										class="w-full justify-center"
-										:loading="reactivateResource.loading"
-										@click="reactivateSubscription"
-									>
-										<RefreshCcw class="size-4 mr-1.5" /> {{ __('Reactivar mi Plus') }}
-									</Button>
+									<!-- Action Buttons -->
+									<div class="mt-6 space-y-2.5">
+										<button
+											v-if="!subscription.cancel_at_period_end"
+											class="plus-btn-primary w-full"
+											@click="showPaymentMethodForm"
+										>
+											<CreditCard class="size-4" /> {{ __('Gestionar suscripción') }}
+										</button>
+										<button
+											v-if="!subscription.cancel_at_period_end"
+											class="plus-btn-danger-ghost w-full"
+											:disabled="cancelResource.loading"
+											@click="requestCancellation"
+										>
+											{{ __('Cancelar plan') }}
+										</button>
+										<button
+											v-if="subscription.cancel_at_period_end"
+											class="plus-btn-primary w-full"
+											:disabled="reactivateResource.loading"
+											@click="reactivateSubscription"
+										>
+											<RefreshCcw class="size-4" /> {{ __('Reactivar mi Plus') }}
+										</button>
+									</div>
 								</div>
 							</div>
 
 							<!-- Soporte -->
-							<div class="rounded-2xl border border-blue-100 bg-blue-50 p-6 text-center">
-								<LifeBuoy class="size-8 text-[#0d6efd] mx-auto mb-3" />
-								<h3 class="font-bold text-gray-900">{{ __('¿Necesitas ayuda?') }}</h3>
-								<p class="mt-2 text-xs text-gray-600 mb-4">{{ __('Nuestro equipo de soporte está listo para ayudarte con tu suscripción.') }}</p>
+							<div class="plus-card-support p-6 text-center">
+								<LifeBuoy class="size-7 mx-auto mb-3 opacity-70" />
+								<h3 class="font-bold text-sm plus-text-primary">{{ __('¿Necesitas ayuda?') }}</h3>
+								<p class="mt-1.5 text-xs plus-text-muted mb-4 leading-relaxed">{{ __('Nuestro equipo está listo para ayudarte.') }}</p>
 								<a
-									class="inline-block text-sm font-bold text-[#0d6efd] hover:text-[#0b2f73]"
+									class="plus-btn-ghost text-xs inline-flex"
 									:href="`mailto:${billing.data?.support_email || 'soporte@studybadge.com'}`"
 								>
-									{{ __('Contactar Soporte') }} &rarr;
+									<Mail class="size-3.5" /> {{ __('Contactar Soporte') }}
 								</a>
 							</div>
 						</div>
 					</div>
 				</div>
 
-				<!-- Modal para tarjeta (if needed to display within page) -->
-				<div v-if="cardFormVisible" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
-					<div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-						<div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-							<div class="font-bold text-gray-900">{{ __('Actualizar método de pago') }}</div>
-							<button @click="hidePaymentMethodForm" class="text-gray-400 hover:text-gray-600">
-								<XCircle class="size-6" />
-							</button>
-						</div>
-						<div class="p-6 overflow-y-auto">
-							<div v-if="cardFormLoading" class="flex justify-center py-8 text-sm text-gray-500 animate-pulse">
-								{{ __('Estableciendo conexión segura...') }}
+				<!-- Card Form Modal -->
+				<Teleport to="body">
+					<Transition name="plus-modal">
+						<div v-if="cardFormVisible" class="fixed inset-0 z-[60] flex items-center justify-center p-4" @click.self="hidePaymentMethodForm">
+							<div class="fixed inset-0 bg-black/60 backdrop-blur-sm"></div>
+							<div class="plus-modal-content relative z-10 w-full max-w-md max-h-[90vh] flex flex-col">
+								<div class="flex justify-between items-center px-6 py-4 border-b plus-border">
+									<div class="flex items-center gap-3">
+										<ShieldCheck class="size-5 text-green-500" />
+										<span class="font-bold plus-text-primary">{{ __('Actualizar método de pago') }}</span>
+									</div>
+									<button @click="hidePaymentMethodForm" class="plus-text-muted hover:plus-text-primary transition-colors p-1 rounded-lg">
+										<XCircle class="size-5" />
+									</button>
+								</div>
+								<div class="p-6 overflow-y-auto">
+									<div v-if="cardFormLoading" class="flex justify-center py-10 text-sm plus-text-muted animate-pulse">
+										{{ __('Estableciendo conexión segura...') }}
+									</div>
+									<div id="studybadge-mp-card-form"></div>
+								</div>
 							</div>
-							<div id="studybadge-mp-card-form"></div>
 						</div>
-					</div>
-				</div>
-
+					</Transition>
+				</Teleport>
 			</div>
-			
-			<!-- ESTADO 1: SIN PLAN ACTIVO -->
+
+			<!-- ═══════════════════════════════════════════
+			     ESTADO 1: SIN PLAN — PÁGINA DE VENTA
+			     ═══════════════════════════════════════════ -->
 			<div v-else>
-				<!-- Hero Section (Venta) -->
-				<div class="bg-[#08204e] text-white py-16 px-5 sm:py-24 sm:px-8 relative overflow-hidden text-center">
-					<div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-full bg-gradient-to-b from-[#0b2f73] to-transparent opacity-50 blur-3xl rounded-full"></div>
-					<div class="mx-auto max-w-3xl relative z-10">
-						<div class="inline-flex justify-center items-center rounded-2xl bg-white/10 p-4 ring-1 ring-white/20 backdrop-blur-md shadow-lg mb-6">
-							<Crown class="size-12 text-amber-400" />
+
+				<!-- Hero de Venta -->
+				<div class="plus-hero-sell relative overflow-hidden text-center">
+					<div class="plus-hero-glow-1"></div>
+					<div class="plus-hero-glow-2"></div>
+					<div class="plus-hero-grid"></div>
+					<div class="mx-auto max-w-3xl relative z-10 px-6 py-20 sm:py-28">
+						<div class="plus-crown-badge mx-auto mb-8">
+							<Crown class="size-12 text-amber-400 drop-shadow-lg" />
 						</div>
-						<h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6">
-							{{ __('Desbloquea StudyBadge') }} <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-200">Plus</span>
+						<h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight mb-6">
+							{{ __('Desbloquea') }}
+							<br class="sm:hidden" />
+							<span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 animate-gradient-x">StudyBadge Plus</span>
 						</h1>
-						<p class="text-lg sm:text-xl text-blue-100 font-medium max-w-2xl mx-auto">
+						<p class="text-lg sm:text-xl text-blue-100/80 font-medium max-w-2xl mx-auto leading-relaxed">
 							{{ __('Impulsa tu carrera con certificados, Tutor IA ilimitado, calendario inteligente y herramientas premium de estudio.') }}
 						</p>
 					</div>
 				</div>
 
-				<div class="mx-auto max-w-5xl px-5 py-12 -mt-8 relative z-20">
+				<!-- Pricing + Beneficios -->
+				<div class="mx-auto max-w-5xl px-5 py-12 -mt-10 relative z-20">
 					<div class="grid gap-8 lg:grid-cols-3 items-start">
-						
-						<!-- Pricing Card Prominente -->
-						<div class="lg:col-span-1 rounded-3xl border border-gray-200 bg-white shadow-xl overflow-hidden order-first lg:order-last sticky top-24">
-							<div class="bg-gradient-to-r from-amber-400 to-yellow-500 p-1 text-center text-xs font-bold uppercase tracking-wider text-amber-900">
-								{{ __('Membresía Plus') }}
-							</div>
-							<div class="p-8 text-center">
-								<div class="flex items-end justify-center gap-1 mb-2">
-									<div class="text-5xl font-black text-gray-900 tracking-tight">
-										{{ formattedPrice }}
-									</div>
-									<div class="pb-2 text-base font-medium text-gray-500">
-										/ {{ __('mes') }}
-									</div>
+
+						<!-- Pricing Card (sticky) -->
+						<div class="lg:col-span-1 order-first lg:order-last sticky top-24">
+							<div class="plus-pricing-card overflow-hidden">
+								<div class="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 py-2 text-center">
+									<span class="text-xs font-extrabold uppercase tracking-widest text-amber-900">{{ __('Membresía Plus') }}</span>
 								</div>
-								<p class="text-sm text-gray-500 mb-8">{{ __('Cancela cuando quieras. Sin compromisos.') }}</p>
-								
-								<Button
-									class="w-full py-6 text-base font-bold shadow-lg shadow-blue-500/30 transition-transform hover:-translate-y-0.5 bg-[#0d6efd] hover:bg-[#0b2f73] text-white rounded-xl"
-									size="lg"
-									:loading="activating"
-									@click="subscription?.init_point ? openExistingCheckout() : activatePlus()"
-								>
-									{{ subscription?.init_point ? __('Continuar pago pendiente') : __('Suscribirme ahora') }}
-								</Button>
-								
-								<div class="mt-6 flex items-center justify-center gap-2 text-xs text-gray-500">
-									<ShieldCheck class="size-4 text-green-500" />
-									{{ __('Pago 100% seguro con Mercado Pago') }}
+								<div class="p-8 text-center">
+									<div class="flex items-end justify-center gap-1 mb-1">
+										<span class="text-5xl font-black plus-text-primary tracking-tight">{{ formattedPrice }}</span>
+										<span class="pb-2 text-base font-medium plus-text-muted">/ {{ __('mes') }}</span>
+									</div>
+									<p class="text-sm plus-text-muted mb-8">{{ __('Cancela cuando quieras. Sin compromisos.') }}</p>
+
+									<button
+										class="plus-btn-cta w-full text-base"
+										:disabled="activating"
+										@click="subscription?.init_point ? openExistingCheckout() : activatePlus()"
+									>
+										<span v-if="activating" class="animate-spin mr-2">⏳</span>
+										{{ subscription?.init_point ? __('Continuar pago pendiente') : __('Suscribirme ahora') }}
+									</button>
+
+									<div class="mt-6 flex items-center justify-center gap-2 text-xs plus-text-muted">
+										<ShieldCheck class="size-4 text-green-500" />
+										{{ __('Pago 100% seguro con Mercado Pago') }}
+									</div>
 								</div>
 							</div>
 						</div>
 
-						<!-- Beneficios y Confianza -->
-						<div class="lg:col-span-2 space-y-12">
+						<!-- Beneficios + Confianza -->
+						<div class="lg:col-span-2 space-y-10">
+
+							<!-- Beneficios Grid -->
 							<div>
-								<h2 class="text-2xl font-bold text-gray-900 mb-8 text-center sm:text-left">
+								<h2 class="text-2xl font-bold plus-text-primary mb-8 flex items-center gap-3">
+									<Sparkles class="size-6 text-amber-500" />
 									{{ __('Beneficios exclusivos') }}
 								</h2>
 								<div class="grid gap-4 sm:grid-cols-2">
 									<div
 										v-for="benefit in benefits"
 										:key="benefit.label"
-										class="flex items-start gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md hover:border-blue-100 group"
+										class="plus-benefit-card group"
 									>
-										<div class="rounded-xl bg-[#f5f7fb] p-3 group-hover:bg-blue-50 transition-colors">
-											<component
-												:is="benefit.icon"
-												class="size-6 text-[#0d6efd]"
-											/>
+										<div class="plus-benefit-card-icon group-hover:scale-110 transition-transform">
+											<component :is="benefit.icon" class="size-6" />
 										</div>
 										<div>
-											<div class="font-bold text-gray-900 text-base">
-												{{ benefit.label }}
-											</div>
-											<div class="mt-1 text-sm text-gray-500 leading-relaxed">
-												{{ benefit.description }}
-											</div>
+											<div class="font-bold text-base plus-text-primary">{{ benefit.label }}</div>
+											<div class="mt-1 text-sm plus-text-muted leading-relaxed">{{ benefit.description }}</div>
 										</div>
 									</div>
 								</div>
 							</div>
 
-							<!-- Sección de confianza -->
-							<div class="rounded-2xl bg-white border border-gray-100 p-8 shadow-sm">
+							<!-- Confianza -->
+							<div class="plus-card p-8">
 								<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-									<div class="flex flex-col items-center text-center gap-2">
-										<ShieldCheck class="size-8 text-green-500" />
-										<span class="text-sm font-bold text-gray-900">{{ __('Pago seguro') }}</span>
-										<span class="text-xs text-gray-500">{{ __('Con Mercado Pago') }}</span>
-									</div>
-									<div class="flex flex-col items-center text-center gap-2">
-										<RefreshCcw class="size-8 text-blue-500" />
-										<span class="text-sm font-bold text-gray-900">{{ __('Cancela cuando quieras') }}</span>
-										<span class="text-xs text-gray-500">{{ __('Sin contratos') }}</span>
-									</div>
-									<div class="flex flex-col items-center text-center gap-2">
-										<Sparkles class="size-8 text-amber-500" />
-										<span class="text-sm font-bold text-gray-900">{{ __('Activación inmediata') }}</span>
-										<span class="text-xs text-gray-500">{{ __('Disfruta al instante') }}</span>
-									</div>
-									<div class="flex flex-col items-center text-center gap-2">
-										<Download class="size-8 text-gray-500" />
-										<span class="text-sm font-bold text-gray-900">{{ __('Recibos en PDF') }}</span>
-										<span class="text-xs text-gray-500">{{ __('Comprobantes claros') }}</span>
+									<div v-for="trust in trustPoints" :key="trust.label" class="flex flex-col items-center text-center gap-2">
+										<div class="plus-trust-icon">
+											<component :is="trust.icon" class="size-6" />
+										</div>
+										<span class="text-sm font-bold plus-text-primary">{{ trust.label }}</span>
+										<span class="text-xs plus-text-muted">{{ trust.sub }}</span>
 									</div>
 								</div>
 							</div>
 
-							<!-- Empty state de recibos (para no usuarios Plus) -->
-							<div class="rounded-2xl border border-gray-100 bg-white p-8 text-center shadow-sm">
-								<div class="flex justify-center mb-4">
-									<div class="rounded-full bg-[#f5f7fb] p-5">
-										<Download class="size-8 text-gray-400" />
-									</div>
+							<!-- Empty Recibos -->
+							<div class="plus-card p-8 text-center">
+								<div class="plus-empty-icon mx-auto">
+									<Download class="size-8" />
 								</div>
-								<h3 class="text-lg font-bold text-gray-900">{{ __('Aún no tienes recibos') }}</h3>
-								<p class="mt-2 text-sm text-gray-500 max-w-md mx-auto mb-6">
-									{{ __('Cuando realices tu primer pago para activar StudyBadge Plus, tus comprobantes aparecerán aquí.') }}
+								<h3 class="text-lg font-bold plus-text-primary mt-4">{{ __('Aún no tienes recibos') }}</h3>
+								<p class="mt-2 text-sm plus-text-muted max-w-sm mx-auto mb-6">
+									{{ __('Cuando realices tu primer pago, tus comprobantes aparecerán aquí.') }}
 								</p>
-								<Button variant="outline" @click="billing.reload()" :loading="billing.loading">
-									<RefreshCcw class="size-4 mr-2" /> {{ __('Actualizar') }}
-								</Button>
+								<button class="plus-btn-outline text-sm" @click="billing.reload()" :disabled="billing.loading">
+									<RefreshCcw class="size-4" :class="{'animate-spin': billing.loading}" /> {{ __('Actualizar') }}
+								</button>
 							</div>
 						</div>
-
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 </template>
+
 <script setup>
 import { computed, inject, nextTick, onBeforeUnmount, ref } from 'vue'
 import { Badge, Breadcrumbs, Button, createResource, toast, usePageMeta } from 'frappe-ui'
@@ -411,6 +437,13 @@ const benefits = [
 		label: __('Cursos propios ilimitados'),
 		description: __('Beneficio mostrado para la generacion de cursos propios.'),
 	},
+]
+
+const trustPoints = [
+	{ icon: ShieldCheck, label: __('Pago seguro'), sub: __('Con Mercado Pago') },
+	{ icon: RefreshCcw, label: __('Cancela cuando quieras'), sub: __('Sin contratos') },
+	{ icon: Sparkles, label: __('Activación inmediata'), sub: __('Disfruta al instante') },
+	{ icon: Download, label: __('Recibos en PDF'), sub: __('Comprobantes claros') },
 ]
 
 const billing = createResource({
@@ -653,3 +686,557 @@ usePageMeta(() => {
 	}
 })
 </script>
+
+<style scoped>
+/* ═══════════════════════════════════════
+   PLUS PAGE — LIGHT & DARK TOKENS
+   ═══════════════════════════════════════ */
+
+.plus-page {
+	background: var(--sb-bg);
+	font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.plus-header {
+	background: var(--sb-white);
+	border-color: rgba(6, 27, 73, 0.06);
+}
+
+:root[data-theme="dark"] .plus-header {
+	border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Text */
+.plus-text-primary { color: #111827; }
+.plus-text-muted { color: #6b7280; }
+:root[data-theme="dark"] .plus-text-primary { color: #f3f4f6; }
+:root[data-theme="dark"] .plus-text-muted { color: #9ca3af; }
+
+/* Border */
+.plus-border { border-color: rgba(0, 0, 0, 0.06); }
+:root[data-theme="dark"] .plus-border { border-color: rgba(255, 255, 255, 0.08); }
+
+/* ═══════════════════════════════════════
+   HERO SECTIONS
+   ═══════════════════════════════════════ */
+
+.plus-hero-active,
+.plus-hero-sell {
+	background: linear-gradient(145deg, #061B49 0%, #0b2f73 40%, #0a2259 100%);
+}
+
+.plus-hero-glow-1 {
+	position: absolute;
+	top: -120px;
+	right: -80px;
+	width: 400px;
+	height: 400px;
+	background: radial-gradient(circle, rgba(59, 130, 246, 0.25), transparent 70%);
+	border-radius: 50%;
+	filter: blur(60px);
+}
+
+.plus-hero-glow-2 {
+	position: absolute;
+	bottom: -100px;
+	left: -60px;
+	width: 300px;
+	height: 300px;
+	background: radial-gradient(circle, rgba(245, 179, 1, 0.12), transparent 70%);
+	border-radius: 50%;
+	filter: blur(50px);
+}
+
+.plus-hero-grid {
+	position: absolute;
+	inset: 0;
+	background-image:
+		linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+	background-size: 48px 48px;
+}
+
+.plus-crown-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 1.25rem;
+	border-radius: 1.25rem;
+	background: rgba(255, 255, 255, 0.08);
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	backdrop-filter: blur(12px);
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+/* ═══════════════════════════════════════
+   CARDS
+   ═══════════════════════════════════════ */
+
+.plus-card {
+	background: var(--sb-white);
+	border: 1px solid rgba(6, 27, 73, 0.06);
+	border-radius: 20px;
+	box-shadow: 0 1px 3px rgba(6, 27, 73, 0.04), 0 4px 12px rgba(6, 27, 73, 0.03);
+	transition: all 0.2s ease;
+}
+
+:root[data-theme="dark"] .plus-card {
+	border-color: rgba(255, 255, 255, 0.06);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.plus-card-support {
+	background: rgba(59, 130, 246, 0.04);
+	border: 1px solid rgba(59, 130, 246, 0.1);
+	border-radius: 20px;
+}
+
+:root[data-theme="dark"] .plus-card-support {
+	background: rgba(59, 130, 246, 0.08);
+	border-color: rgba(59, 130, 246, 0.15);
+}
+
+/* ═══════════════════════════════════════
+   PRICING CARD
+   ═══════════════════════════════════════ */
+
+.plus-pricing-card {
+	background: var(--sb-white);
+	border: 1px solid rgba(6, 27, 73, 0.08);
+	border-radius: 24px;
+	box-shadow: 0 4px 6px rgba(6, 27, 73, 0.04), 0 20px 48px rgba(6, 27, 73, 0.08);
+}
+
+:root[data-theme="dark"] .plus-pricing-card {
+	border-color: rgba(255, 255, 255, 0.08);
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2), 0 20px 48px rgba(0, 0, 0, 0.3);
+}
+
+/* ═══════════════════════════════════════
+   BENEFIT ITEMS (Active state)
+   ═══════════════════════════════════════ */
+
+.plus-benefit-item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 14px 16px;
+	border-radius: 14px;
+	background: rgba(59, 130, 246, 0.03);
+	border: 1px solid rgba(59, 130, 246, 0.06);
+	transition: all 0.2s ease;
+}
+
+.plus-benefit-item:hover {
+	background: rgba(59, 130, 246, 0.06);
+	border-color: rgba(59, 130, 246, 0.12);
+}
+
+:root[data-theme="dark"] .plus-benefit-item {
+	background: rgba(59, 130, 246, 0.05);
+	border-color: rgba(59, 130, 246, 0.1);
+}
+
+:root[data-theme="dark"] .plus-benefit-item:hover {
+	background: rgba(59, 130, 246, 0.1);
+	border-color: rgba(59, 130, 246, 0.18);
+}
+
+.plus-benefit-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	border-radius: 10px;
+	background: rgba(59, 130, 246, 0.08);
+	color: #3b82f6;
+	flex-shrink: 0;
+}
+
+:root[data-theme="dark"] .plus-benefit-icon {
+	background: rgba(59, 130, 246, 0.15);
+	color: #60a5fa;
+}
+
+/* BENEFIT CARDS (Sale state) */
+.plus-benefit-card {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+	padding: 20px;
+	border-radius: 18px;
+	background: var(--sb-white);
+	border: 1px solid rgba(6, 27, 73, 0.06);
+	box-shadow: 0 1px 4px rgba(6, 27, 73, 0.04);
+	transition: all 0.25s ease;
+}
+
+.plus-benefit-card:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 8px 24px rgba(6, 27, 73, 0.1);
+	border-color: rgba(59, 130, 246, 0.15);
+}
+
+:root[data-theme="dark"] .plus-benefit-card {
+	border-color: rgba(255, 255, 255, 0.06);
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+:root[data-theme="dark"] .plus-benefit-card:hover {
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+	border-color: rgba(59, 130, 246, 0.25);
+}
+
+.plus-benefit-card-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 48px;
+	height: 48px;
+	border-radius: 14px;
+	background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.04));
+	color: #3b82f6;
+	flex-shrink: 0;
+	transition: transform 0.2s ease;
+}
+
+:root[data-theme="dark"] .plus-benefit-card-icon {
+	background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.08));
+	color: #60a5fa;
+}
+
+/* ═══════════════════════════════════════
+   ICON BADGES
+   ═══════════════════════════════════════ */
+
+.plus-icon-badge {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	border-radius: 10px;
+	flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════
+   TRUST ICONS
+   ═══════════════════════════════════════ */
+
+.plus-trust-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 48px;
+	height: 48px;
+	border-radius: 14px;
+	background: rgba(16, 185, 129, 0.06);
+	color: #10b981;
+	margin-bottom: 4px;
+}
+
+:root[data-theme="dark"] .plus-trust-icon {
+	background: rgba(16, 185, 129, 0.1);
+	color: #34d399;
+}
+
+/* ═══════════════════════════════════════
+   INFO ROWS
+   ═══════════════════════════════════════ */
+
+.plus-info-row {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	padding: 12px 14px;
+	border-radius: 12px;
+	background: rgba(0, 0, 0, 0.02);
+}
+
+:root[data-theme="dark"] .plus-info-row {
+	background: rgba(255, 255, 255, 0.04);
+}
+
+/* ═══════════════════════════════════════
+   RECEIPT ROWS
+   ═══════════════════════════════════════ */
+
+.plus-receipt-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 14px 16px;
+	border-radius: 14px;
+	background: rgba(0, 0, 0, 0.015);
+	border: 1px solid transparent;
+	transition: all 0.15s ease;
+}
+
+.plus-receipt-row:hover {
+	background: rgba(59, 130, 246, 0.03);
+	border-color: rgba(59, 130, 246, 0.08);
+}
+
+:root[data-theme="dark"] .plus-receipt-row {
+	background: rgba(255, 255, 255, 0.03);
+}
+
+:root[data-theme="dark"] .plus-receipt-row:hover {
+	background: rgba(59, 130, 246, 0.06);
+	border-color: rgba(59, 130, 246, 0.12);
+}
+
+/* ═══════════════════════════════════════
+   STATUS PILLS
+   ═══════════════════════════════════════ */
+
+.plus-status-pill {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 8px;
+	border-radius: 20px;
+	font-size: 10px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.plus-status-paid {
+	background: rgba(16, 185, 129, 0.1);
+	color: #059669;
+}
+
+:root[data-theme="dark"] .plus-status-paid {
+	background: rgba(16, 185, 129, 0.15);
+	color: #34d399;
+}
+
+.plus-status-default {
+	background: rgba(107, 114, 128, 0.1);
+	color: #6b7280;
+}
+
+/* ═══════════════════════════════════════
+   EMPTY STATE
+   ═══════════════════════════════════════ */
+
+.plus-empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+}
+
+.plus-empty-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 64px;
+	height: 64px;
+	border-radius: 20px;
+	background: rgba(0, 0, 0, 0.03);
+	color: #d1d5db;
+}
+
+:root[data-theme="dark"] .plus-empty-icon {
+	background: rgba(255, 255, 255, 0.05);
+	color: #4b5563;
+}
+
+/* ═══════════════════════════════════════
+   LOADING RING
+   ═══════════════════════════════════════ */
+
+.plus-loading-ring {
+	border: 3px solid rgba(0, 0, 0, 0.05);
+	border-top-color: #3b82f6;
+	border-radius: 50%;
+}
+
+:root[data-theme="dark"] .plus-loading-ring {
+	border-color: rgba(255, 255, 255, 0.08);
+	border-top-color: #60a5fa;
+}
+
+/* ═══════════════════════════════════════
+   BUTTONS
+   ═══════════════════════════════════════ */
+
+.plus-btn-primary {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 12px 20px;
+	border-radius: 12px;
+	font-size: 14px;
+	font-weight: 700;
+	color: #fff;
+	background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+	border: none;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	box-shadow: 0 2px 8px rgba(13, 110, 253, 0.25);
+}
+
+.plus-btn-primary:hover {
+	background: linear-gradient(135deg, #0b5ed7, #084298);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 16px rgba(13, 110, 253, 0.35);
+}
+
+.plus-btn-primary:disabled {
+	opacity: 0.6;
+	pointer-events: none;
+}
+
+.plus-btn-cta {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 16px 24px;
+	border-radius: 14px;
+	font-size: 15px;
+	font-weight: 800;
+	color: #fff;
+	background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+	border: none;
+	cursor: pointer;
+	transition: all 0.25s ease;
+	box-shadow: 0 4px 16px rgba(13, 110, 253, 0.3);
+}
+
+.plus-btn-cta:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 8px 32px rgba(13, 110, 253, 0.4);
+}
+
+.plus-btn-cta:disabled {
+	opacity: 0.7;
+	pointer-events: none;
+}
+
+.plus-btn-outline {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 8px 14px;
+	border-radius: 10px;
+	font-weight: 600;
+	color: #374151;
+	background: transparent;
+	border: 1.5px solid rgba(0, 0, 0, 0.1);
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.plus-btn-outline:hover {
+	background: rgba(0, 0, 0, 0.03);
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+:root[data-theme="dark"] .plus-btn-outline {
+	color: #d1d5db;
+	border-color: rgba(255, 255, 255, 0.12);
+}
+
+:root[data-theme="dark"] .plus-btn-outline:hover {
+	background: rgba(255, 255, 255, 0.06);
+	border-color: rgba(255, 255, 255, 0.2);
+}
+
+.plus-btn-ghost {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 8px 14px;
+	border-radius: 10px;
+	font-weight: 600;
+	color: #6b7280;
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.plus-btn-ghost:hover {
+	background: rgba(0, 0, 0, 0.04);
+	color: #374151;
+}
+
+:root[data-theme="dark"] .plus-btn-ghost:hover {
+	background: rgba(255, 255, 255, 0.06);
+	color: #e5e7eb;
+}
+
+.plus-btn-danger-ghost {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 10px 16px;
+	border-radius: 12px;
+	font-size: 13px;
+	font-weight: 600;
+	color: #9ca3af;
+	background: transparent;
+	border: none;
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.plus-btn-danger-ghost:hover {
+	color: #ef4444;
+	background: rgba(239, 68, 68, 0.06);
+}
+
+:root[data-theme="dark"] .plus-btn-danger-ghost:hover {
+	background: rgba(239, 68, 68, 0.1);
+}
+
+/* ═══════════════════════════════════════
+   MODAL
+   ═══════════════════════════════════════ */
+
+.plus-modal-content {
+	background: var(--sb-white);
+	border-radius: 20px;
+	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.3);
+	overflow: hidden;
+}
+
+/* Modal Transition */
+.plus-modal-enter-active,
+.plus-modal-leave-active {
+	transition: all 0.25s ease;
+}
+
+.plus-modal-enter-from,
+.plus-modal-leave-to {
+	opacity: 0;
+}
+
+.plus-modal-enter-from .plus-modal-content,
+.plus-modal-leave-to .plus-modal-content {
+	transform: scale(0.95) translateY(10px);
+}
+
+/* ═══════════════════════════════════════
+   GRADIENT ANIMATION
+   ═══════════════════════════════════════ */
+
+@keyframes gradient-x {
+	0%, 100% { background-position: 0% 50%; }
+	50% { background-position: 100% 50%; }
+}
+
+.animate-gradient-x {
+	background-size: 200% auto;
+	animation: gradient-x 4s ease infinite;
+}
+</style>
