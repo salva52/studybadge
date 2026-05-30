@@ -1,27 +1,27 @@
 <template>
-	<div class="min-h-screen bg-surface-gray-2 pb-12">
+	<div class="help-page min-h-screen pb-16">
 		<header
-			class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-white px-3 py-2.5 sm:px-5 shadow-sm"
+			class="sticky top-0 z-10 flex items-center justify-between border-b help-header px-4 py-3 sm:px-6 shadow-sm"
 		>
 			<Breadcrumbs class="h-7" :items="breadcrumbs" />
 		</header>
 
 		<!-- Hero Section -->
-		<div class="bg-gradient-to-br from-blue-900 to-indigo-900 text-white py-12 px-5 sm:py-16 sm:px-8 border-b border-indigo-800 shadow-inner relative overflow-hidden">
+		<div class="help-hero relative overflow-hidden text-center text-white py-16 px-6 sm:py-24">
 			<!-- Subtle background decoration -->
-			<div class="absolute -top-24 -right-24 size-96 bg-blue-500 opacity-20 blur-3xl rounded-full"></div>
-			<div class="absolute top-1/2 -left-24 size-64 bg-amber-500 opacity-20 blur-3xl rounded-full"></div>
+			<div class="absolute -top-24 -right-24 w-[500px] h-[500px] bg-blue-500 opacity-20 blur-[80px] rounded-full"></div>
+			<div class="absolute top-1/2 -left-24 w-[400px] h-[400px] bg-amber-500 opacity-10 blur-[80px] rounded-full"></div>
 			
 			<div class="mx-auto max-w-5xl relative z-10">
-				<div class="flex flex-col items-center text-center gap-4">
-					<div class="rounded-2xl bg-white/10 p-4 ring-1 ring-white/20 backdrop-blur-md shadow-lg">
-						<LifeBuoy class="size-10 stroke-1.5 text-blue-300" />
+				<div class="flex flex-col items-center gap-6">
+					<div class="rounded-2xl bg-white/10 p-5 ring-1 ring-white/20 backdrop-blur-md shadow-2xl">
+						<LifeBuoy class="size-12 sm:size-14 stroke-1.5 text-blue-300 drop-shadow-md" />
 					</div>
 					<div>
-						<h1 class="text-4xl sm:text-5xl font-bold tracking-tight">
-							Centro de <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-cyan-200">Ayuda</span>
+						<h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-4">
+							Centro de <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-cyan-200 to-blue-200">Ayuda</span>
 						</h1>
-						<p class="mt-4 text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto font-medium">
+						<p class="mt-6 text-xl sm:text-2xl text-blue-100/90 max-w-3xl mx-auto font-medium leading-relaxed">
 							{{ __('Estamos aquí para apoyarte. Encuentra respuestas rápidas o contacta con nuestro equipo de soporte.') }}
 						</p>
 					</div>
@@ -29,41 +29,41 @@
 			</div>
 		</div>
 
-		<div class="mx-auto max-w-5xl px-5 py-10">
+		<div class="mx-auto max-w-5xl px-5 py-12 -mt-8 relative z-20">
 			<div class="space-y-12">
 				
 				<!-- Soporte Rápido -->
 				<section>
-					<h2 class="text-2xl font-bold text-ink-gray-9 mb-6 flex items-center gap-2">
-						<Headset class="size-6 text-blue-600" />
+					<h2 class="text-2xl sm:text-3xl font-extrabold help-text-primary mb-6 flex items-center gap-3">
+						<Headset class="size-7 text-blue-600" />
 						{{ __('¿Cómo podemos ayudarte?') }}
 					</h2>
 					
 					<div class="grid gap-6 md:grid-cols-2">
 						<!-- IA Bubble Info -->
-						<div class="flex flex-col h-full rounded-2xl border border-blue-100 bg-surface-white p-6 sm:p-8 shadow-sm transition-all duration-300 hover:shadow-md hover:border-blue-200 relative overflow-hidden">
-							<div class="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
-								<Bot class="size-24 text-blue-600" />
+						<div class="help-card p-6 sm:p-8 relative overflow-hidden group">
+							<div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+								<Bot class="size-32 text-blue-600" />
 							</div>
-							<div class="rounded-xl bg-blue-50 w-fit p-3 mb-4">
-								<Bot class="size-6 text-blue-600 stroke-1.5" />
+							<div class="rounded-2xl bg-blue-50 dark:bg-blue-900/20 w-fit p-3.5 mb-5 ring-1 ring-blue-100 dark:ring-blue-800/50">
+								<Bot class="size-7 text-blue-600 dark:text-blue-400 stroke-1.5" />
 							</div>
-							<h3 class="text-xl font-bold text-ink-gray-9 mb-2">{{ __('Asistente de IA 24/7') }}</h3>
-							<p class="text-ink-gray-6 mb-4 text-sm leading-relaxed flex-grow">
+							<h3 class="text-xl sm:text-2xl font-bold help-text-primary mb-3">{{ __('Asistente de IA 24/7') }}</h3>
+							<p class="help-text-muted mb-6 text-sm sm:text-base leading-relaxed flex-grow">
 								{{ __('Nuestro asistente inteligente está disponible 24/7 para consultas generales o problemas con la plataforma en ') }}
 								<strong>studybadge.com</strong>.
 							</p>
-							<div class="mt-auto pt-4 flex flex-col gap-3 border-t border-gray-100">
-								<div class="flex items-start gap-2 text-xs text-amber-700 bg-amber-50 p-3 rounded-lg border border-amber-100">
-									<Info class="size-4 shrink-0 mt-0.5" />
-									<span>
-										<strong>Nota importante:</strong> La burbuja de IA que ves en esta academia (academy.studybadge.com) es <em>exclusiva del Tutor IA</em> para resolver dudas de tus cursos, no para soporte técnico.
+							<div class="mt-auto pt-5 flex flex-col gap-4 border-t help-border">
+								<div class="flex items-start gap-3 text-xs sm:text-sm text-amber-800 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 p-4 rounded-xl border border-amber-100 dark:border-amber-500/20">
+									<Info class="size-5 shrink-0 mt-0.5" />
+									<span class="leading-relaxed">
+										<strong>Nota importante:</strong> La burbuja de IA que ves en esta academia es <em>exclusiva del Tutor IA</em> para resolver dudas de tus cursos, no para soporte técnico.
 									</span>
 								</div>
 								<a
 									href="https://studybadge.com"
 									target="_blank"
-									class="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-bold text-blue-600 shadow-sm ring-1 ring-inset ring-blue-200 hover:bg-blue-50 transition-colors w-full sm:w-auto"
+									class="help-btn-outline w-full sm:w-auto mt-2"
 								>
 									<ExternalLink class="size-4" />
 									{{ __('Ir a studybadge.com') }}
@@ -72,27 +72,27 @@
 						</div>
 
 						<!-- Correo Soporte -->
-						<div class="flex flex-col h-full rounded-2xl border border-gray-200 bg-surface-white p-6 sm:p-8 shadow-sm transition-all duration-300 hover:shadow-md hover:border-gray-300 relative overflow-hidden">
-							<div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-								<Mail class="size-24 text-gray-900" />
+						<div class="help-card p-6 sm:p-8 relative overflow-hidden group">
+							<div class="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-10 transition-opacity pointer-events-none">
+								<Mail class="size-32 text-gray-900 dark:text-white" />
 							</div>
-							<div class="rounded-xl bg-gray-100 w-fit p-3 mb-4">
-								<Mail class="size-6 text-gray-700 stroke-1.5" />
+							<div class="rounded-2xl bg-gray-100 dark:bg-gray-800 w-fit p-3.5 mb-5 ring-1 ring-gray-200 dark:ring-gray-700">
+								<Mail class="size-7 text-gray-700 dark:text-gray-300 stroke-1.5" />
 							</div>
-							<h3 class="text-xl font-bold text-ink-gray-9 mb-2">{{ __('Contacto Directo') }}</h3>
-							<p class="text-ink-gray-6 mb-4 text-sm leading-relaxed flex-grow">
+							<h3 class="text-xl sm:text-2xl font-bold help-text-primary mb-3">{{ __('Contacto Directo') }}</h3>
+							<p class="help-text-muted mb-6 text-sm sm:text-base leading-relaxed flex-grow">
 								{{ __('¿Tienes un problema complejo, un error técnico, o una consulta sobre facturación? Nuestro equipo humano está listo para revisar tu caso a detalle.') }}
 							</p>
-							<div class="mt-auto pt-4 border-t border-gray-100">
+							<div class="mt-auto pt-5 border-t help-border flex flex-col items-start">
 								<a
 									href="mailto:soporte@studybadge.com"
-									class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-blue-700 transition-colors w-full sm:w-auto"
+									class="help-btn-primary w-full sm:w-auto"
 								>
 									<Mail class="size-4" />
 									{{ __('Escribir a soporte@studybadge.com') }}
 								</a>
-								<p class="text-xs text-gray-500 mt-3 text-center sm:text-left">
-									{{ __('Respondemos de Lunes a Viernes en menos de 24 horas.') }}
+								<p class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-4 flex items-center gap-2">
+									<Clock class="size-4" /> {{ __('Respondemos de Lunes a Viernes en menos de 24 horas.') }}
 								</p>
 							</div>
 						</div>
@@ -100,49 +100,49 @@
 				</section>
 
 				<!-- Documentación Básica -->
-				<section>
-					<h2 class="text-2xl font-bold text-ink-gray-9 mb-6 flex items-center gap-2">
-						<BookOpen class="size-6 text-amber-500" />
-						{{ __('Guía Rápida / Preguntas Frecuentes') }}
+				<section class="pt-6">
+					<h2 class="text-2xl sm:text-3xl font-extrabold help-text-primary mb-8 flex items-center gap-3">
+						<BookOpen class="size-7 text-amber-500" />
+						{{ __('Preguntas Frecuentes') }}
 					</h2>
 
-					<div class="grid gap-4">
-						<div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-							<div class="flex items-start gap-4">
-								<div class="rounded-full bg-blue-50 p-2 shrink-0">
-									<GraduationCap class="size-5 text-blue-600 stroke-2" />
+					<div class="grid gap-5">
+						<div class="help-card p-6 sm:p-8">
+							<div class="flex flex-col sm:flex-row items-start gap-5">
+								<div class="rounded-2xl bg-blue-50 dark:bg-blue-900/20 p-3.5 shrink-0 ring-1 ring-blue-100 dark:ring-blue-800/50">
+									<GraduationCap class="size-6 text-blue-600 dark:text-blue-400 stroke-2" />
 								</div>
 								<div>
-									<h3 class="font-bold text-ink-gray-9 text-lg">{{ __('¿Cómo empiezo un curso?') }}</h3>
-									<p class="mt-2 text-sm text-ink-gray-6 leading-relaxed">
+									<h3 class="font-extrabold help-text-primary text-xl mb-3">{{ __('¿Cómo empiezo un curso?') }}</h3>
+									<p class="text-base help-text-muted leading-relaxed">
 										Para empezar un curso, dirígete a la pestaña <strong>Cursos</strong> en el menú lateral. Haz clic en el curso que te interese y luego en el botón <strong>"Inscribirse"</strong> o <strong>"Empezar Curso"</strong>. Todo tu progreso se guardará automáticamente en tu perfil.
 									</p>
 								</div>
 							</div>
 						</div>
 
-						<div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-							<div class="flex items-start gap-4">
-								<div class="rounded-full bg-amber-50 p-2 shrink-0">
-									<Award class="size-5 text-amber-600 stroke-2" />
+						<div class="help-card p-6 sm:p-8">
+							<div class="flex flex-col sm:flex-row items-start gap-5">
+								<div class="rounded-2xl bg-amber-50 dark:bg-amber-900/20 p-3.5 shrink-0 ring-1 ring-amber-100 dark:ring-amber-800/50">
+									<Award class="size-6 text-amber-600 dark:text-amber-400 stroke-2" />
 								</div>
 								<div>
-									<h3 class="font-bold text-ink-gray-9 text-lg">{{ __('¿Cómo obtengo mis certificaciones?') }}</h3>
-									<p class="mt-2 text-sm text-ink-gray-6 leading-relaxed">
+									<h3 class="font-extrabold help-text-primary text-xl mb-3">{{ __('¿Cómo obtengo mis certificaciones?') }}</h3>
+									<p class="text-base help-text-muted leading-relaxed">
 										Una vez que completes al 100% todas las lecciones y evaluaciones de un curso, se generará tu certificado automáticamente si cumples con los requisitos. Puedes descargarlo e integrarlo a LinkedIn desde la sección <strong>Certificaciones</strong> o desde tu perfil público.
 									</p>
 								</div>
 							</div>
 						</div>
 
-						<div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-							<div class="flex items-start gap-4">
-								<div class="rounded-full bg-green-50 p-2 shrink-0">
-									<User class="size-5 text-green-600 stroke-2" />
+						<div class="help-card p-6 sm:p-8">
+							<div class="flex flex-col sm:flex-row items-start gap-5">
+								<div class="rounded-2xl bg-green-50 dark:bg-green-900/20 p-3.5 shrink-0 ring-1 ring-green-100 dark:ring-green-800/50">
+									<User class="size-6 text-green-600 dark:text-green-400 stroke-2" />
 								</div>
 								<div>
-									<h3 class="font-bold text-ink-gray-9 text-lg">{{ __('¿Por qué debo completar mi perfil?') }}</h3>
-									<p class="mt-2 text-sm text-ink-gray-6 leading-relaxed">
+									<h3 class="font-extrabold help-text-primary text-xl mb-3">{{ __('¿Por qué debo completar mi perfil?') }}</h3>
+									<p class="text-base help-text-muted leading-relaxed">
 										Completar tu perfil con una foto, titular y biografía te permite acceder a una mejor experiencia. Además, un perfil completo es un requisito previo para ciertas actividades dentro de la plataforma y te ayuda a destacar ante reclutadores en los Rankings.
 									</p>
 								</div>
@@ -169,7 +169,8 @@ import {
 	BookOpen,
 	GraduationCap,
 	Award,
-	User
+	User,
+	Clock
 } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
 
@@ -189,3 +190,134 @@ usePageMeta(() => {
 	}
 })
 </script>
+
+<style scoped>
+/* ═══════════════════════════════════════
+   TOKENS & THEME
+   ═══════════════════════════════════════ */
+
+.help-page {
+	background: var(--sb-bg);
+}
+
+.help-header {
+	background: var(--sb-white);
+	border-color: rgba(6, 27, 73, 0.05);
+}
+
+:root[data-theme="dark"] .help-header {
+	border-color: rgba(255, 255, 255, 0.05);
+}
+
+.help-border {
+	border-color: rgba(6, 27, 73, 0.06);
+}
+
+:root[data-theme="dark"] .help-border {
+	border-color: rgba(255, 255, 255, 0.06);
+}
+
+.help-text-primary { color: #111827; }
+.help-text-muted { color: #4b5563; }
+:root[data-theme="dark"] .help-text-primary { color: #f3f4f6; }
+:root[data-theme="dark"] .help-text-muted { color: #9ca3af; }
+
+/* ═══════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════ */
+
+.help-hero {
+	background: linear-gradient(135deg, #061B49 0%, #0b2f73 50%, #0a2259 100%);
+	box-shadow: inset 0 -1px 0 rgba(0,0,0,0.2);
+}
+
+/* ═══════════════════════════════════════
+   CARDS
+   ═══════════════════════════════════════ */
+
+.help-card {
+	background: var(--sb-white);
+	border: 1px solid rgba(6, 27, 73, 0.06);
+	border-radius: 24px;
+	box-shadow: 0 4px 6px -1px rgba(6, 27, 73, 0.02), 0 2px 4px -2px rgba(6, 27, 73, 0.02);
+	transition: all 0.25s ease;
+	display: flex;
+	flex-direction: column;
+}
+
+.help-card:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 12px 24px -4px rgba(6, 27, 73, 0.06), 0 8px 12px -6px rgba(6, 27, 73, 0.04);
+	border-color: rgba(13, 110, 253, 0.2);
+}
+
+:root[data-theme="dark"] .help-card {
+	border-color: rgba(255, 255, 255, 0.08);
+	box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+:root[data-theme="dark"] .help-card:hover {
+	border-color: rgba(13, 110, 253, 0.4);
+	box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.4), 0 8px 12px -6px rgba(0, 0, 0, 0.2);
+}
+
+/* ═══════════════════════════════════════
+   BUTTONS
+   ═══════════════════════════════════════ */
+
+.help-btn-primary {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 12px 24px;
+	border-radius: 14px;
+	font-size: 15px;
+	font-weight: 700;
+	color: #fff;
+	background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+	border: none;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25);
+	text-decoration: none;
+}
+
+.help-btn-primary:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 6px 16px rgba(13, 110, 253, 0.35);
+	color: #fff;
+}
+
+.help-btn-outline {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 12px 24px;
+	border-radius: 14px;
+	font-size: 15px;
+	font-weight: 700;
+	color: #374151;
+	background: var(--sb-white);
+	border: 2px solid rgba(0, 0, 0, 0.08);
+	cursor: pointer;
+	transition: all 0.15s ease;
+	text-decoration: none;
+}
+
+.help-btn-outline:hover {
+	background: rgba(0, 0, 0, 0.03);
+	border-color: rgba(0, 0, 0, 0.15);
+}
+
+:root[data-theme="dark"] .help-btn-outline {
+	color: #e5e7eb;
+	border-color: rgba(255, 255, 255, 0.12);
+}
+
+:root[data-theme="dark"] .help-btn-outline:hover {
+	background: rgba(255, 255, 255, 0.05);
+	border-color: rgba(255, 255, 255, 0.2);
+}
+</style>
