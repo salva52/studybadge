@@ -1535,13 +1535,14 @@ const ExerciseList = defineComponent({
 	flex-direction: column;
 	gap: 0.875rem;
 	transition: all 0.2s ease;
+	min-width: 0;
 }
 .course-card:hover {
 	border-color: #c7d2fe;
 	box-shadow: 0 6px 24px rgba(99, 102, 241, 0.06);
 }
 
-.course-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; }
+.course-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; min-width: 0; }
 
 .course-tag {
 	display: inline-block;
@@ -1562,9 +1563,12 @@ const ExerciseList = defineComponent({
 	font-weight: 700;
 	color: #0f172a;
 	margin-top: 0.375rem;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
 	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+	white-space: normal;
+	word-break: break-word;
 }
 .course-card-date { display: flex; align-items: center; gap: 0.375rem; font-size: 0.8rem; color: #94a3b8; margin-top: 0.25rem; }
 
@@ -1595,6 +1599,7 @@ const ExerciseList = defineComponent({
 	border-radius: 10px;
 	background: #f8fafc;
 	border: 1px solid #f1f5f9;
+	min-width: 0;
 }
 .course-next-icon {
 	display: grid;
@@ -1607,7 +1612,7 @@ const ExerciseList = defineComponent({
 	color: #4f46e5;
 }
 .course-next-label { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
-.course-next-title { font-size: 0.85rem; font-weight: 600; color: #0f172a; margin-top: 0.125rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.course-next-title { font-size: 0.85rem; font-weight: 600; color: #0f172a; margin-top: 0.125rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; white-space: normal; word-break: break-word; }
 
 .course-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 
