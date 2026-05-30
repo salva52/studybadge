@@ -1,42 +1,44 @@
 <template>
-	<div class="w-full px-5 pt-5 pb-10">
-		<!-- StudyBadge Hero Section -->
-		<div class="sb-hero">
-			<div class="sb-hero-brand">
-				<img :src="'/assets/lms/images/studybadge/studybadge-logo.png'" alt="StudyBadge" class="sb-hero-logo" />
-				<span class="sb-hero-brand-name">StudyBadge</span>
-			</div>
-			<h1>Aprende habilidades reales.<br/>Obtén certificados verificables.</h1>
-			<p>Cursos online diseñados para ayudarte a crecer profesionalmente, validar tus conocimientos y avanzar a tu ritmo.</p>
-			<router-link
-				:to="{ name: 'Courses' }"
-				class="sb-hero-cta"
-			>
-				{{ __('Explorar Cursos') }} →
-			</router-link>
-		</div>
-
-		<div class="space-y-2">
-			<div class="flex items-center justify-between">
-				<div class="text-xl font-bold text-ink-gray-9">
-					{{ __('Hola') }}, {{ user.data?.full_name }} 👋
-				</div>
-				<div>
-					<div
-						v-if="!isAdmin"
-						@click="showStreakModal = true"
-						class="bg-surface-amber-2 px-2 py-1 rounded-md cursor-pointer"
-					>
-						<span> 🔥 </span>
-						<span class="text-ink-gray-9">
-							{{ streakInfo.data?.current_streak }}
-						</span>
+	<div class="w-full px-4 sm:px-6 pt-6 pb-12 font-sans bg-[#f5f7fb] min-h-screen">
+		<!-- New Hero Section -->
+		<div class="bg-[#08204e] rounded-3xl p-8 sm:p-10 text-white relative overflow-hidden mb-8 shadow-lg">
+			<!-- background decorations -->
+			<div class="absolute -top-24 -right-24 w-96 h-96 bg-[#0b2f73] opacity-50 blur-3xl rounded-full"></div>
+			<div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
+				<div class="space-y-4 max-w-2xl">
+					<h1 class="text-3xl sm:text-4xl font-bold tracking-tight">
+						{{ __('Hola') }}, {{ user.data?.full_name?.split(' ')[0] || user.data?.full_name }} 👋
+					</h1>
+					<p class="text-lg text-blue-100 font-medium">
+						{{ subtitle }}
+					</p>
+					<div class="flex flex-wrap gap-3 pt-2" v-if="!isAdmin">
+						<router-link
+							:to="{ name: 'Courses' }"
+							class="inline-flex items-center justify-center rounded-xl bg-[#0d6efd] px-6 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-[#0b2f73]"
+						>
+							{{ __('Continuar aprendiendo') }}
+						</router-link>
+						<router-link
+							:to="{ name: 'Courses' }"
+							class="inline-flex items-center justify-center rounded-xl bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+						>
+							{{ __('Explorar cursos') }}
+						</router-link>
 					</div>
 				</div>
-			</div>
-
-			<div class="text-lg text-ink-gray-6 leading-6">
-				{{ subtitle }}
+				<div class="hidden md:flex gap-6 items-center" v-if="!isAdmin">
+					<!-- Mini Stats in Hero -->
+					<div class="text-center cursor-pointer hover:scale-105 transition-transform" @click="showStreakModal = true">
+						<div class="text-4xl font-black text-amber-400 drop-shadow-sm">{{ streakInfo.data?.current_streak || 0 }}</div>
+						<div class="text-xs uppercase tracking-wider text-blue-200 font-bold mt-1 flex justify-center items-center gap-1">{{ __('Racha') }} 🔥</div>
+					</div>
+					<div class="w-px h-16 bg-white/20"></div>
+					<div class="text-center">
+						<div class="text-4xl font-black text-white drop-shadow-sm">{{ evalCount || 0 }}</div>
+						<div class="text-xs uppercase tracking-wider text-blue-200 font-bold mt-1 flex justify-center items-center gap-1">{{ __('Evals') }} 📝</div>
+					</div>
+				</div>
 			</div>
 		</div>
 
@@ -190,7 +192,7 @@ const subtitle = computed(() => {
 				evalSuffix
 			)
 		}
-		return __('Continúa donde lo dejaste')
+		return __('Sigue aprendiendo y completa tu próximo curso')
 	}
 })
 
