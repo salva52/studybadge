@@ -1,133 +1,114 @@
 <template>
-	<div>
-		<div class="mt-10 space-y-10">
-			<div v-if="evals?.data?.length">
-				<div class="font-semibold text-lg text-ink-gray-9 mb-3">
-					{{ __('Evaluaciones Próximas') }}
-				</div>
-				<div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-					<div
-						v-for="evaluation in evals?.data"
-						class="border hover:border-outline-gray-3 rounded-md p-3 flex flex-col h-full cursor-pointer"
-						@click="redirectToProfile()"
-					>
-						<div class="font-semibold text-ink-gray-9 text-lg leading-5 mb-3">
-							{{ evaluation.course_title }}
-						</div>
-						<div class="text-ink-gray-7">
-							<div class="flex items-center mb-3">
-								<Calendar class="w-4 h-4 stroke-1.5" />
-								<span class="ms-2">
-									{{ dayjs(evaluation.date).format('DD MMMM YYYY') }}
-								</span>
-							</div>
-							<div class="flex items-center mb-3">
-								<Clock class="w-4 h-4 stroke-1.5" />
-								<span class="ms-2">
-									{{ formatTime(evaluation.start_time) }}
-								</span>
-							</div>
-							<div class="flex items-center">
-								<GraduationCap class="w-4 h-4 stroke-1.5" />
-								<span class="ms-2">
-									{{ evaluation.member_name }}
-								</span>
-							</div>
-						</div>
+	<div class="space-y-10">
+		<!-- ═══ 1. EVALUACIONES PRÓXIMAS ═══ -->
+		<div v-if="evals?.data?.length">
+			<h3 class="ah-section-title">
+				<div class="ah-section-icon bg-amber-500/10 text-amber-600"><ClipboardCheck class="size-5" /></div>
+				{{ __('Evaluaciones Próximas') }}
+			</h3>
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+				<div
+					v-for="evaluation in evals?.data"
+					:key="evaluation.name"
+					class="ah-card p-5 group cursor-pointer hover:border-amber-400/30"
+					@click="redirectToProfile()"
+				>
+					<div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-amber-600 mb-3">
+						<ClipboardCheck class="size-3.5" /> {{ __('Evaluación') }}
 					</div>
-				</div>
-			</div>
-			<div v-if="liveClasses?.data?.length">
-				<div class="font-semibold text-lg text-ink-gray-9 mb-3">
-					{{ __('Clases en Vivo Próximas') }}
-				</div>
-				<div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-					<div
-						v-for="cls in liveClasses?.data"
-						class="border hover:border-outline-gray-3 rounded-md p-3"
-					>
-						<div class="font-semibold text-ink-gray-9 text-lg leading-5 mb-1">
-							{{ cls.title }}
+					<div class="font-extrabold ah-text-primary text-lg leading-tight mb-4 group-hover:text-amber-600 transition-colors">
+						{{ evaluation.course_title }}
+					</div>
+					<div class="space-y-2.5 mt-auto">
+						<div class="ah-meta-row">
+							<Calendar class="w-4 h-4 shrink-0 text-gray-400" />
+							<span class="font-medium ah-text-primary text-sm">{{ dayjs(evaluation.date).format('DD MMM YYYY') }}</span>
 						</div>
-						<div class="text-ink-gray-7 leading-5 mb-4">
-							{{ cls.description }}
+						<div class="ah-meta-row">
+							<Clock class="w-4 h-4 shrink-0 text-gray-400" />
+							<span class="font-medium ah-text-primary text-sm">{{ formatTime(evaluation.start_time) }}</span>
 						</div>
-						<div class="mt-auto space-y-3 text-ink-gray-7">
-							<div class="flex items-center gap-x-2">
-								<Calendar class="w-4 h-4 stroke-1.5" />
-								<span>
-									{{ dayjs(cls.date).format('DD MMMM YYYY') }}
-								</span>
-							</div>
-							<div class="flex items-center gap-x-2">
-								<Clock class="w-4 h-4 stroke-1.5" />
-								<span>
-									{{ formatTime(cls.time) }} -
-									{{ dayjs(getClassEnd(cls)).format('HH:mm A') }}
-								</span>
-							</div>
-							<div
-								v-if="canAccessClass(cls)"
-								class="flex items-center gap-x-2 text-ink-gray-9 mt-auto"
-							>
-								<a
-									v-if="user.data?.is_moderator || user.data?.is_evaluator"
-									:href="cls.start_url"
-									target="_blank"
-									class="cursor-pointer inline-flex items-center justify-center gap-2 transition-colors focus:outline-none text-ink-gray-8 bg-surface-gray-2 hover:bg-surface-gray-3 active:bg-surface-gray-4 focus-visible:ring focus-visible:ring-outline-gray-3 h-7 text-base px-2 rounded"
-									:class="cls.join_url ? 'w-full' : 'w-1/2'"
-								>
-									<Monitor class="h-4 w-4 stroke-1.5" />
-									{{ __('Iniciar') }}
-								</a>
-								<a
-									:href="cls.join_url"
-									target="_blank"
-									class="w-full cursor-pointer inline-flex items-center justify-center gap-2 transition-colors focus:outline-none text-ink-gray-8 bg-surface-gray-2 hover:bg-surface-gray-3 active:bg-surface-gray-4 focus-visible:ring focus-visible:ring-outline-gray-3 h-7 text-base px-2 rounded"
-								>
-									<Video class="h-4 w-4 stroke-1.5" />
-									{{ __('Unirse') }}
-								</a>
-							</div>
-							<Tooltip
-								v-else-if="hasClassEnded(cls)"
-								:text="__('Esta clase ha finalizado')"
-								placement="right"
-							>
-								<div class="flex items-center gap-x-2 text-ink-amber-3 w-fit">
-									<Info class="w-4 h-4 stroke-1.5" />
-									<span>
-										{{ __('Finalizada') }}
-									</span>
-								</div>
-							</Tooltip>
+						<div class="ah-meta-row bg-blue-50/50 dark:bg-blue-900/10">
+							<User class="w-4 h-4 shrink-0 text-blue-500" />
+							<span class="font-bold ah-text-primary text-sm line-clamp-1">{{ evaluation.member_name }}</span>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 
-		<div v-if="createdCourses.data?.length" class="mt-10">
-			<div class="flex items-center justify-between mb-3">
-				<span class="font-semibold text-lg text-ink-gray-9">
-					{{ __('Cursos destacados') }}
-				</span>
-				<router-link
-					:to="{
-						name: 'Courses',
-					}"
+		<!-- ═══ 2. CLASES EN VIVO PRÓXIMAS ═══ -->
+		<div v-if="liveClasses?.data?.length">
+			<h3 class="ah-section-title">
+				<div class="ah-section-icon bg-red-500/10 text-red-500"><Video class="size-5" /></div>
+				{{ __('Clases en Vivo Próximas') }}
+			</h3>
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+				<div
+					v-for="cls in liveClasses?.data"
+					:key="cls.name"
+					class="ah-card p-5 flex flex-col"
 				>
-					<span class="flex items-center gap-x-1 text-ink-gray-5 text-xs">
-						<span>
-							{{ __('Ver todos') }}
-						</span>
-						<MoveRight class="size-3 stroke-1.5 rtl:rotate-180" />
-					</span>
+					<div class="font-extrabold ah-text-primary text-lg leading-tight mb-2">
+						{{ cls.title }}
+					</div>
+					<div class="text-sm ah-text-muted leading-relaxed mb-5 line-clamp-2">
+						{{ cls.description }}
+					</div>
+					
+					<div class="mt-auto space-y-2 mb-5">
+						<div class="ah-meta-row">
+							<Calendar class="w-4 h-4 shrink-0 text-gray-400" />
+							<span class="font-medium ah-text-primary text-sm">{{ dayjs(cls.date).format('DD MMM YYYY') }}</span>
+						</div>
+						<div class="ah-meta-row">
+							<Clock class="w-4 h-4 shrink-0 text-red-400" />
+							<span class="font-medium ah-text-primary text-sm">{{ formatTime(cls.time) }} - {{ dayjs(getClassEnd(cls)).format('HH:mm A') }}</span>
+						</div>
+					</div>
+
+					<div v-if="canAccessClass(cls)" class="flex items-center gap-2 mt-auto pt-4 border-t ah-border">
+						<a
+							v-if="user.data?.is_moderator || user.data?.is_evaluator"
+							:href="cls.start_url"
+							target="_blank"
+							class="ah-btn-outline w-full"
+						>
+							<Monitor class="h-4 w-4" /> {{ __('Iniciar') }}
+						</a>
+						<a
+							:href="cls.join_url"
+							target="_blank"
+							class="ah-btn-primary w-full"
+						>
+							<Video class="h-4 w-4" /> {{ __('Unirse') }}
+						</a>
+					</div>
+					
+					<div v-else-if="hasClassEnded(cls)" class="mt-auto pt-4 border-t ah-border">
+						<div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg text-xs font-bold uppercase tracking-wider w-full justify-center">
+							<Info class="w-4 h-4" /> {{ __('Finalizada') }}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ═══ 3. CURSOS DESTACADOS ═══ -->
+		<div v-if="createdCourses.data?.length">
+			<div class="flex items-center justify-between mb-6">
+				<h3 class="ah-section-title mb-0">
+					<div class="ah-section-icon bg-blue-500/10 text-blue-600"><BookOpen class="size-5" /></div>
+					{{ __('Cursos destacados') }}
+				</h3>
+				<router-link :to="{ name: 'Courses' }" class="ah-link text-sm">
+					{{ __('Ver todos') }} <MoveRight class="size-3.5" />
 				</router-link>
 			</div>
-			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
 				<router-link
 					v-for="course in createdCourses.data"
+					:key="course.name"
 					:to="{ name: 'CourseDetail', params: { courseName: course.name } }"
 				>
 					<CourseCard :course="course" />
@@ -135,27 +116,21 @@
 			</div>
 		</div>
 
-		<div v-if="createdBatches.data?.length" class="mt-10">
-			<div class="flex items-center justify-between mb-3">
-				<span class="font-semibold text-lg text-ink-gray-9">
+		<!-- ═══ 4. GRUPOS PRÓXIMOS ═══ -->
+		<div v-if="createdBatches.data?.length">
+			<div class="flex items-center justify-between mb-6">
+				<h3 class="ah-section-title mb-0">
+					<div class="ah-section-icon bg-purple-500/10 text-purple-600"><Users class="size-5" /></div>
 					{{ __('Grupos Próximos') }}
-				</span>
-				<router-link
-					:to="{
-						name: 'Batches',
-					}"
-				>
-					<span class="flex items-center gap-x-1 text-ink-gray-5 text-xs">
-						<span>
-							{{ __('See all') }}
-						</span>
-						<MoveRight class="size-3 stroke-1.5 rtl:rotate-180" />
-					</span>
+				</h3>
+				<router-link :to="{ name: 'Batches' }" class="ah-link text-sm">
+					{{ __('Ver todos') }} <MoveRight class="size-3.5" />
 				</router-link>
 			</div>
 			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
 				<router-link
 					v-for="batch in createdBatches.data"
+					:key="batch.name"
 					:to="{ name: 'BatchDetail', params: { batchName: batch.name } }"
 				>
 					<BatchCard :batch="batch" />
@@ -163,37 +138,27 @@
 			</div>
 		</div>
 
+		<!-- ═══ EMPTY STATE ═══ -->
 		<div
-			v-if="!createdCourses.data?.length && !createdBatches.data?.length"
-			class="flex flex-col items-center justify-center mt-60"
+			v-if="!createdCourses.data?.length && !createdBatches.data?.length && !liveClasses?.data?.length && !evals?.data?.length"
+			class="ah-empty-state"
 		>
-			<GraduationCap class="size-10 mx-auto stroke-1 text-ink-gray-5" />
-			<div class="text-lg font-semibold text-ink-gray-7 mb-1.5">
-				{{ __('No hay cursos creados') }}
+			<div class="ah-empty-icon mb-6">
+				<GraduationCap class="size-12" />
 			</div>
-			<div
-				class="leading-5 text-base w-full md:w-2/5 text-base text-center text-ink-gray-7"
-			>
-				{{
-					__(
-						'No hay cursos actualmente. ¡Crea tu primer curso para comenzar!'
-					)
-				}}
-			</div>
-			<router-link
-				:to="{ name: 'Courses', query: { newCourse: '1' } }"
-				class="mt-4"
-			>
-				<Button>
-					<template #prefix>
-						<Plus class="size-4 stroke-1.5" />
-					</template>
-					{{ __('Crear Curso') }}
-				</Button>
+			<h2 class="text-2xl font-extrabold ah-text-primary mb-3">
+				{{ __('Aún no hay contenido') }}
+			</h2>
+			<p class="text-base ah-text-muted max-w-md mx-auto leading-relaxed mb-8">
+				{{ __('Parece que tu panel está vacío. Crea tu primer curso o programa evaluaciones para que aparezcan aquí.') }}
+			</p>
+			<router-link :to="{ name: 'Courses', query: { newCourse: '1' } }" class="ah-btn-primary text-base px-8 py-3">
+				<Plus class="size-5" /> {{ __('Crear mi primer curso') }}
 			</router-link>
 		</div>
 	</div>
 </template>
+
 <script setup lang="ts">
 import { Button, createResource, Tooltip } from 'frappe-ui'
 import { inject } from 'vue'
@@ -207,6 +172,10 @@ import {
 	MoveRight,
 	Plus,
 	Video,
+	ClipboardCheck,
+	User,
+	BookOpen,
+	Users
 } from 'lucide-vue-next'
 import { formatTime } from '@/utils'
 import CourseCard from '@/components/CourseCard.vue'
@@ -264,3 +233,202 @@ const redirectToProfile = () => {
 	})
 }
 </script>
+
+<style scoped>
+/* ═══════════════════════════════════════
+   TEXT TOKENS & BORDERS
+   ═══════════════════════════════════════ */
+
+.ah-text-primary { color: #111827; }
+.ah-text-muted { color: #6b7280; }
+:root[data-theme="dark"] .ah-text-primary { color: #f3f4f6; }
+:root[data-theme="dark"] .ah-text-muted { color: #9ca3af; }
+
+.ah-border { border-color: rgba(6, 27, 73, 0.05); }
+:root[data-theme="dark"] .ah-border { border-color: rgba(255, 255, 255, 0.05); }
+
+/* ═══════════════════════════════════════
+   SECTION TITLES
+   ═══════════════════════════════════════ */
+
+.ah-section-title {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	font-size: 1.25rem;
+	font-weight: 800;
+	color: #111827;
+	margin-bottom: 1.25rem;
+}
+
+:root[data-theme="dark"] .ah-section-title {
+	color: #f3f4f6;
+}
+
+.ah-section-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	border-radius: 10px;
+	flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════
+   CARDS
+   ═══════════════════════════════════════ */
+
+.ah-card {
+	background: var(--sb-white);
+	border: 1px solid rgba(6, 27, 73, 0.05);
+	border-radius: 20px;
+	box-shadow: 0 1px 3px rgba(6, 27, 73, 0.03), 0 4px 12px rgba(6, 27, 73, 0.02);
+	transition: all 0.2s ease;
+}
+
+.ah-card:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 8px 24px rgba(6, 27, 73, 0.08);
+}
+
+:root[data-theme="dark"] .ah-card {
+	border-color: rgba(255, 255, 255, 0.05);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+:root[data-theme="dark"] .ah-card:hover {
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* ═══════════════════════════════════════
+   META ROWS
+   ═══════════════════════════════════════ */
+
+.ah-meta-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	border-radius: 12px;
+	background: rgba(0, 0, 0, 0.02);
+}
+
+:root[data-theme="dark"] .ah-meta-row {
+	background: rgba(255, 255, 255, 0.04);
+}
+
+/* ═══════════════════════════════════════
+   BUTTONS
+   ═══════════════════════════════════════ */
+
+.ah-btn-primary {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 10px 18px;
+	border-radius: 12px;
+	font-size: 14px;
+	font-weight: 700;
+	color: #fff;
+	background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+	border: none;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	box-shadow: 0 2px 8px rgba(13, 110, 253, 0.25);
+	text-decoration: none;
+}
+
+.ah-btn-primary:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 4px 16px rgba(13, 110, 253, 0.35);
+}
+
+.ah-btn-outline {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 10px 18px;
+	border-radius: 12px;
+	font-size: 14px;
+	font-weight: 700;
+	color: #374151;
+	background: transparent;
+	border: 2px solid rgba(0, 0, 0, 0.08);
+	cursor: pointer;
+	transition: all 0.15s ease;
+	text-decoration: none;
+}
+
+.ah-btn-outline:hover {
+	background: rgba(0, 0, 0, 0.03);
+	border-color: rgba(0, 0, 0, 0.15);
+}
+
+:root[data-theme="dark"] .ah-btn-outline {
+	color: #d1d5db;
+	border-color: rgba(255, 255, 255, 0.1);
+}
+
+:root[data-theme="dark"] .ah-btn-outline:hover {
+	background: rgba(255, 255, 255, 0.05);
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+/* ═══════════════════════════════════════
+   LINKS
+   ═══════════════════════════════════════ */
+
+.ah-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-weight: 700;
+	color: var(--sb-primary);
+	text-decoration: none;
+	transition: color 0.15s ease;
+}
+
+.ah-link:hover {
+	color: var(--sb-medium);
+}
+
+/* ═══════════════════════════════════════
+   EMPTY STATE
+   ═══════════════════════════════════════ */
+
+.ah-empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 60px 20px;
+	text-align: center;
+	background: var(--sb-white);
+	border: 1px dashed rgba(6, 27, 73, 0.1);
+	border-radius: 24px;
+	margin-top: 40px;
+}
+
+:root[data-theme="dark"] .ah-empty-state {
+	border-color: rgba(255, 255, 255, 0.1);
+}
+
+.ah-empty-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 80px;
+	height: 80px;
+	border-radius: 24px;
+	background: rgba(0, 0, 0, 0.03);
+	color: #d1d5db;
+}
+
+:root[data-theme="dark"] .ah-empty-icon {
+	background: rgba(255, 255, 255, 0.05);
+	color: #4b5563;
+}
+</style>
