@@ -662,7 +662,7 @@ function formatMoney(amount, currency) {
 
 function formatSubscriptionStatus(status) {
 	if (!status) return ''
-	if (status === 'authorized' || status === 'active') return __('Activa 🌟')
+	if (status === 'authorized' || status === 'active') return __('Activa')
 	if (status === 'pending') return __('Pendiente de pago')
 	if (status === 'cancelled') return __('Cancelada')
 	return status.charAt(0).toUpperCase() + status.slice(1)

@@ -1,9 +1,9 @@
 <template>
 	<button
 		v-if="link && !link.onlyMobile"
-		class="flex w-full min-h-10 cursor-pointer items-center rounded-lg text-white/90 duration-300 ease-in-out focus:outline-none focus:transition-none focus-visible:rounded-lg focus-visible:ring-2 focus-visible:ring-sb-accent/30 mb-1"
+		class="group flex w-full min-h-10 cursor-pointer items-center rounded-xl duration-300 ease-out focus:outline-none focus:transition-none focus-visible:ring-2 focus-visible:ring-white/30 mb-1"
 		:class="
-			isActive ? 'bg-white/15 shadow-sm font-medium' : 'hover:bg-white/10'
+			isActive ? 'bg-white/15 shadow-sm font-semibold text-white' : 'text-white/80 hover:bg-white/10 hover:text-white'
 		"
 		@click="handleClick"
 	>
@@ -13,16 +13,17 @@
 		>
 			<Tooltip :text="__(link.label)" placement="right">
 				<slot name="icon">
-					<span class="grid h-5 w-6 flex-shrink-0 place-items-center">
+					<span class="grid h-6 w-6 flex-shrink-0 place-items-center transition-transform duration-300 group-hover:scale-[1.15]">
 						<component
 							:is="icons[link.icon]"
-							class="h-4 w-4 stroke-1.5 text-white/70"
+							class="h-4 w-4 stroke-[1.8px] transition-colors duration-300"
+							:class="isActive ? 'text-white' : 'text-white/60 group-hover:text-white/90'"
 						/>
 					</span>
 				</slot>
 			</Tooltip>
 			<span
-				class="flex-shrink-0 text-[15px] duration-300 ease-in-out"
+				class="flex-shrink-0 text-[14px] duration-300 ease-out"
 				:class="
 					isCollapsed
 						? 'ms-0 w-0 overflow-hidden opacity-0'
@@ -33,11 +34,11 @@
 			</span>
 			<span
 				v-if="link.count && !isCollapsed"
-				class="!ms-auto block text-xs text-blue-200/50"
+				class="!ms-auto flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full text-[11px] font-bold transition-colors duration-300"
 				:class="
 					isCollapsed && link.count > 9
-						? 'absolute top-[2px] end-0 bg-surface-white'
-						: ''
+						? 'absolute top-[2px] end-0 bg-white text-sb-dark'
+						: (isActive ? 'bg-white/20 text-white' : 'bg-white/10 text-white/70 group-hover:bg-white/20 group-hover:text-white')
 				"
 			>
 				{{ link.count }}

@@ -97,16 +97,15 @@
 				v-if="
 					isStudent && !profileIsComplete && !sidebarStore.isSidebarCollapsed
 				"
-				class="flex flex-col gap-3 text-ink-gray-9 py-2.5 px-3 bg-surface-white shadow-sm rounded-md"
+				class="flex flex-col gap-4 text-white py-4 px-4 bg-gradient-to-br from-blue-600/40 to-indigo-600/40 border border-white/10 shadow-lg rounded-xl backdrop-blur-sm relative overflow-hidden"
 			>
-				<div class="flex flex-col text-p-sm gap-1">
-					<div class="inline-flex gap-1">
-						<User class="h-4 my-0.5 shrink-0" />
-						<div class="font-medium">
-							{{ __('Completa tu perfil') }}
-						</div>
+				<div class="absolute -top-6 -right-6 w-20 h-20 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+				<div class="flex flex-col text-sm gap-1.5 relative z-10">
+					<div class="flex items-center gap-2 font-bold tracking-wide">
+						<User class="h-4 w-4 text-blue-300" />
+						<span>{{ __('Completa tu perfil') }}</span>
 					</div>
-					<div class="text-ink-gray-7 leading-5">
+					<div class="text-white/70 leading-snug text-xs">
 						{{ __('Destaca lo que te hace único y muestra tus habilidades.') }}
 					</div>
 				</div>
@@ -117,12 +116,12 @@
 							username: userResource.data?.username,
 						},
 					}"
+					class="relative z-10"
 				>
-					<Button :label="__('Mi Perfil')" class="w-full">
-						<template #prefix>
-							<ChevronsRight class="h-4 w-4 text-ink-gray-7 stroke-1.5" />
-						</template>
-					</Button>
+					<button class="w-full flex items-center justify-center gap-2 bg-white/15 hover:bg-white/25 active:bg-white/30 text-white font-medium text-sm py-2 px-3 rounded-lg transition-colors duration-200">
+						<ChevronsRight class="h-4 w-4 text-white/70" />
+						<span>{{ __('Mi Perfil') }}</span>
+					</button>
 				</router-link>
 			</div>
 			<Tooltip
@@ -140,7 +139,9 @@
 					}"
 					class="flex items-center justify-center"
 				>
-					<User class="size-4 stroke-1.5 text-ink-gray-7 cursor-pointer" />
+					<div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
+						<User class="size-4 stroke-1.5 text-white/70 cursor-pointer" />
+					</div>
 				</router-link>
 			</Tooltip>
 			<TrialBanner
