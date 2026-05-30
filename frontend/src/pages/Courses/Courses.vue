@@ -2,69 +2,84 @@
 	<!-- ═══════════════════════════════════════════════════════════════
 	     PUBLIC VIEW — Course catalog for unauthenticated users
 	     ═══════════════════════════════════════════════════════════════ -->
-	<div v-if="!isLoggedIn" class="sb-public-page">
+	<div v-if="!isLoggedIn" class="c-public-page">
 		<!-- Top Navbar -->
-		<nav class="sb-navbar">
-			<div class="sb-navbar-inner">
-				<div class="sb-navbar-brand">
-					<img :src="brand.favicon" alt="StudyBadge" class="sb-navbar-logo" v-if="brand?.favicon" />
-					<span class="sb-navbar-name">StudyBadge</span>
+		<nav class="c-navbar">
+			<div class="c-navbar-inner">
+				<div class="c-navbar-brand">
+					<img :src="brand.favicon" alt="StudyBadge" class="w-8 h-8" v-if="brand?.favicon" />
+					<span class="c-navbar-name">StudyBadge</span>
 				</div>
-				<div class="sb-navbar-links">
-					<a href="/login" class="sb-nav-link sb-nav-login">Iniciar sesión</a>
-					<a href="/login#signup" class="sb-nav-cta">Registrarse</a>
+				<div class="c-navbar-links">
+					<a href="/login" class="c-nav-login">{{ __('Iniciar sesión') }}</a>
+					<a href="/login#signup" class="c-nav-cta">{{ __('Registrarse') }}</a>
 				</div>
-				<button class="sb-mobile-menu-btn" @click="mobileMenuOpen = !mobileMenuOpen">
+				<button class="c-mobile-menu-btn" @click="mobileMenuOpen = !mobileMenuOpen">
 					<Menu v-if="!mobileMenuOpen" class="w-6 h-6" />
 					<X v-else class="w-6 h-6" />
 				</button>
 			</div>
-			<Transition name="sb-menu-slide">
-				<div v-if="mobileMenuOpen" class="sb-mobile-menu">
-					<a href="/login" class="sb-mobile-link">Iniciar sesión</a>
-					<a href="/login#signup" class="sb-mobile-cta">Registrarse</a>
+			<Transition name="c-menu-slide">
+				<div v-if="mobileMenuOpen" class="c-mobile-menu">
+					<a href="/login" class="c-mobile-link">{{ __('Iniciar sesión') }}</a>
+					<a href="/login#signup" class="c-mobile-cta">{{ __('Registrarse') }}</a>
 				</div>
 			</Transition>
 		</nav>
 
 		<!-- Page Content -->
-		<div class="sb-catalog">
-			<!-- Compact Header -->
-			<div class="sb-catalog-header">
-				<h1 class="sb-catalog-title">Nuestros Cursos</h1>
-				<p class="sb-catalog-desc">Elige un curso, inscríbete y empieza a aprender a tu ritmo. Todos incluyen actividades prácticas y certificado digital.</p>
+		<div class="c-catalog">
+			<!-- Hero Section Public -->
+			<div class="c-hero-banner relative overflow-hidden mb-10">
+				<div class="c-hero-glow-1"></div>
+				<div class="c-hero-glow-2"></div>
+				<div class="c-hero-grid"></div>
+				<div class="relative z-10 p-8 sm:p-12 text-center md:text-left flex flex-col md:flex-row items-center gap-8">
+					<div class="flex-1">
+						<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-100 text-xs font-bold uppercase tracking-wider mb-4">
+							<Sparkles class="size-3.5 text-amber-400" />
+							{{ __('Aprende a tu ritmo') }}
+						</div>
+						<h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight mb-4">
+							{{ __('Explora nuestro catálogo') }}
+						</h1>
+						<p class="text-base sm:text-lg text-blue-100/80 max-w-2xl leading-relaxed">
+							{{ __('Desarrolla nuevas habilidades con nuestros cursos. Todos incluyen actividades prácticas, tutor IA y certificado digital verificable.') }}
+						</p>
+					</div>
+				</div>
 			</div>
 
-			<!-- Search Bar -->
-			<div class="sb-search-bar">
-				<Search class="sb-search-icon" />
-				<input
-					v-model="title"
-					type="text"
-					class="sb-search-input"
-					:placeholder="__('Buscar IA, Excel, ventas, marketing...')"
-					@input="updateCourses()"
-				/>
-			</div>
-
-			<!-- Category Chips -->
-			<div class="sb-chips">
-				<button
-					class="sb-chip"
-					:class="{ 'sb-chip-active': !currentCategory }"
-					@click="currentCategory = null; updateCourses()"
-				>
-					Todos
-				</button>
-				<button
-					v-for="cat in categoryChips"
-					:key="cat"
-					class="sb-chip"
-					:class="{ 'sb-chip-active': currentCategory === cat }"
-					@click="selectCategory(cat)"
-				>
-					{{ cat }}
-				</button>
+			<!-- Search and Filters -->
+			<div class="c-filters-bar">
+				<div class="relative flex-1 md:max-w-md">
+					<Search class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+					<input
+						v-model="title"
+						type="text"
+						class="c-search-input"
+						:placeholder="__('Buscar cursos...')"
+						@input="updateCourses()"
+					/>
+				</div>
+				<div class="c-chips">
+					<button
+						class="c-chip"
+						:class="{ 'c-chip-active': !currentCategory }"
+						@click="currentCategory = null; updateCourses()"
+					>
+						{{ __('Todos') }}
+					</button>
+					<button
+						v-for="cat in categoryChips"
+						:key="cat"
+						class="c-chip"
+						:class="{ 'c-chip-active': currentCategory === cat }"
+						@click="selectCategory(cat)"
+					>
+						{{ cat }}
+					</button>
+				</div>
 			</div>
 
 			<!-- Courses Grid -->
@@ -79,37 +94,44 @@
 					<CourseCard :course="course" />
 				</router-link>
 			</div>
-			<div v-else-if="!courses.list.loading" class="sb-empty">
-				<BookOpen class="w-12 h-12 mb-3" style="color: #cbd5e1;" />
-				<p style="color: #64748b;">No se encontraron cursos.</p>
+			<div v-else-if="!courses.list.loading" class="c-empty">
+				<div class="c-empty-icon mb-4"><BookOpen class="size-10 text-gray-400" /></div>
+				<p class="text-gray-500 font-medium">{{ __('No se encontraron cursos.') }}</p>
 			</div>
 			<div
 				v-if="!courses.list.loading && courses.hasNextPage"
-				class="flex justify-center mt-8"
+				class="flex justify-center mt-10"
 			>
-				<button class="sb-btn-outline" @click="courses.next()">
+				<button class="c-btn-outline" @click="courses.next()">
 					{{ __('Cargar más cursos') }}
 				</button>
 			</div>
 
 			<!-- Small Registration Banner -->
-			<div class="sb-register-banner">
-				<div class="sb-register-text">
-					<GraduationCap class="w-5 h-5" style="color: #F5B301;" />
-					<span>¿Listo para empezar? Regístrate gratis y accede a todos los cursos con certificado.</span>
+			<div class="c-register-banner group mt-16">
+				<div class="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+					<div class="flex items-center gap-4">
+						<div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+							<GraduationCap class="w-6 h-6 text-amber-600" />
+						</div>
+						<div>
+							<h4 class="text-lg font-bold text-gray-900 mb-1">{{ __('¿Listo para empezar?') }}</h4>
+							<p class="text-sm text-gray-600">{{ __('Regístrate gratis y accede a todos los cursos con certificado.') }}</p>
+						</div>
+					</div>
+					<a href="/login#signup" class="c-btn-primary shrink-0">{{ __('Crear cuenta gratis') }}</a>
 				</div>
-				<a href="/login#signup" class="sb-btn-primary">Crear cuenta gratis</a>
 			</div>
 		</div>
 
 		<!-- Footer -->
-		<footer class="sb-footer">
-			<p>© {{ new Date().getFullYear() }} StudyBadge. Todos los derechos reservados.</p>
+		<footer class="c-footer">
+			<p>© {{ new Date().getFullYear() }} StudyBadge. {{ __('Todos los derechos reservados.') }}</p>
 		</footer>
 	</div>
 
 	<!-- ═══════════════════════════════════════════════════════════════
-	     AUTHENTICATED VIEW — Original dashboard for logged-in users
+	     AUTHENTICATED VIEW — Dashboard for logged-in users
 	     ═══════════════════════════════════════════════════════════════ -->
 	<template v-else>
 		<LayoutHeader>
@@ -142,77 +164,93 @@
 				</Dropdown>
 			</template>
 		</LayoutHeader>
-		<div class="bg-gray-50 dark:bg-gray-900 min-h-screen p-4 md:p-8 pb-12">
-			<!-- Page Header / Hero -->
-			<div class="mb-8 relative overflow-hidden rounded-xl bg-gray-900 p-8 md:p-12 text-white shadow-md">
-				<div class="absolute top-0 right-0 -mr-20 -mt-20 w-72 h-72 rounded-full bg-white opacity-10 blur-3xl"></div>
-				<div class="absolute bottom-0 left-10 w-48 h-48 rounded-full bg-white opacity-10 blur-2xl"></div>
-				<div class="relative z-10 flex flex-col md:flex-row items-center gap-6">
+		<div class="c-auth-page min-h-screen px-4 sm:px-6 pt-6 pb-12">
+			<!-- Hero Section -->
+			<div class="c-hero-banner relative overflow-hidden mb-8">
+				<div class="c-hero-glow-1"></div>
+				<div class="c-hero-glow-2"></div>
+				<div class="c-hero-grid"></div>
+				<div class="relative z-10 p-8 sm:p-10 flex flex-col md:flex-row items-center gap-8">
 					<div class="flex-1">
-						<h1 class="text-3xl md:text-5xl font-extrabold mb-4 text-white">{{ __('¡Descubre tu próximo gran logro!') }}</h1>
-						<p class="text-blue-100 dark:text-gray-300 text-lg max-w-xl leading-relaxed">{{ __('Explora nuestro catálogo de cursos, desarrolla nuevas habilidades y lleva tu carrera al siguiente nivel.') }}</p>
+						<div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-100 text-[11px] font-extrabold uppercase tracking-widest mb-4">
+							<Target class="size-3.5 text-amber-400" />
+							{{ __('Catálogo de Cursos') }}
+						</div>
+						<h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight mb-3">
+							{{ __('¡Descubre tu próximo gran logro!') }}
+						</h1>
+						<p class="text-base sm:text-lg text-blue-100/80 font-medium leading-relaxed max-w-2xl">
+							{{ __('Explora nuestro catálogo, desarrolla nuevas habilidades y lleva tu carrera al siguiente nivel.') }}
+						</p>
 					</div>
-					<div class="hidden md:flex items-center justify-center w-32 h-32 rounded-full bg-white/20 backdrop-blur-md border border-white/30 shadow-xl">
-						<BookOpen class="w-16 h-16 text-white" />
+					<div class="hidden md:flex items-center justify-center w-32 h-32 rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 shadow-xl rotate-3 hover:rotate-6 transition-transform">
+						<BookOpen class="w-14 h-14 text-white drop-shadow-md" />
 					</div>
 				</div>
 			</div>
 
-			<!-- Filters -->
-			<div
-				class="mb-8 flex flex-col justify-between space-y-4 lg:flex-row lg:items-center lg:space-y-0 bg-white dark:bg-gray-800 p-3 md:p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700"
-			>
-				<TabButtons :buttons="courseTabs" v-model="currentTab" class="w-fit" />
+			<!-- Filters Bar -->
+			<div class="c-filters-panel mb-8">
+				<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+					<TabButtons :buttons="courseTabs" v-model="currentTab" class="w-fit" />
 
-				<div
-					class="flex flex-col space-y-3 lg:flex-row lg:items-center lg:gap-x-3 lg:space-y-0"
-				>
-					<div class="grid grid-cols-2 gap-2">
-						<FormControl
-							v-model="title"
-							:placeholder="__('Buscar')"
-							type="text"
-							class="w-full"
-							@input="updateCourses()"
-						/>
-						<Select
-							v-if="categories.length"
-							v-model="currentCategory"
-							:options="categories"
-							:placeholder="__('Categoría')"
-							@update:modelValue="updateCourses()"
-						/>
+					<div class="flex flex-col sm:flex-row items-center gap-3">
+						<div class="relative w-full sm:w-64">
+							<Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10" />
+							<FormControl
+								v-model="title"
+								:placeholder="__('Buscar curso...')"
+								type="text"
+								class="w-full c-auth-search"
+								@input="updateCourses()"
+							/>
+						</div>
+						<div class="w-full sm:w-48" v-if="categories.length">
+							<Select
+								v-model="currentCategory"
+								:options="categories"
+								:placeholder="__('Categoría')"
+								@update:modelValue="updateCourses()"
+							/>
+						</div>
+						<Tooltip :text="__('Mostrar solo cursos con certificado')">
+							<label class="flex items-center gap-2 cursor-pointer bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+								<input type="checkbox" v-model="certification" @change="updateCourses()" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+								<span>{{ __('Certificado') }}</span>
+							</label>
+						</Tooltip>
 					</div>
-
-					<Tooltip :text="__('Mostrar solo cursos con certificado')">
-						<FormControl
-							type="checkbox"
-							v-model="certification"
-							:label="__('Certificación')"
-							@change="updateCourses()"
-						/>
-					</Tooltip>
 				</div>
 			</div>
+
+			<!-- Courses Grid -->
 			<div
 				v-if="courses.data?.length"
-				class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+				class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
 			>
 				<router-link
 					v-for="course in courses.data"
+					:key="course.name"
 					:to="{ name: 'CourseDetail', params: { courseName: course.name } }"
 				>
 					<CourseCard :course="course" />
 				</router-link>
 			</div>
-			<EmptyStateLayout v-else-if="!courses.list.loading" name="Courses" />
+			<div v-else-if="!courses.list.loading" class="flex flex-col items-center justify-center py-20 px-4 text-center">
+				<div class="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+					<Search class="w-10 h-10 text-gray-400 dark:text-gray-500" />
+				</div>
+				<h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">{{ __('No se encontraron cursos') }}</h3>
+				<p class="text-gray-500 dark:text-gray-400">{{ __('Intenta con otros filtros de búsqueda.') }}</p>
+			</div>
+			
 			<div
 				v-if="!courses.list.loading && courses.hasNextPage"
-				class="flex justify-center mt-5"
+				class="flex justify-center mt-10"
 			>
-				<Button @click="courses.next()">
+				<button class="c-btn-outline" @click="courses.next()">
 					{{ __('Cargar Más') }}
-				</Button>
+				</button>
 			</div>
 		</div>
 		<NewCourseModal
@@ -227,6 +265,7 @@
 		/>
 	</template>
 </template>
+
 <script setup>
 import {
 	Breadcrumbs,
@@ -522,26 +561,158 @@ usePageMeta(() => {
 	}
 })
 </script>
+
 <style scoped>
-/* ─── Public Page Shell ─── */
-.sb-public-page {
+/* ═══════════════════════════════════════
+   GLOBAL & SHARED
+   ═══════════════════════════════════════ */
+
+.c-btn-primary {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 10px 20px;
+	font-size: 14px;
+	font-weight: 700;
+	color: #fff;
+	background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+	border-radius: 12px;
+	text-decoration: none;
+	transition: all 0.2s ease;
+	border: none;
+	cursor: pointer;
+	white-space: nowrap;
+	box-shadow: 0 2px 8px rgba(13, 110, 253, 0.25);
+}
+
+.c-btn-primary:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 4px 16px rgba(13, 110, 253, 0.35);
+}
+
+.c-btn-outline {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 10px 24px;
+	font-size: 14px;
+	font-weight: 700;
+	color: #111827;
+	background: transparent;
+	border: 2px solid rgba(0, 0, 0, 0.1);
+	border-radius: 12px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.c-btn-outline:hover {
+	background: rgba(0, 0, 0, 0.03);
+	border-color: rgba(0, 0, 0, 0.2);
+}
+
+:root[data-theme="dark"] .c-btn-outline {
+	color: #f3f4f6;
+	border-color: rgba(255, 255, 255, 0.15);
+}
+
+:root[data-theme="dark"] .c-btn-outline:hover {
+	background: rgba(255, 255, 255, 0.05);
+	border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* ═══════════════════════════════════════
+   HERO BANNER (Used in both Public and Auth)
+   ═══════════════════════════════════════ */
+
+.c-hero-banner {
+	background: linear-gradient(145deg, #061B49 0%, #0b2f73 40%, #0a2259 100%);
+	border-radius: 24px;
+	box-shadow: 0 4px 24px rgba(6, 27, 73, 0.15), 0 1px 3px rgba(6, 27, 73, 0.08);
+}
+
+:root[data-theme="dark"] .c-hero-banner {
+	box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.c-hero-glow-1 {
+	position: absolute;
+	top: -100px;
+	right: -60px;
+	width: 360px;
+	height: 360px;
+	background: radial-gradient(circle, rgba(59, 130, 246, 0.25), transparent 70%);
+	border-radius: 50%;
+	filter: blur(50px);
+}
+
+.c-hero-glow-2 {
+	position: absolute;
+	bottom: -80px;
+	left: -40px;
+	width: 260px;
+	height: 260px;
+	background: radial-gradient(circle, rgba(245, 179, 1, 0.15), transparent 70%);
+	border-radius: 50%;
+	filter: blur(40px);
+}
+
+.c-hero-grid {
+	position: absolute;
+	inset: 0;
+	background-image:
+		linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+	background-size: 40px 40px;
+	border-radius: 24px;
+}
+
+/* ═══════════════════════════════════════
+   AUTHENTICATED STYLES
+   ═══════════════════════════════════════ */
+
+.c-auth-page {
+	background: var(--sb-bg);
+}
+
+.c-filters-panel {
+	background: var(--sb-white);
+	border: 1px solid rgba(6, 27, 73, 0.05);
+	border-radius: 16px;
+	padding: 16px;
+	box-shadow: 0 1px 3px rgba(6, 27, 73, 0.03);
+}
+
+:root[data-theme="dark"] .c-filters-panel {
+	border-color: rgba(255, 255, 255, 0.06);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.c-auth-search :deep(input) {
+	padding-left: 2.25rem;
+}
+
+/* ═══════════════════════════════════════
+   PUBLIC PAGE SPECIFIC
+   ═══════════════════════════════════════ */
+
+.c-public-page {
 	font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-	color: #1a1a2e;
-	background: #F5F7FB;
+	color: #111827;
+	background: #f5f7fb;
 	min-height: 100vh;
 }
 
-/* ─── Navbar ─── */
-.sb-navbar {
+/* Navbar */
+.c-navbar {
 	position: sticky;
 	top: 0;
 	z-index: 100;
 	background: rgba(255, 255, 255, 0.92);
 	backdrop-filter: blur(16px);
-	-webkit-backdrop-filter: blur(16px);
 	border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
-.sb-navbar-inner {
+
+.c-navbar-inner {
 	max-width: 1280px;
 	margin: 0 auto;
 	padding: 0 24px;
@@ -550,269 +721,240 @@ usePageMeta(() => {
 	align-items: center;
 	justify-content: space-between;
 }
-.sb-navbar-brand {
+
+.c-navbar-brand {
 	display: flex;
 	align-items: center;
 	gap: 10px;
 }
-.sb-navbar-logo {
-	width: 32px;
-	height: 32px;
-}
-.sb-navbar-name {
+
+.c-navbar-name {
 	font-size: 20px;
 	font-weight: 800;
 	color: #061B49;
 	letter-spacing: -0.02em;
 }
-.sb-navbar-links {
+
+.c-navbar-links {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 12px;
 }
-.sb-nav-link {
-	padding: 8px 14px;
+
+.c-nav-login {
+	padding: 8px 16px;
 	font-size: 14px;
-	font-weight: 500;
-	color: #64748b;
+	font-weight: 700;
+	color: #4b5563;
 	text-decoration: none;
-	border-radius: 8px;
+	border-radius: 10px;
 	transition: all 0.2s;
 }
-.sb-nav-link:hover {
+
+.c-nav-login:hover {
 	color: #061B49;
 	background: rgba(0, 0, 0, 0.04);
 }
-.sb-nav-login {
-	font-weight: 600;
-	color: #061B49;
-}
-.sb-nav-cta {
+
+.c-nav-cta {
 	padding: 8px 20px;
 	font-size: 14px;
-	font-weight: 600;
+	font-weight: 700;
 	color: white;
-	background: #007BFF;
-	border-radius: 8px;
+	background: #111827;
+	border-radius: 10px;
 	text-decoration: none;
 	transition: all 0.2s;
 }
-.sb-nav-cta:hover {
-	background: #0069d9;
+
+.c-nav-cta:hover {
+	background: #000;
 	transform: translateY(-1px);
-	box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
-.sb-mobile-menu-btn {
+
+.c-mobile-menu-btn {
 	display: none;
 	background: none;
 	border: none;
 	cursor: pointer;
 	color: #061B49;
 }
-.sb-mobile-menu {
+
+.c-mobile-menu {
 	display: none;
 	flex-direction: column;
 	padding: 8px 24px 16px;
+	background: #fff;
 	border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
-.sb-mobile-link {
+
+.c-mobile-link {
 	display: block;
-	padding: 10px 0;
+	padding: 12px 0;
 	font-size: 15px;
-	color: #64748b;
+	font-weight: 600;
+	color: #4b5563;
 	text-decoration: none;
 	border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 }
-.sb-mobile-cta {
+
+.c-mobile-cta {
 	display: block;
 	text-align: center;
 	margin-top: 12px;
 	padding: 12px;
-	font-weight: 600;
+	font-weight: 700;
 	color: white;
-	background: #007BFF;
-	border-radius: 8px;
+	background: #111827;
+	border-radius: 10px;
 	text-decoration: none;
 }
+
 @media (max-width: 768px) {
-	.sb-navbar-links { display: none; }
-	.sb-mobile-menu-btn { display: block; }
-	.sb-mobile-menu { display: flex; }
+	.c-navbar-links { display: none; }
+	.c-mobile-menu-btn { display: block; }
+	.c-mobile-menu { display: flex; }
 }
 
-/* ─── Catalog Layout ─── */
-.sb-catalog {
+/* Catalog Container */
+.c-catalog {
 	max-width: 1280px;
 	margin: 0 auto;
 	padding: 32px 24px 64px;
 }
 
-/* ─── Compact Header ─── */
-.sb-catalog-header {
-	margin-bottom: 32px;
-}
-.sb-catalog-title {
-	font-size: 32px;
-	font-weight: 800;
-	color: #061B49;
-	letter-spacing: -0.02em;
-	margin-bottom: 8px;
-}
-.sb-catalog-desc {
-	font-size: 16px;
-	color: #64748b;
-	line-height: 1.6;
-	max-width: 600px;
+/* Search and Filters */
+.c-filters-bar {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
 }
 
-/* ─── Search Bar ─── */
-.sb-search-bar {
-	position: relative;
-	max-width: 480px;
-	margin-bottom: 20px;
+@media (min-width: 768px) {
+	.c-filters-bar {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+	}
 }
-.sb-search-icon {
-	position: absolute;
-	left: 16px;
-	top: 50%;
-	transform: translateY(-50%);
-	width: 18px;
-	height: 18px;
-	color: #94a3b8;
-}
-.sb-search-input {
+
+.c-search-input {
 	width: 100%;
-	padding: 12px 16px 12px 46px;
+	padding: 12px 16px 12px 42px;
 	font-size: 15px;
-	color: #1a1a2e;
+	font-weight: 500;
+	color: #111827;
 	background: #ffffff;
-	border: 1.5px solid rgba(0, 0, 0, 0.08);
-	border-radius: 12px;
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	border-radius: 14px;
 	outline: none;
 	transition: all 0.2s;
-}
-.sb-search-input:focus {
-	border-color: #007BFF;
-	box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.08);
-}
-.sb-search-input::placeholder {
-	color: #94a3b8;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.02);
 }
 
-/* ─── Category Chips ─── */
-.sb-chips {
+.c-search-input:focus {
+	border-color: #3b82f6;
+	box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.c-search-input::placeholder {
+	color: #9ca3af;
+}
+
+/* Chips */
+.c-chips {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	flex-wrap: wrap;
-	margin-bottom: 8px;
-}
-.sb-chip {
-	padding: 8px 18px;
-	font-size: 13px;
-	font-weight: 500;
-	color: #64748b;
-	background: #ffffff;
-	border: 1.5px solid rgba(0, 0, 0, 0.08);
-	border-radius: 100px;
-	cursor: pointer;
-	transition: all 0.2s;
-}
-.sb-chip:hover {
-	border-color: #007BFF;
-	color: #007BFF;
-}
-.sb-chip-active {
-	background: #007BFF !important;
-	color: #ffffff !important;
-	border-color: #007BFF !important;
 }
 
-/* ─── Empty State ─── */
-.sb-empty {
+.c-chip {
+	padding: 8px 16px;
+	font-size: 13px;
+	font-weight: 600;
+	color: #4b5563;
+	background: #ffffff;
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	border-radius: 100px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.c-chip:hover {
+	border-color: #d1d5db;
+	background: #f9fafb;
+}
+
+.c-chip-active {
+	background: #111827 !important;
+	color: #ffffff !important;
+	border-color: #111827 !important;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
+
+/* Empty State */
+.c-empty {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	padding: 64px 0;
-}
-
-/* ─── Buttons ─── */
-.sb-btn-primary {
-	display: inline-block;
-	padding: 12px 24px;
-	font-size: 14px;
-	font-weight: 600;
-	color: #ffffff;
-	background: #007BFF;
-	border-radius: 10px;
-	text-decoration: none;
-	transition: all 0.2s;
-	border: none;
-	cursor: pointer;
-	white-space: nowrap;
-}
-.sb-btn-primary:hover {
-	background: #0069d9;
-	transform: translateY(-1px);
-	box-shadow: 0 4px 16px rgba(0, 123, 255, 0.25);
-}
-.sb-btn-outline {
-	padding: 12px 28px;
-	font-size: 14px;
-	font-weight: 600;
-	color: #007BFF;
-	background: #ffffff;
-	border: 1.5px solid #007BFF;
-	border-radius: 10px;
-	cursor: pointer;
-	transition: all 0.2s;
-}
-.sb-btn-outline:hover {
-	background: #007BFF;
-	color: #ffffff;
-}
-
-/* ─── Registration Banner ─── */
-.sb-register-banner {
-	margin-top: 48px;
-	padding: 24px 32px;
-	background: #ffffff;
-	border: 1.5px solid rgba(0, 123, 255, 0.12);
-	border-radius: 14px;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 24px;
-	flex-wrap: wrap;
-}
-.sb-register-text {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-	font-size: 15px;
-	font-weight: 500;
-	color: #1a1a2e;
-}
-
-/* ─── Footer ─── */
-.sb-footer {
+	padding: 80px 20px;
 	text-align: center;
-	padding: 24px;
-	font-size: 13px;
-	color: #94a3b8;
-	border-top: 1px solid rgba(0, 0, 0, 0.04);
 }
 
-/* ─── Transitions ─── */
-.sb-menu-slide-enter-active,
-.sb-menu-slide-leave-active {
+.c-empty-icon {
+	width: 80px;
+	height: 80px;
+	border-radius: 24px;
+	background: rgba(0,0,0,0.03);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+/* Registration Banner */
+.c-register-banner {
+	padding: 32px;
+	background: #ffffff;
+	border: 1px solid rgba(0, 0, 0, 0.05);
+	border-radius: 24px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+	position: relative;
+	overflow: hidden;
+}
+
+.c-register-banner::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: 30%;
+	background: radial-gradient(circle at top right, rgba(245, 179, 1, 0.1), transparent);
+	z-index: 0;
+}
+
+/* Footer */
+.c-footer {
+	text-align: center;
+	padding: 32px 24px;
+	font-size: 14px;
+	font-weight: 500;
+	color: #6b7280;
+	border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Transitions */
+.c-menu-slide-enter-active,
+.c-menu-slide-leave-active {
 	transition: all 0.2s ease;
 }
-.sb-menu-slide-enter-from,
-.sb-menu-slide-leave-to {
+.c-menu-slide-enter-from,
+.c-menu-slide-leave-to {
 	opacity: 0;
 	transform: translateY(-8px);
 }
 </style>
-
