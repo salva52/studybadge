@@ -1,6 +1,6 @@
 <template>
 	<div class="p-2 w-full">
-		<Popover placement="bottom-start" class="w-full">
+		<Popover placement="bottom-start" class="w-full" transition="default">
 			<template #target="{ togglePopover }">
 				<button
 					@click="togglePopover()"
@@ -47,18 +47,17 @@
 				</button>
 			</template>
 			<template #body="{ close }">
-				<div class="my-2 w-64 rounded-xl bg-white shadow-[0_8px_30px_rgb(0,0,0,0.12)] ring-1 ring-slate-900/5 dark:bg-slate-900 dark:ring-white/10 overflow-hidden flex flex-col z-50">
+				<div class="my-2 w-64 rounded-xl bg-surface-white shadow-[0_8px_30px_rgb(0,0,0,0.12)] ring-1 ring-surface-gray-2 overflow-hidden flex flex-col z-50">
 					<!-- Profile Header -->
-					<div class="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50 flex items-center gap-3">
-						<div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-sm flex-shrink-0">
-							{{ userResource.data?.full_name ? convertToTitleCase(userResource.data.full_name).charAt(0) : 'U' }}
-						</div>
+					<div class="p-4 border-b border-surface-gray-2 bg-surface-gray-1 flex items-center gap-3">
+						<img v-if="userResource.data?.user_image" :src="userResource.data.user_image" class="w-10 h-10 rounded-full object-cover shadow-sm flex-shrink-0 border border-surface-gray-2" />
+						<img v-else src="/assets/lms/images/instructor.png" class="w-10 h-10 rounded-full object-cover shadow-sm flex-shrink-0 border border-surface-gray-2 bg-surface-gray-2 p-0.5" />
 						<div class="flex-1 min-w-0">
-							<div class="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+							<div class="text-sm font-bold text-ink-gray-9 truncate">
 								{{ userResource.data?.full_name ? convertToTitleCase(userResource.data?.full_name) : 'Usuario' }}
 							</div>
-							<div class="text-xs text-slate-500 dark:text-slate-400 truncate">
-								@{{ userResource.data?.username }}
+							<div class="text-xs text-ink-gray-5 truncate">
+								{{ userResource.data?.email || '' }}
 							</div>
 						</div>
 					</div>
@@ -71,9 +70,9 @@
 								<button
 									v-else
 									@click="item.onClick ? item.onClick() : null; close()"
-									class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group"
+									class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-ink-gray-7 hover:bg-surface-gray-2 hover:text-ink-gray-9 transition-all duration-200 group"
 								>
-									<component :is="item.icon" class="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
+									<component :is="item.icon" class="w-4 h-4 text-ink-gray-5 group-hover:text-ink-gray-8 transition-colors" />
 									<span>{{ item.label }}</span>
 								</button>
 							</template>

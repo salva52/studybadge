@@ -2,15 +2,15 @@
 	<Popover placement="right-start" trigger="hover" class="flex w-full">
 		<template #target="{ togglePopover }">
 			<button
-				class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors group"
+				class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium text-ink-gray-7 hover:bg-surface-gray-2 hover:text-ink-gray-9 transition-all duration-200 group"
 			>
 				<div class="flex items-center gap-3">
-					<LayoutGrid class="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
+					<LayoutGrid class="w-4 h-4 text-ink-gray-5 group-hover:text-ink-gray-8 transition-colors" />
 					<span class="whitespace-nowrap">
 						{{ __('Aplicaciones') }}
 					</span>
 				</div>
-				<ChevronRight class="h-4 w-4 text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
+				<ChevronRight class="h-4 w-4 text-ink-gray-4 group-hover:text-ink-gray-7 transition-colors" />
 			</button>
 		</template>
 		<template #body>
