@@ -497,7 +497,7 @@ const getSidebarItems = (forMobile = false) => {
 					},
 				},
 				{
-					label: 'Programs',
+					label: 'Programas',
 					icon: 'Route',
 					to: 'Programs',
 					activeFor: ['Programs', 'ProgramDetail'],
@@ -513,7 +513,7 @@ const getSidebarItems = (forMobile = false) => {
 					activeFor: ['Batches', 'BatchDetail', 'Batch', 'BatchForm'],
 				},
 				{
-					label: 'Certifications',
+					label: 'Certificados',
 					icon: 'GraduationCap',
 					to: 'CertifiedParticipants',
 					activeFor: ['CertifiedParticipants'],
