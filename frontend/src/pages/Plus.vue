@@ -272,12 +272,12 @@
 						<div class="plus-crown-badge mx-auto mb-8">
 							<Crown class="size-12 text-amber-400 drop-shadow-lg" />
 						</div>
-						<h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight mb-6">
+						<h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-tight mb-6">
 							{{ __('Desbloquea') }}
 							<br class="sm:hidden" />
 							<span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 animate-gradient-x">StudyBadge Plus</span>
 						</h1>
-						<p class="text-lg sm:text-xl text-blue-100/80 font-medium max-w-2xl mx-auto leading-relaxed">
+						<p class="text-xl sm:text-2xl text-blue-100/80 font-medium max-w-3xl mx-auto leading-relaxed">
 							{{ __('Impulsa tu carrera con certificados, Tutor IA ilimitado, calendario inteligente y herramientas premium de estudio.') }}
 						</p>
 					</div>
@@ -477,9 +477,9 @@ const receipts = computed(() => billing.data?.receipts || [])
 
 const formattedPrice = computed(() => {
 	const plan = billing.data?.plan
-	if (!plan) return 'S/ 29'
-	if (plan.currency === 'PEN') return `S/ ${Number(plan.amount).toFixed(0)}`
-	return `${plan.currency} ${Number(plan.amount).toFixed(0)}`
+	if (!plan) return 'S/ 29.90'
+	if (plan.currency === 'PEN') return `S/ ${Number(plan.amount).toFixed(2)}`
+	return `${plan.currency} ${Number(plan.amount).toFixed(2)}`
 })
 
 const paymentMethodLabel = computed(() => {
