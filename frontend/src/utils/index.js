@@ -543,18 +543,12 @@ const getSidebarItems = (forMobile = false) => {
 					activeFor: ['Statistics'],
 				},
 				{
-					label: 'Contact Us',
-					icon: settings.data?.contact_us_url ? 'Headset' : 'Mail',
-					to: settings.data?.contact_us_url
-						? settings.data?.contact_us_url
-						: settings.data?.contact_us_email,
+					label: 'Ayuda',
+					icon: 'LifeBuoy',
+					to: 'Help',
+					activeFor: ['Help'],
 					condition: () => {
-						return (
-							(!forMobile &&
-								settings?.data?.contact_us_email &&
-								userResource?.data) ||
-							settings?.data?.contact_us_url
-						)
+						return userResource?.data
 					},
 				},
 			],

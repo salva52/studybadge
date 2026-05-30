@@ -26,6 +26,11 @@ const routes = [
 		component: () => import('@/pages/Plus.vue'),
 	},
 	{
+		path: '/help',
+		name: 'Help',
+		component: () => import('@/pages/Help.vue'),
+	},
+	{
 		path: '/billing/plus',
 		redirect: { name: 'Plus' },
 	},
