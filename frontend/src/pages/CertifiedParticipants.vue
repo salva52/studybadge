@@ -87,7 +87,7 @@
 						@click="
 							router.push({
 								name: 'ProfileAbout',
-								params: { username: participant.username },
+								params: { username: participant.member },
 							})
 						"
 					>
