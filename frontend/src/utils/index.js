@@ -488,6 +488,15 @@ const getSidebarItems = (forMobile = false) => {
 					},
 				},
 				{
+					label: 'StudyBadge Plus',
+					icon: 'Crown',
+					to: 'Plus',
+					activeFor: ['Plus'],
+					condition: () => {
+						return userResource?.data
+					},
+				},
+				{
 					label: 'Programs',
 					icon: 'Route',
 					to: 'Programs',
