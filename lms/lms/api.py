@@ -1492,10 +1492,16 @@ def get_certification_details(course: str):
 		)
 
 	paid_certificate = frappe.db.get_value("LMS Course", course, "paid_certificate")
+	course_details = frappe.db.get_value(
+		"LMS Course",
+		course,
+		["title", "evaluator"],
+		as_dict=1,
+	)
 	certificate = frappe.db.get_value(
 		"LMS Certificate",
 		{"member": frappe.session.user, "course": course},
-		["name", "template"],
+		["name", "template", "issue_date"],
 		as_dict=1,
 	)
 
@@ -1504,6 +1510,8 @@ def get_certification_details(course: str):
 		"paid_certificate": paid_certificate,
 		"certificate": certificate,
 		"has_plus": has_active_plus(),
+		"course_title": course_details.title if course_details else None,
+		"evaluator": course_details.evaluator if course_details else None,
 	}
 
 

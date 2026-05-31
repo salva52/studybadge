@@ -42,7 +42,7 @@
 </template>
 <script setup>
 import { computed, inject, onMounted, ref } from 'vue'
-import { Breadcrumbs, call, createResource, usePageMeta } from 'frappe-ui'
+import { Breadcrumbs, call, usePageMeta } from 'frappe-ui'
 import { useRouter } from 'vue-router'
 import { sessionStore } from '../../stores/session'
 import UpcomingEvaluations from '@/components/UpcomingEvaluations.vue'
@@ -65,26 +65,18 @@ const props = defineProps({
 
 onMounted(() => {
 	fetchCertificationDetails()
-	fetchCourseDetails()
 })
 
-const certificate = createResource({
-	url: 'frappe.client.get_value',
-	params: {
-		doctype: 'LMS Certificate',
-		filters: {
-			member: user.data?.name,
-			course: props.courseName,
-		},
-		fieldname: ['name', 'template', 'issue_date'],
-	},
-	cache: [user.data?.name, props.courseName],
-})
+const certificate = ref({ data: null })
 
 const fetchCertificationDetails = () => {
 	call('lms.lms.api.get_certification_details', {
 		course: props.courseName,
 	}).then((data) => {
+		courseTitle.value = data.course_title
+		evaluator.value = data.evaluator
+		populateCourses()
+		certificate.value.data = data.certificate || null
 		const hasAccess =
 			data.certificate ||
 			!data.paid_certificate ||
@@ -97,25 +89,13 @@ const fetchCertificationDetails = () => {
 				params: { courseName: props.courseName },
 			})
 		} else if (hasAccess) {
-			certificate.reload()
+			certificate.value.data = data.certificate || null
 		} else {
 			router.push({
 				name: 'Plus',
 				query: { from: 'certificate', course: props.courseName },
 			})
 		}
-	})
-}
-
-const fetchCourseDetails = () => {
-	call('frappe.client.get_value', {
-		doctype: 'LMS Course',
-		filters: { name: props.courseName },
-		fieldname: ['title', 'evaluator'],
-	}).then((data) => {
-		courseTitle.value = data.title
-		evaluator.value = data.evaluator
-		populateCourses()
 	})
 }
 
