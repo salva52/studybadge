@@ -45,10 +45,10 @@
 						<div class="s-panel-header">
 							<div>
 								<div class="s-kicker"><Sparkles class="h-3.5 w-3.5 stroke-1.5" /> {{ __('Empieza en 4 pasos') }}</div>
-								<h2 class="s-panel-title">{{ __('Mis cursos IA') }}</h2>
-								<p class="s-panel-desc">{{ __('Crea un curso desde tus apuntes, deja que la IA lo ordene en módulos y continúa cada lección con práctica guiada.') }}</p>
+								<h2 class="s-panel-title">{{ __('Crear curso IA') }}</h2>
+								<p class="s-panel-desc">{{ __('Elige el objetivo que más se parece a tu situación. La IA ordenará tus apuntes en módulos, lecciones y práctica guiada.') }}</p>
 							</div>
-							<Button variant="solid" :label="__('Crear mi primer curso')" @click="startFlow('parcial')" />
+							<Button variant="solid" :label="__('Crear curso IA')" @click="startFlow('parcial')" />
 						</div>
 						<div class="flow-grid">
 							<button
@@ -123,8 +123,7 @@
 							<div v-if="!sessions.length" class="s-empty lg:col-span-2">
 								<div class="s-empty-icon"><BookOpen class="h-8 w-8 stroke-1.5" /></div>
 								<h3 class="s-empty-title">{{ __('Aún no tienes cursos IA') }}</h3>
-								<p class="s-empty-desc">{{ __('Crea uno con tus apuntes, PDFs o temas del parcial. Te guiaremos paso a paso.') }}</p>
-								<Button class="mt-4" variant="solid" :label="__('Crear curso IA')" @click="startFlow('parcial')" />
+								<p class="s-empty-desc">{{ __('Elige un modo de estudio arriba para crear tu primer curso con apuntes, PDFs o temas del parcial.') }}</p>
 							</div>
 						</div>
 					</div>
@@ -191,24 +190,24 @@
 								<p class="s-step-desc">{{ currentSession ? __('Curso creado') : __('Ponle nombre y contexto') }}</p>
 							</div>
 						</div>
-						<div class="s-step" :class="currentSession?.topics?.length ? 'is-done' : currentSession ? 'is-active' : ''">
+						<div class="s-step" :class="hasCourseSeed ? 'is-done' : currentSession ? 'is-active' : 'is-locked'">
 							<span class="s-step-num">2</span>
 							<div>
 								<div class="s-step-title">{{ __('Material y temas') }}</div>
-								<p class="s-step-desc">{{ __('Sube archivos o pega texto') }}</p>
+								<p class="s-step-desc">{{ __('Analiza archivos o texto base') }}</p>
 							</div>
 						</div>
-						<div class="s-step" :class="currentSession?.profile_questions?.length ? 'is-done' : currentSession?.topics?.length ? 'is-active' : ''">
+						<div class="s-step" :class="currentSession?.profile_questions?.length ? 'is-done' : canGenerateQuestions ? 'is-active' : 'is-locked'">
 							<span class="s-step-num">3</span>
 							<div>
-								<div class="s-step-title">{{ __('Perfil') }}</div>
-								<p class="s-step-desc">{{ __('Adapta el curso a tu nivel') }}</p>
+								<div class="s-step-title">{{ __('Perfil de aprendizaje') }}</div>
+								<p class="s-step-desc">{{ __('Genera preguntas de nivel') }}</p>
 							</div>
 						</div>
-						<div class="s-step" :class="currentSession?.course_structure?.modules?.length ? 'is-done' : currentSession?.profile_questions?.length ? 'is-active' : ''">
+						<div class="s-step" :class="currentSession?.course_structure?.modules?.length ? 'is-done' : canCreateFullCourse ? 'is-active' : 'is-locked'">
 							<span class="s-step-num">4</span>
 							<div>
-								<div class="s-step-title">{{ __('Curso listo') }}</div>
+								<div class="s-step-title">{{ __('Crear el curso') }}</div>
 								<p class="s-step-desc">{{ __('Genera módulos y lecciones') }}</p>
 							</div>
 						</div>
@@ -222,7 +221,7 @@
 							<div>
 								<div class="s-kicker">{{ __('Paso 1') }}</div>
 								<h2 class="s-panel-title">{{ __('Datos básicos del curso') }}</h2>
-								<p class="s-panel-desc">{{ __('Con esto la IA entiende qué estás preparando y cuánto contexto tiene.') }}</p>
+								<p class="s-panel-desc">{{ __('Haz esto primero: ponle nombre al curso y pega cualquier texto base que ya tengas.') }}</p>
 							</div>
 							<Button :label="currentSession ? __('Guardar cambios') : __('Crear curso')" variant="solid" :loading="loading === 'create'" @click="createOrUpdateSession" />
 						</div>
@@ -265,12 +264,12 @@
 					</div>
 
 					<!-- Step 2 -->
-					<div class="s-panel s-panel--flush" :class="{ 'opacity-50 pointer-events-none': !currentSession }">
+					<div class="s-panel s-panel--flush" :class="{ 's-panel--locked': !currentSession }">
 						<div class="s-panel-header">
 							<div>
 								<div class="s-kicker">{{ __('Paso 2') }}</div>
 								<h2 class="s-panel-title">{{ __('Materiales y temas') }}</h2>
-								<p class="s-panel-desc">{{ __('Sube PDF, imágenes o Word. Luego analiza para detectar los temas del curso.') }}</p>
+								<p class="s-panel-desc">{{ __('Luego haz esto: sube archivos o usa el texto manual, y analiza para detectar los temas del curso.') }}</p>
 							</div>
 							<div class="flex flex-wrap gap-2">
 								<FileUploader
@@ -325,15 +324,15 @@
 					</div>
 
 					<!-- Step 3 -->
-					<div class="s-panel s-panel--flush" :class="{ 'opacity-50 pointer-events-none': !currentSession?.topics?.length && !currentSession?.manual_text }">
+					<div class="s-panel s-panel--flush" :class="{ 's-panel--locked': !canGenerateQuestions }">
 						<div class="s-panel-header">
 							<div>
 								<div class="s-kicker">{{ __('Paso 3') }}</div>
 								<h2 class="s-panel-title">{{ __('Perfil de aprendizaje') }}</h2>
-								<p class="s-panel-desc">{{ __('Responde unas preguntas rápidas para adaptar el curso a tu nivel.') }}</p>
+								<p class="s-panel-desc">{{ __('Después: genera preguntas breves para que la IA adapte dificultad, ritmo y ejemplos a tu nivel.') }}</p>
 							</div>
 							<div class="flex flex-wrap gap-2">
-								<Button :label="__('Generar preguntas')" :disabled="!currentSession" :loading="loading === 'questions'" @click="generateQuestions" />
+								<Button :label="__('Generar preguntas')" :disabled="!canGenerateQuestions" :loading="loading === 'questions'" @click="generateQuestions" />
 							</div>
 						</div>
 						<div class="p-5 flex flex-col gap-4">
@@ -346,26 +345,30 @@
 							</div>
 							<div v-if="!currentSession?.profile_questions?.length" class="s-mini-empty">
 								<UserCog class="h-5 w-5 stroke-1.5" />
-								<span>{{ __('Pulsa "Generar preguntas" cuando ya tengas temas detectados.') }}</span>
+								<span>{{ canGenerateQuestions ? __('Pulsa "Generar preguntas" para completar tu perfil.') : __('Primero crea el curso y agrega temas, texto o material analizado.') }}</span>
 							</div>
 						</div>
 					</div>
 
 					<!-- Step 4 -->
-					<div class="s-panel s-panel--flush" :class="{ 'opacity-50 pointer-events-none': !currentSession?.profile_questions?.length }">
+					<div class="s-panel s-panel--flush" :class="{ 's-panel--locked': !canCreateFullCourse }">
 						<div class="s-panel-header">
 							<div>
 								<div class="s-kicker">{{ __('Paso 4') }}</div>
-								<h2 class="s-panel-title">{{ __('Creación del curso') }}</h2>
-								<p class="s-panel-desc">{{ __('Genera la malla de módulos y lecciones finales.') }}</p>
+								<h2 class="s-panel-title">{{ __('Crear el curso') }}</h2>
+								<p class="s-panel-desc">{{ __('Luego haz esto: crea la malla completa de módulos y lecciones cuando ya haya temas o texto base.') }}</p>
 							</div>
 							<div class="flex flex-wrap gap-2">
-								<Button :label="__('Crear curso completo')" variant="solid" :disabled="!currentSession" :loading="loading === 'plan'" @click="generatePlan" />
+								<Button :label="__('Crear curso completo')" variant="solid" :disabled="!canCreateFullCourse" :loading="loading === 'plan'" @click="generatePlan" />
 							</div>
 						</div>
 						<div v-if="loading === 'plan'" class="s-loader mb-4">
 							<div class="s-loader-spinner"></div>
 							{{ __('Creando módulos, lecciones y ruta de estudio...') }}
+						</div>
+						<div v-else class="step-instruction">
+							<CheckCircle2 class="h-4 w-4 stroke-1.5" />
+							<span>{{ canCreateFullCourse ? __('Listo para generar el curso completo.') : __('Completa el perfil de aprendizaje antes de crear la malla final.') }}</span>
 						</div>
 					</div>
 				</div>
@@ -460,7 +463,7 @@
 			<section v-else-if="isRoom" class="grid gap-6 xl:grid-cols-[1fr_360px]">
 				<div class="flex flex-col gap-6">
 					<!-- Room header -->
-					<div class="s-panel s-panel--flush sticky top-4 z-20 shadow-md">
+					<div class="s-panel s-panel--flush room-header-panel">
 						<div class="s-panel-header">
 							<div>
 								<div class="s-kicker">{{ activeLesson.moduleTitle || __('Lección') }}</div>
@@ -479,6 +482,13 @@
 								</Button>
 							</div>
 						</div>
+						<div v-if="loading === 'lesson'" class="s-loader mb-4">
+							<div class="s-loader-spinner"></div>
+							{{ __('Preparando tu lección personalizada...') }}
+						</div>
+					</div>
+
+					<div class="room-steps-sticky">
 						<div class="room-steps">
 							<div class="room-step is-active">
 								<span class="room-step-num">1</span>
@@ -502,10 +512,6 @@
 								</div>
 							</div>
 						</div>
-						<div v-if="loading === 'lesson'" class="s-loader mb-4">
-							<div class="s-loader-spinner"></div>
-							{{ __('Preparando tu lección personalizada...') }}
-						</div>
 					</div>
 
 					<!-- Explanation -->
@@ -521,44 +527,44 @@
 						<div v-if="lessonPack.lessonTitle || lessonPack.sections?.length" class="lesson-content">
 							<div class="key-idea">
 								<div class="key-idea-label"><Lightbulb class="h-4 w-4 stroke-1.5" /> {{ __('Idea clave') }}</div>
-								<div class="key-idea-text">{{ lessonPack.keyIdea || __('Esta lección ya está lista para estudiar.') }}</div>
+								<div class="key-idea-text markdown-inline" v-html="renderInlineMarkdown(lessonPack.keyIdea || __('Esta lección ya está lista para estudiar.'))" />
 							</div>
 							<div v-if="lessonPack.conceptCards?.length" class="concept-grid">
 								<div v-for="card in lessonPack.conceptCards" :key="card.title" class="concept-card">
-									<h3 class="concept-title">{{ card.title }}</h3>
-									<p class="concept-body">{{ card.body }}</p>
-									<div v-if="card.formula" class="concept-formula">{{ card.formula }}</div>
+									<h3 class="concept-title markdown-inline" v-html="renderInlineMarkdown(card.title)" />
+									<p class="concept-body markdown-inline" v-html="renderInlineMarkdown(card.body)" />
+									<div v-if="card.formula" class="concept-formula markdown-inline" v-html="renderInlineMarkdown(card.formula)" />
 								</div>
 							</div>
 							<div v-for="(section, index) in lessonPack.sections || []" :key="section.title" class="content-block">
 								<div class="content-block-header">
 									<span class="content-num">{{ index + 1 }}</span>
 									<div>
-										<h3 class="content-title">{{ section.title }}</h3>
-										<p class="content-summary">{{ section.summary }}</p>
+										<h3 class="content-title markdown-inline" v-html="renderInlineMarkdown(section.title)" />
+										<p class="content-summary markdown-inline" v-html="renderInlineMarkdown(section.summary)" />
 									</div>
 								</div>
 								<ul class="content-points">
 									<li v-for="point in section.keyPoints || []" :key="point">
 										<span class="point-dot" />
-										<span>{{ point }}</span>
+										<span class="markdown-inline" v-html="renderInlineMarkdown(point)" />
 									</li>
 								</ul>
 							</div>
-							<div v-if="lessonPack.workedExamples?.length" class="content-block">
+							<div v-if="lessonWorkedExamples.length" class="content-block">
 								<h3 class="content-title">{{ __('Ejemplo resuelto paso a paso') }}</h3>
-								<div v-for="example in lessonPack.workedExamples" :key="example.title || example.problem" class="worked-example">
-									<div class="example-title">{{ example.title || example.problem }}</div>
-									<p v-if="example.problem" class="example-problem">{{ example.problem }}</p>
+								<div v-for="example in lessonWorkedExamples" :key="example.title || example.problem" class="worked-example">
+									<div class="example-title markdown-inline" v-html="renderInlineMarkdown(example.title || example.problem)" />
+									<p v-if="example.problem" class="example-problem markdown-inline" v-html="renderInlineMarkdown(example.problem)" />
 									<ol class="example-steps">
-										<li v-for="(step, index) in example.steps || []" :key="index">
+										<li v-for="(step, index) in exampleSteps(example)" :key="index">
 											<span class="content-num content-num--sm">{{ index + 1 }}</span>
-											<span>{{ step }}</span>
+											<span class="markdown-inline" v-html="renderInlineMarkdown(step)" />
 										</li>
 									</ol>
-									<div v-if="example.answer" class="example-answer">
+									<div v-if="exampleAnswer(example)" class="example-answer">
 										<CheckCircle2 class="h-4 w-4 stroke-1.5" />
-										{{ example.answer }}
+										<span class="markdown-inline" v-html="renderInlineMarkdown(exampleAnswer(example))" />
 									</div>
 								</div>
 							</div>
@@ -566,8 +572,8 @@
 								<h3 class="content-title">{{ __('Errores frecuentes') }}</h3>
 								<div class="mistakes-list">
 									<div v-for="mistake in lessonPack.commonMistakes" :key="mistake.mistake" class="mistake-item">
-										<div class="mistake-bad"><AlertTriangle class="h-3.5 w-3.5 stroke-1.5" /> {{ mistake.mistake }}</div>
-										<div class="mistake-fix">{{ mistake.fix }}</div>
+										<div class="mistake-bad"><AlertTriangle class="h-3.5 w-3.5 stroke-1.5" /> <span class="markdown-inline" v-html="renderInlineMarkdown(mistake.mistake)" /></div>
+										<div class="mistake-fix markdown-inline" v-html="renderInlineMarkdown(mistake.fix)" />
 									</div>
 								</div>
 							</div>
@@ -577,7 +583,9 @@
 							<h3 class="s-empty-title">{{ __('Prepararemos esta lección automáticamente') }}</h3>
 							<p class="s-empty-desc">{{ __('Si tarda, usa "Regenerar" para pedir una nueva versión.') }}</p>
 						</div>
-					</div>					<!-- Practice Flow -->
+					</div>
+
+					<!-- Practice Flow -->
 					<div class="practice-flow mt-12">
 						<div class="practice-flow-header">
 							<div class="practice-flow-icon">
@@ -681,6 +689,10 @@
 						<textarea v-model="whiteboardText" class="s-textarea" rows="8" :placeholder="__('Fórmulas, dudas, errores frecuentes...')" @input="saveWhiteboard" />
 					</div>
 				</aside>
+				<button class="tutor-fab" @click="isTutorExpanded = true" :title="__('Abrir tutor')">
+					<MessageCircle class="h-5 w-5 stroke-1.5" />
+					<span>{{ __('Tutor') }}</span>
+				</button>
 			</section>
 
 			<!-- ═══════════ HISTORY ═══════════ -->
@@ -905,12 +917,31 @@ const activeTopicTitle = computed(() => activeLesson.value?.title || activeTopic
 const courseStructure = computed(() => currentSession.value?.course_structure || fallbackCourseStructure(currentSession.value))
 const lessonsFlat = computed(() => flattenLessons(courseStructure.value))
 const activeQuiz = computed(() => lessonPack.value?.quiz?.length ? lessonPack.value.quiz : quiz.value)
+const hasCourseSeed = computed(() => {
+	const session = currentSession.value
+	if (!session) return false
+	return Boolean((session.topics || []).length || session.manual_text || session.desired_topics || draft.value.manual_text || draft.value.desired_topics)
+})
+const canGenerateQuestions = computed(() => Boolean(currentSession.value && hasCourseSeed.value))
+const canCreateFullCourse = computed(() => Boolean(currentSession.value && hasCourseSeed.value && currentSession.value?.profile_questions?.length))
 const quizScore = computed(() => {
 	if (!activeQuiz.value.length) return 0
 	const answered = activeQuiz.value.filter((item) => item.selected !== undefined)
 	if (!answered.length) return 0
 	const correct = answered.filter((item) => item.selected === Number(item.correct || 0)).length
 	return Math.round((correct / activeQuiz.value.length) * 100)
+})
+const lessonWorkedExamples = computed(() => {
+	const direct = lessonPack.value?.workedExamples || []
+	if (direct.length) return direct
+	return (lessonPack.value?.sections || [])
+		.filter((section) => section.workedExample)
+		.map((section, index) => ({
+			title: section.title || `${__('Ejemplo')} ${index + 1}`,
+			problem: section.summary || '',
+			steps: Array.isArray(section.workedExample) ? section.workedExample : [section.workedExample],
+			answer: section.answer || section.result || '',
+		}))
 })
 const studyPackMarkdown = computed(() => {
 	const pack = currentSession.value?.study_pack || {}
@@ -961,12 +992,31 @@ onMounted(async () => {
 
 watch(() => route.fullPath, loadRouteSession)
 
+function sanitizeRenderedMarkdown(html) {
+	return DOMPurify.sanitize(html, {
+		ADD_TAGS: ['math', 'mrow', 'mi', 'mo', 'mn', 'ms', 'mspace', 'mtext', 'menclose', 'merror', 'mfrac', 'mpadded', 'mphantom', 'mroot', 'mrow', 'msqrt', 'mstyle', 'mmultiscripts', 'mover', 'mprescripts', 'msub', 'msubsup', 'msup', 'munder', 'munderover', 'none', 'semantics', 'annotation', 'annotation-xml'],
+		ADD_ATTR: ['mathvariant', 'mathcolor', 'mathsize', 'mathbackground', 'dir', 'display', 'class', 'style', 'aria-hidden', 'xmlns', 'encoding'],
+	})
+}
+
 function renderMarkdown(text) {
 	if (!text) return ''
-	return DOMPurify.sanitize(markdown.render(String(text)), {
-		ADD_TAGS: ['math', 'mrow', 'mi', 'mo', 'mn', 'ms', 'mspace', 'mtext', 'menclose', 'merror', 'mfrac', 'mpadded', 'mphantom', 'mroot', 'mrow', 'msqrt', 'mstyle', 'mmultiscripts', 'mover', 'mprescripts', 'msub', 'msubsup', 'msup', 'munder', 'munderover', 'none', 'semantics', 'annotation', 'annotation-xml'],
-		ADD_ATTR: ['mathvariant', 'mathcolor', 'mathsize', 'mathbackground', 'dir', 'display', 'class', 'style', 'aria-hidden']
-	})
+	return sanitizeRenderedMarkdown(markdown.render(String(text)))
+}
+
+function renderInlineMarkdown(text) {
+	if (!text) return ''
+	return sanitizeRenderedMarkdown(markdown.renderInline(String(text)))
+}
+
+function exampleSteps(example = {}) {
+	const steps = example.steps || example.solutionSteps || example.solution || example.workedExample || []
+	if (Array.isArray(steps)) return steps.filter(Boolean)
+	return String(steps).split(/\n+/).map((step) => step.trim()).filter(Boolean)
+}
+
+function exampleAnswer(example = {}) {
+	return example.answer || example.result || example.finalAnswer || ''
 }
 
 function flowLabel(id) {
@@ -1134,13 +1184,20 @@ async function analyzeMaterial() {
 }
 
 async function generateQuestions() {
+	if (!canGenerateQuestions.value) {
+		toast.warning(__('Primero agrega temas, texto o material analizado.'))
+		return
+	}
 	const result = await api('generate_profile_questions', { session: currentSession.value.name }, 'questions')
 	currentSession.value.profile_questions = result.questions
 	toast.success(__('Preguntas generadas.'))
 }
 
 async function generatePlan() {
-	if (!currentSession.value) return
+	if (!canCreateFullCourse.value) {
+		toast.warning(__('Completa el perfil de aprendizaje antes de crear el curso.'))
+		return
+	}
 	const result = await api('generate_plan', { session: currentSession.value.name, profile_answers: profileAnswers.value }, 'plan')
 	currentSession.value = result.session
 	toast.success(__('Plan creado.'))
@@ -1301,7 +1358,7 @@ const ExerciseList = defineComponent({
 			? props.items.map((item, itemIndex) => h('div', { class: 'exercise-item' }, [
 				h('div', { class: 'exercise-question-row' }, [
 					h('span', { class: 'exercise-question-num' }, String(itemIndex + 1)),
-					h('span', { class: 'exercise-question-text' }, item.question),
+					h('span', { class: 'exercise-question-text markdown-inline', innerHTML: renderInlineMarkdown(item.question) }),
 				]),
 				h('div', { class: 'exercise-options' }, (item.options || []).map((option, index) =>
 					h('button', {
@@ -1310,7 +1367,7 @@ const ExerciseList = defineComponent({
 						disabled: item.selected !== undefined,
 					}, [
 						h('span', { class: 'quiz-option-letter' }, String.fromCharCode(65 + index)),
-						h('span', { class: 'quiz-option-content' }, option),
+						h('span', { class: 'quiz-option-content markdown-inline', innerHTML: renderInlineMarkdown(option) }),
 						icon(item, index),
 					])
 				)),
@@ -1320,7 +1377,7 @@ const ExerciseList = defineComponent({
 							h('span', { class: 'exercise-explanation-icon' }, '💡'),
 							h('span', {}, __('Explicación')),
 						]),
-						h('p', { class: 'exercise-explanation-text' }, item.explanation),
+						h('p', { class: 'exercise-explanation-text markdown-inline', innerHTML: renderInlineMarkdown(item.explanation) }),
 					])
 					: null,
 			]))
@@ -1448,6 +1505,16 @@ const ExerciseList = defineComponent({
 	transition: box-shadow 0.3s ease;
 }
 .s-panel:hover { box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06); }
+.s-panel--locked {
+	border-color: #e5e7eb;
+	background: #f8fafc;
+	opacity: 0.72;
+}
+.s-panel--locked :deep(button),
+.s-panel--locked .s-select,
+.s-panel--locked .s-textarea {
+	cursor: not-allowed;
+}
 .s-panel--flush > * { padding-left: 1.25rem; padding-right: 1.25rem; }
 .s-panel--flush > *:first-child { padding-top: 1.25rem; }
 .s-panel--flush > *:last-child { padding-bottom: 1.25rem; }
@@ -1676,6 +1743,7 @@ const ExerciseList = defineComponent({
 }
 .s-step.is-active { border-color: #a5b4fc; background: #eef2ff; color: #1f2937; }
 .s-step.is-done { border-color: #86efac; background: #f0fdf4; color: #166534; }
+.s-step.is-locked { background: #f8fafc; color: #94a3b8; border-style: dashed; }
 
 .s-step-num {
 	display: grid;
@@ -1691,11 +1759,22 @@ const ExerciseList = defineComponent({
 }
 .s-step.is-active .s-step-num { background: #6366f1; color: #fff; }
 .s-step.is-done .s-step-num { background: #22c55e; color: #fff; }
+.s-step.is-locked .s-step-num { background: #e2e8f0; color: #94a3b8; }
 
 .s-step-title { font-size: 0.85rem; font-weight: 600; color: inherit; }
 .s-step-desc { font-size: 0.75rem; color: #94a3b8; margin-top: 0.125rem; }
 .s-step.is-active .s-step-desc { color: #6366f1; }
 .s-step.is-done .s-step-desc { color: #16a34a; }
+.step-instruction {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding-top: 1rem;
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: #475569;
+}
+.step-instruction svg { color: #22c55e; flex-shrink: 0; }
 
 /* ─── FORMS ─── */
 .form-grid { display: grid; gap: 0.875rem; padding-top: 1rem; }
@@ -1846,7 +1925,19 @@ const ExerciseList = defineComponent({
 .summary-stat-next { font-size: 0.85rem; font-weight: 600; color: #4f46e5; margin-top: 0.25rem; }
 
 /* ─── ROOM STEPS ─── */
-.room-steps { display: grid; gap: 0.5rem; padding-top: 1rem; }
+.room-header-panel { overflow: visible; }
+.room-steps-sticky {
+	position: sticky;
+	top: 0.75rem;
+	z-index: 20;
+	border: 1px solid #e2e8f0;
+	border-radius: 12px;
+	background: rgba(255, 255, 255, 0.96);
+	box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+	backdrop-filter: blur(12px);
+	padding: 0.75rem;
+}
+.room-steps { display: grid; gap: 0.5rem; }
 @media (min-width: 768px) { .room-steps { grid-template-columns: repeat(3, 1fr); } }
 
 .room-step {
@@ -2095,6 +2186,29 @@ const ExerciseList = defineComponent({
 .s-markdown-block :deep(ol) {
 	margin: 0.5rem 0 0.75rem 1.25rem;
 }
+.markdown-inline :deep(p) {
+	display: inline;
+	margin: 0;
+	color: inherit;
+	font: inherit;
+}
+.markdown-inline :deep(.katex) {
+	font-size: 1.02em;
+}
+.markdown-inline :deep(.katex-display),
+.chat-msg :deep(.katex-display),
+.s-markdown-block :deep(.katex-display) {
+	margin: 0.75rem 0;
+	overflow-x: auto;
+	overflow-y: hidden;
+	padding: 0.25rem 0;
+}
+.chat-msg :deep(p) {
+	margin: 0 0 0.5rem;
+}
+.chat-msg :deep(p:last-child) {
+	margin-bottom: 0;
+}
 
 /* ─── MOBILE RESPONSIVE ─── */
 @media (max-width: 768px) {
@@ -2342,6 +2456,10 @@ const ExerciseList = defineComponent({
 	.room-steps {
 		grid-template-columns: 1fr !important;
 	}
+	.room-steps-sticky {
+		top: 0.5rem;
+		padding: 0.5rem;
+	}
 	.course-card-title {
 		font-size: 0.9rem;
 	}
@@ -2464,6 +2582,28 @@ const ExerciseList = defineComponent({
 	background: rgba(15, 23, 42, 0.5);
 	backdrop-filter: blur(4px);
 	z-index: 49;
+}
+.tutor-fab {
+	display: none;
+	position: fixed;
+	right: 1rem;
+	bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+	z-index: 48;
+	align-items: center;
+	gap: 0.45rem;
+	border: 0;
+	border-radius: 9999px;
+	background: #4f46e5;
+	color: #fff;
+	box-shadow: 0 14px 30px rgba(79, 70, 229, 0.28);
+	padding: 0.75rem 1rem;
+	font-size: 0.85rem;
+	font-weight: 700;
+	cursor: pointer;
+}
+.tutor-fab:hover { background: #4338ca; }
+@media (max-width: 1024px) {
+	.tutor-fab { display: inline-flex; }
 }
 </style>
 
