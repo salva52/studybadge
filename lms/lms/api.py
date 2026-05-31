@@ -2738,3 +2738,24 @@ def fix_home_folder():
         frappe.db.commit()
         return "Home folder created"
     return "Home folder already exists"
+
+@frappe.whitelist()
+def fix_home_folder_advanced():
+    import frappe
+    folders = ['Home', 'Home/Attachments']
+    for f in folders:
+        if not frappe.db.exists('File', f):
+            parent = 'Home' if f != 'Home' else ''
+            doc = frappe.new_doc('File')
+            doc.file_name = f.split('/')[-1]
+            doc.name = f
+            doc.is_folder = 1
+            doc.folder = parent
+            doc.is_home_folder = 1 if f == 'Home' else 0
+            doc.insert(ignore_permissions=True, ignore_mandatory=True)
+            frappe.db.commit()
+            print(f'Created {f}')
+        else:
+            frappe.db.set_value('File', f, 'is_folder', 1)
+            print(f'Verified {f}')
+    return 'Fixed'
