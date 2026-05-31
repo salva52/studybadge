@@ -1,89 +1,113 @@
 <template>
 	<section v-if="segments.length" class="lesson-tts-reader">
-		<div class="lesson-tts-header">
-			<div>
-				<div class="lesson-tts-kicker">{{ __('Lector IA') }}</div>
-				<div class="lesson-tts-title">
-					{{ statusLabel }}
-				</div>
-			</div>
-			<div class="lesson-tts-actions">
-				<Button
-					v-if="status !== 'playing'"
-					:disabled="!speechSupported"
-					variant="solid"
-					@click="play"
-				>
-					<template #prefix>
-						<Play class="size-4" />
-					</template>
-					{{ primaryActionLabel }}
-				</Button>
-				<Button v-else :disabled="!speechSupported" @click="pause">
-					<template #prefix>
-						<Pause class="size-4" />
-					</template>
-					{{ __('Pausar') }}
-				</Button>
-				<Button :disabled="!hasStarted" @click="stop">
-					<template #icon>
-						<Square class="size-4" />
-					</template>
-				</Button>
-			</div>
-		</div>
-
-		<div v-if="!speechSupported" class="lesson-tts-warning">
-			{{ __('Tu navegador no permite lectura por voz en esta pantalla.') }}
-		</div>
-		<div v-else class="lesson-tts-body">
-			<div class="lesson-tts-progress-row">
-				<span>
-					{{ __('Parte {0} de {1}', [currentIndex + 1, segments.length]) }}
-				</span>
-				<span>{{ Math.round(progress) }}%</span>
-			</div>
-			<div class="lesson-tts-progress">
+		<div v-if="!isOpen" class="lesson-tts-mini">
+			<Button @click="openReader">
+				<template #prefix>
+					<Headphones class="size-4" />
+				</template>
+				{{ miniButtonLabel }}
+			</Button>
+			<div v-if="hasStarted" class="lesson-tts-mini-progress">
 				<div
-					class="lesson-tts-progress-fill"
+					class="lesson-tts-mini-fill"
 					:style="{ width: `${progress}%` }"
 				></div>
 			</div>
+		</div>
 
-			<div class="lesson-tts-current" aria-live="polite">
-				<span
-					v-for="(token, index) in currentTokens"
-					:key="`${currentIndex}-${index}`"
-					:class="{ 'is-current-word': token.isWord && isCurrentToken(token) }"
-				>
-					{{ token.text }}
-				</span>
+		<div v-else class="lesson-tts-panel">
+			<div class="lesson-tts-header">
+				<div class="lesson-tts-heading">
+					<div class="lesson-tts-icon">
+						<Headphones class="size-4" />
+					</div>
+					<div>
+						<div class="lesson-tts-kicker">{{ __('Lector IA') }}</div>
+						<div class="lesson-tts-title">
+							{{ statusLabel }}
+						</div>
+					</div>
+				</div>
+				<div class="lesson-tts-actions">
+					<Button
+						v-if="status !== 'playing'"
+						:disabled="!speechSupported"
+						variant="solid"
+						@click="play"
+					>
+						<template #prefix>
+							<Play class="size-4" />
+						</template>
+						{{ primaryActionLabel }}
+					</Button>
+					<Button v-else :disabled="!speechSupported" @click="pause">
+						<template #icon>
+							<Pause class="size-4" />
+						</template>
+					</Button>
+					<Button :disabled="!hasStarted" @click="stop">
+						<template #icon>
+							<Square class="size-4" />
+						</template>
+					</Button>
+					<Button @click="isOpen = false">
+						<template #icon>
+							<X class="size-4" />
+						</template>
+					</Button>
+				</div>
 			</div>
 
-			<div class="lesson-tts-settings">
-				<label v-if="voices.length" class="lesson-tts-field">
-					<span>{{ __('Voz') }}</span>
-					<select v-model="selectedVoiceURI" :disabled="status === 'playing'">
-						<option
-							v-for="voice in voices"
-							:key="voice.voiceURI"
-							:value="voice.voiceURI"
-						>
-							{{ voice.name }} · {{ voice.lang }}
-						</option>
-					</select>
-				</label>
-				<label class="lesson-tts-field">
-					<span>{{ __('Velocidad') }}</span>
-					<input
-						v-model.number="rate"
-						type="range"
-						min="0.8"
-						max="1.2"
-						step="0.05"
-						:disabled="status === 'playing'"
-					/>
-				</label>
+			<div v-if="!speechSupported" class="lesson-tts-warning">
+				{{ __('Tu navegador no permite lectura por voz en esta pantalla.') }}
+			</div>
+			<div v-else class="lesson-tts-body">
+				<div class="lesson-tts-progress-row">
+					<span>{{ partLabel }}</span>
+					<span>{{ Math.round(progress) }}%</span>
+				</div>
+				<div class="lesson-tts-progress">
+					<div
+						class="lesson-tts-progress-fill"
+						:style="{ width: `${progress}%` }"
+					></div>
+				</div>
+
+				<div class="lesson-tts-current" aria-live="polite">
+					<span
+						v-for="(token, index) in currentTokens"
+						:key="`${currentIndex}-${index}`"
+						:class="{ 'is-current-word': token.isWord && isCurrentToken(token) }"
+					>
+						{{ token.text }}
+					</span>
+				</div>
+
+				<div class="lesson-tts-settings">
+					<label v-if="voices.length" class="lesson-tts-field">
+						<span>{{ __('Voz') }}</span>
+						<select v-model="selectedVoiceURI" :disabled="status === 'playing'">
+							<option
+								v-for="voice in spanishVoices"
+								:key="voice.voiceURI"
+								:value="voice.voiceURI"
+							>
+								{{ voice.name }} · {{ voice.lang }}
+							</option>
+						</select>
+					</label>
+					<label class="lesson-tts-field">
+						<span>{{ __('Velocidad') }}</span>
+						<input
+							v-model.number="rate"
+							type="range"
+							min="0.8"
+							max="1.2"
+							step="0.05"
+							:disabled="status === 'playing'"
+						/>
+					</label>
+				</div>
 			</div>
 		</div>
 	</section>
@@ -92,7 +116,7 @@
 <script setup>
 import { Button } from 'frappe-ui'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { Pause, Play, Square } from 'lucide-vue-next'
+import { Headphones, Pause, Play, Square, X } from 'lucide-vue-next'
 
 const props = defineProps({
 	segments: {
@@ -112,6 +136,7 @@ const voices = ref([])
 const selectedVoiceURI = ref('')
 const rate = ref(1)
 const utterance = ref(null)
+const isOpen = ref(false)
 
 const speechSupported = computed(() => {
 	return (
@@ -140,6 +165,21 @@ const statusLabel = computed(() => {
 const primaryActionLabel = computed(() => {
 	if (status.value === 'done') return __('Repetir')
 	return hasStarted.value ? __('Continuar') : __('Escuchar')
+})
+const miniButtonLabel = computed(() => {
+	if (status.value === 'playing') return __('Leyendo')
+	if (status.value === 'paused') return __('Continuar audio')
+	if (status.value === 'done') return __('Repetir audio')
+	return __('Escuchar lección')
+})
+const partLabel = computed(() => {
+	return `Parte ${currentIndex.value + 1} de ${props.segments.length}`
+})
+const spanishVoices = computed(() => {
+	const filteredVoices = voices.value.filter((voice) =>
+		voice.lang?.toLowerCase().startsWith('es')
+	)
+	return filteredVoices.length ? filteredVoices : voices.value
 })
 
 const currentTokens = computed(() => {
@@ -172,6 +212,10 @@ const loadVoices = () => {
 			voices.value[0]
 		selectedVoiceURI.value = spanishVoice.voiceURI
 	}
+}
+
+const openReader = () => {
+	isOpen.value = true
 }
 
 const getSelectedVoice = () => {
@@ -256,17 +300,51 @@ onBeforeUnmount(() => {
 
 watch(
 	() => props.segments,
-	() => stop()
+	() => {
+		isOpen.value = false
+		stop()
+	}
 )
 </script>
 
 <style scoped>
 .lesson-tts-reader {
 	margin-top: 1.5rem;
+}
+
+.lesson-tts-mini {
+	display: inline-flex;
+	position: relative;
+	align-items: center;
+	overflow: hidden;
+	border: 1px solid rgba(0, 123, 255, 0.16);
+	border-radius: 999px;
+	background: #ffffff;
+	box-shadow: 0 8px 18px rgba(6, 27, 73, 0.06);
+}
+
+.lesson-tts-mini-progress {
+	position: absolute;
+	inset-inline: 0.5rem;
+	bottom: 0.2rem;
+	height: 2px;
+	overflow: hidden;
+	border-radius: 999px;
+	background: rgba(0, 123, 255, 0.12);
+}
+
+.lesson-tts-mini-fill {
+	height: 100%;
+	border-radius: inherit;
+	background: var(--sb-primary, #007bff);
+	transition: width 0.25s ease;
+}
+
+.lesson-tts-panel {
 	border: 1px solid rgba(0, 123, 255, 0.16);
 	border-radius: 8px;
 	background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-	padding: 1rem;
+	padding: 0.875rem;
 	box-shadow: 0 10px 24px rgba(6, 27, 73, 0.06);
 }
 
@@ -277,9 +355,28 @@ watch(
 	gap: 1rem;
 }
 
+.lesson-tts-heading {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	min-width: 0;
+}
+
+.lesson-tts-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	border-radius: 999px;
+	background: rgba(0, 123, 255, 0.1);
+	color: var(--sb-primary, #007bff);
+	flex-shrink: 0;
+}
+
 .lesson-tts-kicker {
 	color: var(--sb-primary, #007bff);
-	font-size: 0.75rem;
+	font-size: 0.6875rem;
 	font-weight: 700;
 	text-transform: uppercase;
 }
@@ -287,7 +384,7 @@ watch(
 .lesson-tts-title {
 	margin-top: 0.125rem;
 	color: var(--sb-dark, #061b49);
-	font-size: 1rem;
+	font-size: 0.9375rem;
 	font-weight: 700;
 }
 
@@ -305,7 +402,7 @@ watch(
 }
 
 .lesson-tts-body {
-	margin-top: 0.875rem;
+	margin-top: 0.75rem;
 }
 
 .lesson-tts-progress-row {
@@ -332,13 +429,15 @@ watch(
 }
 
 .lesson-tts-current {
-	margin-top: 0.875rem;
+	margin-top: 0.75rem;
+	max-height: 6rem;
+	overflow-y: auto;
 	border-radius: 8px;
 	background: white;
-	padding: 0.875rem;
+	padding: 0.75rem;
 	color: #374151;
-	font-size: 0.95rem;
-	line-height: 1.7;
+	font-size: 0.875rem;
+	line-height: 1.6;
 }
 
 .is-current-word {
@@ -351,7 +450,7 @@ watch(
 	display: grid;
 	grid-template-columns: minmax(0, 1.4fr) minmax(9rem, 0.6fr);
 	gap: 0.75rem;
-	margin-top: 0.875rem;
+	margin-top: 0.75rem;
 }
 
 .lesson-tts-field {
@@ -379,6 +478,7 @@ watch(
 
 @media (max-width: 640px) {
 	.lesson-tts-header {
+		align-items: stretch;
 		flex-direction: column;
 	}
 
