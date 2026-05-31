@@ -15,7 +15,7 @@
 		</template>
 	</LayoutHeader>
 
-	<div class="cm-page mx-auto flex min-h-0 w-full flex-1 flex-col pb-12">
+	<div class="cm-page w-full pb-12">
 		<!-- ═══ HERO SECTION ═══ -->
 		<div class="cm-hero relative overflow-hidden px-6 pt-24 pb-14 sm:pt-32 sm:pb-20 mb-8">
 			<div class="cm-hero-glow-1"></div>
@@ -37,20 +37,20 @@
 
 		<!-- ═══ FILTERS ═══ -->
 		<div class="mx-auto max-w-7xl w-full px-5">
-			<div class="mb-8 flex flex-col justify-between gap-6 md:flex-row md:items-center">
+			<div class="mb-8 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
 				<div class="flex items-center gap-3 text-xl font-extrabold cm-text-primary">
 					<div class="flex h-10 min-w-[2.5rem] items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/30 px-3 text-base font-black text-blue-600 dark:text-blue-400 ring-1 ring-blue-100 dark:ring-blue-800">
 						{{ memberCount }}
 					</div>
 					{{ __('Resultados') }}
 				</div>
-				<div class="flex flex-col space-y-4 md:flex-row md:items-center md:gap-x-4 md:space-y-0">
-					<div class="flex items-center gap-x-4 w-full md:w-auto">
+				<div class="flex flex-col xl:flex-row xl:items-center gap-4">
+					<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto">
 						<FormControl
 							v-model="nameFilter"
 							:placeholder="__('Buscar por nombre...')"
 							type="text"
-							class="w-full md:w-48 lg:w-64"
+							class="w-full sm:w-48 lg:w-64"
 							@input="updateParticipants()"
 						/>
 						<Select
@@ -58,11 +58,11 @@
 							v-model="currentCategory"
 							:options="categories.data"
 							:placeholder="__('Categoría')"
-							class="w-full md:w-48"
+							class="w-full sm:w-48"
 							@update:modelValue="updateParticipants()"
 						/>
 					</div>
-					<div class="flex items-center gap-x-6 bg-white dark:bg-gray-800 px-4 py-2 rounded-xl border cm-border shadow-sm">
+					<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-6 bg-white dark:bg-gray-800 p-3 sm:px-4 sm:py-2 rounded-xl border cm-border shadow-sm w-full xl:w-auto">
 						<Checkbox
 							v-model="openToWork"
 							:label="__('Disponible para trabajar')"
@@ -78,7 +78,7 @@
 			</div>
 
 			<!-- ═══ GRID ═══ -->
-			<div v-if="participants.data?.length" class="flex-1 pb-5">
+			<div v-if="participants.data?.length" class="pb-5">
 				<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 					<div
 						v-for="participant in participants.data"
