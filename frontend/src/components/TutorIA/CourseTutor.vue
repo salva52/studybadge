@@ -11,8 +11,10 @@
 	<Transition name="tutor-window">
 		<div v-show="isOpen" class="tutor-floating-window shadow-2xl" :style="{ width: windowWidth + 'px', height: windowHeight + 'px', right: windowX + 'px', bottom: windowY + 'px' }" ref="tutorWindow">
 			
-			<!-- Resize Handle (Top Left) -->
-			<div class="tutor-resize-handle" @mousedown="startResize"></div>
+			<!-- Resize Handles (Bordes) -->
+			<div class="absolute top-0 left-0 w-full h-2 cursor-ns-resize z-[100]" @mousedown="startResize($event, 'top')"></div>
+			<div class="absolute top-0 left-0 w-2 h-full cursor-ew-resize z-[100]" @mousedown="startResize($event, 'left')"></div>
+			<div class="absolute top-0 left-0 w-4 h-4 cursor-nwse-resize z-[101]" @mousedown="startResize($event, 'both')"></div>
 
 			<!-- Header (Draggable) -->
 			<div class="tutor-header" @mousedown="startDrag">
@@ -37,7 +39,7 @@
 			</div>
 
 			<!-- Messages -->
-			<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-gray-50/80 dark:bg-gray-900/80 backdrop-blur-sm" ref="messagesContainer">
+			<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-gray-50 dark:bg-gray-900" ref="messagesContainer">
 				<div class="tutor-msg-ai shadow-sm">
 					👋 Soy el tutor de <strong>{{ courseTitle }}</strong>.<br>
 					¿Tienes alguna duda sobre la lección actual?
@@ -186,9 +188,11 @@ const stopDrag = () => {
 const isResizing = ref(false)
 let startW = 0
 let startH = 0
+let resizeMode = 'both'
 
-const startResize = (e) => {
+const startResize = (e, mode = 'both') => {
 	isResizing.value = true
+	resizeMode = mode
 	dragStartX = e.clientX
 	dragStartY = e.clientY
 	startW = windowWidth.value
@@ -199,11 +203,15 @@ const startResize = (e) => {
 
 const onResize = (e) => {
 	if (!isResizing.value) return
-	// Resizing from top-left. Moving left (dx < 0) increases width
 	const dx = e.clientX - dragStartX
 	const dy = e.clientY - dragStartY
-	windowWidth.value = Math.max(300, startW - dx)
-	windowHeight.value = Math.max(400, startH - dy)
+	
+	if (resizeMode === 'both' || resizeMode === 'left') {
+		windowWidth.value = Math.max(300, startW - dx)
+	}
+	if (resizeMode === 'both' || resizeMode === 'top') {
+		windowHeight.value = Math.max(400, startH - dy)
+	}
 }
 
 const stopResize = () => {
@@ -493,15 +501,7 @@ const sendMessage = async () => {
 	box-shadow: none;
 }
 
-.tutor-resize-handle {
-	position: absolute;
-	top: -5px;
-	left: -5px;
-	width: 20px;
-	height: 20px;
-	cursor: nwse-resize;
-	z-index: 100;
-}
+
 
 .tutor-window-enter-active,
 .tutor-window-leave-active {
