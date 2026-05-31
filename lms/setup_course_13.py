@@ -493,7 +493,7 @@ COURSE_DATA = {
                         "title": "Quiz corto 5: Lección 5: cómo aplicar este paso",
                         "questions": [
                             {
-                                "question": "¿Cuál es una idea importante de la lección 5?",
+                                "question": "¿Cuál es la idea principal de la lección 5?",
                                 "options": [
                                     "Aplicar el concepto en un caso concreto",
                                     "Ignorar el objetivo de la lección",
@@ -504,7 +504,7 @@ COURSE_DATA = {
                                 "explanation": "La lección busca que el estudiante aplique el contenido de forma práctica."
                             },
                             {
-                                "question": "¿Cuál es una idea importante de la lección 5?",
+                                "question": "¿Qué aspecto clave se menciona en la lección 5?",
                                 "options": [
                                     "Aplicar el concepto en un caso concreto",
                                     "Ignorar el objetivo de la lección",
@@ -515,7 +515,7 @@ COURSE_DATA = {
                                 "explanation": "La lección busca que el estudiante aplique el contenido de forma práctica."
                             },
                             {
-                                "question": "¿Cuál es una idea importante de la lección 5?",
+                                "question": "¿Qué conclusión sacamos de la lección 5?",
                                 "options": [
                                     "Aplicar el concepto en un caso concreto",
                                     "Ignorar el objetivo de la lección",
