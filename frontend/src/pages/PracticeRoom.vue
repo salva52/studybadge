@@ -304,10 +304,10 @@ async function startLiveVoice() {
 			apiKey: token.token,
 		})
 		liveSession.value = await ai.live.connect({
-			model: 'gemini-2.0-flash-exp',
+			model: token.model,
 			config: {
 				...token.config,
-				responseModalities: ['AUDIO'],
+				responseModalities: ['AUDIO', 'TEXT'],
 			},
 			callbacks: {
 				onopen: () => {
