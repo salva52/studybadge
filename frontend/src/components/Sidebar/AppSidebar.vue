@@ -95,7 +95,10 @@
 			</div>
 			<div
 				v-if="
-					isStudent && !profileIsComplete && !sidebarStore.isSidebarCollapsed
+					isStudent &&
+					!profileIsComplete &&
+					profileUsername &&
+					!sidebarStore.isSidebarCollapsed
 				"
 				class="flex flex-col gap-4 text-white py-4 px-4 bg-gradient-to-br from-blue-600/40 to-indigo-600/40 border border-white/10 shadow-lg rounded-xl backdrop-blur-sm relative overflow-hidden"
 			>
@@ -113,7 +116,7 @@
 					:to="{
 						name: 'Profile',
 						params: {
-							username: userResource.data?.username,
+							username: profileUsername,
 						},
 					}"
 					class="relative z-10"
@@ -126,7 +129,10 @@
 			</div>
 			<Tooltip
 				v-if="
-					isStudent && !profileIsComplete && sidebarStore.isSidebarCollapsed
+					isStudent &&
+					!profileIsComplete &&
+					profileUsername &&
+					sidebarStore.isSidebarCollapsed
 				"
 				:text="__('Completa tu perfil')"
 			>
@@ -134,7 +140,7 @@
 					:to="{
 						name: 'Profile',
 						params: {
-							username: userResource.data?.username,
+							username: profileUsername,
 						},
 					}"
 					class="flex items-center justify-center"
@@ -313,6 +319,13 @@ let onboardingDetails
 let isOnboardingStepsCompleted = false
 const readOnlyMode = window.read_only_mode
 const isRtl = document.documentElement.dir === 'rtl'
+const profileUsername = computed(
+	() =>
+		userResource.data?.username ||
+		userResource.data?.name ||
+		userResource.data?.email ||
+		''
+)
 const iconProps = {
 	strokeWidth: 1.5,
 	width: 16,

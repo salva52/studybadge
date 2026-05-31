@@ -172,6 +172,7 @@ const microphoneSource = ref(null)
 const microphoneProcessor = ref(null)
 const outputPlayTime = ref(0)
 const liveSocketOpen = ref(false)
+const audioStreaming = ref(false)
 
 const interviewerLabel = computed(() => {
 	const labels = {
@@ -240,6 +241,9 @@ async function sendMessage() {
 			history: JSON.stringify(transcript.value.slice(0, -1)),
 		})
 		transcript.value = result.transcript || transcript.value
+		if (result.fallback) {
+			liveError.value = __('La IA no respondió desde el proveedor configurado. Dejé una respuesta guía para que puedas seguir por texto.')
+		}
 	} catch (error) {
 		toast.error(error.messages?.[0] || __('La IA no pudo responder.'))
 	} finally {
@@ -314,11 +318,14 @@ async function startLiveVoice() {
 				onmessage: handleLiveMessage,
 				onerror: (event) => {
 					liveError.value = event?.message || __('Live API tuvo un problema. Continúa por texto.')
+					liveSocketOpen.value = false
+					liveConnected.value = false
+					stopMicrophoneOnly()
 				},
 				onclose: () => {
 					liveConnected.value = false
 					liveSocketOpen.value = false
-					micEnabled.value = false
+					stopMicrophoneOnly()
 				},
 			},
 		})
@@ -353,8 +360,9 @@ async function startMicrophone() {
 	}
 	microphoneSource.value = inputAudioContext.value.createMediaStreamSource(mediaStream.value)
 	microphoneProcessor.value = inputAudioContext.value.createScriptProcessor(4096, 1, 1)
+	audioStreaming.value = true
 	microphoneProcessor.value.onaudioprocess = (event) => {
-		if (!liveSocketOpen.value || !liveSession.value) return
+		if (!audioStreaming.value || !liveSocketOpen.value || !liveSession.value) return
 		const input = event.inputBuffer.getChannelData(0)
 		const pcm16 = resampleToPcm16(input, inputAudioContext.value.sampleRate, 16000)
 		if (!pcm16.byteLength) return
@@ -367,7 +375,9 @@ async function startMicrophone() {
 			})
 		} catch (error) {
 			liveError.value = __('La conexión de voz se cerró. Puedes seguir por texto.')
-			stopLiveVoice()
+			liveSocketOpen.value = false
+			liveConnected.value = false
+			stopMicrophoneOnly()
 		}
 	}
 	microphoneSource.value.connect(microphoneProcessor.value)
@@ -443,40 +453,42 @@ function playAudio(data, mimeType) {
 }
 
 async function stopLiveVoice() {
+	stopMicrophoneOnly()
 	try {
-		if (liveSocketOpen.value && liveSession.value?.sendRealtimeInput) {
-			liveSession.value.sendRealtimeInput({ audioStreamEnd: true })
-		}
+		liveSession.value?.close?.()
 	} catch {}
+	liveSession.value = null
+	liveConnected.value = false
+	liveSocketOpen.value = false
+}
+
+function stopMicrophoneOnly() {
+	audioStreaming.value = false
 	try {
+		if (microphoneProcessor.value) microphoneProcessor.value.onaudioprocess = null
 		microphoneProcessor.value?.disconnect()
 		microphoneSource.value?.disconnect()
 	} catch {}
 	mediaStream.value?.getTracks?.().forEach((track) => track.stop())
-	try {
-		await inputAudioContext.value?.close?.()
-	} catch {}
-	try {
-		liveSession.value?.close?.()
-	} catch {}
+	const context = inputAudioContext.value
+	if (context && context.state !== 'closed') {
+		context.close().catch(() => {})
+	}
 	mediaStream.value = null
 	inputAudioContext.value = null
 	microphoneSource.value = null
 	microphoneProcessor.value = null
-	liveSession.value = null
 	micEnabled.value = false
-	liveConnected.value = false
-	liveSocketOpen.value = false
 }
 </script>
 
 <style scoped>
-.room-page { min-height: 100vh; background: radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.22), transparent 34%), #080d19; color: white; overflow-x: hidden; }
+.room-page { display: flex; min-height: 100vh; min-height: 100dvh; flex-direction: column; background: radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.22), transparent 34%), #080d19; color: white; overflow-x: hidden; }
 .room-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 72px; padding: 0.9rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(15,23,42,0.92); backdrop-filter: blur(14px); }
 .room-kicker { color: #93c5fd; font-size: 0.72rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0; }
 .room-header h1 { margin-top: 0.15rem; max-width: 46rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 1.2rem; font-weight: 900; }
 .room-header-actions { display: flex; gap: 0.6rem; }
-.room-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(340px, 390px); gap: 1rem; min-height: calc(100vh - 72px); padding: 1rem; background: transparent; }
+.room-layout { display: grid; flex: 1; grid-template-columns: minmax(0, 1fr) minmax(340px, 390px); gap: 1rem; min-height: calc(100dvh - 72px); padding: 1rem; background: transparent; }
 .room-stage { display: flex; min-width: 0; min-height: 0; flex-direction: column; }
 .meeting-grid { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 1rem; flex: 1; min-height: 430px; }
 .ai-tile, .user-tile, .side-section, .feedback-panel { border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: #111827; box-shadow: 0 24px 60px rgba(0,0,0,0.25); }

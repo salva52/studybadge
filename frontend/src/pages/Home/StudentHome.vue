@@ -140,7 +140,8 @@
 						{{ __('Completa cursos y aprueba evaluaciones para obtener certificados verificables.') }}
 					</p>
 					<router-link
-						:to="{ name: 'ProfileCertificates', params: { user: user.data?.name } }"
+						v-if="profileUsername"
+						:to="{ name: 'ProfileCertificates', params: { username: profileUsername } }"
 						class="sh-btn-outline inline-flex"
 					>
 						{{ __('Ver mis certificados') }}
@@ -241,6 +242,9 @@ const billing = createResource({
 })
 
 const certCount = ref(0)
+const profileUsername = computed(
+	() => user?.data?.username || user?.data?.name || user?.data?.email || ''
+)
 const fetchCertCount = () => {
 	call('frappe.client.get_count', {
 		doctype: 'LMS Certificate',

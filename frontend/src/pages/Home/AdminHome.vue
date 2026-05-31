@@ -267,6 +267,9 @@ import BatchCard from '@/pages/Batches/components/BatchCard.vue'
 const user = inject<any>('$user')
 const dayjs = inject<any>('$dayjs')
 const router = useRouter()
+const profileUsername = computed(
+	() => user?.data?.username || user?.data?.name || user?.data?.email || ''
+)
 
 const props = defineProps<{
 	liveClasses?: { data?: any[] }
@@ -341,9 +344,10 @@ const hasClassEnded = (cls: {
 }
 
 const redirectToProfile = () => {
+	if (!profileUsername.value) return
 	router.push({
 		name: 'ProfileEvaluationSchedule',
-		params: { username: user.data?.username },
+		params: { username: profileUsername.value },
 	})
 }
 </script>

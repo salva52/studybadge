@@ -263,12 +263,13 @@ const setActiveTab = () => {
 
 watchEffect(() => {
 	if (activeTab.value) {
+		const params = { username: props.username }
 		let route = {
-			About: { name: 'ProfileAbout' },
-			Certificates: { name: 'ProfileCertificates' },
-			Roles: { name: 'ProfileRoles' },
-			Slots: { name: 'ProfileEvaluator' },
-			Schedule: { name: 'ProfileEvaluationSchedule' },
+			About: { name: 'ProfileAbout', params },
+			Certificates: { name: 'ProfileCertificates', params },
+			Roles: { name: 'ProfileRoles', params },
+			Slots: { name: 'ProfileEvaluator', params },
+			Schedule: { name: 'ProfileEvaluationSchedule', params },
 		}[activeTab.value]
 		router.push(route)
 	}
@@ -344,7 +345,7 @@ const breadcrumbs = computed(() => {
 			route: {
 				name: 'Profile',
 				params: {
-					username: user.doc?.username,
+					username: props.username || user.doc?.username,
 				},
 			},
 		},

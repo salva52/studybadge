@@ -60,7 +60,7 @@
 import { getSidebarLinks } from '@/utils'
 import { useRouter } from 'vue-router'
 import { call } from 'frappe-ui'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { sessionStore } from '@/stores/session'
 import { useSettings } from '@/stores/settings'
 import { usersStore } from '@/stores/user'
@@ -77,6 +77,13 @@ const showMenu = ref(false)
 const menu = ref(null)
 const isModerator = ref(false)
 const isInstructor = ref(false)
+const profileUsername = computed(
+	() =>
+		userResource.data?.username ||
+		userResource.data?.name ||
+		userResource.data?.email ||
+		''
+)
 
 const handleOutsideClick = (e) => {
 	if (menu.value && !menu.value.contains(e.target)) {
@@ -212,11 +219,11 @@ const handleClick = (tab) => {
 		logout.submit().then(() => {
 			isLoggedIn = false
 		})
-	else if (tab.label == 'Profile')
+	else if (tab.label == 'Profile' && profileUsername.value)
 		router.push({
 			name: 'Profile',
 			params: {
-				username: userResource.data?.username,
+				username: profileUsername.value,
 			},
 		})
 	else router.push({ name: tab.to })

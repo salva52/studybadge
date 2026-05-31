@@ -148,7 +148,10 @@ const routes = [
 		name: 'Profile',
 		component: () => import('@/pages/Profile.vue'),
 		props: true,
-		redirect: { name: 'ProfileAbout' },
+		redirect: (to) => ({
+			name: 'ProfileAbout',
+			params: { username: to.params.username },
+		}),
 		children: [
 			{
 				name: 'ProfileAbout',
