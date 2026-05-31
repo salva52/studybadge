@@ -2759,3 +2759,15 @@ def fix_home_folder_advanced():
             frappe.db.set_value('File', f, 'is_folder', 1)
             print(f'Verified {f}')
     return 'Fixed'
+
+
+@frappe.whitelist()
+def fix_home_folder_permissions():
+    import frappe
+    folders = ['Home', 'Home/Attachments']
+    for f in folders:
+        if frappe.db.exists('File', f):
+            frappe.db.set_value('File', f, 'is_private', 0)
+            print(f'Set is_private=0 for {f}')
+    frappe.db.commit()
+    return 'Permissions Fixed'
