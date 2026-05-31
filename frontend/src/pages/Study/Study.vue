@@ -21,9 +21,6 @@
 						<p class="hero-subtitle">{{ headerSubtitle }}</p>
 					</div>
 					<div class="hero-actions">
-						<Button v-if="isDashboard" variant="solid" :label="__('Crear curso IA')" @click="startFlow('parcial')" class="hero-cta">
-							<template #prefix><BookOpen class="h-4 w-4 stroke-1.5" /></template>
-						</Button>
 						<nav class="hero-nav">
 							<router-link
 								v-for="item in topNav"
@@ -268,7 +265,7 @@
 					</div>
 
 					<!-- Step 2 -->
-					<div class="s-panel s-panel--flush">
+					<div class="s-panel s-panel--flush" :class="{ 'opacity-50 pointer-events-none': !currentSession }">
 						<div class="s-panel-header">
 							<div>
 								<div class="s-kicker">{{ __('Paso 2') }}</div>
@@ -294,46 +291,26 @@
 							<div class="s-loader-spinner"></div>
 							{{ __('Analizando material y ordenando temas...') }}
 						</div>
-						<div class="materials-list">
-							<div v-for="material in currentSession?.materials || []" :key="material.idx" class="material-item">
-								<div class="material-icon"><FileText class="h-4 w-4 stroke-1.5" /></div>
-								<div class="min-w-0">
-									<div class="material-name">{{ material.file_name }}</div>
-									<div class="material-meta">{{ material.file_type }} · {{ material.analysis_status }}</div>
-								</div>
-							</div>
-							<div v-if="!currentSession?.materials?.length" class="s-empty-sm">
-								<Upload class="h-6 w-6 stroke-1.5" />
-								<h3>{{ currentSession ? __('Agrega material para mejorar el curso') : __('Primero crea el curso') }}</h3>
-								<p>{{ currentSession ? __('También puedes usar solo el texto manual del paso 1.') : __('Así se activará la subida de archivos.') }}</p>
-							</div>
-						</div>
-					</div>
-
-					<!-- Steps 3 & 4 -->
-					<div class="s-panel s-panel--flush">
-						<div class="s-panel-header">
+						<div class="grid gap-6 md:grid-cols-2 p-5">
 							<div>
-								<div class="s-kicker">{{ __('Pasos 3 y 4') }}</div>
-								<h2 class="s-panel-title">{{ __('Perfil y creación del curso') }}</h2>
-								<p class="s-panel-desc">{{ __('Responde unas preguntas rápidas y crea la malla de módulos y lecciones.') }}</p>
-							</div>
-							<div class="flex flex-wrap gap-2">
-								<Button :label="__('Crear preguntas')" :disabled="!currentSession" :loading="loading === 'questions'" @click="generateQuestions" />
-								<Button :label="__('Crear curso completo')" variant="solid" :disabled="!currentSession" :loading="loading === 'plan'" @click="generatePlan" />
-							</div>
-						</div>
-						<div v-if="loading === 'plan'" class="s-loader">
-							<div class="s-loader-spinner"></div>
-							{{ __('Creando módulos, lecciones y ruta de estudio...') }}
-						</div>
-						<div class="twin-grid">
-							<div class="twin-card">
-								<div class="twin-card-header">
-									<Layers class="h-4 w-4 stroke-1.5" />
-									<h3>{{ __('Temas detectados') }}</h3>
+								<h3 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2"><FileText class="h-4 w-4 stroke-1.5 text-indigo-500" /> {{ __('Archivos subidos') }}</h3>
+								<div class="materials-list mt-0 pt-0">
+									<div v-for="material in currentSession?.materials || []" :key="material.idx" class="material-item">
+										<div class="material-icon"><FileText class="h-4 w-4 stroke-1.5" /></div>
+										<div class="min-w-0">
+											<div class="material-name">{{ material.file_name }}</div>
+											<div class="material-meta">{{ material.file_type }} · {{ material.analysis_status }}</div>
+										</div>
+									</div>
+									<div v-if="!currentSession?.materials?.length" class="s-empty-sm">
+										<Upload class="h-6 w-6 stroke-1.5" />
+										<p>{{ currentSession ? __('Agrega material para mejorar el curso. También puedes usar solo el texto manual del paso 1.') : __('Primero crea el curso.') }}</p>
+									</div>
 								</div>
-								<div class="twin-card-body">
+							</div>
+							<div>
+								<h3 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2"><Layers class="h-4 w-4 stroke-1.5 text-indigo-500" /> {{ __('Temas detectados') }}</h3>
+								<div class="flex flex-col gap-2">
 									<div v-for="topic in currentSession?.topics || []" :key="topic.title || topic" class="topic-chip">
 										<CheckCircle2 class="h-3.5 w-3.5 stroke-1.5" />
 										{{ topic.title || topic }}
@@ -344,25 +321,51 @@
 									</div>
 								</div>
 							</div>
-							<div class="twin-card">
-								<div class="twin-card-header">
-									<UserCog class="h-4 w-4 stroke-1.5" />
-									<h3>{{ __('Perfil de aprendizaje') }}</h3>
-								</div>
-								<div class="twin-card-body">
-									<div v-for="question in currentSession?.profile_questions || []" :key="question.id" class="profile-q">
-										<div class="profile-q-text">{{ question.question }}</div>
-										<select v-model="profileAnswers[question.id]" class="s-select s-select--sm">
-											<option value="">{{ __('Selecciona una opción') }}</option>
-											<option v-for="option in question.options || []" :key="option.label" :value="option.label">{{ option.label }}</option>
-										</select>
-									</div>
-									<div v-if="!currentSession?.profile_questions?.length" class="s-mini-empty">
-										<UserCog class="h-5 w-5 stroke-1.5" />
-										<span>{{ __('Pulsa "Crear preguntas" cuando ya tengas temas detectados.') }}</span>
-									</div>
-								</div>
+						</div>
+					</div>
+
+					<!-- Step 3 -->
+					<div class="s-panel s-panel--flush" :class="{ 'opacity-50 pointer-events-none': !currentSession?.topics?.length && !currentSession?.manual_text }">
+						<div class="s-panel-header">
+							<div>
+								<div class="s-kicker">{{ __('Paso 3') }}</div>
+								<h2 class="s-panel-title">{{ __('Perfil de aprendizaje') }}</h2>
+								<p class="s-panel-desc">{{ __('Responde unas preguntas rápidas para adaptar el curso a tu nivel.') }}</p>
 							</div>
+							<div class="flex flex-wrap gap-2">
+								<Button :label="__('Generar preguntas')" :disabled="!currentSession" :loading="loading === 'questions'" @click="generateQuestions" />
+							</div>
+						</div>
+						<div class="p-5 flex flex-col gap-4">
+							<div v-for="question in currentSession?.profile_questions || []" :key="question.id" class="profile-q">
+								<div class="profile-q-text">{{ question.question }}</div>
+								<select v-model="profileAnswers[question.id]" class="s-select s-select--sm max-w-md">
+									<option value="">{{ __('Selecciona una opción') }}</option>
+									<option v-for="option in question.options || []" :key="option.label" :value="option.label">{{ option.label }}</option>
+								</select>
+							</div>
+							<div v-if="!currentSession?.profile_questions?.length" class="s-mini-empty">
+								<UserCog class="h-5 w-5 stroke-1.5" />
+								<span>{{ __('Pulsa "Generar preguntas" cuando ya tengas temas detectados.') }}</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- Step 4 -->
+					<div class="s-panel s-panel--flush" :class="{ 'opacity-50 pointer-events-none': !currentSession?.profile_questions?.length }">
+						<div class="s-panel-header">
+							<div>
+								<div class="s-kicker">{{ __('Paso 4') }}</div>
+								<h2 class="s-panel-title">{{ __('Creación del curso') }}</h2>
+								<p class="s-panel-desc">{{ __('Genera la malla de módulos y lecciones finales.') }}</p>
+							</div>
+							<div class="flex flex-wrap gap-2">
+								<Button :label="__('Crear curso completo')" variant="solid" :disabled="!currentSession" :loading="loading === 'plan'" @click="generatePlan" />
+							</div>
+						</div>
+						<div v-if="loading === 'plan'" class="s-loader mb-4">
+							<div class="s-loader-spinner"></div>
+							{{ __('Creando módulos, lecciones y ruta de estudio...') }}
 						</div>
 					</div>
 				</div>
@@ -457,7 +460,7 @@
 			<section v-else-if="isRoom" class="grid gap-6 xl:grid-cols-[1fr_360px]">
 				<div class="flex flex-col gap-6">
 					<!-- Room header -->
-					<div class="s-panel s-panel--flush">
+					<div class="s-panel s-panel--flush sticky top-4 z-20 shadow-md">
 						<div class="s-panel-header">
 							<div>
 								<div class="s-kicker">{{ activeLesson.moduleTitle || __('Lección') }}</div>
@@ -499,7 +502,7 @@
 								</div>
 							</div>
 						</div>
-						<div v-if="loading === 'lesson'" class="s-loader">
+						<div v-if="loading === 'lesson'" class="s-loader mb-4">
 							<div class="s-loader-spinner"></div>
 							{{ __('Preparando tu lección personalizada...') }}
 						</div>
@@ -625,22 +628,6 @@
 
 				<!-- Room sidebar -->
 				<aside class="flex flex-col gap-6 room-sidebar">
-					<div class="s-panel s-panel--flush">
-						<div class="sidebar-header">
-							<ListChecks class="h-4 w-4 stroke-1.5" />
-							<h2 class="sidebar-title">{{ __('Checklist de dominio') }}</h2>
-						</div>
-						<div v-if="lessonPack.masteryChecklist?.length" class="checklist">
-							<label v-for="item in lessonPack.masteryChecklist" :key="item" class="checklist-item">
-								<input type="checkbox" class="checklist-box" @change="markProgress({ explanation_viewed: true })" />
-								<span>{{ item }}</span>
-							</label>
-						</div>
-						<div v-else class="s-mini-empty">
-							<ListChecks class="h-5 w-5 stroke-1.5" />
-							<span>{{ __('Termina la explicación para ver qué debes dominar.') }}</span>
-						</div>
-					</div>
 					<div v-if="isTutorExpanded" class="tutor-backdrop" @click="isTutorExpanded = false"></div>
 					<div class="s-panel s-panel--flush tutor-panel" :class="{ 'is-expanded': isTutorExpanded }">
 						<div class="sidebar-header flex justify-between items-center w-full">
@@ -668,6 +655,22 @@
 							<Button :disabled="!chatInput.trim()" :loading="loading === 'chat'" @click="sendChat">
 								<template #icon><SendHorizontal class="h-4 w-4 stroke-1.5" /></template>
 							</Button>
+						</div>
+					</div>
+					<div class="s-panel s-panel--flush">
+						<div class="sidebar-header">
+							<ListChecks class="h-4 w-4 stroke-1.5" />
+							<h2 class="sidebar-title">{{ __('Checklist de dominio') }}</h2>
+						</div>
+						<div v-if="lessonPack.masteryChecklist?.length" class="checklist">
+							<label v-for="item in lessonPack.masteryChecklist" :key="item" class="checklist-item">
+								<input type="checkbox" class="checklist-box" @change="markProgress({ explanation_viewed: true })" />
+								<span>{{ item }}</span>
+							</label>
+						</div>
+						<div v-else class="s-mini-empty">
+							<ListChecks class="h-5 w-5 stroke-1.5" />
+							<span>{{ __('Termina la explicación para ver qué debes dominar.') }}</span>
 						</div>
 					</div>
 					<div class="s-panel s-panel--flush">
@@ -793,6 +796,8 @@ import { computed, defineComponent, h, nextTick, onMounted, ref, watch } from 'v
 import { useRoute, useRouter } from 'vue-router'
 import { Button, FileUploader, FormControl, call, toast } from 'frappe-ui'
 import MarkdownIt from 'markdown-it'
+import mk from 'markdown-it-katex'
+import 'katex/dist/katex.min.css'
 import DOMPurify from 'dompurify'
 import {
 	AlertTriangle,
@@ -835,13 +840,13 @@ import {
 
 const route = useRoute()
 const router = useRouter()
-const markdown = new MarkdownIt({ html: false, linkify: true, breaks: true })
+const markdown = new MarkdownIt({ html: false, linkify: true, breaks: true }).use(mk)
 
 const flows = [
-	{ id: 'parcial', label: __('Parcial / Final'), icon: FileQuestion, description: __('Plan intensivo, ejercicios tipo evaluación y quiz final.') },
-	{ id: 'admision', label: __('Admisión'), icon: GraduationCap, description: __('Busca temarios universitarios y arma preparación por áreas.') },
-	{ id: 'recordar', label: __('Recordar'), icon: Brain, description: __('Recupera temas olvidados con práctica y memoria activa.') },
-	{ id: 'cero', label: __('Desde cero'), icon: BookOpen, description: __('Construye una ruta desde tus apuntes o un tema inicial.') },
+	{ id: 'parcial', label: __('Parcial / Final'), icon: FileQuestion, description: __('Tengo un examen próximo y quiero practicar.') },
+	{ id: 'admision', label: __('Admisión'), icon: GraduationCap, description: __('Busco prepararme para un proceso de admisión universitaria.') },
+	{ id: 'recordar', label: __('Recordar'), icon: Brain, description: __('Ya estudié esto antes y quiero reforzar la memoria.') },
+	{ id: 'cero', label: __('Desde cero'), icon: BookOpen, description: __('No sé nada del tema y quiero aprender desde el principio.') },
 ]
 
 const topNav = [
@@ -958,7 +963,10 @@ watch(() => route.fullPath, loadRouteSession)
 
 function renderMarkdown(text) {
 	if (!text) return ''
-	return DOMPurify.sanitize(markdown.render(String(text)))
+	return DOMPurify.sanitize(markdown.render(String(text)), {
+		ADD_TAGS: ['math', 'mrow', 'mi', 'mo', 'mn', 'ms', 'mspace', 'mtext', 'menclose', 'merror', 'mfrac', 'mpadded', 'mphantom', 'mroot', 'mrow', 'msqrt', 'mstyle', 'mmultiscripts', 'mover', 'mprescripts', 'msub', 'msubsup', 'msup', 'munder', 'munderover', 'none', 'semantics', 'annotation', 'annotation-xml'],
+		ADD_ATTR: ['mathvariant', 'mathcolor', 'mathsize', 'mathbackground', 'dir', 'display', 'class', 'style', 'aria-hidden']
+	})
 }
 
 function flowLabel(id) {
