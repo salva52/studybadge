@@ -2724,3 +2724,17 @@ def export_course_as_zip(course_name: str):
 def import_course_from_zip(zip_file_path: str):
 	frappe.only_for(["Moderator", "Course Creator"])
 	return import_course_zip(zip_file_path)
+
+
+@frappe.whitelist()
+def fix_home_folder():
+    if not frappe.db.exists("File", "Home"):
+        doc = frappe.new_doc("File")
+        doc.file_name = "Home"
+        doc.is_folder = 1
+        doc.folder = "Home"
+        doc.is_home_folder = 1
+        doc.insert(ignore_permissions=True, ignore_mandatory=True)
+        frappe.db.commit()
+        return "Home folder created"
+    return "Home folder already exists"
