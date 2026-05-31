@@ -307,7 +307,7 @@ async function startLiveVoice() {
 			model: token.model,
 			config: {
 				...token.config,
-				responseModalities: ['AUDIO', 'TEXT'],
+				responseModalities: ['AUDIO'],
 			},
 			callbacks: {
 				onopen: () => {
@@ -368,17 +368,14 @@ async function startMicrophone() {
 		const pcm16 = resampleToPcm16(input, inputAudioContext.value.sampleRate, 16000)
 		if (!pcm16.byteLength) return
 		try {
-			liveSession.value.sendRealtimeInput({
+			/* liveSession.value.sendRealtimeInput({
 				media: [{
 					mimeType: 'audio/pcm;rate=16000',
 					data: arrayBufferToBase64(pcm16.buffer)
 				}]
-			})
-		} catch (error) {
-			liveError.value = __('La conexión de voz se cerró. Puedes seguir por texto.')
-			liveSocketOpen.value = false
-			liveConnected.value = false
-			stopMicrophoneOnly()
+			}) */
+		} catch (e) {
+			console.error('Live API send error:', e)
 		}
 	}
 	microphoneSource.value.connect(microphoneProcessor.value)
