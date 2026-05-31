@@ -319,6 +319,9 @@ def process_mercadopago_certificate_payment(mp_payment: dict):
 			payment_doc.payment_for_document_type,
 			payment_doc.payment_for_document,
 		)
+		from lms.lms.doctype.lms_certificate.lms_certificate import auto_issue_course_certificate
+
+		auto_issue_course_certificate(payment_doc.payment_for_document, payment_doc.member)
 		_send_certificate_receipt_email(payment_doc, mp_payment)
 	return payment_doc
 

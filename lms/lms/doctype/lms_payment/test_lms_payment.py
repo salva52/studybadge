@@ -21,6 +21,13 @@ class TestLMSPayment(BaseTestUtils):
 			instructor="Administrator",
 		)
 		self.enrollment = self._create_enrollment(self.student.name, self.course.name)
+		frappe.db.set_value(
+			"LMS Course",
+			self.course.name,
+			{"paid_certificate": 1, "course_price": 25, "currency": "PEN"},
+		)
+		frappe.db.set_value("LMS Enrollment", self.enrollment.name, "progress", 100)
+		self.enrollment.reload()
 
 	def test_approved_mercadopago_certificate_payment_unlocks_enrollment_member(self):
 		payment = frappe.new_doc("LMS Payment")
@@ -55,6 +62,7 @@ class TestLMSPayment(BaseTestUtils):
 		self.assertEqual(payment.payment_status, "approved")
 		self.assertEqual(self.enrollment.purchased_certificate, 1)
 		self.assertEqual(self.enrollment.payment, payment.name)
+		self.assertTrue(self.enrollment.certificate)
 
 		process_mercadopago_certificate_payment(
 			{

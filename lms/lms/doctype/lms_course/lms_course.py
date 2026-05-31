@@ -73,12 +73,6 @@ class LMSCourse(Document):
 		if self.enable_certification and self.paid_certificate:
 			frappe.throw(_("A course cannot have both paid certificate and certificate of completion."))
 
-		if self.paid_certificate and not self.evaluator:
-			frappe.throw(_("Evaluator is required for paid certificates."))
-
-		if self.paid_certificate and not self.timezone:
-			frappe.throw(_("Timezone is required for paid certificates."))
-
 	def validate_amount_and_currency(self):
 		if self.paid_course and (cint(self.course_price) < 0 or not self.currency):
 			frappe.throw(_("Amount and currency are required for paid courses."))

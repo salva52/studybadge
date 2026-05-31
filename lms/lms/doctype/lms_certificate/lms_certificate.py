@@ -84,8 +84,12 @@ class LMSCertificate(Document):
 					_("Certification cannot be issued as the member is not enrolled in this course.")
 				)
 
-			completion_certificate = frappe.db.get_value("LMS Course", self.course, "enable_certification")
-			if completion_certificate:
+			certificate_enabled = frappe.db.get_value(
+				"LMS Course", self.course, ["enable_certification", "paid_certificate"], as_dict=True
+			)
+			if certificate_enabled and (
+				certificate_enabled.enable_certification or certificate_enabled.paid_certificate
+			):
 				progress = frappe.db.get_value(
 					"LMS Enrollment", {"course": self.course, "member": self.member}, "progress"
 				)
@@ -155,8 +159,9 @@ def has_website_permission(doc, ptype, user, verbose=False):
 	return False
 
 
-def is_certified(course):
-	certificate = frappe.get_all("LMS Certificate", {"member": frappe.session.user, "course": course})
+def is_certified(course, member: str | None = None):
+	member = member or frappe.session.user
+	certificate = frappe.get_all("LMS Certificate", {"member": member, "course": course})
 	if len(certificate):
 		return certificate[0].name
 	return
@@ -164,26 +169,36 @@ def is_certified(course):
 
 @frappe.whitelist()
 def create_certificate(course: str):
-	certificate = is_certified(course)
+	return create_course_certificate(course, frappe.session.user)
+
+
+def create_course_certificate(course: str, member: str | None = None):
+	member = member or frappe.session.user
+	certificate = is_certified(course, member)
 	if certificate:
 		return frappe.db.get_value(
-			"LMS Certificate", certificate, ["name", "course", "template"], as_dict=True
+			"LMS Certificate", certificate, ["name", "course", "template", "issue_date"], as_dict=True
 		)
 
-	else:
-		validate_certification_eligibility(course)
-		default_certificate_template = get_default_certificate_template()
-		certificate = frappe.get_doc(
-			{
-				"doctype": "LMS Certificate",
-				"member": frappe.session.user,
-				"course": course,
-				"issue_date": nowdate(),
-				"template": default_certificate_template,
-			}
-		)
-		certificate.save(ignore_permissions=True)
-		return certificate
+	validate_certification_eligibility(course, member)
+	default_certificate_template = get_default_certificate_template()
+	certificate = frappe.get_doc(
+		{
+			"doctype": "LMS Certificate",
+			"member": member,
+			"course": course,
+			"issue_date": nowdate(),
+			"template": default_certificate_template,
+		}
+	)
+	certificate.save(ignore_permissions=True)
+	frappe.db.set_value(
+		"LMS Enrollment",
+		{"course": course, "member": member},
+		"certificate",
+		certificate.name,
+	)
+	return certificate
 
 
 def get_default_certificate_template():
@@ -206,18 +221,45 @@ def get_default_certificate_template():
 	return default_certificate_template
 
 
-def validate_certification_eligibility(course):
-	if not frappe.db.exists("LMS Enrollment", {"course": course, "member": frappe.session.user}):
+def validate_certification_eligibility(course, member: str | None = None):
+	member = member or frappe.session.user
+	enrollment = frappe.db.get_value(
+		"LMS Enrollment",
+		{"course": course, "member": member},
+		["name", "progress", "purchased_certificate"],
+		as_dict=True,
+	)
+	if not enrollment:
 		frappe.throw(_("You are not enrolled in this course."))
 
-	if not frappe.db.get_value("LMS Course", course, "enable_certification"):
+	course_settings = frappe.db.get_value(
+		"LMS Course",
+		course,
+		["enable_certification", "paid_certificate"],
+		as_dict=True,
+	)
+	if not course_settings or not (course_settings.enable_certification or course_settings.paid_certificate):
 		frappe.throw(_("Certification is not enabled for this course."))
 
-	progress = frappe.db.get_value(
-		"LMS Enrollment", {"course": course, "member": frappe.session.user}, "progress"
-	)
-	if progress < 100:
+	if course_settings.paid_certificate:
+		from lms.lms.subscriptions import has_active_plus
+
+		if not enrollment.purchased_certificate and not has_active_plus(member):
+			frappe.throw(_("Please purchase this certificate or activate StudyBadge Plus first."))
+
+	if enrollment.progress < 100:
 		frappe.throw(_("You have not completed the course yet."))
+
+
+def auto_issue_course_certificate(course: str, member: str | None = None):
+	member = member or frappe.session.user
+	try:
+		return create_course_certificate(course, member)
+	except Exception:
+		frappe.log_error(
+			frappe.get_traceback(),
+			f"StudyBadge Auto Certificate Failed: {course} / {member}",
+		)
 
 
 def has_permission(doc, ptype="read", user=None):

@@ -158,6 +158,25 @@ def save_progress(lesson: str, course: str, scorm_details: dict = None):
 	enrollment.flags.ignore_version = True
 	enrollment.save()
 	enrollment.run_method("on_change")
+	certificate_settings = frappe.db.get_value(
+		"LMS Course",
+		course,
+		["enable_certification", "paid_certificate"],
+		as_dict=True,
+	)
+	if progress >= 100 and certificate_settings and (
+		certificate_settings.enable_certification or certificate_settings.paid_certificate
+	):
+		can_issue_paid_certificate = True
+		if certificate_settings.paid_certificate:
+			from lms.lms.subscriptions import has_active_plus
+
+			can_issue_paid_certificate = bool(enrollment.purchased_certificate or has_active_plus(frappe.session.user))
+
+		if can_issue_paid_certificate:
+			from lms.lms.doctype.lms_certificate.lms_certificate import auto_issue_course_certificate
+
+			auto_issue_course_certificate(course, frappe.session.user)
 
 	frappe.publish_realtime(
 		event="update_lesson_progress",

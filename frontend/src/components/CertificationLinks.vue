@@ -7,7 +7,7 @@
 		<template #prefix>
 			<GraduationCap class="size-4 stroke-1.5" />
 		</template>
-		{{ __('View Certificate') }}
+		{{ __('Ver certificado') }}
 	</Button>
 	<div
 		v-else-if="
@@ -19,6 +19,7 @@
 	>
 		<router-link
 			v-if="
+				certification.data.membership.progress >= 100 &&
 				!certification.data.membership.purchased_certificate &&
 				!certification.data.has_plus
 			"
@@ -34,13 +35,14 @@
 				<template #prefix>
 					<GraduationCap class="size-4 stroke-1.5" />
 				</template>
-				{{ __('Get Certified') }}
+				{{ __('Comprar certificado') }}
 			</Button>
 		</router-link>
 		<router-link
 			v-else-if="
-				!certification.data.membership.certificate ||
-				certification.data.has_plus
+				certification.data.membership.progress >= 100 &&
+				(!certification.data.membership.certificate ||
+					certification.data.has_plus)
 			"
 			:to="{
 				name: 'CourseCertification',
@@ -53,9 +55,15 @@
 				<template #prefix>
 					<GraduationCap class="size-4 stroke-1.5" />
 				</template>
-				{{ __('Get Certified') }}
+				{{ __('Emitir certificado') }}
 			</Button>
 		</router-link>
+		<Button v-else class="w-full" variant="subtle" disabled>
+			<template #prefix>
+				<GraduationCap class="size-4 stroke-1.5" />
+			</template>
+			{{ __('Completa el curso para certificarte') }}
+		</Button>
 	</div>
 </template>
 <script setup>

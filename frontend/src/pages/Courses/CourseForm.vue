@@ -269,28 +269,6 @@
 									@update:modelValue="makeFormDirty()"
 								/>
 							</div>
-							<div v-if="courseResource.doc.paid_certificate" class="space-y-5">
-								<Link
-									ref="evaluatorLinkRef"
-									doctype="Course Evaluator"
-									v-model="courseResource.doc.evaluator"
-									:label="__('Evaluator')"
-									:required="courseResource.doc.paid_certificate"
-									:onCreate="
-										() => {
-											memberModalRoles = ['batch_evaluator']
-											showMemberModal = true
-										}
-									"
-									@update:modelValue="makeFormDirty()"
-								/>
-								<FormControl
-									v-model="courseResource.doc.timezone"
-									:label="__('Timezone')"
-									:placeholder="__('e.g. IST, UTC, GMT...')"
-									@input="makeFormDirty()"
-								/>
-							</div>
 						</div>
 					</div>
 

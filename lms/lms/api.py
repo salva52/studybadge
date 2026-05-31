@@ -199,6 +199,20 @@ def verify_billing_access(doctype, name, billing_type):
 			access = False
 			message = _("You already have StudyBadge Plus. Your certificates are unlocked.")
 
+		membership = frappe.db.get_value(
+			"LMS Enrollment",
+			{"course": name, "member": frappe.session.user},
+			["name", "progress", "purchased_certificate"],
+			as_dict=1,
+		)
+		if access and not membership:
+			access = False
+			message = _("You are not enrolled in this course.")
+
+		if access and membership.progress < 100:
+			access = False
+			message = _("Please complete the course before purchasing the certificate.")
+
 		purchased_certificate = frappe.db.exists(
 			"LMS Enrollment",
 			{
@@ -207,7 +221,7 @@ def verify_billing_access(doctype, name, billing_type):
 				"purchased_certificate": 1,
 			},
 		)
-		if purchased_certificate:
+		if access and purchased_certificate:
 			access = False
 			message = _("You have already purchased the certificate for this course.")
 
@@ -1487,17 +1501,34 @@ def get_certification_details(course: str):
 		membership = frappe.db.get_value(
 			"LMS Enrollment",
 			filters,
-			["name", "purchased_certificate"],
+			["name", "progress", "purchased_certificate", "certificate"],
 			as_dict=1,
 		)
 
-	paid_certificate = frappe.db.get_value("LMS Course", course, "paid_certificate")
+	course_flags = frappe.db.get_value(
+		"LMS Course",
+		course,
+		["enable_certification", "paid_certificate"],
+		as_dict=1,
+	)
+	paid_certificate = course_flags.paid_certificate if course_flags else 0
 	course_details = frappe.db.get_value(
 		"LMS Course",
 		course,
 		["title", "evaluator"],
 		as_dict=1,
 	)
+	if (
+		membership
+		and membership.progress >= 100
+		and course_flags
+		and (course_flags.enable_certification or course_flags.paid_certificate)
+		and (not course_flags.paid_certificate or membership.purchased_certificate or has_active_plus())
+	):
+		from lms.lms.doctype.lms_certificate.lms_certificate import auto_issue_course_certificate
+
+		auto_issue_course_certificate(course, frappe.session.user)
+
 	certificate = frappe.db.get_value(
 		"LMS Certificate",
 		{"member": frappe.session.user, "course": course},
@@ -1508,6 +1539,7 @@ def get_certification_details(course: str):
 	return {
 		"membership": membership,
 		"paid_certificate": paid_certificate,
+		"enable_certification": course_flags.enable_certification if course_flags else 0,
 		"certificate": certificate,
 		"has_plus": has_active_plus(),
 		"course_title": course_details.title if course_details else None,
