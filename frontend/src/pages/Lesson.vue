@@ -220,6 +220,12 @@
 							/>
 						</div>
 
+						<LessonTTSReader
+							v-if="lessonSpeechSegments.length"
+							:title="lesson.data.title"
+							:segments="lessonSpeechSegments"
+						/>
+
 						<div
 							v-if="
 								lesson.data.instructor_content &&
@@ -382,11 +388,13 @@ import {
 	enablePlyr,
 	highlightText,
 	sanitizeEditorJs,
+	htmlToText,
 } from '@/utils'
 import { sessionStore } from '@/stores/session'
 import { useSidebar } from '@/stores/sidebar'
 import EditorJS from '@editorjs/editorjs'
 import LessonContent from '@/components/LessonContent.vue'
+import LessonTTSReader from '@/components/LessonTTSReader.vue'
 import CourseInstructors from '@/components/CourseInstructors.vue'
 import ProgressBar from '@/components/ProgressBar.vue'
 import Discussions from '@/components/Discussions.vue'
@@ -450,18 +458,104 @@ onMounted(() => {
 })
 
 const getLessonTextContent = () => {
-	if (lesson.data?.content) {
-		try {
-			const blocks = JSON.parse(lesson.data.content)?.blocks || []
-			return blocks.map(b => {
-				if (b.type === 'paragraph') return b.data?.text || ''
-				if (b.type === 'header') return b.data?.text || ''
-				if (b.type === 'list') return (b.data?.items || []).join('\n')
-				return ''
-			}).filter(Boolean).join('\n').substring(0, 3000)
-		} catch { return '' }
+	return lessonSpeechSegments.value.join('\n').substring(0, 3000)
+}
+
+const lessonSpeechSegments = computed(() => {
+	if (!lesson.data) return []
+	const segments = lesson.data.content
+		? getEditorSpeechSegments(lesson.data.content)
+		: getLegacySpeechSegments(lesson.data.body || '')
+	if (lesson.data.title) {
+		return [lesson.data.title, ...segments].filter(Boolean)
 	}
-	return lesson.data?.body?.substring(0, 3000) || ''
+	return segments
+})
+
+const getEditorSpeechSegments = (content) => {
+	try {
+		const blocks = JSON.parse(content)?.blocks || []
+		return blocks.flatMap(getBlockSpeechSegments).filter(Boolean)
+	} catch {
+		return []
+	}
+}
+
+const getBlockSpeechSegments = (block) => {
+	const data = block?.data || {}
+	if (['paragraph', 'header'].includes(block.type)) {
+		return splitSpeechText(stripHtml(data.text))
+	}
+	if (block.type === 'list') {
+		return flattenListItems(data.items).flatMap((item) =>
+			splitSpeechText(stripHtml(item))
+		)
+	}
+	if (block.type === 'checklist') {
+		return (data.items || []).flatMap((item) =>
+			splitSpeechText(stripHtml(item.text))
+		)
+	}
+	if (block.type === 'quote') {
+		return splitSpeechText(
+			stripHtml([data.text, data.caption].filter(Boolean).join('. '))
+		)
+	}
+	if (block.type === 'table') {
+		return (data.content || []).flatMap((row) =>
+			splitSpeechText(row.map(stripHtml).join(', '))
+		)
+	}
+	if (block.type === 'markdown') {
+		return getLegacySpeechSegments(data.markdown || data.text || '')
+	}
+	return []
+}
+
+const flattenListItems = (items = []) => {
+	return items.flatMap((item) => {
+		if (typeof item === 'string') return item
+		return [
+			item.content || item.text || '',
+			...flattenListItems(item.items || []),
+		]
+	})
+}
+
+const getLegacySpeechSegments = (content) => {
+	if (!content) return []
+	return content
+		.split(/\n{2,}/)
+		.filter((block) => !block.includes('{{'))
+		.flatMap((block) => splitSpeechText(stripMarkdown(block)))
+}
+
+const splitSpeechText = (text) => {
+	return normalizeSpeechText(text)
+		.split(/(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÑ¿¡0-9])/)
+		.map((segment) => segment.trim())
+		.filter((segment) => segment.length > 3)
+		.slice(0, 80)
+}
+
+const normalizeSpeechText = (text = '') => {
+	return text
+		.replace(/\s+/g, ' ')
+		.replace(/\s+([,.;:!?])/g, '$1')
+		.trim()
+}
+
+const stripHtml = (value = '') => {
+	return normalizeSpeechText(htmlToText(String(value)))
+}
+
+const stripMarkdown = (value = '') => {
+	return stripHtml(
+		String(value)
+			.replace(/!\[([^\]]*)\]\([^)]+\)/g, '$1')
+			.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+			.replace(/[`*_>#-]/g, ' ')
+	)
 }
 
 const attachFullscreenEvent = () => {
