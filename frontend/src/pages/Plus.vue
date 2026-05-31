@@ -388,6 +388,7 @@ import {
 	CreditCard,
 	Crown,
 	Download,
+	FileText,
 	LifeBuoy,
 	RefreshCcw,
 	Sparkles,
@@ -395,6 +396,7 @@ import {
 	ShieldCheck,
 	Mail,
 	Info,
+	Video,
 } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
 
@@ -421,6 +423,16 @@ const benefits = [
 		icon: Sparkles,
 		label: __('IA motivacional'),
 		description: __('Beneficio incluido para herramientas inteligentes de estudio.'),
+	},
+	{
+		icon: Video,
+		label: __('Simulaciones con IA'),
+		description: __('Practica entrevistas, ventas, inglés y casos con transcripción.'),
+	},
+	{
+		icon: FileText,
+		label: __('Prompts listos'),
+		description: __('Biblioteca premium para productividad, marketing, negocios y estudio.'),
 	},
 	{
 		icon: CalendarDays,

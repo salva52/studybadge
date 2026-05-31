@@ -21,6 +21,22 @@ const routes = [
 		component: () => import('@/pages/Study/Study.vue'),
 	},
 	{
+		path: '/practice',
+		name: 'Practice',
+		component: () => import('@/pages/Practice.vue'),
+	},
+	{
+		path: '/practice/:sessionId',
+		name: 'PracticeRoom',
+		component: () => import('@/pages/PracticeRoom.vue'),
+		props: true,
+	},
+	{
+		path: '/prompts',
+		name: 'PromptLibrary',
+		component: () => import('@/pages/PromptLibrary.vue'),
+	},
+	{
 		path: '/plus',
 		name: 'Plus',
 		component: () => import('@/pages/Plus.vue'),

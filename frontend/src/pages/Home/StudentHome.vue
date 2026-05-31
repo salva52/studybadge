@@ -165,12 +165,22 @@
 						</p>
 						<ul class="space-y-2 mb-6 text-sm font-medium text-blue-50/90">
 							<li class="flex items-center gap-2"><CheckCircle2 class="size-3.5 text-amber-400 shrink-0" /> {{ __('Tutor IA ilimitado') }}</li>
+							<li class="flex items-center gap-2"><CheckCircle2 class="size-3.5 text-amber-400 shrink-0" /> {{ __('Simulaciones tipo entrevista') }}</li>
+							<li class="flex items-center gap-2"><CheckCircle2 class="size-3.5 text-amber-400 shrink-0" /> {{ __('Biblioteca de prompts') }}</li>
 							<li class="flex items-center gap-2"><CheckCircle2 class="size-3.5 text-amber-400 shrink-0" /> {{ __('Generación de cursos') }}</li>
 							<li class="flex items-center gap-2"><CheckCircle2 class="size-3.5 text-amber-400 shrink-0" /> {{ __('Certificados incluidos') }}</li>
 						</ul>
-						<router-link :to="{ name: 'Plus' }" class="sh-btn-gold w-full">
-							{{ billing.data?.active ? __('Gestionar mi Plus') : __('Desbloquear Plus') }}
-						</router-link>
+						<div class="grid grid-cols-1 gap-2">
+							<router-link :to="{ name: 'Practice' }" class="sh-btn-gold w-full">
+								<Video class="size-4" /> {{ __('Practicar con IA') }}
+							</router-link>
+							<router-link :to="{ name: 'PromptLibrary' }" class="sh-btn-outline w-full !border-white/20 !text-white hover:!bg-white/10">
+								<Zap class="size-4" /> {{ __('Ver prompts') }}
+							</router-link>
+							<router-link :to="{ name: 'Plus' }" class="sh-btn-outline w-full !border-white/20 !text-white hover:!bg-white/10">
+								{{ billing.data?.active ? __('Gestionar mi Plus') : __('Desbloquear Plus') }}
+							</router-link>
+						</div>
 					</div>
 				</div>
 			</div>

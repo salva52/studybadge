@@ -488,6 +488,24 @@ const getSidebarItems = (forMobile = false) => {
 					},
 				},
 				{
+					label: 'Simulaciones IA',
+					icon: 'Video',
+					to: 'Practice',
+					activeFor: ['Practice', 'PracticeRoom'],
+					condition: () => {
+						return userResource?.data
+					},
+				},
+				{
+					label: 'Biblioteca de prompts',
+					icon: 'Zap',
+					to: 'PromptLibrary',
+					activeFor: ['PromptLibrary'],
+					condition: () => {
+						return userResource?.data
+					},
+				},
+				{
 					label: 'StudyBadge Plus',
 					icon: 'Crown',
 					to: 'Plus',
