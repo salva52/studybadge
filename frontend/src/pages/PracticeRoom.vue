@@ -316,12 +316,14 @@ async function startLiveVoice() {
 				},
 				onmessage: handleLiveMessage,
 				onerror: (event) => {
+					console.error('Live API onerror:', event)
 					liveError.value = event?.message || __('Live API tuvo un problema. Continúa por texto.')
 					liveSocketOpen.value = false
 					liveConnected.value = false
 					stopMicrophoneOnly()
 				},
-				onclose: () => {
+				onclose: (event) => {
+					console.error('Live API onclose:', event?.code, event?.reason)
 					liveConnected.value = false
 					liveSocketOpen.value = false
 					stopMicrophoneOnly()
@@ -366,10 +368,12 @@ async function startMicrophone() {
 		const pcm16 = resampleToPcm16(input, inputAudioContext.value.sampleRate, 16000)
 		if (!pcm16.byteLength) return
 		try {
-			liveSession.value.sendRealtimeInput([{
-				mimeType: 'audio/pcm;rate=16000',
-				data: arrayBufferToBase64(pcm16.buffer)
-			}])
+			liveSession.value.sendRealtimeInput({
+				audio: {
+					data: arrayBufferToBase64(pcm16.buffer),
+					mimeType: 'audio/pcm;rate=16000'
+				}
+			})
 		} catch (error) {
 			liveError.value = __('La conexión de voz se cerró. Puedes seguir por texto.')
 			liveSocketOpen.value = false
