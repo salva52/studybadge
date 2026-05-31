@@ -1,6 +1,8 @@
 # Copyright (c) 2021, FOSS United and contributors
 # For license information, please see license.txt
 
+from urllib.parse import quote
+
 import frappe
 from frappe import _
 from frappe.email.doctype.email_template.email_template import get_email_template
@@ -30,30 +32,58 @@ class LMSCertificate(Document):
 			self.send_mail()
 
 	def send_mail(self):
-		subject = _("Congratulations on getting certified!")
+		subject = _("Tu certificado StudyBadge ya está listo")
 		template = "certification"
 		custom_template = frappe.db.get_single_value("LMS Settings", "certification_template")
+		course_title = frappe.db.get_value("LMS Course", self.course, "title")
+		certificate_url = frappe.utils.get_url(
+			"/api/method/frappe.utils.print_format.download_pdf"
+			f"?doctype=LMS+Certificate&name={quote(self.name)}&format={quote(self.template)}"
+		)
+		course_url = frappe.utils.get_url(f"/lms/courses/{self.course}/certification")
 
 		args = {
 			"member_name": self.member_name,
 			"course_name": self.course,
-			"course_title": frappe.db.get_value("LMS Course", self.course, "title"),
+			"course_title": course_title,
 			"name": self.name,
 			"template": self.template,
+			"certificate_url": certificate_url,
+			"course_url": course_url,
+			"issue_date": frappe.utils.format_date(self.issue_date, "long"),
 		}
 
 		if custom_template:
 			email_template = get_email_template(custom_template, args)
 			subject = email_template.get("subject")
 			content = email_template.get("message")
+		attachments = self.get_certificate_email_attachments()
 		frappe.sendmail(
 			recipients=self.member,
 			subject=subject,
 			template=template if not custom_template else None,
 			content=content if custom_template else None,
 			args=args,
-			header=[subject, "green"],
+			attachments=attachments,
+			header=[subject, "blue"],
 		)
+
+	def get_certificate_email_attachments(self):
+		try:
+			return [
+				frappe.attach_print(
+					self.doctype,
+					self.name,
+					file_name=f"certificado-studybadge-{self.name}",
+					print_format=self.template,
+				)
+			]
+		except Exception:
+			frappe.log_error(
+				frappe.get_traceback(),
+				f"StudyBadge Certificate PDF Attachment Failed: {self.name}",
+			)
+			return []
 
 	def validate_criteria(self):
 		self.validate_role_of_owner()

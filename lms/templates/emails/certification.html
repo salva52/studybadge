@@ -1,42 +1,46 @@
-<div style="background-color: #f4f7f6; padding: 40px 20px; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);">
-        <!-- Header -->
-        <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); padding: 32px 24px; text-align: center; border-bottom: 1px solid #bfdbfe;">
-            <img src="{{ frappe.utils.get_url() }}/assets/lms/images/studybadge/studybadge-logo.png" alt="StudyBadge" style="max-height: 48px; margin: 0 auto; display: block;">
-        </div>
-        
-        <!-- Content -->
-        <div style="padding: 40px 32px; color: #334155; font-size: 16px; line-height: 1.7;">
-            <p>
-                {{ _("Dear ") }} {{ member_name }},
-            </p>
-            <br>
-            <p>
-                {{ _("I am delighted to inform you that you have successfully earned your certification for the {0} course. Congratulations!").format(frappe.bold(course_title)) }}
-            </p>
-            <br>
-            <p>
-                {{ _("With this certification, you can now showcase your updated skills and share your achievement with your colleagues and on LinkedIn. To access your certificate, please click on the link provided below. Make sure you are logged in to the portal.") }}
-            </p>
-            <br>
-            <a href="/api/method/frappe.utils.print_format.download_pdf?doctype=LMS+Certificate&name={{name}}&format={{template | urlencode }}">{{ _("Certificate Link") }}</a>
-            <br>
-            <p>
-                {{ _("Once again, congratulations on this significant accomplishment.")}}
-            </p>
-            <br>
-            <p>
-                {{ _("Best Regards") }}
-            </p>
-        </div>
-        
-        <!-- Footer -->
-        <div style="background-color: #f8fafc; padding: 32px 24px; text-align: center; font-size: 13px; color: #64748b; border-top: 1px solid #f1f5f9;">
-            <p style="margin: 0; font-weight: 600; color: #0f172a; font-size: 15px;">StudyBadge</p>
-            <p style="margin: 6px 0 0 0;">Aprende habilidades reales. Obtén certificados verificables.</p>
-            <div style="margin-top: 20px;">
-                <a href="{{ frappe.utils.get_url() }}" style="background-color: #3b82f6; color: #ffffff; padding: 10px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; display: inline-block;">Visitar Plataforma</a>
-            </div>
-        </div>
-    </div>
+<div style="margin:0;padding:36px 18px;background:#f4f7fb;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#172033;">
+	<div style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e4eaf2;border-radius:12px;overflow:hidden;box-shadow:0 18px 45px rgba(10,35,81,0.10);">
+		<div style="background:#0a2351;padding:30px 28px;text-align:center;">
+			<img src="{{ frappe.utils.get_url() }}/assets/lms/images/studybadge/studybadge-logo.png" alt="StudyBadge" style="display:block;max-height:48px;margin:0 auto 18px auto;">
+			<div style="font-size:13px;font-weight:700;letter-spacing:0;text-transform:uppercase;color:#c8d8f2;">Certificado emitido</div>
+			<h1 style="margin:8px 0 0 0;font-size:28px;line-height:1.2;color:#ffffff;font-weight:800;">Tu certificado ya está listo</h1>
+		</div>
+
+		<div style="padding:34px 30px 12px 30px;">
+			<p style="margin:0 0 16px 0;font-size:16px;line-height:1.65;color:#334155;">
+				Hola {{ member_name }},
+			</p>
+			<p style="margin:0 0 18px 0;font-size:16px;line-height:1.65;color:#334155;">
+				Completaste el curso <strong style="color:#0a2351;">{{ course_title }}</strong> y StudyBadge emitió tu certificado oficialmente.
+			</p>
+
+			<div style="margin:24px 0;padding:20px;border:1px solid #d8e2ef;border-radius:10px;background:#f8fbff;">
+				<div style="font-size:13px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0;margin-bottom:8px;">Certificado</div>
+				<div style="font-size:18px;line-height:1.4;font-weight:800;color:#0a2351;margin-bottom:10px;">{{ course_title }}</div>
+				<div style="font-size:14px;line-height:1.5;color:#475569;">
+					Emitido el {{ issue_date }}<br>
+					Código: {{ name }}
+				</div>
+			</div>
+
+			<div style="text-align:center;margin:30px 0;">
+				<a href="{{ certificate_url }}" style="display:inline-block;background:#0a2351;color:#ffffff;text-decoration:none;font-size:15px;font-weight:800;padding:13px 22px;border-radius:8px;">
+					Descargar certificado en PDF
+				</a>
+			</div>
+
+			<p style="margin:0 0 18px 0;font-size:15px;line-height:1.65;color:#475569;">
+				También puedes verlo desde tu panel de certificación en StudyBadge cuando quieras compartirlo o descargarlo nuevamente.
+			</p>
+
+			<p style="margin:0 0 18px 0;font-size:15px;line-height:1.65;color:#475569;">
+				<a href="{{ course_url }}" style="color:#0a2351;font-weight:700;text-decoration:none;">Abrir certificación en StudyBadge</a>
+			</p>
+		</div>
+
+		<div style="padding:24px 30px 30px 30px;border-top:1px solid #eef2f7;background:#fbfdff;text-align:center;">
+			<p style="margin:0;font-size:14px;line-height:1.6;color:#64748b;">Aprende habilidades reales. Obtén certificados verificables.</p>
+			<p style="margin:8px 0 0 0;font-size:13px;color:#94a3b8;">StudyBadge</p>
+		</div>
+	</div>
 </div>
