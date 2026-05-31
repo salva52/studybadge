@@ -58,7 +58,7 @@
 								</div>
 							</div>
 							<div class="text-3xl font-black text-[#0a2351]">
-								{{ orderSummary.data.total_amount_formatted }}
+								{{ formatCertificateMoney(orderSummary.data.total_amount) }}
 							</div>
 						</div>
 						<router-link
@@ -175,6 +175,14 @@
 						</div>
 						<div class="rounded-md bg-blue-50 px-3 py-1 text-xs font-semibold text-[#0a2351]">
 							{{ __('PEN') }}
+						</div>
+					</div>
+					<div class="mb-4 rounded-md border border-blue-100 bg-blue-50 p-3 text-sm text-[#0a2351]">
+						<div class="font-semibold">
+							{{ __('Si quieres pagar con Yape') }}
+						</div>
+						<div class="mt-1 leading-5">
+							{{ __('En Medios de pago, elige Mercado Pago Wallet. Ahi apareceran tus medios favoritos, incluido Yape si esta disponible para tu cuenta.') }}
 						</div>
 					</div>
 					<div
@@ -638,6 +646,10 @@ const paymentStatusMessage = computed(() => {
 	}
 	return certificatePaymentMessage.value || __('Revisa los datos del metodo de pago e intenta nuevamente.')
 })
+
+function formatCertificateMoney(amount) {
+	return `S/ ${Number(amount || 0).toFixed(2)}`
+}
 
 const generatePaymentLink = () => {
 	paymentLink.submit(
