@@ -87,7 +87,7 @@
 					</div>
 					<div class="space-y-4">
 						<FormControl
-							:label="__('Billing Name')"
+							label="Nombre completo"
 							v-model="billingDetails.billing_name"
 							:required="!!fieldMeta.billing_name?.reqd"
 						/>
@@ -140,7 +140,7 @@
 							:required="!!fieldMeta.source?.reqd"
 						/>
 						<FormControl
-							:label="__('I consent to my personal information being stored for invoicing')"
+							label="Autorizo el uso de mis datos para registrar esta compra"
 							type="checkbox"
 							class="leading-6"
 							v-model="billingDetails.member_consent"
