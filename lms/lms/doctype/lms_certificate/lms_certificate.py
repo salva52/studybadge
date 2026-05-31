@@ -36,6 +36,7 @@ class LMSCertificate(Document):
 		template = "certification"
 		custom_template = frappe.db.get_single_value("LMS Settings", "certification_template")
 		course_title = frappe.db.get_value("LMS Course", self.course, "title")
+		verification_url = get_certificate_verification_url(self.name)
 		certificate_url = frappe.utils.get_url(
 			"/api/method/frappe.utils.print_format.download_pdf"
 			f"?doctype=LMS+Certificate&name={quote(self.name)}&format={quote(self.template)}"
@@ -49,6 +50,7 @@ class LMSCertificate(Document):
 			"name": self.name,
 			"template": self.template,
 			"certificate_url": certificate_url,
+			"verification_url": verification_url,
 			"course_url": course_url,
 			"issue_date": frappe.utils.format_date(self.issue_date, "long"),
 		}
@@ -195,6 +197,52 @@ def is_certified(course, member: str | None = None):
 	if len(certificate):
 		return certificate[0].name
 	return
+
+
+def get_certificate_verification_url(certificate_id: str):
+	return frappe.utils.get_url(f"/certificate?certificate_id={quote(certificate_id or '')}")
+
+
+def get_certificate_qr_svg(certificate_id: str, scale: int = 3):
+	import io
+
+	import pyqrcode
+
+	qr = pyqrcode.create(get_certificate_verification_url(certificate_id), error="M")
+	buffer = io.BytesIO()
+	qr.svg(
+		buffer,
+		scale=scale,
+		quiet_zone=1,
+		xmldecl=False,
+		svgns=False,
+		module_color="#0a2351",
+		background="#ffffff",
+	)
+	return buffer.getvalue().decode("utf-8")
+
+
+@frappe.whitelist(allow_guest=True)
+def download_public_certificate(certificate_id: str):
+	certificate = frappe.db.get_value(
+		"LMS Certificate",
+		certificate_id,
+		["name", "template"],
+		as_dict=True,
+	)
+	if not certificate:
+		frappe.throw(_("Certificate not found."), frappe.DoesNotExistError)
+
+	attachment = frappe.attach_print(
+		"LMS Certificate",
+		certificate.name,
+		file_name=f"certificado-studybadge-{certificate.name}",
+		print_format=certificate.template,
+	)
+	frappe.local.response.filename = attachment["fname"]
+	frappe.local.response.filecontent = attachment["fcontent"]
+	frappe.local.response.type = "download"
+	frappe.local.response.content_type = "application/pdf"
 
 
 @frappe.whitelist()
