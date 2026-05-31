@@ -1,22 +1,30 @@
 <template>
 	<div v-if="!forHome || (forHome && upcoming_evals.data?.length)">
 		<div class="flex items-center justify-between mb-4">
-			<div class="text-lg text-ink-gray-9 font-semibold">
-				{{ __('Upcoming Evaluations') }}
+			<div>
+				<div class="text-lg text-ink-gray-9 font-semibold">
+					{{ __('Próximas evaluaciones') }}
+				</div>
+				<div v-if="!forHome" class="mt-1 text-sm text-ink-gray-6">
+					{{ __('Agenda tu evaluación final para obtener tu certificado.') }}
+				</div>
 			</div>
 			<Button v-if="canScheduleEvals" @click="openEvalModal">
-				{{ __('Schedule') }}
+				<template #prefix>
+					<Calendar class="w-4 h-4 stroke-1.5" />
+				</template>
+				{{ __('Programar evaluación') }}
 			</Button>
 		</div>
 		<div
 			v-if="endDate && !endDateHasPassed"
 			class="text-sm leading-5 bg-surface-amber-1 text-ink-amber-3 p-2 rounded-md mb-4"
 		>
-			{{ __('The last day to schedule your evaluations is ') }}
+			{{ __('El último día para programar tus evaluaciones es ') }}
 			<span class="font-medium">
 				{{ dayjs(endDate).format('DD MMMM YYYY') }} </span
 			>.
-			{{ __('Please make sure to schedule your evaluation before this date.') }}
+			{{ __('Asegúrate de reservar tu horario antes de esa fecha.') }}
 		</div>
 		<div
 			v-else-if="endDateHasPassed"
@@ -24,7 +32,7 @@
 		>
 			{{
 				__(
-					'The deadline to schedule evaluations has passed. Please contact the Instructor for assistance.'
+					'El plazo para programar evaluaciones ya pasó. Contacta al instructor para recibir ayuda.'
 				)
 			}}
 		</div>
@@ -90,15 +98,35 @@
 								<template #prefix>
 									<HeadsetIcon class="w-4 h-4 stroke-1.5" />
 								</template>
-								{{ __('Join Call') }}
+								{{ __('Entrar a la llamada') }}
 							</Button>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-		<div v-else-if="!endDateHasPassed" class="text-ink-gray-7">
-			{{ __('Schedule an evaluation to get certified.') }}
+		<div v-else-if="!endDateHasPassed" class="cert-empty-state">
+			<div class="cert-empty-icon">
+				<Calendar class="w-6 h-6 stroke-1.5" />
+			</div>
+			<div class="min-w-0">
+				<div class="font-semibold text-ink-gray-9">
+					{{ __('Tu certificado está listo para el siguiente paso') }}
+				</div>
+				<div class="mt-1 text-sm leading-5 text-ink-gray-6">
+					{{ __('Programa una evaluación con el equipo de StudyBadge y completa tu certificación.') }}
+				</div>
+			</div>
+			<Button
+				v-if="canScheduleEvals"
+				class="cert-empty-action"
+				@click="openEvalModal"
+			>
+				<template #prefix>
+					<GraduationCap class="w-4 h-4 stroke-1.5" />
+				</template>
+				{{ __('Programar ahora') }}
+			</Button>
 		</div>
 	</div>
 	<EvaluationModal
@@ -227,3 +255,51 @@ const cancelEvaluation = (evl) => {
 	})
 }
 </script>
+
+<style scoped>
+.cert-empty-state {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	border: 1px solid rgba(10, 35, 81, 0.1);
+	border-radius: 8px;
+	background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+	padding: 18px;
+	box-shadow: 0 8px 24px rgba(10, 35, 81, 0.06);
+}
+
+.cert-empty-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	flex-shrink: 0;
+	border-radius: 8px;
+	background: #0a2351;
+	color: white;
+}
+
+.cert-empty-action {
+	margin-left: auto;
+	flex-shrink: 0;
+}
+
+:root[data-theme='dark'] .cert-empty-state {
+	border-color: rgba(255, 255, 255, 0.08);
+	background: rgba(255, 255, 255, 0.03);
+	box-shadow: none;
+}
+
+@media (max-width: 640px) {
+	.cert-empty-state {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.cert-empty-action {
+		margin-left: 0;
+		width: 100%;
+	}
+}
+</style>
