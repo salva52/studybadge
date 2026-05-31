@@ -305,10 +305,7 @@ async function startLiveVoice() {
 		})
 		liveSession.value = await ai.live.connect({
 			model: token.model,
-			config: {
-				...token.config,
-				responseModalities: [Modality?.AUDIO || 'AUDIO'],
-			},
+			config: {},
 			callbacks: {
 				onopen: () => {
 					liveConnected.value = true
