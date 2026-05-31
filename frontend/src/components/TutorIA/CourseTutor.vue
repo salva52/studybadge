@@ -1,6 +1,7 @@
 <template>
-	<!-- Floating Toggle Button -->
-	<button v-if="!isOpen" @click="isOpen = true" class="tutor-floating-btn shadow-xl hover:scale-105 transition-transform group">
+	<Teleport to="body">
+		<!-- Floating Toggle Button -->
+		<button v-if="!isOpen" @click="isOpen = true" class="tutor-floating-btn shadow-xl hover:scale-105 transition-transform group">
 		<Bot class="w-7 h-7 text-white" />
 		<span class="absolute right-full mr-3 bg-gray-800 text-white text-xs px-2.5 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 whitespace-nowrap transition-opacity shadow-lg">
 			TutorIA del Curso
@@ -114,6 +115,7 @@
 			</div>
 		</div>
 	</Transition>
+	</Teleport>
 </template>
 
 <script setup>
@@ -394,7 +396,7 @@ const sendMessage = async () => {
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
-	z-index: 90;
+	z-index: 99999;
 	border: none;
 }
 
@@ -404,7 +406,7 @@ const sendMessage = async () => {
 	border-radius: 20px;
 	display: flex;
 	flex-direction: column;
-	z-index: 95;
+	z-index: 99999;
 	border: 1px solid rgba(229, 231, 235, 0.8);
 }
 :root.dark .tutor-floating-window {
