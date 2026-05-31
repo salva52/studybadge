@@ -622,6 +622,22 @@ def _is_authorized_payment_topic(topic: str | None, payload: dict) -> bool:
 	return "authorized_payment" in topic or "authorized_payments" in str(resource)
 
 
+def _is_payment_topic(topic: str | None, payload: dict) -> bool:
+	resource = _get_resource(payload) or ""
+	topic = topic or ""
+	return topic == "payment" or topic.startswith("payment.") or "/v1/payments/" in str(resource)
+
+
+def _sync_certificate_payment_event(data_id: str | None, settings=None):
+	if not data_id:
+		return None
+
+	from lms.lms.payments import _mp_request, process_mercadopago_certificate_payment
+
+	mp_payment = _mp_request("GET", f"/v1/payments/{data_id}", settings=settings)
+	return process_mercadopago_certificate_payment(mp_payment)
+
+
 @frappe.whitelist()
 def get_plus_billing() -> dict:
 	if frappe.session.user == "Guest":
@@ -987,6 +1003,12 @@ def mercadopago_webhook():
 		event.processed = 1
 		event.save(ignore_permissions=True)
 		return {"status": "ok", "receipt": receipt.name if receipt else None}
+
+	if _is_payment_topic(topic, payload):
+		payment = _sync_certificate_payment_event(data_id, settings=settings)
+		event.processed = 1
+		event.save(ignore_permissions=True)
+		return {"status": "ok", "payment": payment.name if payment else None}
 
 	preapproval_id = _get_mp_subscription_id(payload, data_id, topic)
 	if not preapproval_id:

@@ -18,7 +18,10 @@
 		"
 	>
 		<router-link
-			v-if="!certification.data.membership.purchased_certificate"
+			v-if="
+				!certification.data.membership.purchased_certificate &&
+				!certification.data.has_plus
+			"
 			:to="{
 				name: 'Billing',
 				params: {
@@ -35,7 +38,10 @@
 			</Button>
 		</router-link>
 		<router-link
-			v-else-if="!certification.data.membership.certificate"
+			v-else-if="
+				!certification.data.membership.certificate ||
+				certification.data.has_plus
+			"
 			:to="{
 				name: 'CourseCertification',
 				params: {

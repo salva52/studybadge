@@ -278,7 +278,7 @@
 							<span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 animate-gradient-x">StudyBadge Plus</span>
 						</h1>
 						<p class="text-xl sm:text-2xl text-blue-100/80 font-medium max-w-3xl mx-auto leading-relaxed">
-							{{ __('Impulsa tu carrera con certificados, Tutor IA ilimitado, calendario inteligente y herramientas premium de estudio.') }}
+							{{ __('Impulsa tu carrera con certificados ilimitados, Tutor IA ilimitado, calendario inteligente y herramientas premium de estudio.') }}
 						</p>
 					</div>
 				</div>
@@ -409,8 +409,8 @@ const user = inject('$user')
 const benefits = [
 	{
 		icon: Award,
-		label: __('Certificados desbloqueados'),
-		description: __('Accede a certificados de cursos inscritos con certificado pagado.'),
+		label: __('Certificados ilimitados'),
+		description: __('Paga una vez por certificado o desbloquealos todos con Plus.'),
 	},
 	{
 		icon: Bot,
@@ -434,8 +434,8 @@ const benefits = [
 	},
 	{
 		icon: Crown,
-		label: __('Cursos propios ilimitados'),
-		description: __('Beneficio mostrado para la generacion de cursos propios.'),
+		label: __('Ideal para certificarte mas'),
+		description: __('Aprovecha Plus si planeas certificarte en varios cursos.'),
 	},
 ]
 

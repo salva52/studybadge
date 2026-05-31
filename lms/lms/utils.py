@@ -1840,9 +1840,10 @@ def get_discussion_replies(topic: str):
 def get_order_summary(doctype: str, docname: str, coupon: str | None = None, country: str | None = None):
 	details = get_paid_course_details(docname) if doctype == "LMS Course" else get_paid_batch_details(docname)
 
-	details.amount, details.currency = check_multicurrency(
-		details.amount, details.currency, country, details.amount_usd
-	)
+	if not (doctype == "LMS Course" and details.paid_certificate):
+		details.amount, details.currency = check_multicurrency(
+			details.amount, details.currency, country, details.amount_usd
+		)
 
 	details.original_amount = details.amount
 	details.original_amount_formatted = fmt_money(details.amount, 0, details.currency)
@@ -2033,7 +2034,7 @@ def complete_enrollment(payment_name: str, doctype: str, docname: str):
 	update_coupon_redemption(payment_doc)
 
 	if payment_doc.payment_for_certificate:
-		update_certificate_purchase(docname, payment_name)
+		update_certificate_purchase(docname, payment_name, payment_doc.member)
 	elif doctype == "LMS Course":
 		enroll_in_course(docname, payment_name)
 	else:
@@ -2056,7 +2057,10 @@ def get_integration_requests(doctype: str, docname: str):
 
 def get_payment_doc(payment_name: str) -> dict:
 	return frappe.db.get_value(
-		"LMS Payment", payment_name, ["name", "coupon", "payment_for_certificate"], as_dict=True
+		"LMS Payment",
+		payment_name,
+		["name", "member", "coupon", "payment_for_certificate"],
+		as_dict=True,
 	)
 
 
@@ -2149,10 +2153,11 @@ def create_enrollment(batch: str, payment_doc: dict = None):
 	new_student.save()
 
 
-def update_certificate_purchase(course: str, payment_name: str):
+def update_certificate_purchase(course: str, payment_name: str, member: str | None = None):
+	member = member or frappe.session.user
 	frappe.db.set_value(
 		"LMS Enrollment",
-		{"member": frappe.session.user, "course": course},
+		{"member": member, "course": course},
 		{
 			"purchased_certificate": 1,
 			"payment": payment_name,

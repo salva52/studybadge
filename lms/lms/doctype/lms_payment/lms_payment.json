@@ -28,8 +28,13 @@
   "coupon_code",
   "billing_details_section",
   "address",
+  "payment_gateway",
+  "payment_status",
+  "payment_status_detail",
+  "external_reference",
   "payment_id",
   "order_id",
+  "raw_response",
   "column_break_monu",
   "gstin",
   "pan"
@@ -113,6 +118,34 @@
    "fieldname": "payment_details_section",
    "fieldtype": "Section Break",
    "label": "Payment Details"
+  },
+  {
+   "fieldname": "payment_gateway",
+   "fieldtype": "Data",
+   "label": "Payment Gateway"
+  },
+  {
+   "fieldname": "payment_status",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Payment Status"
+  },
+  {
+   "fieldname": "payment_status_detail",
+   "fieldtype": "Data",
+   "label": "Payment Status Detail"
+  },
+  {
+   "fieldname": "external_reference",
+   "fieldtype": "Data",
+   "label": "External Reference",
+   "search_index": 1
+  },
+  {
+   "fieldname": "raw_response",
+   "fieldtype": "Code",
+   "label": "Raw Response",
+   "options": "JSON"
   },
   {
    "fieldname": "column_break_yxpl",
