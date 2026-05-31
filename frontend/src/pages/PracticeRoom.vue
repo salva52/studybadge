@@ -299,43 +299,77 @@ async function startLiveVoice() {
 		const token = await call('studybadge_ai.ai_practice.create_live_token', {
 			session: props.sessionId,
 		})
-		const { GoogleGenAI, Modality } = await import('@google/genai')
-		const ai = new GoogleGenAI({
-			apiKey: token.token,
-		})
-		liveSession.value = await ai.live.connect({
-			model: token.model,
-			config: {
-				...token.config,
-				responseModalities: ['AUDIO'],
-			},
-			callbacks: {
-				onopen: () => {
+		
+		const url = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${token.token}`
+		const ws = new WebSocket(url)
+		liveSession.value = ws
+
+		ws.onopen = () => {
+			console.log('Live API WebSocket onopen')
+			const setupMessage = {
+				setup: {
+					model: `models/${token.model.replace('models/', '')}`,
+					generationConfig: {
+						responseModalities: ["AUDIO"],
+					},
+					systemInstruction: {
+						parts: [{ text: token.config.systemInstruction }]
+					}
+				}
+			}
+			console.log('Sending setup message:', JSON.stringify(setupMessage, null, 2))
+			ws.send(JSON.stringify(setupMessage))
+		}
+
+		ws.onmessage = async (event) => {
+			console.log('Live API raw message length:', typeof event.data === 'string' ? event.data.length : 'Blob')
+			try {
+				let msg = event.data
+				if (msg instanceof Blob) {
+					msg = await msg.text()
+				}
+				const data = JSON.parse(msg)
+				if (data.setupComplete) {
+					console.log('Setup complete received, starting microphone')
 					liveConnected.value = true
 					liveSocketOpen.value = true
-				},
-				onmessage: handleLiveMessage,
-				onerror: (event) => {
-					console.error('Live API onerror:', event)
-					liveError.value = event?.message || __('Live API tuvo un problema. Continúa por texto.')
-					liveSocketOpen.value = false
-					liveConnected.value = false
-					stopMicrophoneOnly()
-				},
-				onclose: (event) => {
-					console.error('Live API onclose:', event?.code, event?.reason)
-					liveConnected.value = false
-					liveSocketOpen.value = false
-					stopMicrophoneOnly()
-				},
-			},
-		})
-		await startMicrophone()
-		toast.success(__('Voz activada.'))
+					await startMicrophone()
+					toast.success(__('Voz activada.'))
+					liveLoading.value = false
+				} else if (data.serverContent) {
+					handleLiveMessage(data)
+				} else if (data.error) {
+					console.error('Live API Server Error Response:', data.error)
+					liveError.value = data.error.message || 'Error en servidor'
+				} else {
+					console.log('Unknown message format:', data)
+				}
+			} catch (e) {
+				console.error('Error parsing onmessage:', e)
+			}
+		}
+
+		ws.onerror = (event) => {
+			console.error('Live API onerror:', event)
+			liveError.value = __('Live API tuvo un problema. Continúa por texto.')
+			liveSocketOpen.value = false
+			liveConnected.value = false
+			stopMicrophoneOnly()
+			liveLoading.value = false
+		}
+
+		ws.onclose = (event) => {
+			console.error('Live API onclose: code=', event.code, 'reason=', event.reason)
+			liveError.value = `Conexión cerrada: ${event.code} - ${event.reason || 'Sin razón específica'}`
+			liveConnected.value = false
+			liveSocketOpen.value = false
+			stopMicrophoneOnly()
+			liveLoading.value = false
+		}
+
 	} catch (error) {
 		liveError.value = error.messages?.[0] || error.message || __('No se pudo activar voz. Continúa por texto.')
 		await stopLiveVoice()
-	} finally {
 		liveLoading.value = false
 	}
 }
@@ -368,12 +402,17 @@ async function startMicrophone() {
 		const pcm16 = resampleToPcm16(input, inputAudioContext.value.sampleRate, 16000)
 		if (!pcm16.byteLength) return
 		try {
-			/* liveSession.value.sendRealtimeInput({
-				media: [{
-					mimeType: 'audio/pcm;rate=16000',
-					data: arrayBufferToBase64(pcm16.buffer)
-				}]
-			}) */
+			if (liveSession.value && liveSession.value.readyState === WebSocket.OPEN) {
+				const realtimeInput = {
+					realtimeInput: {
+						mediaChunks: [{
+							mimeType: 'audio/pcm;rate=16000',
+							data: arrayBufferToBase64(pcm16.buffer)
+						}]
+					}
+				}
+				liveSession.value.send(JSON.stringify(realtimeInput))
+			}
 		} catch (e) {
 			console.error('Live API send error:', e)
 		}
