@@ -777,7 +777,7 @@ function formatDate(value) {
 .chat-page { display: grid; grid-template-columns: 280px minmax(0, 1fr) 330px; height: 100vh; overflow: hidden; background: #f7f8fb; color: #101827; }
 .session-rail, .source-panel { background: #fff; border-color: #e5e7eb; border-style: solid; height: 100vh; overflow-y: auto; padding: 1rem; position: relative; z-index: 10; }
 .session-rail { border-width: 0 1px 0 0; }
-.source-panel { border-width: 0 0 0 1px; }
+.source-panel { border-width: 0 0 0 1px; padding: 1.1rem; }
 .rail-head, .panel-head, .chat-header, .header-left, .header-actions, .new-actions { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
 .rail-brand { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 900; color: #2563eb; }
 .new-badge { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 800; font-size: 0.95rem; color: #2563eb; background: #eff6ff; padding: 0.4rem 0.85rem; border-radius: 999px; margin-bottom: 0.5rem; }
@@ -794,6 +794,9 @@ function formatDate(value) {
 .session-list, .sources-list, .tool-list { display: flex; flex-direction: column; gap: 0.65rem; }
 .scrollable-list { margin-top: 0.5rem; margin-bottom: 1rem; max-height: 250px; overflow-y: auto; padding-right: 0.25rem; }
 .session-item, .source-item, .tool-card { display: flex; align-items: flex-start; gap: 0.75rem; border: 1px solid transparent; border-radius: 12px; padding: 0.85rem; text-align: left; transition: all 0.2s ease; }
+.tool-card { padding: 0.75rem; border-radius: 14px; }
+.tool-card strong { font-size: 0.88rem; }
+.tool-card small { font-size: 0.74rem; }
 .session-item { width: 100%; background: transparent; color: #334155; }
 .session-item:hover, .session-item.active { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
 .session-item span, .source-item span, .tool-card span { min-width: 0; display: flex; flex-direction: column; gap: 0.15rem; }
@@ -840,7 +843,7 @@ function formatDate(value) {
 	max-width: 100%;
 	overflow-y: auto;
 	overflow-x: hidden;
-	padding: 24px;
+	padding: clamp(48px, 7vh, 76px) 24px 32px;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -855,17 +858,17 @@ function formatDate(value) {
 .message-row { 
 	min-width: 0;
 	width: 100%;
-	max-width: 900px;
+	max-width: 980px;
 	display: flex; 
-	gap: 12px; 
-	margin: 1.5rem 0; 
+	gap: 8px; 
+	margin: 1.25rem 0; 
 	animation: messageSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 	opacity: 0;
 	transform: translateY(15px);
 }
 .message-row.user {
 	flex-direction: row-reverse;
-	justify-content: flex-end;
+	justify-content: flex-start;
 }
 .message-row.assistant {
 	justify-content: flex-start;
@@ -893,7 +896,7 @@ function formatDate(value) {
 
 .message-bubble { 
 	min-width: 0;
-	max-width: min(780px, calc(100% - 56px)); 
+	max-width: min(820px, calc(100% - 56px)); 
 	box-sizing: border-box;
 	border-radius: 18px; 
 	padding: 1rem 1.25rem; 
@@ -979,15 +982,15 @@ function formatDate(value) {
 @keyframes pulse { 0%, 80%, 100% { opacity: 0.3; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
 .composer-wrap { 
 	position: sticky; bottom: 0; z-index: 20; 
-	padding: 1rem 1rem 2.5rem 1rem; 
-	background: linear-gradient(to top, #f7f8fb 80%, rgba(247,248,251,0));
+	padding: 1rem 1.5rem 1.4rem; 
+	background: linear-gradient(to top, #f7f8fb 82%, rgba(247,248,251,0));
 	min-width: 0;
 	width: 100%;
-	max-width: 900px;
+	max-width: 980px;
 	margin: 0 auto;
 }
-.composer { display: flex; align-items: flex-end; gap: 0.55rem; border: 1px solid #dbe3ef; border-radius: 8px; background: #fff; padding: 0.55rem; box-shadow: 0 16px 40px rgba(15,23,42,0.07); }
-.composer textarea { min-height: 42px; max-height: 180px; flex: 1; resize: vertical; border: 0; outline: 0; padding: 0.55rem; line-height: 1.5; }
+.composer { display: flex; align-items: flex-end; gap: 0.55rem; border: 1px solid #dbe3ef; border-radius: 14px; background: #fff; padding: 0.6rem; box-shadow: 0 16px 40px rgba(15,23,42,0.07); }
+.composer textarea { min-height: 42px; max-height: 180px; flex: 1; resize: vertical; border: 0; outline: 0; padding: 0.55rem; line-height: 1.5; font-size: 0.98rem; }
 .send-btn { width: 42px; height: 42px; border: 0; background: #2563eb; color: #fff; }
 .composer-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.8rem; padding-top: 0.45rem; font-weight: 700; }
 .upgrade-link { color: #d97706; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem; background: #fef3c7; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.75rem; }
@@ -998,7 +1001,7 @@ function formatDate(value) {
 .session-item svg { flex-shrink: 0; margin-top: 0.1rem; }
 .source-item { background: #f8fafc; border-color: #edf2f7; box-shadow: 0 2px 10px rgba(15,23,42,0.02); }
 .source-item svg, .tool-card svg { flex-shrink: 0; color: #2563eb; margin-top: 0.1rem; }
-.tools-head { margin: 1.5rem 0 0.8rem; }
+.tools-head { margin: 1.25rem 0 0.65rem; }
 .tool-card { position: relative; width: 100%; background: #fff; border-color: #dbe3ef; box-shadow: 0 2px 10px rgba(15,23,42,0.03); }
 .tool-card:hover:not(:disabled) { border-color: #93c5fd; background: #eff6ff; }
 .tool-card.locked { background: #fffbeb; border-color: #fde68a; }
