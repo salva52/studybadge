@@ -392,13 +392,13 @@ async function createSession() {
 		currentThread.value = session.threads?.[0] || null
 		chatMessages.value = currentThread.value?.messages || []
 		await attachPendingFiles()
-		await router.push({ name: 'AISessionRoom', params: { sessionId: session.name } })
-		sessions.value = await api('list_ai_sessions')
 		if (seed) {
 			chatInput.value = seed
 			initialPrompt.value = ''
 			await sendChat()
 		}
+		await router.push({ name: 'AISessionRoom', params: { sessionId: session.name } })
+		sessions.value = await api('list_ai_sessions')
 		draft.value = { title: '', goal: '', academic_context: '', student_level: 'universitario', manual_text: '', model_tier: 'light' }
 	} finally {
 		creating.value = false
