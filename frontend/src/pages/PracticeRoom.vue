@@ -405,10 +405,10 @@ async function startMicrophone() {
 			if (liveSession.value && liveSession.value.readyState === WebSocket.OPEN) {
 				const realtimeInput = {
 					realtimeInput: {
-						mediaChunks: [{
+						audio: {
 							mimeType: 'audio/pcm;rate=16000',
 							data: arrayBufferToBase64(pcm16.buffer)
-						}]
+						}
 					}
 				}
 				liveSession.value.send(JSON.stringify(realtimeInput))
