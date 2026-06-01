@@ -546,4 +546,19 @@ const sendMessage = async () => {
 :root.dark .scrollbar-thin::-webkit-scrollbar-thumb {
 	background-color: #475569;
 }
+
+@media (max-width: 640px) {
+	.tutor-floating-btn {
+		bottom: 96px;
+		right: 16px;
+		width: 56px;
+		height: 56px;
+	}
+	.tutor-floating-window {
+		bottom: 110px !important;
+		right: 16px !important;
+		width: calc(100vw - 32px) !important;
+		height: calc(100vh - 140px) !important;
+	}
+}
 </style>

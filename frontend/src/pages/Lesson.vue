@@ -1,10 +1,12 @@
 <template>
 	<div v-if="lesson.data" class="">
 		<header
-			class="sticky top-0 z-10 flex items-center justify-between border-b bg-white/95 backdrop-blur-sm px-4 py-3 sm:px-6 shadow-sm"
+			class="sticky top-0 z-10 flex items-center justify-between gap-4 border-b bg-white/95 backdrop-blur-sm px-4 py-3 sm:px-6 shadow-sm"
 		>
-			<Breadcrumbs class="h-7" :items="breadcrumbs" />
-			<div class="flex items-center gap-x-2">
+			<div class="min-w-0 flex-1">
+				<Breadcrumbs class="h-7 truncate-breadcrumbs" :items="breadcrumbs" />
+			</div>
+			<div class="flex shrink-0 items-center gap-x-2">
 				<Tooltip v-if="canGoZen()" :text="__('Zen Mode')">
 					<Button @click="goFullScreen()">
 						<template #icon>
@@ -1378,6 +1380,26 @@ usePageMeta(() => {
 
 .avatar-group .avatar {
 	transition: margin 0.1s ease-in-out;
+}
+
+.truncate-breadcrumbs {
+	min-width: 0;
+	flex: 1;
+}
+
+.truncate-breadcrumbs :deep(.whitespace-nowrap) {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.truncate-breadcrumbs :deep(.whitespace-nowrap a) {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: block;
+}
+.truncate-breadcrumbs :deep(.whitespace-nowrap a span) {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: block;
 }
 
 .lesson-content p {
