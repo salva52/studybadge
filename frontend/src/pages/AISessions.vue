@@ -828,7 +828,7 @@ function formatDate(value) {
 	to { opacity: 1; transform: translateY(0); }
 }
 
-.chat-thread { padding: 1.5rem max(1rem, calc((100% - 860px) / 2)); padding-bottom: 5rem; }
+.chat-thread { padding: 1.5rem max(1rem, calc((100% - 860px) / 2)); padding-bottom: 2rem; }
 .welcome-block { display: grid; place-items: center; min-height: 55vh; text-align: center; }
 .welcome-block h2 { margin-top: 0.75rem; color: #0f172a; font-size: 1.6rem; font-weight: 950; }
 .suggestions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.55rem; margin-top: 1rem; }
@@ -986,7 +986,7 @@ function formatDate(value) {
 	.new-chat h1 { font-size: 2rem; }
 	.new-form { padding: 1rem; }
 	.new-form-row { grid-template-columns: 1fr; gap: 0.75rem; }
-	.chat-thread { padding: 1rem 0.75rem; padding-bottom: 10rem; flex: 1; overflow-y: auto; }
+	.chat-thread { padding: 1rem 0.75rem; padding-bottom: 5rem; flex: 1; overflow-y: auto; }
 	.message-row { gap: 0.5rem; margin: 1.25rem 0; }
 	.avatar { width: 32px; height: 32px; border-radius: 10px; }
 	.avatar svg { width: 16px; height: 16px; }
