@@ -798,7 +798,7 @@ function formatDate(value) {
 .session-item:hover, .session-item.active { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
 .session-item span, .source-item span, .tool-card span { min-width: 0; display: flex; flex-direction: column; gap: 0.15rem; }
 .session-item strong, .source-item strong, .tool-card strong { color: #0f172a; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.chat-main { display: grid; grid-template-rows: auto 1fr auto; min-width: 0; height: 100vh; }
+.chat-main { display: flex; flex-direction: column; min-width: 0; width: 100%; max-width: 100%; overflow: hidden; height: 100vh; }
 .chat-header { position: sticky; top: 0; z-index: 5; min-height: 68px; border-bottom: 1px solid #e5e7eb; background: rgba(255,255,255,0.92); padding: 0.75rem 1rem; backdrop-filter: blur(12px); }
 .header-left { flex: 1; min-width: 0; justify-content: flex-start; }
 .header-actions { flex-shrink: 0; }
@@ -834,11 +834,16 @@ function formatDate(value) {
 }
 
 .chat-thread { 
-	padding: 1.5rem max(2.5rem, calc((100% - 720px) / 2)); 
-	padding-bottom: 2rem; 
-	min-height: 0; 
-	overflow-y: auto; 
+	flex: 1;
+	min-width: 0;
+	width: 100%;
+	max-width: 100%;
+	overflow-y: auto;
 	overflow-x: hidden;
+	padding: 24px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
 .welcome-block { display: grid; place-items: center; min-height: 55vh; text-align: center; }
 .welcome-block h2 { margin-top: 0.75rem; color: #0f172a; font-size: clamp(1.2rem, 3.5vw, 1.8rem); font-weight: 950; text-wrap: balance; max-width: 800px; line-height: 1.35; }
@@ -848,8 +853,11 @@ function formatDate(value) {
 
 /* Chat Messages Modernization */
 .message-row { 
+	min-width: 0;
+	width: 100%;
+	max-width: 900px;
 	display: flex; 
-	gap: 0.85rem; 
+	gap: 12px; 
 	margin: 1.5rem 0; 
 	animation: messageSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 	opacity: 0;
@@ -857,6 +865,10 @@ function formatDate(value) {
 }
 .message-row.user {
 	flex-direction: row-reverse;
+	justify-content: flex-end;
+}
+.message-row.assistant {
+	justify-content: flex-start;
 }
 
 .avatar { 
@@ -880,9 +892,9 @@ function formatDate(value) {
 }
 
 .message-bubble { 
-	max-width: min(760px, calc(100% - 3.5rem)); 
-	width: fit-content;
 	min-width: 0;
+	max-width: min(780px, calc(100% - 56px)); 
+	box-sizing: border-box;
 	border-radius: 18px; 
 	padding: 1rem 1.25rem; 
 	color: #1f2937; 
@@ -890,8 +902,39 @@ function formatDate(value) {
 	font-size: 0.95rem; 
 	box-shadow: 0 4px 24px rgba(15,23,42,0.04); 
 	border: 1px solid rgba(255,255,255,0.4);
-	word-wrap: break-word;
-	overflow-wrap: break-word;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+.message-bubble > div {
+	min-width: 0;
+	max-width: 100%;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+.message-bubble p, .message-bubble li, .message-bubble h1, .message-bubble h2, .message-bubble h3, .message-bubble h4, .message-bubble strong, .message-bubble span {
+	max-width: 100%;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+.message-bubble pre, .message-bubble code {
+	max-width: 100%;
+	white-space: pre-wrap;
+	overflow-x: auto;
+}
+.message-bubble table {
+	display: block;
+	max-width: 100%;
+	overflow-x: auto;
+}
+.message-bubble img, .chat-image {
+	max-width: 100%;
+	height: auto;
+	display: block;
+}
+.katex-display {
+	max-width: 100%;
+	overflow-x: auto;
+	overflow-y: hidden;
 }
 .message-row.user .message-bubble { 
 	background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); 
@@ -936,9 +979,12 @@ function formatDate(value) {
 @keyframes pulse { 0%, 80%, 100% { opacity: 0.3; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
 .composer-wrap { 
 	position: sticky; bottom: 0; z-index: 20; 
-	padding: 1rem max(2.5rem, calc((100% - 720px) / 2)); 
-	padding-bottom: 2.5rem; 
+	padding: 1rem 1rem 2.5rem 1rem; 
 	background: linear-gradient(to top, #f7f8fb 80%, rgba(247,248,251,0));
+	min-width: 0;
+	width: 100%;
+	max-width: 900px;
+	margin: 0 auto;
 }
 .composer { display: flex; align-items: flex-end; gap: 0.55rem; border: 1px solid #dbe3ef; border-radius: 8px; background: #fff; padding: 0.55rem; box-shadow: 0 16px 40px rgba(15,23,42,0.07); }
 .composer textarea { min-height: 42px; max-height: 180px; flex: 1; resize: vertical; border: 0; outline: 0; padding: 0.55rem; line-height: 1.5; }
