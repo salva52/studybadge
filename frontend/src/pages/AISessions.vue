@@ -643,9 +643,25 @@ function formatDate(value) {
 .message-row { display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: 0.75rem; margin: 1rem 0; }
 .message-row.user .message-bubble { background: #2563eb; color: #fff; margin-left: auto; }
 .avatar { display: grid; width: 36px; height: 36px; place-items: center; border-radius: 999px; background: #e0e7ff; color: #3730a3; font-size: 0.72rem; font-weight: 950; }
-.message-bubble { max-width: 780px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; padding: 0.9rem 1rem; color: #111827; line-height: 1.7; box-shadow: 0 8px 28px rgba(15,23,42,0.04); }
-.message-bubble :deep(ul), .message-bubble :deep(ol) { padding-left: 1.25rem; }
-.message-model { margin-bottom: 0.35rem; color: #2563eb; font-size: 0.72rem; font-weight: 900; }
+.message-bubble { max-width: 780px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; padding: 0.9rem 1.2rem; color: #1f2937; line-height: 1.7; box-shadow: 0 8px 28px rgba(15,23,42,0.04); font-size: 0.95rem; }
+.message-bubble :deep(p) { margin-bottom: 0.85rem; }
+.message-bubble :deep(p:last-child) { margin-bottom: 0; }
+.message-bubble :deep(ul) { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.85rem; }
+.message-bubble :deep(ol) { list-style-type: decimal; padding-left: 1.5rem; margin-bottom: 0.85rem; }
+.message-bubble :deep(li) { margin-bottom: 0.35rem; }
+.message-bubble :deep(li > p) { margin-bottom: 0.35rem; }
+.message-bubble :deep(h1), .message-bubble :deep(h2), .message-bubble :deep(h3), .message-bubble :deep(h4) { margin-top: 1.5rem; margin-bottom: 0.75rem; font-weight: 800; color: #0f172a; line-height: 1.3; }
+.message-bubble :deep(h1) { font-size: 1.4rem; }
+.message-bubble :deep(h2) { font-size: 1.25rem; }
+.message-bubble :deep(h3) { font-size: 1.1rem; }
+.message-bubble :deep(h4) { font-size: 1rem; }
+.message-bubble :deep(strong) { font-weight: 700; color: #111827; }
+.message-bubble :deep(em) { font-style: italic; }
+.message-bubble :deep(hr) { margin: 1.5rem 0; border: 0; border-top: 1px solid #e5e7eb; }
+.message-bubble :deep(blockquote) { border-left: 4px solid #e2e8f0; padding-left: 1rem; color: #475569; font-style: italic; margin-bottom: 0.85rem; }
+.message-bubble :deep(.katex-display) { overflow-x: auto; overflow-y: hidden; padding: 0.5rem 0; margin: 1em 0; }
+.message-bubble :deep(.katex) { font-size: 1.05em; }
+.message-model { margin-bottom: 0.5rem; color: #2563eb; font-size: 0.72rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; }
 .chat-image { display: block; width: min(100%, 620px); margin-top: 0.75rem; border: 1px solid #dbe3ef; border-radius: 8px; background: white; }
 .typing span { display: inline-block; width: 7px; height: 7px; margin-right: 0.3rem; border-radius: 999px; background: #94a3b8; animation: pulse 1s infinite ease-in-out; }
 .typing span:nth-child(2) { animation-delay: 0.12s; }
