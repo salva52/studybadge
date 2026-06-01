@@ -228,7 +228,7 @@
 
 		<QuizModal v-model:show="showQuiz" :loading="modalLoading" :data="modalData" />
 		<FlashcardsModal v-model:show="showFlashcards" :loading="modalLoading" :data="modalData" />
-		<GuidedReadingModal v-model:show="showGuidedReading" :loading="modalLoading" :data="modalData" :materials="activeSession?.materials || []" @request-question="requestGuidedQuestion" />
+		<GuidedReadingModal v-model:show="showGuidedReading" :loading="modalLoading" :data="modalData" :materials="activeSession?.materials || []" @request-question="requestGuidedQuestion" @verify-answer="verifyGuidedAnswer" />
 		<MathModal v-model:show="showMath" :loading="modalLoading" :data="modalData" />
 	</div>
 </template>
@@ -683,6 +683,30 @@ async function requestGuidedQuestion() {
 		access.value = result.access || access.value
 	} catch (e) {
 		toast.error(__('No se pudo generar la pregunta.'))
+	} finally {
+		modalLoading.value = false
+	}
+}
+
+async function verifyGuidedAnswer(answer) {
+	if (!activeSession.value) return
+	modalLoading.value = true
+	try {
+		const payloadPrompt = modalData.value?.question 
+			? `Mi respuesta a tu pregunta ("${modalData.value.question}") es: "${answer}". Evalúa mi respuesta brevemente.` 
+			: `Evalúa esta respuesta: "${answer}"`
+			
+		const result = await api('generate_ai_tool', {
+			session: activeSession.value.name,
+			thread: currentThread.value?.name,
+			tool: 'reader_question',
+			payload: { prompt: payloadPrompt, topic: activeSession.value.goal },
+		})
+		
+		modalData.value = result.result
+		access.value = result.access || access.value
+	} catch (e) {
+		toast.error(__('No se pudo verificar la respuesta.'))
 	} finally {
 		modalLoading.value = false
 	}

@@ -56,6 +56,11 @@
 						</div>
 						
 						<div v-else-if="readingData && readingData.question" class="question-card">
+							<div v-if="readingData.evaluation" class="evaluation-box">
+								<Bot class="size-4" />
+								<p><strong>{{ __('Respuesta anterior:') }}</strong> {{ readingData.evaluation }}</p>
+							</div>
+
 							<span class="badge">{{ __('Reflexión') }}</span>
 							<h3>{{ readingData.question }}</h3>
 							
@@ -65,8 +70,10 @@
 							</div>
 							
 							<div class="response-area">
-								<textarea rows="3" :placeholder="__('Escribe tu respuesta o reflexión aquí...')"></textarea>
-								<button class="primary-btn mt-2 full-w">{{ __('Verificar respuesta') }}</button>
+								<textarea v-model="userAnswer" rows="3" :placeholder="__('Escribe tu respuesta o reflexión aquí...')"></textarea>
+								<button class="primary-btn mt-2 full-w" :disabled="!userAnswer.trim()" @click="$emit('verify-answer', userAnswer); userAnswer = ''">
+									{{ __('Verificar respuesta') }}
+								</button>
 							</div>
 						</div>
 						
@@ -95,11 +102,12 @@ const props = defineProps({
 	materials: { type: Array, default: () => [] }
 })
 
-const emit = defineEmits(['update:show', 'request-question'])
+const emit = defineEmits(['update:show', 'request-question', 'verify-answer'])
 
 const selectedMaterial = ref(null)
 const activeTab = ref('doc') // 'doc' or 'assistant'
 const isMobile = ref(false)
+const userAnswer = ref('')
 
 const checkMobile = () => { isMobile.value = window.innerWidth <= 768 }
 
@@ -159,6 +167,10 @@ function close() {
 .hint-box { display: flex; gap: 0.5rem; background: #fefce8; border-radius: 8px; padding: 0.85rem; margin-bottom: 1rem; }
 .hint-icon { color: #ca8a04; flex-shrink: 0; margin-top: 0.1rem; }
 .hint-box p { font-size: 0.9rem; color: #854d0e; margin: 0; line-height: 1.4; }
+
+.evaluation-box { display: flex; gap: 0.5rem; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 0.85rem; margin-bottom: 1.25rem; }
+.evaluation-box .lucide { color: #059669; flex-shrink: 0; margin-top: 0.1rem; }
+.evaluation-box p { font-size: 0.9rem; color: #065f46; margin: 0; line-height: 1.4; }
 
 .response-area { margin-top: 1rem; border-top: 1px solid #f1f5f9; padding-top: 1rem; }
 .response-area textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.75rem; font-size: 0.95rem; color: #334155; resize: vertical; outline: none; transition: border-color 0.2s; }
@@ -225,6 +237,8 @@ function close() {
 :root[data-theme="dark"] .badge { background: rgba(37,99,235,0.2); color: #93c5fd; }
 :root[data-theme="dark"] .hint-box { background: rgba(234,179,8,0.1); border-color: transparent; }
 :root[data-theme="dark"] .hint-box p { color: #fde047; }
+:root[data-theme="dark"] .evaluation-box { background: rgba(16,185,129,0.1); border-color: transparent; }
+:root[data-theme="dark"] .evaluation-box p, :root[data-theme="dark"] .evaluation-box .lucide { color: #34d399; }
 :root[data-theme="dark"] .doc-selector-wrap { background: #0f172a; }
 :root[data-theme="dark"] .doc-select { color: #f8fafc; }
 :root[data-theme="dark"] .mobile-tabs { background: #1e293b; border-color: #334155; }
