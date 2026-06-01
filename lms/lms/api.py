@@ -2829,7 +2829,7 @@ def grant_gift_plus(email="macheromuri@gmail.com"):
         sub = frappe.new_doc("StudyBadge Plus Subscription")
         sub.member = email
         sub.status = "active"
-        sub.external_reference = "GIFT-FROM-TEAM"
+        sub.external_reference = f"GIFT-FROM-TEAM-{email}"
         sub.insert(ignore_permissions=True)
     else:
         frappe.db.set_value("StudyBadge Plus Subscription", {"member": email}, "status", "active")
