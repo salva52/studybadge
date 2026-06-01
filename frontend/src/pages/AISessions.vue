@@ -160,7 +160,7 @@
 				</div>
 			</section>
 
-			<footer v-if="activeSession" class="composer-wrap">
+			<footer v-if="activeSession" class="composer-wrap" :class="{ 'panel-open': showSessions || showTools }">
 				<div v-if="pendingFiles.length" class="pending-row">
 					<span v-for="file in pendingFiles" :key="file.file_url">{{ file.file_name || file.file_url }}</span>
 				</div>
@@ -183,22 +183,17 @@
 						</div>
 					</div>
 					<textarea
+						ref="chatTextarea"
 						v-model="chatInput"
 						rows="1"
 						:placeholder="__('Pregunta sobre tus documentos o proyecto')"
+						@input="autoResizeTextarea"
 						@keydown.enter.exact.prevent="sendChat"
+						@keydown.shift.enter.stop
 					/>
 					<button class="send-btn" :disabled="chatLoading || (!chatInput.trim() && !pendingFiles.length)" @click="sendChat">
 						<SendHorizontal class="size-5" />
 					</button>
-				</div>
-				<div class="composer-meta">
-					<span>{{ remainingText }}</span>
-					<span>{{ materialCountText }}</span>
-					<span class="mobile-only">{{ __('Ctrl+V para imagenes') }}</span>
-					<a v-if="access && !access.is_plus && access.messages_remaining <= 0" href="https://academy.studybadge.com/lms/plus" target="_blank" class="upgrade-link">
-						{{ __('👑 Mejora a Plus') }}
-					</a>
 				</div>
 			</footer>
 		</main>
@@ -344,6 +339,27 @@ const useSearch = ref(false)
 
 const chatMode = ref('chat')
 const showModesDropdown = ref(false)
+const chatTextarea = ref(null)
+
+function autoResizeTextarea() {
+	const el = chatTextarea.value
+	if (!el) return
+	const lineHeight = 24
+	const maxLines = 5
+	const maxHeight = lineHeight * maxLines
+	el.style.height = 'auto'
+	const nextHeight = Math.min(el.scrollHeight, maxHeight)
+	el.style.height = `${nextHeight}px`
+	el.style.overflowY = el.scrollHeight > maxHeight ? 'auto' : 'hidden'
+}
+
+function resetTextareaHeight() {
+	const el = chatTextarea.value
+	if (!el) return
+	el.style.height = '42px'
+	el.style.overflowY = 'hidden'
+}
+
 const chatModesList = [
 	{ label: __('Libre'), value: 'chat' },
 	{ label: __('Simple'), value: 'simple' },
@@ -622,7 +638,9 @@ async function sendChat() {
 		chatMessages.value = [...chatMessages.value, optimistic]
 		chatInput.value = ''
 		pendingFiles.value = []
-		await nextTick(scrollChat)
+		await nextTick()
+		resetTextareaHeight()
+		scrollChat()
 		const result = await api('chat_ai_session', {
 			session: activeSession.value.name,
 			thread: currentThread.value?.name,
@@ -1035,11 +1053,59 @@ function formatDate(value) {
 	width: 100%;
 	max-width: 1020px;
 	margin: 0 auto;
+	transition: all 0.2s;
 }
-.composer { display: flex; align-items: flex-end; gap: 0.55rem; border: 1px solid #dbe3ef; border-radius: 20px; background: #fff; padding: 0.6rem; box-shadow: 0 20px 50px rgba(15,23,42,0.08); }
-.composer textarea { min-height: 42px; max-height: 180px; flex: 1; resize: vertical; border: 0; outline: 0; padding: 0.55rem; line-height: 1.5; font-size: 0.98rem; }
-.send-btn { width: 42px; height: 42px; border: 0; border-radius: 12px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #fff; transition: all 0.2s; }
+.composer-wrap.panel-open {
+	opacity: 0;
+	pointer-events: none;
+	transform: translateY(12px);
+}
+.composer {
+	display: flex;
+	align-items: flex-end;
+	gap: 0.55rem;
+	width: 100%;
+	border: 1px solid #dbe3ef;
+	border-radius: 18px;
+	background: #fff;
+	padding: 0.55rem;
+	box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+}
+.composer .icon-btn,
+.composer .send-btn,
+.composer .mode-dropdown-wrapper {
+	flex-shrink: 0;
+}
+.composer textarea {
+	flex: 1;
+	min-width: 0;
+	min-height: 42px;
+	max-height: 120px;
+	resize: none;
+	border: 0;
+	outline: 0;
+	padding: 0.55rem 0.65rem;
+	line-height: 24px;
+	font-size: 0.98rem;
+	background: transparent;
+	overflow-y: hidden;
+}
+.composer textarea::placeholder {
+	color: #94a3b8;
+}
+.composer textarea::-webkit-scrollbar {
+	width: 6px;
+}
+.composer textarea::-webkit-scrollbar-thumb {
+	background: #cbd5e1;
+	border-radius: 999px;
+}
+.composer textarea::-webkit-scrollbar-track {
+	background: transparent;
+}
+.send-btn { width: 42px; height: 42px; border: 0; border-radius: 14px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #fff; transition: all 0.2s; flex-shrink: 0; }
 .send-btn:hover:not(:disabled) { box-shadow: 0 4px 12px rgba(37,99,235,0.3); transform: scale(1.05); }
+.send-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 .composer-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.8rem; padding-top: 0.45rem; font-weight: 700; }
 .upgrade-link { color: #d97706; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem; background: #fef3c7; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.75rem; }
 .upgrade-link:hover { background: #fde68a; color: #b45309; }
@@ -1133,57 +1199,57 @@ function formatDate(value) {
 
 .mode-dropdown-wrapper {
 	position: relative;
-	display: flex;
-	align-items: center;
 }
 .modes-dropdown-menu {
 	position: absolute;
-	bottom: 100%;
+	bottom: calc(100% + 10px);
 	left: 0;
-	margin-bottom: 8px;
+	width: 190px;
+	max-width: calc(100vw - 24px);
 	background: #fff;
-	border: 1px solid #e2e8f0;
-	border-radius: 12px;
-	box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-	padding: 8px;
-	min-width: 150px;
-	z-index: 100;
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
+	border: 1px solid #dbe3ef;
+	border-radius: 14px;
+	box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+	padding: 0.4rem;
+	z-index: 60;
 }
-.modes-header {
-	font-size: 0.75rem;
-	font-weight: 700;
-	color: #94a3b8;
-	padding: 4px 8px;
-	text-transform: uppercase;
-	letter-spacing: 0.5px;
-}
-.mode-dropdown-item {
-	text-align: left;
-	padding: 6px 12px;
-	border-radius: 8px;
-	font-size: 0.85rem;
-	font-weight: 500;
-	color: #475569;
+.modes-dropdown-menu button {
+	width: 100%;
+	border: 0;
 	background: transparent;
-	border: none;
-	cursor: pointer;
-	transition: background 0.2s;
-}
-.mode-dropdown-item:hover {
-	background: #f1f5f9;
+	padding: 0.65rem 0.75rem;
+	border-radius: 10px;
+	text-align: left;
+	font-weight: 700;
 	color: #0f172a;
 }
-.mode-dropdown-item.active {
+.modes-dropdown-menu button:hover,
+.modes-dropdown-menu button.active {
 	background: #eff6ff;
 	color: #2563eb;
-	font-weight: 600;
 }
 .icon-btn.active-mode {
 	color: #2563eb;
 	background: #eff6ff;
+}
+
+.quick-actions,
+.response-actions,
+.suggestions,
+.follow-up-actions {
+	max-width: 100%;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	overflow: hidden;
+}
+.quick-actions button,
+.response-actions button,
+.suggestions button,
+.follow-up-actions button {
+	max-width: 100%;
+	white-space: normal;
+	overflow-wrap: anywhere;
 }
 @media (max-width: 760px) {
 	.chat-page { display: block; }
@@ -1198,8 +1264,14 @@ function formatDate(value) {
 	.new-chat h1 { font-size: 2rem; }
 	.new-form { padding: 1rem; }
 	.new-form-row { grid-template-columns: 1fr; gap: 0.75rem; }
-	.chat-thread { padding: 1rem 1.25rem; padding-bottom: 5rem; flex: 1; overflow-y: auto; }
-	.composer-wrap { padding: 1rem 1.25rem; padding-bottom: 65px; position: fixed; left: 0; right: 0; bottom: 65px; z-index: 50; }
+	.chat-thread { padding: 1rem 1.25rem; padding-bottom: 150px; flex: 1; overflow-y: auto; }
+	.composer-wrap { 
+		position: fixed; left: 0; right: 0; bottom: 58px; z-index: 50; 
+		padding: 0.55rem 0.75rem 0.45rem; background: rgba(247,248,251,0.94); backdrop-filter: blur(12px); border-top: 1px solid rgba(229,231,235,0.8);
+	}
+	.composer-wrap.panel-open { opacity: 0; pointer-events: none; }
+	.session-rail, .source-panel { z-index: 80; }
+	.mobile-backdrop { z-index: 70; }
 	.message-row { gap: 0.5rem; margin: 1.25rem 0; }
 	.avatar { width: 32px; height: 32px; border-radius: 10px; }
 	.avatar svg { width: 16px; height: 16px; }
@@ -1207,9 +1279,14 @@ function formatDate(value) {
 	.message-row.user .message-bubble { border-bottom-right-radius: 4px; }
 	.message-row.assistant .message-bubble { border-bottom-left-radius: 4px; }
 	
-	.composer-wrap { padding: 0.6rem; background: rgba(247,248,251,0.92); backdrop-filter: blur(12px); border-top: 1px solid rgba(229,231,235,0.7); padding-bottom: calc(0.6rem + env(safe-area-inset-bottom)); }
-	.composer { border-radius: 14px; padding: 0.4rem; box-shadow: 0 10px 25px rgba(15,23,42,0.05); }
-	.composer textarea { font-size: 16px; padding: 0.45rem; }
-	.composer-meta { justify-content: flex-start; font-size: 0.7rem; }
+	.composer { gap: 0.45rem; padding: 0.45rem; border-radius: 18px; box-shadow: 0 10px 25px rgba(15,23,42,0.05); }
+	.composer .icon-btn { width: 38px; height: 38px; border-radius: 12px; }
+	.composer .send-btn { width: 42px; height: 42px; border-radius: 14px; }
+	.composer textarea { min-height: 40px; max-height: 112px; font-size: 16px; line-height: 22px; padding: 0.5rem 0.45rem; }
+	.composer-meta { display: none !important; }
+	
+	.quick-actions, .response-actions, .follow-up-actions { padding: 0 0.75rem; justify-content: flex-start; }
+	.quick-actions button, .response-actions button, .follow-up-actions button { font-size: 0.82rem; padding: 0.45rem 0.7rem; border-radius: 999px; }
+	.suggestions { grid-template-columns: 1fr; width: 100%; }
 }
 </style>
