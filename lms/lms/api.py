@@ -2811,3 +2811,45 @@ def fix_home_folder_permissions():
             print(f'Set is_private=0 for {f}')
     frappe.db.commit()
     return 'Permissions Fixed'
+
+
+@frappe.whitelist()
+def grant_gift_plus(email="macheromuri@gmail.com"):
+    import frappe
+    # 1. Ensure user exists
+    if not frappe.db.exists("User", email):
+        user = frappe.new_doc("User")
+        user.email = email
+        user.first_name = email.split('@')[0].capitalize()
+        user.send_welcome_email = 0
+        user.insert(ignore_permissions=True)
+    
+    # 2. Assign Plus Subscription
+    if not frappe.db.exists("StudyBadge Plus Subscription", {"member": email}):
+        sub = frappe.new_doc("StudyBadge Plus Subscription")
+        sub.member = email
+        sub.status = "active"
+        sub.external_reference = "GIFT-FROM-TEAM"
+        sub.insert(ignore_permissions=True)
+    else:
+        frappe.db.set_value("StudyBadge Plus Subscription", {"member": email}, "status", "active")
+        
+    # 3. Send email
+    subject = "¡Felicidades! Has recibido StudyBadge Plus de regalo 🎁"
+    message = '''
+    <div style="background-color: #f0f8ff; padding: 30px; border-radius: 10px; font-family: sans-serif; color: #333; text-align: center;">
+        <h2 style="color: #0d47a1; margin-bottom: 20px;">¡Hola!</h2>
+        <p style="font-size: 16px;">El equipo de StudyBadge te ha elegido para regalarte una suscripción a <strong style="color: #0d47a1;">StudyBadge Plus</strong>.</p>
+        <p style="font-size: 16px;">Ahora tienes acceso a todas las herramientas avanzadas, mensajes ilimitados con TutorIA y mucho más.</p>
+        <p style="font-size: 16px; margin-bottom: 30px;">¡Disfruta aprendiendo con nosotros!</p>
+        <p style="font-size: 14px; color: #666;">Con cariño,</p>
+        <p style="font-size: 14px; font-weight: bold; color: #0d47a1;">El Equipo de StudyBadge</p>
+    </div>
+    '''
+    frappe.sendmail(
+        recipients=[email],
+        subject=subject,
+        message=message
+    )
+    frappe.db.commit()
+    return "Regalo enviado correctamente."
