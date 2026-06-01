@@ -986,7 +986,7 @@ function formatDate(value) {
 	.message-row.user .message-bubble { border-bottom-right-radius: 4px; }
 	.message-row.assistant .message-bubble { border-bottom-left-radius: 4px; }
 	
-	.composer-wrap { position: fixed; bottom: 75px; left: 0; width: 100%; z-index: 20; padding: 0.6rem; background: rgba(247,248,251,0.92); backdrop-filter: blur(12px); border-top: 1px solid rgba(229,231,235,0.7); padding-bottom: calc(0.6rem + env(safe-area-inset-bottom)); }
+	.composer-wrap { position: fixed; bottom: 65px; left: 0; width: 100%; z-index: 20; padding: 0.6rem; background: rgba(247,248,251,0.92); backdrop-filter: blur(12px); border-top: 1px solid rgba(229,231,235,0.7); padding-bottom: calc(0.6rem + env(safe-area-inset-bottom)); }
 	.composer { border-radius: 14px; padding: 0.4rem; box-shadow: 0 10px 25px rgba(15,23,42,0.05); }
 	.composer textarea { font-size: 16px; padding: 0.45rem; }
 	.composer-meta { justify-content: flex-start; font-size: 0.7rem; }

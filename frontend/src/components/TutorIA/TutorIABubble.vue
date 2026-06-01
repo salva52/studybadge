@@ -1,6 +1,6 @@
 <template>
 	<!-- Floating Bubble -->
-	<div class="tutoria-bubble" @click="toggleChat" v-if="!isOpen">
+	<div class="tutoria-bubble" @click="toggleChat" v-if="!isOpen && !['AISessions', 'AISessionRoom', 'AISessionChat'].includes(router?.currentRoute?.value?.name)">
 		<Bot class="w-8 h-8 text-white" />
 	</div>
 
@@ -110,7 +110,9 @@ import { Bot, X, SendHorizontal, MonitorSmartphone, Sparkles, Trash2, Image } fr
 import { call, toast } from 'frappe-ui'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const isOpen = ref(false)
 const inputMessage = ref('')
 const isLoading = ref(false)
