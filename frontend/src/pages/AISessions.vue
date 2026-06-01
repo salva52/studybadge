@@ -1,5 +1,5 @@
 <template>
-	<div class="chat-page" @paste="handlePaste">
+	<div class="chat-page" :class="{ 'right-collapsed': rightPanelCollapsed }" @paste="handlePaste">
 		<FileUploader
 			ref="fileUploader"
 			class="hidden"
@@ -65,6 +65,9 @@
 							<Crown class="size-4" /> <span>Study Model Pro</span>
 						</button>
 					</div>
+					<button class="icon-btn hide-on-mobile" :class="{ 'active': rightPanelCollapsed }" @click="rightPanelCollapsed = !rightPanelCollapsed" :title="__('Alternar panel derecho')">
+						<PanelRight class="size-5" />
+					</button>
 					<button class="icon-btn mobile-only" @click="showTools = true">
 						<PanelRight class="size-5" />
 					</button>
@@ -153,6 +156,11 @@
 			<footer v-if="activeSession" class="composer-wrap">
 				<div v-if="pendingFiles.length" class="pending-row">
 					<span v-for="file in pendingFiles" :key="file.file_url">{{ file.file_name || file.file_url }}</span>
+				</div>
+				<div class="quick-chips" v-if="!chatLoading">
+					<button v-for="action in quickActions" :key="action" class="quick-chip" @click="chatInput = action">
+						{{ action }}
+					</button>
 				</div>
 				<div class="composer">
 					<button class="icon-btn" :title="__('Subir fuentes')" @click="openUploader">
@@ -317,8 +325,11 @@ const showAdvanced = ref(false)
 const readerHistory = ref([])
 const showSessions = ref(false)
 const showTools = ref(false)
+const rightPanelCollapsed = ref(false)
 const sessionSearch = ref('')
 const useSearch = ref(false)
+
+const quickActions = [__('Resumir sesión'), __('Hacer quiz'), __('Explicar simple'), __('Ordenar temas')]
 
 const showQuiz = ref(false)
 const showFlashcards = ref(false)
@@ -346,12 +357,21 @@ const tools = [
 	{ id: 'infographic', label: __('Infografia'), description: __('Mapa visual de estudio'), icon: ImageIcon, pro: true, prompt: __('Genera una infografia academica sobre esta sesion.') },
 ]
 
-const starterPrompts = [
-	__('Hazme un resumen de mis documentos.'),
-	__('Que temas deberia estudiar primero?'),
-	__('Crea preguntas para practicar.'),
-	__('Explicame lo mas dificil con ejemplos simples.'),
-]
+const starterPrompts = computed(() => {
+	if (activeSession.value?.materials?.length > 0) {
+		return [
+			__('Hazme un resumen de estos documentos.'),
+			__('¿Qué temas debería estudiar primero según las fuentes?'),
+			__('Crea un quiz basado en este material.'),
+			__('Explícame los conceptos más difíciles con ejemplos simples.'),
+		]
+	}
+	return [
+		__('Hazme un resumen de un tema.'),
+		__('Crea preguntas para practicar.'),
+		__('Explícame lo más difícil con ejemplos simples.'),
+	]
+})
 
 const filteredSessions = computed(() => {
 	const query = sessionSearch.value.trim().toLowerCase()
@@ -858,7 +878,7 @@ function formatDate(value) {
 .message-row { 
 	min-width: 0;
 	width: 100%;
-	max-width: 980px;
+	max-width: 1020px;
 	display: flex; 
 	gap: 8px; 
 	margin: 1.25rem 0; 
@@ -940,17 +960,17 @@ function formatDate(value) {
 	overflow-y: hidden;
 }
 .message-row.user .message-bubble { 
-	background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); 
+	background: linear-gradient(135deg, #2563eb 0%, #08204e 100%); 
 	color: #fff; 
 	border-bottom-right-radius: 4px;
 	box-shadow: 0 8px 24px rgba(37,99,235,0.2);
 	border: none;
 }
 .message-row.assistant .message-bubble {
-	background: rgba(255, 255, 255, 0.9);
-	backdrop-filter: blur(12px);
+	background: #ffffff;
 	border-bottom-left-radius: 4px;
-	border: 1px solid #f1f5f9;
+	border: 1px solid #e2e8f0;
+	box-shadow: 0 6px 16px rgba(15,23,42,0.03);
 }
 
 @keyframes messageSlideIn {
@@ -986,12 +1006,13 @@ function formatDate(value) {
 	background: linear-gradient(to top, #f7f8fb 82%, rgba(247,248,251,0));
 	min-width: 0;
 	width: 100%;
-	max-width: 980px;
+	max-width: 1020px;
 	margin: 0 auto;
 }
-.composer { display: flex; align-items: flex-end; gap: 0.55rem; border: 1px solid #dbe3ef; border-radius: 14px; background: #fff; padding: 0.6rem; box-shadow: 0 16px 40px rgba(15,23,42,0.07); }
+.composer { display: flex; align-items: flex-end; gap: 0.55rem; border: 1px solid #dbe3ef; border-radius: 20px; background: #fff; padding: 0.6rem; box-shadow: 0 20px 50px rgba(15,23,42,0.08); }
 .composer textarea { min-height: 42px; max-height: 180px; flex: 1; resize: vertical; border: 0; outline: 0; padding: 0.55rem; line-height: 1.5; font-size: 0.98rem; }
-.send-btn { width: 42px; height: 42px; border: 0; background: #2563eb; color: #fff; }
+.send-btn { width: 42px; height: 42px; border: 0; border-radius: 12px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: #fff; transition: all 0.2s; }
+.send-btn:hover:not(:disabled) { box-shadow: 0 4px 12px rgba(37,99,235,0.3); transform: scale(1.05); }
 .composer-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.8rem; padding-top: 0.45rem; font-weight: 700; }
 .upgrade-link { color: #d97706; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem; background: #fef3c7; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.75rem; }
 .upgrade-link:hover { background: #fde68a; color: #b45309; }
@@ -1042,6 +1063,39 @@ function formatDate(value) {
 	.mobile-only { display: inline-flex; }
 	.mobile-backdrop { display: block; position: fixed; inset: 0; z-index: 30; background: rgba(15,23,42,0.4); backdrop-filter: blur(2px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
 	.session-rail.open ~ .mobile-backdrop, .source-panel.open ~ .mobile-backdrop { opacity: 1; pointer-events: auto; }
+	.hide-on-mobile { display: none !important; }
+}
+
+@media (min-width: 1181px) {
+	.chat-page.right-collapsed { grid-template-columns: 280px minmax(0, 1fr); }
+	.chat-page.right-collapsed .source-panel { display: none; }
+}
+
+.quick-chips {
+	display: flex;
+	gap: 0.5rem;
+	margin-bottom: 0.75rem;
+	overflow-x: auto;
+	padding-bottom: 0.25rem;
+}
+.quick-chips::-webkit-scrollbar { display: none; }
+.quick-chip {
+	white-space: nowrap;
+	border: 1px solid #e2e8f0;
+	background: #fff;
+	color: #475569;
+	border-radius: 999px;
+	padding: 0.4rem 0.8rem;
+	font-size: 0.78rem;
+	font-weight: 700;
+	box-shadow: 0 2px 8px rgba(15,23,42,0.03);
+	transition: all 0.2s;
+	cursor: pointer;
+}
+.quick-chip:hover {
+	background: #f8fafc;
+	border-color: #cbd5e1;
+	color: #0f172a;
 }
 @media (max-width: 760px) {
 	.chat-page { display: block; }
