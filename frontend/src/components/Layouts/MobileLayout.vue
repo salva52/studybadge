@@ -9,24 +9,41 @@
 
 		<div class="relative z-20">
 			<!-- Dropdown menu -->
-			<div
-				class="fixed bottom-16 end-2 w-[80%] space-y-4 rounded-md bg-surface-white p-5 text-base shadow-md"
-				v-if="showMenu"
-				ref="menu"
+			<Transition
+				enter-active-class="transition duration-300 ease-out"
+				enter-from-class="transform translate-y-8 opacity-0 scale-95"
+				enter-to-class="transform translate-y-0 opacity-100 scale-100"
+				leave-active-class="transition duration-200 ease-in"
+				leave-from-class="transform translate-y-0 opacity-100 scale-100"
+				leave-to-class="transform translate-y-8 opacity-0 scale-95"
 			>
 				<div
-					v-for="link in otherLinks"
-					:key="link.label"
-					class="flex cursor-pointer items-center gap-x-2"
-					@click="handleClick(link)"
+					class="fixed bottom-[4.5rem] right-4 w-64 rounded-2xl bg-white/95 p-2 backdrop-blur-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] ring-1 ring-black/5"
+					v-if="showMenu"
+					ref="menu"
 				>
-					<component
-						:is="icons[link.icon]"
-						class="h-4 w-4 stroke-1.5 text-ink-gray-5"
-					/>
-					<div>{{ link.label }}</div>
+					<div
+						v-for="(link, index) in otherLinks"
+						:key="link.label"
+					>
+						<div v-if="link.label === 'Notificaciones' && index !== 0" class="my-1.5 border-t border-gray-100"></div>
+						<div v-if="link.label === 'Cerrar sesión' || link.label === 'Iniciar sesión'" class="my-1.5 border-t border-gray-100"></div>
+						
+						<div
+							class="flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition-all hover:bg-gray-50 active:scale-95 active:bg-gray-100"
+							@click="handleClick(link); showMenu = false"
+						>
+							<div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+								<component
+									:is="icons[link.icon]"
+									class="h-[18px] w-[18px] stroke-[1.8]"
+								/>
+							</div>
+							<div class="text-[0.95rem] font-semibold text-gray-700">{{ link.label }}</div>
+						</div>
+					</div>
 				</div>
-			</div>
+			</Transition>
 
 			<!-- Fixed menu -->
 			<div
@@ -123,11 +140,11 @@ const filterLinksToShow = (data) => {
 
 const addOtherLinks = () => {
 	if (user) {
-		addLink('Notifications', 'Bell', 'Notifications')
-		addLink('Profile', 'UserRound')
-		addLink('Log out', 'LogOut')
+		addLink('Notificaciones', 'Bell', 'Notifications')
+		addLink('Perfil', 'UserRound')
+		addLink('Cerrar sesión', 'LogOut')
 	} else {
-		addLink('Log in', 'LogIn')
+		addLink('Iniciar sesión', 'LogIn')
 	}
 }
 
@@ -229,12 +246,12 @@ let isActive = (tab) => {
 }
 
 const handleClick = (tab) => {
-	if (tab.label == 'Log in') window.location.href = '/login'
-	else if (tab.label == 'Log out')
+	if (tab.label == 'Iniciar sesión') window.location.href = '/login'
+	else if (tab.label == 'Cerrar sesión')
 		logout.submit().then(() => {
 			isLoggedIn = false
 		})
-	else if (tab.label == 'Profile' && profileUsername.value)
+	else if (tab.label == 'Perfil' && profileUsername.value)
 		router.push({
 			name: 'Profile',
 			params: {
@@ -245,8 +262,8 @@ const handleClick = (tab) => {
 }
 
 const isVisible = (tab) => {
-	if (tab.label == 'Log in') return !isLoggedIn
-	else if (tab.label == 'Log out') return isLoggedIn
+	if (tab.label == 'Iniciar sesión') return !isLoggedIn
+	else if (tab.label == 'Cerrar sesión') return isLoggedIn
 	else return true
 }
 
