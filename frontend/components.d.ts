@@ -74,6 +74,7 @@ declare module 'vue' {
     LayoutHeader: typeof import('./src/components/Layouts/LayoutHeader.vue')['default']
     LessonContent: typeof import('./src/components/LessonContent.vue')['default']
     LessonHelp: typeof import('./src/components/LessonHelp.vue')['default']
+    LessonTTSReader: typeof import('./src/components/LessonTTSReader.vue')['default']
     Link: typeof import('./src/components/Controls/Link.vue')['default']
     LiveClassAttendance: typeof import('./src/components/Modals/LiveClassAttendance.vue')['default']
     LiveClassModal: typeof import('./src/components/Modals/LiveClassModal.vue')['default']

@@ -25,7 +25,7 @@
 						<div class="call-time">
 							<Radio class="size-4" /> {{ micEnabled ? __('Escuchando') : __('En espera') }}
 						</div>
-						<div class="ai-avatar">
+						<div class="ai-avatar" :class="{ speaking: isAiSpeaking }">
 							<Bot class="size-16" />
 						</div>
 						<h2>{{ interviewerLabel }}</h2>
@@ -173,7 +173,24 @@ const microphoneProcessor = ref(null)
 const outputPlayTime = ref(0)
 const liveSocketOpen = ref(false)
 const audioStreaming = ref(false)
+const isAiSpeaking = ref(false)
+let speakingInterval = null
 
+onMounted(() => {
+	loadSession()
+	speakingInterval = setInterval(() => {
+		if (outputAudioContext.value && outputPlayTime.value) {
+			isAiSpeaking.value = outputAudioContext.value.currentTime < outputPlayTime.value + 0.5
+		} else {
+			isAiSpeaking.value = false
+		}
+	}, 200)
+})
+
+onBeforeUnmount(() => {
+	stopLiveVoice()
+	if (speakingInterval) clearInterval(speakingInterval)
+})
 const interviewerLabel = computed(() => {
 	const labels = {
 		interview: __('Entrevistador IA'),
@@ -189,9 +206,6 @@ usePageMeta(() => ({
 	title: session.value?.title || __('Sala de práctica'),
 	icon: brand.favicon,
 }))
-
-onMounted(loadSession)
-onBeforeUnmount(stopLiveVoice)
 
 async function loadSession() {
 	try {
@@ -539,12 +553,12 @@ function stopMicrophoneOnly() {
 </script>
 
 <style scoped>
-.room-page { display: flex; min-height: 100vh; min-height: 100dvh; flex-direction: column; background: radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.22), transparent 34%), #080d19; color: white; overflow-x: hidden; }
+.room-page { display: flex; height: 100vh; height: 100dvh; flex-direction: column; background: radial-gradient(circle at 20% 0%, rgba(37, 99, 235, 0.22), transparent 34%), #080d19; color: white; overflow: hidden; }
 .room-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 72px; padding: 0.9rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(15,23,42,0.92); backdrop-filter: blur(14px); }
 .room-kicker { color: #93c5fd; font-size: 0.72rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0; }
 .room-header h1 { margin-top: 0.15rem; max-width: 46rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 1.2rem; font-weight: 900; }
 .room-header-actions { display: flex; gap: 0.6rem; }
-.room-layout { display: grid; flex: 1; grid-template-columns: minmax(0, 1fr) minmax(340px, 390px); gap: 1rem; min-height: calc(100dvh - 72px); padding: 1rem; background: transparent; }
+.room-layout { display: grid; flex: 1; grid-template-columns: minmax(0, 1fr) minmax(340px, 390px); gap: 1rem; min-height: 0; padding: 1rem; background: transparent; }
 .room-stage { display: flex; min-width: 0; min-height: 0; flex-direction: column; }
 .meeting-grid { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 1rem; flex: 1; min-height: 430px; }
 .ai-tile, .user-tile, .side-section, .feedback-panel { border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: #111827; box-shadow: 0 24px 60px rgba(0,0,0,0.25); }
@@ -554,8 +568,14 @@ function stopMicrophoneOnly() {
 .tile-status span { width: 8px; height: 8px; border-radius: 999px; background: #94a3b8; }
 .tile-status.live span { background: #22c55e; box-shadow: 0 0 0 6px rgba(34,197,94,0.14); }
 .call-time { position: absolute; top: 1rem; right: 1rem; display: inline-flex; align-items: center; gap: 0.45rem; border-radius: 999px; background: rgba(15,23,42,0.72); padding: 0.35rem 0.65rem; color: #dbeafe; font-size: 0.75rem; font-weight: 800; }
-.ai-avatar, .user-avatar { display: grid; place-items: center; border-radius: 999px; background: linear-gradient(135deg, #2563eb, #0d6efd); color: white; box-shadow: 0 0 0 12px rgba(37,99,235,0.12), 0 24px 80px rgba(37,99,235,0.28); }
+.ai-avatar, .user-avatar { display: grid; place-items: center; border-radius: 999px; background: linear-gradient(135deg, #2563eb, #0d6efd); color: white; box-shadow: 0 0 0 12px rgba(37,99,235,0.12), 0 24px 80px rgba(37,99,235,0.28); transition: box-shadow 0.3s ease; }
 .ai-avatar { width: 148px; height: 148px; }
+.ai-avatar.speaking { animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(37,99,235,0.7), 0 0 0 12px rgba(37,99,235,0.12), 0 24px 80px rgba(37,99,235,0.28); }
+  70% { box-shadow: 0 0 0 30px rgba(37,99,235,0), 0 0 0 12px rgba(37,99,235,0.12), 0 24px 80px rgba(37,99,235,0.28); }
+  100% { box-shadow: 0 0 0 0 rgba(37,99,235,0), 0 0 0 12px rgba(37,99,235,0.12), 0 24px 80px rgba(37,99,235,0.28); }
+}
 .user-avatar { width: 92px; height: 92px; background: #1f2937; box-shadow: 0 0 0 10px rgba(255,255,255,0.05); }
 .ai-tile h2, .user-tile h3 { position: relative; margin-top: 1rem; font-size: 1.4rem; font-weight: 900; }
 .ai-tile p, .user-tile p { position: relative; margin-top: 0.5rem; max-width: 34rem; color: #cbd5e1; line-height: 1.6; }
