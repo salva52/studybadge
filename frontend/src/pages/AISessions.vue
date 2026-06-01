@@ -874,8 +874,9 @@ function formatDate(value) {
 }
 
 .message-bubble { 
-	max-width: 100%; 
+	max-width: calc(100% - 3.5rem); 
 	width: fit-content;
+	min-width: 0;
 	border-radius: 18px; 
 	padding: 1rem 1.25rem; 
 	color: #1f2937; 
