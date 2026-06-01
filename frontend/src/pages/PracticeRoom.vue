@@ -622,9 +622,41 @@ function stopMicrophoneOnly() {
 	.user-tile { min-height: 210px; }
 }
 @media (max-width: 640px) {
-	.room-header { align-items: stretch; flex-direction: column; }
-	.room-header-actions { width: 100%; }
+	.room-page { min-height: auto; }
+	.room-header { flex-direction: column; align-items: stretch; gap: 0.75rem; padding: 1rem; }
+	.room-header h1 { font-size: 1rem; white-space: normal; line-height: 1.3; max-height: none; }
+	.room-header-actions { flex-direction: row; flex-wrap: wrap; width: 100%; gap: 0.5rem; }
 	.room-header-actions > * { flex: 1; }
+	
+	.room-layout { padding: 0.75rem; gap: 1rem; }
+	.meeting-grid { min-height: auto; gap: 0.75rem; }
+	
+	.ai-tile { min-height: 280px; padding: 1.5rem 1rem; }
+	.ai-avatar { width: 100px; height: 100px; }
+	.ai-tile h2 { font-size: 1.2rem; }
+	.ai-tile p { font-size: 0.85rem; max-width: 100%; }
+	
+	.user-tile { min-height: 140px; padding: 1rem; }
+	.user-avatar { width: 64px; height: 64px; }
+	.user-tile h3 { font-size: 1.1rem; }
+	.user-tile p { font-size: 0.85rem; }
+	
+	.room-controls { 
+		position: static; 
+		flex-direction: column; 
+		width: 100%; 
+		margin-top: 1rem; 
+		padding: 1rem;
+		border-radius: 12px;
+	}
+	.room-controls > * { width: 100%; justify-content: center; }
+
+	.transcript-section { height: 420px; max-height: none; border-radius: 12px; }
+	.transcript-box { padding: 0.75rem; }
+	.side-head { padding: 0.85rem; }
+	.side-head h2 { font-size: 0.9rem; }
+	.chat-compose { padding: 0.85rem; }
+	
 	.feedback-grid { grid-template-columns: 1fr; }
 }
 </style>
