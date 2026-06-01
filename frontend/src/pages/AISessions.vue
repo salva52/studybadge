@@ -77,17 +77,31 @@
 					<h1>{{ __('Que vas a estudiar hoy?') }}</h1>
 					<p>{{ __('Crea una sesion, sube tus lecturas o trabajos, y conversa con la IA usando esos documentos como contexto.') }}</p>
 					<div class="new-form">
-						<input v-model="draft.title" :placeholder="__('Nombre de la sesion, ej. Parcial de calculo')" />
-						<div class="new-form-row">
-							<select v-model="draft.student_level">
-								<option value="colegio">{{ __('Colegio') }}</option>
-								<option value="preuniversitario">{{ __('Preuniversitario') }}</option>
-								<option value="universitario">{{ __('Universitario') }}</option>
-								<option value="profesional">{{ __('Profesional') }}</option>
-							</select>
-							<input v-model="draft.academic_context" :placeholder="__('Curso o contexto')" />
+						<div class="form-group main-group">
+							<label>{{ __('Título de tu Sesión') }}</label>
+							<input v-model="draft.title" class="title-input" :placeholder="__('Ej: Preparación para Parcial de Cálculo')" />
 						</div>
-						<textarea v-model="initialPrompt" rows="4" :placeholder="__('Pregunta inicial o instrucciones. Ej: ayudame a estudiar estos PDFs para mi examen.')" />
+						
+						<div class="new-form-row">
+							<div class="form-group">
+								<label>{{ __('Nivel Académico') }}</label>
+								<select v-model="draft.student_level">
+									<option value="colegio">{{ __('Colegio') }}</option>
+									<option value="preuniversitario">{{ __('Preuniversitario') }}</option>
+									<option value="universitario">{{ __('Universitario') }}</option>
+									<option value="profesional">{{ __('Profesional') }}</option>
+								</select>
+							</div>
+							<div class="form-group">
+								<label>{{ __('Materia o Contexto') }}</label>
+								<input v-model="draft.academic_context" :placeholder="__('Ej: Ingeniería de Sistemas')" />
+							</div>
+						</div>
+						
+						<div class="form-group" style="margin-top: 1rem;">
+							<label>{{ __('Instrucción Inicial (Opcional)') }}</label>
+							<textarea v-model="initialPrompt" rows="2" :placeholder="__('Ej: Ayúdame a resumir los conceptos más importantes para el examen final.')" />
+						</div>
 						<div v-if="pendingFiles.length" class="pending-row">
 							<span v-for="file in pendingFiles" :key="file.file_url">{{ file.file_name || file.file_url }}</span>
 						</div>
@@ -787,10 +801,14 @@ function formatDate(value) {
 .new-chat-inner { width: min(760px, 100%); text-align: center; }
 .new-chat h1 { margin-top: 0.8rem; color: #0f172a; font-size: clamp(2rem, 6vw, 4rem); line-height: 1; font-weight: 950; letter-spacing: 0; }
 .new-chat p { margin: 1rem auto 0; max-width: 620px; font-size: 1rem; line-height: 1.7; }
-.new-form { margin-top: 1.5rem; border: 1px solid #dbe3ef; border-radius: 8px; background: #fff; padding: 1rem; box-shadow: 0 20px 50px rgba(15,23,42,0.07); text-align: left; }
-.new-form input, .new-form select, .new-form textarea { width: 100%; border: 1px solid #dbe3ef; border-radius: 8px; background: #fff; color: #0f172a; outline: 0; padding: 0.75rem; }
-.new-form textarea { margin-top: 0.7rem; resize: vertical; }
-.new-form-row { display: grid; grid-template-columns: 190px 1fr; gap: 0.7rem; margin-top: 0.7rem; }
+.new-form { margin-top: 2rem; border: 1px solid #e2e8f0; border-radius: 16px; background: #fff; padding: 1.5rem; box-shadow: 0 10px 30px rgba(15,23,42,0.04); text-align: left; }
+.form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+.form-group label { font-size: 0.85rem; font-weight: 700; color: #475569; }
+.new-form input, .new-form select, .new-form textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 10px; background: #f8fafc; color: #0f172a; outline: 0; padding: 0.85rem 1rem; font-size: 0.95rem; transition: all 0.2s; }
+.new-form input:focus, .new-form select:focus, .new-form textarea:focus { border-color: #3b82f6; background: #fff; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+.title-input { font-size: 1.1rem !important; font-weight: 700; padding: 1rem !important; }
+.new-form textarea { resize: vertical; }
+.new-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
 .chat-thread { padding: 1.5rem max(1rem, calc((100% - 860px) / 2)); padding-bottom: 5rem; }
 .welcome-block { display: grid; place-items: center; min-height: 55vh; text-align: center; }
 .welcome-block h2 { margin-top: 0.75rem; color: #0f172a; font-size: 1.6rem; font-weight: 950; }
@@ -924,7 +942,8 @@ function formatDate(value) {
 :root[data-theme="dark"] .model-switch { background: #0b1220; border-color: rgba(255,255,255,0.1); }
 :root[data-theme="dark"] .new-form input,
 :root[data-theme="dark"] .new-form select,
-:root[data-theme="dark"] .new-form textarea { background: #0b1220; border-color: rgba(255,255,255,0.1); color: #e5e7eb; }
+:root[data-theme="dark"] .new-form textarea { background: #1e293b; border-color: rgba(255,255,255,0.1); color: #e5e7eb; }
+:root[data-theme="dark"] .form-group label { color: #94a3b8; }
 @media (max-width: 1180px) {
 	.chat-page { grid-template-columns: 250px minmax(0, 1fr); }
 	.source-panel { position: fixed; top: 0; right: 0; z-index: 40; width: min(360px, 88vw); transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: none; }
@@ -942,17 +961,19 @@ function formatDate(value) {
 	.header-actions { gap: 0.4rem; }
 	.model-switch button { padding: 0.42rem 0.55rem; }
 	.model-switch span { display: none; }
-	.new-chat { padding: 1.5rem 1rem; }
+	.new-chat { padding: 1.5rem 1rem 5rem 1rem; }
 	.new-chat h1 { font-size: 2rem; }
-	.new-form-row { grid-template-columns: 1fr; }
-	.chat-thread { padding: 1rem 0.75rem; padding-bottom: 7rem; flex: 1; overflow-y: auto; }
+	.new-form { padding: 1rem; }
+	.new-form-row { grid-template-columns: 1fr; gap: 0.75rem; }
+	.chat-thread { padding: 1rem 0.75rem; padding-bottom: 2rem; flex: 1; overflow-y: auto; }
 	.message-row { gap: 0.5rem; margin: 1.25rem 0; }
 	.avatar { width: 32px; height: 32px; border-radius: 10px; }
 	.avatar svg { width: 16px; height: 16px; }
 	.message-bubble { max-width: 92%; padding: 0.85rem 1rem; border-radius: 16px; font-size: 0.92rem; }
 	.message-row.user .message-bubble { border-bottom-right-radius: 4px; }
 	.message-row.assistant .message-bubble { border-bottom-left-radius: 4px; }
-	.composer-wrap { position: fixed; bottom: 0; left: 0; width: 100%; z-index: 20; padding: 0.6rem; background: rgba(247,248,251,0.92); backdrop-filter: blur(12px); border-top: 1px solid rgba(229,231,235,0.7); padding-bottom: calc(0.6rem + env(safe-area-inset-bottom)); }
+	
+	.composer-wrap { z-index: 20; padding: 0.6rem; background: rgba(247,248,251,0.92); backdrop-filter: blur(12px); border-top: 1px solid rgba(229,231,235,0.7); padding-bottom: calc(1rem + env(safe-area-inset-bottom, 15px)); }
 	.composer { border-radius: 14px; padding: 0.4rem; box-shadow: 0 10px 25px rgba(15,23,42,0.05); }
 	.composer textarea { font-size: 16px; padding: 0.45rem; }
 	.composer-meta { justify-content: flex-start; font-size: 0.7rem; }
