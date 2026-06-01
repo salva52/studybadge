@@ -47,9 +47,10 @@ const hiddenGlobalTutorRoutes = [
 ]
 
 const showGlobalTutor = computed(() => {
-	if (!isLoggedIn) return false
+	return false // Desactivado temporalmente por ahora
+	/* if (!isLoggedIn) return false
 	if (hiddenGlobalTutorRoutes.includes(route.name)) return false
-	return true
+	return true */
 })
 
 router.beforeEach((to, from, next) => {
