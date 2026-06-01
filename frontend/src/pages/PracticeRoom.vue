@@ -205,13 +205,20 @@ async function loadSession() {
 	}
 }
 
-function appendLine(role, content) {
+function appendLine(role, content, append = false) {
 	if (!content?.trim()) return
-	transcript.value.push({
-		role,
-		content: content.trim(),
-		timestamp: new Date().toISOString(),
-	})
+	const c = content.trim()
+	const last = transcript.value[transcript.value.length - 1]
+	
+	if (append && last && last.role === role) {
+		last.content += ' ' + c
+	} else {
+		transcript.value.push({
+			role,
+			content: c,
+			timestamp: new Date().toISOString(),
+		})
+	}
 	nextTick(() => {
 		if (transcriptBox.value) transcriptBox.value.scrollTop = transcriptBox.value.scrollHeight
 	})
@@ -455,11 +462,23 @@ function base64ToInt16Array(base64) {
 	return new Int16Array(bytes.buffer)
 }
 
+let lastTurnWasComplete = true
+
 function handleLiveMessage(message) {
+	if (message?.serverContent?.turnComplete || message?.serverContent?.interrupted) {
+		lastTurnWasComplete = true
+	}
+
 	const inputText = message?.serverContent?.inputTranscription?.text
 	const outputText = message?.serverContent?.outputTranscription?.text
-	if (inputText) appendLine('user', inputText)
-	if (outputText) appendLine('assistant', outputText)
+	
+	if (inputText) {
+		appendLine('user', inputText, false)
+	}
+	if (outputText) {
+		appendLine('assistant', outputText, !lastTurnWasComplete)
+		lastTurnWasComplete = false
+	}
 
 	const parts = message?.serverContent?.modelTurn?.parts || []
 	for (const part of parts) {
