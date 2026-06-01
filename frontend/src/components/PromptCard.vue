@@ -64,7 +64,8 @@
 
 <script setup>
 import { Clock, Copy, Crown } from 'lucide-vue-next'
-import { inject, computed } from 'vue'
+import { computed } from 'vue'
+import { usersStore } from '@/stores/user'
 
 defineProps({
 	prompt: {
@@ -75,8 +76,8 @@ defineProps({
 
 defineEmits(['view', 'copy'])
 
-const user = inject('$user')
-const isPlus = computed(() => !!user?.data?.is_plus)
+const { userResource } = usersStore()
+const isPlus = computed(() => !!userResource.data?.is_plus)
 </script>
 
 <style scoped>

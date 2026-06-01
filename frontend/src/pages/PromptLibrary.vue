@@ -207,16 +207,17 @@
 </template>
 
 <script setup>
-import { ref, computed, inject } from 'vue'
+import { ref, computed } from 'vue'
 import { Breadcrumbs, Dialog, toast, usePageMeta } from 'frappe-ui'
 import { Check, Copy, Crown, Zap, Video, Search, ArrowDown, Target, Star, Clock, ArrowRight } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
 import { promptsData } from '@/data/prompts'
 import PromptCard from '@/components/PromptCard.vue'
+import { usersStore } from '@/stores/user'
 
 const { brand } = sessionStore()
-const user = inject('$user')
-const isPlus = computed(() => !!user?.data?.is_plus)
+const { userResource } = usersStore()
+const isPlus = computed(() => !!userResource.data?.is_plus)
 
 const breadcrumbs = computed(() => [
 	{ label: __('Biblioteca de prompts'), route: { name: 'PromptLibrary' } },
