@@ -775,7 +775,7 @@ function formatDate(value) {
 
 <style scoped>
 .chat-page { display: grid; grid-template-columns: 280px minmax(0, 1fr) 330px; height: 100vh; overflow: hidden; background: #f7f8fb; color: #101827; }
-.session-rail, .source-panel { background: #fff; border-color: #e5e7eb; border-style: solid; height: 100vh; overflow-y: auto; padding: 1rem; }
+.session-rail, .source-panel { background: #fff; border-color: #e5e7eb; border-style: solid; height: 100vh; overflow-y: auto; padding: 1rem; position: relative; z-index: 10; }
 .session-rail { border-width: 0 1px 0 0; }
 .source-panel { border-width: 0 0 0 1px; }
 .rail-head, .panel-head, .chat-header, .header-left, .header-actions, .new-actions { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
@@ -808,7 +808,7 @@ function formatDate(value) {
 .model-switch button { display: inline-flex; align-items: center; gap: 0.35rem; border: 0; border-radius: 999px; background: transparent; color: #64748b; padding: 0.45rem 0.7rem; font-size: 0.78rem; font-weight: 900; white-space: nowrap; }
 .model-switch button.active { background: #2563eb; color: white; }
 .model-switch button.locked { color: #92400e; }
-.new-chat, .chat-thread { min-height: 0; overflow-y: auto; }
+.new-chat, .chat-thread { min-height: 0; overflow-y: auto; overflow-x: hidden; }
 .new-chat { display: grid; place-items: center; padding: 2rem; }
 .new-chat-inner { width: min(760px, 100%); text-align: center; }
 .new-chat h1 { margin-top: 0.8rem; color: #0f172a; font-size: clamp(2rem, 6vw, 4rem); line-height: 1; font-weight: 950; letter-spacing: 0; }
@@ -874,7 +874,8 @@ function formatDate(value) {
 }
 
 .message-bubble { 
-	max-width: 760px; 
+	max-width: 100%; 
+	width: fit-content;
 	border-radius: 18px; 
 	padding: 1rem 1.25rem; 
 	color: #1f2937; 
@@ -882,6 +883,8 @@ function formatDate(value) {
 	font-size: 0.95rem; 
 	box-shadow: 0 4px 24px rgba(15,23,42,0.04); 
 	border: 1px solid rgba(255,255,255,0.4);
+	word-wrap: break-word;
+	overflow-wrap: break-word;
 }
 .message-row.user .message-bubble { 
 	background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); 
@@ -934,6 +937,7 @@ function formatDate(value) {
 .pending-row { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.55rem; }
 .pending-row span { border-radius: 999px; background: #ecfdf5; color: #047857; padding: 0.25rem 0.55rem; font-size: 0.76rem; font-weight: 900; }
 .panel-head h2, .tools-head h2 { color: #0f172a; font-size: 1rem; font-weight: 950; }
+.session-item svg { flex-shrink: 0; margin-top: 0.1rem; }
 .source-item { background: #f8fafc; border-color: #edf2f7; box-shadow: 0 2px 10px rgba(15,23,42,0.02); }
 .source-item svg, .tool-card svg { flex-shrink: 0; color: #2563eb; margin-top: 0.1rem; }
 .tools-head { margin: 1.5rem 0 0.8rem; }
