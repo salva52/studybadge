@@ -50,16 +50,20 @@
 					</div>
 					
 					<div class="assistant-body">
+						<div v-if="history && history.length" class="history-list">
+							<div v-for="(item, idx) in history" :key="idx" class="history-item">
+								<p class="h-q"><strong>Q:</strong> {{ item.question }}</p>
+								<p class="h-a"><strong>{{ __('Tú') }}:</strong> {{ item.answer }}</p>
+								<p class="h-e" :class="item.evaluation.toUpperCase().includes('MAL') ? 'text-red-600' : 'text-green-600'"><strong>{{ __('IA') }}:</strong> {{ item.evaluation }}</p>
+							</div>
+						</div>
+						
 						<div v-if="loading" class="loading-state">
 							<div class="typing-indicator"><span></span><span></span><span></span></div>
 							<p>{{ __('Analizando tu avance...') }}</p>
 						</div>
 						
 						<div v-else-if="readingData && readingData.question" class="question-card">
-							<div v-if="readingData.evaluation" class="evaluation-box">
-								<Bot class="size-4" />
-								<p><strong>{{ __('Respuesta anterior:') }}</strong> {{ readingData.evaluation }}</p>
-							</div>
 
 							<span class="badge">{{ __('Reflexión') }}</span>
 							<h3>{{ readingData.question }}</h3>
@@ -99,7 +103,8 @@ const props = defineProps({
 	show: Boolean,
 	loading: Boolean,
 	data: Object,
-	materials: { type: Array, default: () => [] }
+	materials: { type: Array, default: () => [] },
+	history: { type: Array, default: () => [] }
 })
 
 const emit = defineEmits(['update:show', 'request-question', 'verify-answer'])
@@ -148,7 +153,7 @@ function submitAnswer() {
 
 <style scoped>
 .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; }
-.modal-content { background: #fff; width: 100%; max-width: 1100px; height: 85vh; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); display: flex; flex-direction: column; overflow: hidden; }
+.modal-content { background: #fff; width: 100%; max-width: 1250px; height: 85vh; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); display: flex; flex-direction: column; overflow: hidden; }
 .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #fff; z-index: 10; }
 .modal-header h2 { display: flex; align-items: center; gap: 0.5rem; font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0; }
 .icon { color: #2563eb; }
@@ -168,9 +173,17 @@ function submitAnswer() {
 .doc-content-placeholder p { font-weight: 600; font-size: 1.1rem; color: #475569; margin: 0.5rem 0; }
 .doc-content-placeholder small { max-width: 300px; line-height: 1.5; }
 
-.assistant-pane { flex: 1; min-width: 320px; max-width: 400px; display: flex; flex-direction: column; background: #fff; }
+.assistant-pane { flex: 1; min-width: 350px; max-width: 480px; display: flex; flex-direction: column; background: #fff; }
 .assistant-header { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; background: #eff6ff; border-bottom: 1px solid #bfdbfe; font-weight: 800; color: #1e3a8a; font-size: 0.95rem; }
 .assistant-body { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; }
+
+.history-list { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
+.history-item { font-size: 0.9rem; line-height: 1.4; padding-bottom: 1rem; border-bottom: 1px dashed #e2e8f0; }
+.history-item p { margin: 0 0 0.35rem 0; }
+.h-q { color: #334155; }
+.h-a { color: #64748b; }
+.text-red-600 { color: #dc2626; }
+.text-green-600 { color: #16a34a; }
 
 .question-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); animation: slideUp 0.3s ease-out; }
 .badge { display: inline-block; background: #dbeafe; color: #1d4ed8; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; padding: 0.25rem 0.5rem; border-radius: 999px; margin-bottom: 0.75rem; letter-spacing: 0.05em; }
@@ -179,10 +192,6 @@ function submitAnswer() {
 .hint-box { display: flex; gap: 0.5rem; background: #fefce8; border-radius: 8px; padding: 0.85rem; margin-bottom: 1rem; }
 .hint-icon { color: #ca8a04; flex-shrink: 0; margin-top: 0.1rem; }
 .hint-box p { font-size: 0.9rem; color: #854d0e; margin: 0; line-height: 1.4; }
-
-.evaluation-box { display: flex; gap: 0.5rem; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 0.85rem; margin-bottom: 1.25rem; }
-.evaluation-box .lucide { color: #059669; flex-shrink: 0; margin-top: 0.1rem; }
-.evaluation-box p { font-size: 0.9rem; color: #065f46; margin: 0; line-height: 1.4; }
 
 .response-area { margin-top: 1rem; border-top: 1px solid #f1f5f9; padding-top: 1rem; }
 .response-area textarea { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.75rem; font-size: 0.95rem; color: #334155; resize: vertical; outline: none; transition: border-color 0.2s; }
@@ -249,10 +258,13 @@ function submitAnswer() {
 :root[data-theme="dark"] .badge { background: rgba(37,99,235,0.2); color: #93c5fd; }
 :root[data-theme="dark"] .hint-box { background: rgba(234,179,8,0.1); border-color: transparent; }
 :root[data-theme="dark"] .hint-box p { color: #fde047; }
-:root[data-theme="dark"] .evaluation-box { background: rgba(16,185,129,0.1); border-color: transparent; }
-:root[data-theme="dark"] .evaluation-box p, :root[data-theme="dark"] .evaluation-box .lucide { color: #34d399; }
 :root[data-theme="dark"] .doc-selector-wrap { background: #0f172a; }
 :root[data-theme="dark"] .doc-select { color: #f8fafc; }
+:root[data-theme="dark"] .history-item { border-color: #334155; }
+:root[data-theme="dark"] .h-q { color: #f8fafc; }
+:root[data-theme="dark"] .h-a { color: #94a3b8; }
+:root[data-theme="dark"] .text-red-600 { color: #f87171; }
+:root[data-theme="dark"] .text-green-600 { color: #4ade80; }
 :root[data-theme="dark"] .mobile-tabs { background: #1e293b; border-color: #334155; }
 :root[data-theme="dark"] .tab-btn { color: #94a3b8; }
 :root[data-theme="dark"] .tab-btn.active { background: rgba(37,99,235,0.1); color: #60a5fa; }

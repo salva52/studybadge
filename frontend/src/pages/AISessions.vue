@@ -228,7 +228,7 @@
 
 		<QuizModal v-model:show="showQuiz" :loading="modalLoading" :data="modalData" />
 		<FlashcardsModal v-model:show="showFlashcards" :loading="modalLoading" :data="modalData" />
-		<GuidedReadingModal v-model:show="showGuidedReading" :loading="modalLoading" :data="modalData" :materials="activeSession?.materials || []" @request-question="requestGuidedQuestion" @verify-answer="verifyGuidedAnswer" />
+		<GuidedReadingModal v-model:show="showGuidedReading" :loading="modalLoading" :data="modalData" :materials="activeSession?.materials || []" :history="readerHistory" @request-question="requestGuidedQuestion" @verify-answer="verifyGuidedAnswer" />
 		<MathModal v-model:show="showMath" :loading="modalLoading" :data="modalData" />
 	</div>
 </template>
@@ -291,6 +291,8 @@ const chatBox = ref(null)
 const creating = ref(false)
 const chatLoading = ref(false)
 const toolLoading = ref(false)
+
+const readerHistory = ref([])
 const showSessions = ref(false)
 const showTools = ref(false)
 const sessionSearch = ref('')
@@ -615,7 +617,6 @@ async function runTool(tool) {
 		if (tool.id === 'quiz') showQuiz.value = true
 		if (tool.id === 'flashcards') showFlashcards.value = true
 		if (tool.id === 'reader_question') {
-			modalData.value = null
 			showGuidedReading.value = true
 			return
 		}
@@ -701,9 +702,10 @@ async function requestGuidedQuestion(material) {
 async function verifyGuidedAnswer(answer) {
 	if (!activeSession.value) return
 	modalLoading.value = true
+	const currentQuestion = modalData.value?.question
 	try {
-		const payloadPrompt = modalData.value?.question 
-			? `Mi respuesta a tu pregunta ("${modalData.value.question}") es: "${answer}". Evalúa mi respuesta brevemente.` 
+		const payloadPrompt = currentQuestion 
+			? `Mi respuesta a tu pregunta ("${currentQuestion}") es: "${answer}". Evalúa mi respuesta brevemente.` 
 			: `Evalúa esta respuesta: "${answer}"`
 			
 		const result = await api('generate_ai_tool', {
@@ -713,7 +715,16 @@ async function verifyGuidedAnswer(answer) {
 			payload: { prompt: payloadPrompt, topic: activeSession.value.goal },
 		})
 		
-		modalData.value = result.result
+		const resultData = result.result
+		if (resultData.evaluation && currentQuestion) {
+			readerHistory.value.push({
+				question: currentQuestion,
+				answer: answer,
+				evaluation: resultData.evaluation
+			})
+		}
+		
+		modalData.value = resultData
 		access.value = result.access || access.value
 	} catch (e) {
 		toast.error(__('No se pudo verificar la respuesta.'))
