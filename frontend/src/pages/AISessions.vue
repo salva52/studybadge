@@ -149,9 +149,8 @@
 						</div>
 					</div>
 					<div v-if="message.role !== 'user' && index === chatMessages.length - 1 && !chatLoading && !toolLoading" class="follow-up-actions">
-						<button @click="sendFollowUp('Entendí')">{{ __('Entendí') }}</button>
 						<button @click="sendFollowUp('Explícalo más simple')">{{ __('Explícalo más simple') }}</button>
-						<button @click="sendFollowUp('Dame otro ejemplo')">{{ __('Dame otro ejemplo') }}</button>
+						<button @click="sendFollowUp('Dame un ejemplo')">{{ __('Dame un ejemplo') }}</button>
 						<button @click="sendFollowUp('Hazme practicar')">{{ __('Hazme practicar') }}</button>
 					</div>
 				</div>
@@ -165,12 +164,6 @@
 				<div v-if="pendingFiles.length" class="pending-row">
 					<span v-for="file in pendingFiles" :key="file.file_url">{{ file.file_name || file.file_url }}</span>
 				</div>
-				<div class="chat-modes" v-if="!chatLoading">
-					<span class="mode-label">{{ __('Modo:') }}</span>
-					<button v-for="m in chatModesList" :key="m.value" class="mode-chip" :class="{ active: chatMode === m.value }" @click="chatMode = m.value">
-						{{ m.label }}
-					</button>
-				</div>
 				<div class="composer">
 					<button class="icon-btn" :title="__('Subir fuentes')" @click="openUploader">
 						<Paperclip class="size-5" />
@@ -178,6 +171,17 @@
 					<button class="icon-btn" :class="{ 'active-search': useSearch }" :title="__('Activar búsqueda en Google')" @click="useSearch = !useSearch">
 						<Globe class="size-5" />
 					</button>
+					<div class="relative mode-dropdown-wrapper">
+						<button class="icon-btn" :class="{ 'active-mode': showModesDropdown || chatMode !== 'chat' }" :title="__('Modos de IA')" @click="showModesDropdown = !showModesDropdown">
+							<Plus class="size-5" />
+						</button>
+						<div v-if="showModesDropdown" class="modes-dropdown-menu">
+							<div class="modes-header">{{ __('Modo de IA') }}</div>
+							<button v-for="m in chatModesList" :key="m.value" class="mode-dropdown-item" :class="{ active: chatMode === m.value }" @click="chatMode = m.value; showModesDropdown = false">
+								{{ m.label }}
+							</button>
+						</div>
+					</div>
 					<textarea
 						v-model="chatInput"
 						rows="1"
@@ -339,6 +343,7 @@ const sessionSearch = ref('')
 const useSearch = ref(false)
 
 const chatMode = ref('chat')
+const showModesDropdown = ref(false)
 const chatModesList = [
 	{ label: __('Libre'), value: 'chat' },
 	{ label: __('Simple'), value: 'simple' },
@@ -1108,56 +1113,77 @@ function formatDate(value) {
 	margin-bottom: 12px;
 }
 .follow-up-actions button {
-	font-size: 0.8rem;
-	padding: 4px 12px;
-	border-radius: 999px;
+	font-size: 0.75rem;
+	padding: 6px 14px;
+	border-radius: 12px;
 	border: 1px solid #e2e8f0;
 	background: #fff;
 	color: #64748b;
+	font-weight: 500;
 	cursor: pointer;
 	transition: all 0.2s;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 .follow-up-actions button:hover {
-	background: #f1f5f9;
+	background: #f8fafc;
 	color: #0f172a;
 	border-color: #cbd5e1;
+	box-shadow: 0 2px 6px rgba(0,0,0,0.04);
 }
 
-.chat-modes {
+.mode-dropdown-wrapper {
+	position: relative;
 	display: flex;
 	align-items: center;
-	gap: 0.5rem;
-	margin-bottom: 0.75rem;
-	overflow-x: auto;
-	padding-bottom: 0.25rem;
 }
-.chat-modes::-webkit-scrollbar { display: none; }
-.mode-label {
-	font-size: 0.85rem;
-	font-weight: 600;
-	color: #64748b;
-	margin-right: 4px;
-}
-.mode-chip {
-	white-space: nowrap;
-	border: 1px solid #e2e8f0;
+.modes-dropdown-menu {
+	position: absolute;
+	bottom: 100%;
+	left: 0;
+	margin-bottom: 8px;
 	background: #fff;
-	color: #475569;
-	border-radius: 999px;
-	padding: 0.4rem 0.8rem;
-	font-size: 0.78rem;
+	border: 1px solid #e2e8f0;
+	border-radius: 12px;
+	box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+	padding: 8px;
+	min-width: 150px;
+	z-index: 100;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+.modes-header {
+	font-size: 0.75rem;
 	font-weight: 700;
-	transition: all 0.2s;
+	color: #94a3b8;
+	padding: 4px 8px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+.mode-dropdown-item {
+	text-align: left;
+	padding: 6px 12px;
+	border-radius: 8px;
+	font-size: 0.85rem;
+	font-weight: 500;
+	color: #475569;
+	background: transparent;
+	border: none;
 	cursor: pointer;
+	transition: background 0.2s;
 }
-.mode-chip:hover {
-	background: #f8fafc;
-	border-color: #cbd5e1;
+.mode-dropdown-item:hover {
+	background: #f1f5f9;
+	color: #0f172a;
 }
-.mode-chip.active {
+.mode-dropdown-item.active {
 	background: #eff6ff;
 	color: #2563eb;
-	border-color: #bfdbfe;
+	font-weight: 600;
+}
+.icon-btn.active-mode {
+	color: #2563eb;
+	background: #eff6ff;
 }
 @media (max-width: 760px) {
 	.chat-page { display: block; }
