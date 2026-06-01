@@ -155,10 +155,31 @@
 		<aside class="source-panel" :class="{ open: showTools }">
 			<div class="panel-head">
 				<div>
-					<h2>{{ __('Fuentes') }}</h2>
-					<p>{{ materialCountText }}</p>
+					<h2>{{ __('Panel de Sesión') }}</h2>
 				</div>
 				<button class="icon-btn mobile-only" @click="showTools = false"><X class="size-4" /></button>
+			</div>
+
+			<div v-if="activeSession" class="tools-head" style="margin-top: 0">
+				<h2>{{ __('Chats') }}</h2>
+				<p>{{ __('Historial de esta sesión') }}</p>
+			</div>
+			<button v-if="activeSession" class="secondary-btn full" @click="startNewThread">
+				<Plus class="size-4" /> {{ __('Nuevo chat') }}
+			</button>
+			<div v-if="activeSession" class="sources-list" style="margin-top: 0.5rem; margin-bottom: 1rem; max-height: 200px; overflow-y: auto;">
+				<button v-for="thread in activeSession?.threads || []" :key="thread.name" class="session-item" :class="{ active: currentThread?.name === thread.name }" @click="switchThread(thread)">
+					<MessageCircle class="size-4" style="margin-top:0.2rem" />
+					<span>
+						<strong>{{ thread.title || __('Chat') }}</strong>
+						<small>{{ formatDate(thread.modified) }}</small>
+					</span>
+				</button>
+			</div>
+
+			<div class="tools-head" style="margin-top: 0">
+				<h2>{{ __('Fuentes') }}</h2>
+				<p>{{ materialCountText }}</p>
 			</div>
 			<button class="secondary-btn full" :disabled="!activeSession" @click="openUploader">
 				<Upload class="size-4" /> {{ __('Agregar documentos') }}
@@ -202,6 +223,8 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { FileUploader, call, toast, usePageMeta } from 'frappe-ui'
 import MarkdownIt from 'markdown-it'
+import mk from 'markdown-it-katex'
+import 'katex/dist/katex.min.css'
 import DOMPurify from 'dompurify'
 import {
 	BookOpenCheck,
@@ -231,7 +254,7 @@ import { sessionStore } from '@/stores/session'
 const route = useRoute()
 const router = useRouter()
 const { brand } = sessionStore()
-const markdown = new MarkdownIt({ html: false, linkify: true, breaks: true })
+const markdown = new MarkdownIt({ html: false, linkify: true, breaks: true }).use(mk)
 
 const access = ref(null)
 const sessions = ref([])
@@ -410,6 +433,21 @@ function openSession(name) {
 	router.push({ name: 'AISessionRoom', params: { sessionId: name } })
 }
 
+function startNewThread() {
+	currentThread.value = null
+	chatMessages.value = []
+	chatInput.value = ''
+	showTools.value = false
+	toast.success(__('Escribe un mensaje para iniciar el nuevo chat.'))
+}
+
+function switchThread(thread) {
+	currentThread.value = thread
+	chatMessages.value = thread.messages || []
+	showTools.value = false
+	nextTick(scrollChat)
+}
+
 function validateFile(file) {
 	const ext = file.name.split('.').pop().toLowerCase()
 	if (!['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'webp', 'txt', 'md'].includes(ext)) return __('Usa PDF, imagenes, Word o texto.')
@@ -492,8 +530,12 @@ async function sendChat() {
 			files,
 			model_tier: activeSession.value.model_tier,
 		})
+		const isNewThread = !currentThread.value
 		currentThread.value = result.thread
 		chatMessages.value = result.thread.messages || []
+		if (isNewThread) {
+			activeSession.value.threads = [result.thread, ...(activeSession.value.threads || [])]
+		}
 		access.value = result.access || access.value
 		await nextTick(scrollChat)
 	} finally {
@@ -538,7 +580,10 @@ async function runTool(tool) {
 
 function renderMarkdown(text) {
 	if (!text) return ''
-	return DOMPurify.sanitize(markdown.render(String(text)))
+	return DOMPurify.sanitize(markdown.render(String(text)), {
+		ADD_TAGS: ['math', 'semantics', 'mrow', 'mi', 'mo', 'mn', 'msup', 'mspace', 'mtd', 'mtr', 'mtable', 'annotation', 'mfrac', 'msqrt', 'mroot', 'mstyle', 'merror', 'mpadded', 'mphantom', 'mfenced', 'menclose', 'msub', 'msubsup', 'munderover', 'mover', 'munder'],
+		ADD_ATTR: ['display', 'xmlns', 'encoding', 'aria-hidden', 'class', 'style', 'href', 'target'],
+	})
 }
 
 function scrollChat() {
