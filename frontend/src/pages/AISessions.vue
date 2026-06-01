@@ -810,7 +810,7 @@ function formatDate(value) {
 .model-switch button.locked { color: #92400e; }
 .new-chat, .chat-thread { min-height: 0; overflow-y: auto; overflow-x: hidden; }
 .new-chat { display: grid; place-items: center; padding: 2rem; }
-.new-chat-inner { width: min(760px, 100%); text-align: center; }
+.new-chat-inner { width: min(720px, 100%); text-align: center; }
 .new-chat h1 { margin-top: 0.8rem; color: #0f172a; font-size: clamp(2rem, 6vw, 4rem); line-height: 1; font-weight: 950; letter-spacing: 0; }
 .new-chat p { margin: 1rem auto 0; max-width: 620px; font-size: 1rem; line-height: 1.7; }
 .new-form { margin-top: 2rem; border: 1px solid #e2e8f0; border-radius: 16px; background: #fff; padding: 1.5rem; box-shadow: 0 10px 30px rgba(15,23,42,0.04); text-align: left; }
@@ -833,7 +833,13 @@ function formatDate(value) {
 	to { opacity: 1; transform: translateY(0); }
 }
 
-.chat-thread { padding: 1.5rem max(1rem, calc((100% - 860px) / 2)); padding-bottom: 2rem; }
+.chat-thread { 
+	padding: 1.5rem max(2.5rem, calc((100% - 720px) / 2)); 
+	padding-bottom: 2rem; 
+	min-height: 0; 
+	overflow-y: auto; 
+	overflow-x: hidden;
+}
 .welcome-block { display: grid; place-items: center; min-height: 55vh; text-align: center; }
 .welcome-block h2 { margin-top: 0.75rem; color: #0f172a; font-size: clamp(1.2rem, 3.5vw, 1.8rem); font-weight: 950; text-wrap: balance; max-width: 800px; line-height: 1.35; }
 .suggestions { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.85rem; margin-top: 1.8rem; width: 100%; max-width: 720px; }
@@ -928,7 +934,12 @@ function formatDate(value) {
 .typing span:nth-child(2) { animation-delay: 0.12s; }
 .typing span:nth-child(3) { animation-delay: 0.24s; }
 @keyframes pulse { 0%, 80%, 100% { opacity: 0.3; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
-.composer-wrap { border-top: 1px solid #e5e7eb; background: rgba(247,248,251,0.96); padding: 0.75rem max(1rem, calc((100% - 860px) / 2)); }
+.composer-wrap { 
+	position: sticky; bottom: 0; z-index: 20; 
+	padding: 1rem max(2.5rem, calc((100% - 720px) / 2)); 
+	padding-bottom: 2.5rem; 
+	background: linear-gradient(to top, #f7f8fb 80%, rgba(247,248,251,0));
+}
 .composer { display: flex; align-items: flex-end; gap: 0.55rem; border: 1px solid #dbe3ef; border-radius: 8px; background: #fff; padding: 0.55rem; box-shadow: 0 16px 40px rgba(15,23,42,0.07); }
 .composer textarea { min-height: 42px; max-height: 180px; flex: 1; resize: vertical; border: 0; outline: 0; padding: 0.55rem; line-height: 1.5; }
 .send-btn { width: 42px; height: 42px; border: 0; background: #2563eb; color: #fff; }
@@ -996,7 +1007,8 @@ function formatDate(value) {
 	.new-chat h1 { font-size: 2rem; }
 	.new-form { padding: 1rem; }
 	.new-form-row { grid-template-columns: 1fr; gap: 0.75rem; }
-	.chat-thread { padding: 1rem 0.75rem; padding-bottom: 5rem; flex: 1; overflow-y: auto; }
+	.chat-thread { padding: 1rem 1.25rem; padding-bottom: 5rem; flex: 1; overflow-y: auto; }
+	.composer-wrap { padding: 1rem 1.25rem; padding-bottom: 65px; position: fixed; left: 0; right: 0; bottom: 65px; z-index: 50; }
 	.message-row { gap: 0.5rem; margin: 1.25rem 0; }
 	.avatar { width: 32px; height: 32px; border-radius: 10px; }
 	.avatar svg { width: 16px; height: 16px; }
@@ -1004,7 +1016,7 @@ function formatDate(value) {
 	.message-row.user .message-bubble { border-bottom-right-radius: 4px; }
 	.message-row.assistant .message-bubble { border-bottom-left-radius: 4px; }
 	
-	.composer-wrap { position: fixed; bottom: 65px; left: 0; width: 100%; z-index: 20; padding: 0.6rem; background: rgba(247,248,251,0.92); backdrop-filter: blur(12px); border-top: 1px solid rgba(229,231,235,0.7); padding-bottom: calc(0.6rem + env(safe-area-inset-bottom)); }
+	.composer-wrap { padding: 0.6rem; background: rgba(247,248,251,0.92); backdrop-filter: blur(12px); border-top: 1px solid rgba(229,231,235,0.7); padding-bottom: calc(0.6rem + env(safe-area-inset-bottom)); }
 	.composer { border-radius: 14px; padding: 0.4rem; box-shadow: 0 10px 25px rgba(15,23,42,0.05); }
 	.composer textarea { font-size: 16px; padding: 0.45rem; }
 	.composer-meta { justify-content: flex-start; font-size: 0.7rem; }
