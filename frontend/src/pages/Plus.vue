@@ -261,117 +261,324 @@
 			<!-- ═══════════════════════════════════════════
 			     ESTADO 1: SIN PLAN — PÁGINA DE VENTA
 			     ═══════════════════════════════════════════ -->
-			<div v-else>
-
+			<div v-else class="bg-[#f5f7fb]">
 				<!-- Hero de Venta -->
-				<div class="plus-hero-sell relative overflow-hidden text-center">
-					<div class="plus-hero-glow-1"></div>
-					<div class="plus-hero-glow-2"></div>
-					<div class="plus-hero-grid"></div>
-					<div class="mx-auto max-w-3xl relative z-10 px-6 py-20 sm:py-28">
-						<div class="plus-crown-badge mx-auto mb-8">
-							<Crown class="size-12 text-amber-400 drop-shadow-lg" />
-						</div>
-						<h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-tight mb-6">
-							{{ __('Desbloquea') }}
-							<br class="sm:hidden" />
-							<span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 animate-gradient-x">StudyBadge Plus</span>
-						</h1>
-						<p class="text-xl sm:text-2xl text-blue-100/80 font-medium max-w-3xl mx-auto leading-relaxed">
-							{{ __('Impulsa tu carrera con certificados ilimitados, Tutor IA ilimitado, calendario inteligente y herramientas premium de estudio.') }}
-						</p>
-					</div>
-				</div>
-
-				<!-- Pricing + Beneficios -->
-				<div class="mx-auto max-w-5xl px-5 py-12 -mt-10 relative z-20">
-					<div class="grid gap-8 lg:grid-cols-3 items-start">
-
-						<!-- Pricing Card (sticky) -->
-						<div class="lg:col-span-1 order-first lg:order-last sticky top-24">
-							<div class="plus-pricing-card overflow-hidden">
-								<div class="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 py-2 text-center">
-									<span class="text-xs font-extrabold uppercase tracking-widest text-amber-900">{{ __('Membresía Plus') }}</span>
-								</div>
-								<div class="p-8 text-center">
-									<div class="flex items-end justify-center gap-1 mb-1">
-										<span class="text-5xl font-black plus-text-primary tracking-tight">{{ formattedPrice }}</span>
-										<span class="pb-2 text-base font-medium plus-text-muted">/ {{ __('mes') }}</span>
-									</div>
-									<p class="text-sm plus-text-muted mb-8">{{ __('Cancela cuando quieras. Sin compromisos.') }}</p>
-
-									<button
-										class="plus-btn-cta w-full text-base"
-										:disabled="activating"
-										@click="subscription?.init_point ? openExistingCheckout() : activatePlus()"
-									>
-										<span v-if="activating" class="animate-spin mr-2">⏳</span>
-										{{ subscription?.init_point ? __('Continuar pago pendiente') : __('Suscribirme ahora') }}
-									</button>
-
-									<div class="mt-6 flex items-center justify-center gap-2 text-xs plus-text-muted">
-										<ShieldCheck class="size-4 text-green-500" />
-										{{ __('Pago 100% seguro con Mercado Pago') }}
-									</div>
-								</div>
-							</div>
-						</div>
-
-						<!-- Beneficios + Confianza -->
-						<div class="lg:col-span-2 space-y-10">
-
-							<!-- Beneficios Grid -->
+				<section class="relative bg-[#08204e] text-white pt-12 pb-20 overflow-hidden">
+					<div class="absolute top-0 right-0 w-3/4 h-full bg-gradient-to-l from-blue-600/20 to-transparent pointer-events-none"></div>
+					<div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+					<div class="absolute bottom-0 right-0 w-full h-24 bg-gradient-to-t from-[#f5f7fb] to-transparent pointer-events-none z-10"></div>
+					
+					<div class="max-w-7xl mx-auto px-6 relative z-20">
+						<div class="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+							<!-- Columna Izquierda: Copy -->
 							<div>
-								<h2 class="text-2xl font-bold plus-text-primary mb-8 flex items-center gap-3">
-									<Sparkles class="size-6 text-amber-500" />
-									{{ __('Beneficios exclusivos') }}
-								</h2>
-								<div class="grid gap-4 sm:grid-cols-2">
-									<div
-										v-for="benefit in benefits"
-										:key="benefit.label"
-										class="plus-benefit-card group"
-									>
-										<div class="plus-benefit-card-icon group-hover:scale-110 transition-transform">
-											<component :is="benefit.icon" class="size-6" />
-										</div>
-										<div>
-											<div class="font-bold text-base plus-text-primary">{{ benefit.label }}</div>
-											<div class="mt-1 text-sm plus-text-muted leading-relaxed">{{ benefit.description }}</div>
-										</div>
-									</div>
+								<div class="inline-block px-3 py-1 mb-6 rounded-full bg-white/10 border border-white/20 text-amber-400 text-xs font-black uppercase tracking-widest backdrop-blur-sm">
+									STUDYBADGE PLUS
 								</div>
-							</div>
-
-							<!-- Confianza -->
-							<div class="plus-card p-8">
-								<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-									<div v-for="trust in trustPoints" :key="trust.label" class="flex flex-col items-center text-center gap-2">
-										<div class="plus-trust-icon">
-											<component :is="trust.icon" class="size-6" />
-										</div>
-										<span class="text-sm font-bold plus-text-primary">{{ trust.label }}</span>
-										<span class="text-xs plus-text-muted">{{ trust.sub }}</span>
-									</div>
-								</div>
-							</div>
-
-							<!-- Empty Recibos -->
-							<div class="plus-card p-8 text-center">
-								<div class="plus-empty-icon mx-auto">
-									<Download class="size-8" />
-								</div>
-								<h3 class="text-lg font-bold plus-text-primary mt-4">{{ __('Aún no tienes recibos') }}</h3>
-								<p class="mt-2 text-sm plus-text-muted max-w-sm mx-auto mb-6">
-									{{ __('Cuando realices tu primer pago, tus comprobantes aparecerán aquí.') }}
+								<h1 class="text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-6">
+									{{ __('Desbloquea todo el poder de StudyBadge') }}
+								</h1>
+								<p class="text-lg md:text-xl text-blue-100/90 leading-relaxed mb-8 max-w-xl">
+									{{ __('Certificados ilimitados, Tutor IA sin límites, prompts premium, simulaciones y herramientas inteligentes para estudiar mejor, crear más rápido y avanzar todos los días.') }}
 								</p>
-								<button class="plus-btn-outline text-sm" @click="billing.reload()" :disabled="billing.loading">
-									<RefreshCcw class="size-4" :class="{'animate-spin': billing.loading}" /> {{ __('Actualizar') }}
-								</button>
+								
+								<div class="flex flex-col sm:flex-row gap-4 mb-8">
+									<button @click="scrollToPricing" class="plus-btn-cta text-lg bg-amber-400 hover:bg-amber-300 text-[#08204e] border-none shadow-amber-500/30">
+										{{ __('Desbloquear Plus ahora') }}
+									</button>
+									<button @click="scrollToBenefits" class="plus-btn-outline border-white/30 text-white hover:bg-white/10 hover:border-white/50 text-base">
+										{{ __('Ver beneficios') }} <ArrowDown class="size-4" />
+									</button>
+								</div>
+								
+								<div class="flex flex-wrap items-center gap-4 text-sm text-blue-200 font-medium">
+									<span class="flex items-center gap-1.5"><Sparkles class="size-4 text-amber-400"/> {{ __('Acceso inmediato') }}</span>
+									<span class="flex items-center gap-1.5"><RefreshCcw class="size-4 text-amber-400"/> {{ __('Cancela cuando quieras') }}</span>
+									<span class="flex items-center gap-1.5"><ShieldCheck class="size-4 text-green-400"/> {{ __('Pago seguro con Mercado Pago') }}</span>
+								</div>
+							</div>
+							
+							<!-- Columna Derecha: Pricing Card -->
+							<div id="pricing-card" class="w-full max-w-md mx-auto lg:ml-auto mt-6 lg:mt-0">
+								<div class="bg-white rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100 text-gray-900 relative">
+									<div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-amber-400 to-amber-500"></div>
+									<div class="p-8 pb-6">
+										<div class="text-center mb-6">
+											<span class="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-black uppercase tracking-widest mb-4">
+												{{ __('Membresía Plus') }}
+											</span>
+											<div class="flex items-end justify-center gap-1 mb-2">
+												<span class="text-5xl font-black tracking-tight">{{ formattedPrice }}</span>
+												<span class="text-gray-500 font-medium pb-1">/ {{ __('mes') }}</span>
+											</div>
+											<p class="text-sm font-bold text-gray-500">{{ __('Menos de S/1 al día') }}</p>
+										</div>
+										
+										<div class="space-y-4 mb-8 bg-blue-50/50 p-5 rounded-2xl border border-blue-100/50">
+											<div class="flex items-start gap-3">
+												<CheckCircle2 class="size-5 text-[#0b82e6] shrink-0" />
+												<span class="text-sm font-semibold text-gray-700">{{ __('Certificados ilimitados') }}</span>
+											</div>
+											<div class="flex items-start gap-3">
+												<CheckCircle2 class="size-5 text-[#0b82e6] shrink-0" />
+												<span class="text-sm font-semibold text-gray-700">{{ __('Tutor IA ilimitado') }}</span>
+											</div>
+											<div class="flex items-start gap-3">
+												<CheckCircle2 class="size-5 text-[#0b82e6] shrink-0" />
+												<span class="text-sm font-semibold text-gray-700">{{ __('Prompts premium') }}</span>
+											</div>
+											<div class="flex items-start gap-3">
+												<CheckCircle2 class="size-5 text-[#0b82e6] shrink-0" />
+												<span class="text-sm font-semibold text-gray-700">{{ __('Calendario inteligente') }}</span>
+											</div>
+										</div>
+										
+										<button
+											class="w-full py-4 rounded-xl font-bold text-white text-[17px] bg-[#1473e6] hover:bg-[#0f5ebd] transition-all shadow-lg shadow-blue-500/30 flex justify-center items-center gap-2 mb-4"
+											:disabled="activating"
+											@click="subscription?.init_point ? openExistingCheckout() : activatePlus()"
+										>
+											<span v-if="activating" class="animate-spin">⏳</span>
+											<Crown v-else class="size-5" />
+											{{ subscription?.init_point ? __('Continuar pago pendiente') : __('Desbloquear StudyBadge Plus') }}
+										</button>
+										
+										<div class="flex items-center justify-center gap-2 text-xs font-semibold text-gray-500">
+											<ShieldCheck class="size-4 text-green-500" />
+											{{ __('Pago 100% seguro con Mercado Pago') }}
+										</div>
+									</div>
+									<div class="bg-gray-50 p-4 text-center border-t border-gray-100">
+										<p class="text-sm font-bold text-gray-600">{{ __('Próximamente: Plan anual con descuento especial') }}</p>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
+				</section>
+				
+				<!-- Prueba Social -->
+				<section class="border-y border-gray-200 bg-white py-6">
+					<div class="max-w-7xl mx-auto px-6">
+						<div class="flex flex-wrap justify-center md:justify-between items-center gap-6 text-center">
+							<div class="flex items-center gap-2">
+								<div class="p-2 bg-blue-50 rounded-lg"><Users class="size-5 text-blue-600" /></div>
+								<span class="font-bold text-gray-700">+1,000 estudiantes</span>
+							</div>
+							<div class="flex items-center gap-2">
+								<div class="p-2 bg-amber-50 rounded-lg"><FileText class="size-5 text-amber-600" /></div>
+								<span class="font-bold text-gray-700">+100 prompts listos</span>
+							</div>
+							<div class="flex items-center gap-2">
+								<div class="p-2 bg-emerald-50 rounded-lg"><PlayCircle class="size-5 text-emerald-600" /></div>
+								<span class="font-bold text-gray-700">+30 cursos y recursos</span>
+							</div>
+							<div class="flex items-center gap-2">
+								<div class="p-2 bg-indigo-50 rounded-lg"><Clock class="size-5 text-indigo-600" /></div>
+								<span class="font-bold text-gray-700">Disponible 24/7</span>
+							</div>
+						</div>
+					</div>
+				</section>
+
+				<!-- Beneficios (Cards) -->
+				<section id="benefits-section" class="py-20 max-w-7xl mx-auto px-6">
+					<div class="text-center mb-16">
+						<h2 class="text-3xl md:text-4xl font-black text-[#08204e] mb-4">{{ __('Herramientas creadas para tu éxito') }}</h2>
+						<p class="text-lg text-gray-600 max-w-2xl mx-auto">{{ __('Todo lo que necesitas para estudiar, crear y trabajar en un solo lugar.') }}</p>
+					</div>
+					
+					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+						<div v-for="benefit in benefits" :key="benefit.label" class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+							<div class="w-14 h-14 rounded-xl bg-blue-50 text-[#0b82e6] flex items-center justify-center mb-6 transition-transform hover:scale-110">
+								<component :is="benefit.icon" class="size-7" />
+							</div>
+							<h3 class="text-xl font-bold text-gray-900 mb-3">{{ benefit.label }}</h3>
+							<p class="text-gray-600 leading-relaxed">{{ benefit.description }}</p>
+						</div>
+					</div>
+				</section>
+
+				<!-- Lo que desbloqueas hoy -->
+				<section class="bg-white py-20 border-t border-gray-100">
+					<div class="max-w-7xl mx-auto px-6">
+						<div class="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
+							<div>
+								<h2 class="text-3xl md:text-4xl font-black text-[#08204e] mb-10">{{ __('Resultados desde el primer día') }}</h2>
+								<div class="space-y-8">
+									<div class="flex gap-4">
+										<div class="mt-1"><div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600"><Zap class="size-5" /></div></div>
+										<div>
+											<h4 class="text-lg font-bold text-gray-900 mb-1">{{ __('Aprende más rápido') }}</h4>
+											<p class="text-gray-600">{{ __('Convierte una clase larga en un resumen detallado y un quiz práctico en minutos.') }}</p>
+										</div>
+									</div>
+									<div class="flex gap-4">
+										<div class="mt-1"><div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><Briefcase class="size-5" /></div></div>
+										<div>
+											<h4 class="text-lg font-bold text-gray-900 mb-1">{{ __('Crea mejores trabajos') }}</h4>
+											<p class="text-gray-600">{{ __('Prepara exposiciones, presentaciones y entrevistas con simulaciones realistas.') }}</p>
+										</div>
+									</div>
+									<div class="flex gap-4">
+										<div class="mt-1"><div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"><Clock class="size-5" /></div></div>
+										<div>
+											<h4 class="text-lg font-bold text-gray-900 mb-1">{{ __('Ahorra horas con prompts') }}</h4>
+											<p class="text-gray-600">{{ __('Genera contenido, planes de marketing y tareas sin empezar desde cero.') }}</p>
+										</div>
+									</div>
+									<div class="flex gap-4">
+										<div class="mt-1"><div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600"><Bot class="size-5" /></div></div>
+										<div>
+											<h4 class="text-lg font-bold text-gray-900 mb-1">{{ __('Practica con IA sin límites') }}</h4>
+											<p class="text-gray-600">{{ __('Recibe retroalimentación inmediata en tus respuestas y mejora tus habilidades.') }}</p>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="bg-gray-50 rounded-[2rem] p-6 lg:p-8 border border-gray-200 shadow-inner relative overflow-hidden">
+								<div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiNlNWU3ZWIiLz48L3N2Zz4=')] opacity-50"></div>
+								<div class="relative z-10 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+									<div class="flex items-center gap-3 mb-5">
+										<div class="w-10 h-10 bg-[#0b82e6] rounded-full flex items-center justify-center text-white"><Bot class="size-6" /></div>
+										<div>
+											<div class="font-bold text-sm text-gray-900">Tutor IA StudyBadge</div>
+											<div class="text-xs text-green-500 font-semibold">En línea</div>
+										</div>
+									</div>
+									<p class="text-sm text-gray-700 mb-4 bg-gray-50 p-4 rounded-xl rounded-tl-none border border-gray-100 leading-relaxed">
+										¡Hola! He analizado tu documento sobre <b>Estrategias de Marketing</b>. Aquí tienes el resumen y las 5 preguntas clave para tu examen de mañana. ¿Empezamos el quiz interactivo?
+									</p>
+									<div class="text-right">
+										<p class="inline-block text-sm text-white bg-[#0b82e6] p-4 rounded-xl rounded-tr-none shadow-sm shadow-blue-500/20">
+											¡Sí, por favor! Empecemos con preguntas difíciles.
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+
+				<!-- Gratis vs Plus -->
+				<section class="py-20 max-w-5xl mx-auto px-6">
+					<div class="text-center mb-12">
+						<h2 class="text-3xl font-black text-[#08204e] mb-4">{{ __('Compara los planes') }}</h2>
+					</div>
+					
+					<div class="bg-white rounded-3xl overflow-hidden shadow-xl border border-gray-200">
+						<div class="grid grid-cols-2 bg-gray-50">
+							<div class="p-6 text-center border-r border-gray-200">
+								<h3 class="text-xl font-bold text-gray-500 mb-2">{{ __('Plan Gratis') }}</h3>
+								<p class="text-sm text-gray-400">{{ __('Ideal para empezar') }}</p>
+							</div>
+							<div class="p-6 text-center bg-blue-50 border-b-2 border-[#0b82e6] relative">
+								<div class="absolute -top-3 inset-x-0 flex justify-center"><span class="bg-amber-400 text-amber-900 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-sm">{{ __('Recomendado') }}</span></div>
+								<h3 class="text-xl font-black text-[#08204e] mb-2">StudyBadge Plus</h3>
+								<p class="text-sm text-[#0b82e6] font-medium">{{ __('Para lograr más') }}</p>
+							</div>
+						</div>
+						
+						<div class="divide-y divide-gray-100">
+							<div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
+								<div class="p-5 border-r border-gray-200 flex flex-col items-center justify-center text-center gap-2">
+									<span class="text-sm text-gray-600">{{ __('Acceso limitado a cursos') }}</span>
+								</div>
+								<div class="p-5 flex flex-col items-center text-center gap-2 bg-blue-50/30">
+									<CheckCircle2 class="size-5 text-[#0b82e6]" />
+									<span class="text-sm font-bold text-gray-900">{{ __('Cursos y recursos premium') }}</span>
+								</div>
+							</div>
+							<div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
+								<div class="p-5 border-r border-gray-200 flex flex-col items-center justify-center text-center gap-2">
+									<span class="text-sm text-gray-600">{{ __('Certificados limitados') }}</span>
+								</div>
+								<div class="p-5 flex flex-col items-center text-center gap-2 bg-blue-50/30">
+									<CheckCircle2 class="size-5 text-[#0b82e6]" />
+									<span class="text-sm font-bold text-gray-900">{{ __('Certificados ilimitados') }}</span>
+								</div>
+							</div>
+							<div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
+								<div class="p-5 border-r border-gray-200 flex flex-col items-center justify-center text-center gap-2">
+									<span class="text-sm text-gray-600">{{ __('Prompts básicos') }}</span>
+								</div>
+								<div class="p-5 flex flex-col items-center text-center gap-2 bg-blue-50/30">
+									<CheckCircle2 class="size-5 text-[#0b82e6]" />
+									<span class="text-sm font-bold text-gray-900">{{ __('Prompts premium ilimitados') }}</span>
+								</div>
+							</div>
+							<div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
+								<div class="p-5 border-r border-gray-200 flex flex-col items-center justify-center text-center gap-2">
+									<span class="text-sm text-gray-600">{{ __('Tutor IA limitado') }}</span>
+								</div>
+								<div class="p-5 flex flex-col items-center text-center gap-2 bg-blue-50/30">
+									<CheckCircle2 class="size-5 text-[#0b82e6]" />
+									<span class="text-sm font-bold text-gray-900">{{ __('Tutor IA ilimitado') }}</span>
+								</div>
+							</div>
+							<div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
+								<div class="p-5 border-r border-gray-200 flex flex-col items-center justify-center text-center gap-2">
+									<X class="size-5 text-gray-300" />
+									<span class="text-sm text-gray-500">{{ __('Sin simulaciones premium') }}</span>
+								</div>
+								<div class="p-5 flex flex-col items-center text-center gap-2 bg-blue-50/30">
+									<CheckCircle2 class="size-5 text-[#0b82e6]" />
+									<span class="text-sm font-bold text-gray-900">{{ __('Simulaciones con IA completas') }}</span>
+								</div>
+							</div>
+							<div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
+								<div class="p-5 border-r border-gray-200 flex flex-col items-center justify-center text-center gap-2">
+									<X class="size-5 text-gray-300" />
+									<span class="text-sm text-gray-500">{{ __('Sin calendario inteligente') }}</span>
+								</div>
+								<div class="p-5 flex flex-col items-center text-center gap-2 bg-blue-50/30">
+									<CheckCircle2 class="size-5 text-[#0b82e6]" />
+									<span class="text-sm font-bold text-gray-900">{{ __('Calendario y seguimiento total') }}</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+
+				<!-- FAQ -->
+				<section class="py-20 bg-white border-t border-gray-100">
+					<div class="max-w-4xl mx-auto px-6">
+						<div class="text-center mb-12">
+							<h2 class="text-3xl font-black text-[#08204e] mb-4">{{ __('Preguntas frecuentes') }}</h2>
+						</div>
+						
+						<div class="grid gap-6 md:grid-cols-2">
+							<div v-for="(faq, index) in faqs" :key="index" class="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+								<h3 class="text-base font-bold text-gray-900 mb-2">{{ faq.q }}</h3>
+								<p class="text-sm text-gray-600 leading-relaxed">{{ faq.a }}</p>
+							</div>
+						</div>
+					</div>
+				</section>
+
+				<!-- Final CTA -->
+				<section class="py-24 bg-[#08204e] text-center px-6 relative overflow-hidden">
+					<div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiNmZmYiLz48L3N2Zz4=')] opacity-[0.03]"></div>
+					<div class="relative z-10 max-w-2xl mx-auto">
+						<h2 class="text-4xl font-black text-white mb-6">{{ __('Empieza hoy con StudyBadge Plus') }}</h2>
+						<p class="text-xl text-blue-100 mb-10">{{ __('Desbloquea herramientas inteligentes para estudiar, crear y avanzar más rápido.') }}</p>
+						
+						<button
+							class="plus-btn-cta text-lg bg-amber-400 hover:bg-amber-300 text-[#08204e] border-none shadow-amber-500/30 px-10 py-5 w-full sm:w-auto"
+							:disabled="activating"
+							@click="subscription?.init_point ? openExistingCheckout() : activatePlus()"
+						>
+							<span v-if="activating" class="animate-spin mr-2">⏳</span>
+							{{ subscription?.init_point ? __('Continuar pago pendiente') : __('Desbloquear Plus por ') + formattedPrice }}
+						</button>
+						
+						<div class="mt-6 flex flex-wrap justify-center gap-4 text-sm text-blue-200 font-medium">
+							<span class="flex items-center gap-1.5"><Sparkles class="size-4" /> {{ __('Acceso inmediato') }}</span> 
+							<span class="flex items-center gap-1.5"><RefreshCcw class="size-4" /> {{ __('Cancela cuando quieras') }}</span> 
+							<span class="flex items-center gap-1.5"><ShieldCheck class="size-4" /> {{ __('Pago seguro') }}</span>
+						</div>
+					</div>
+				</section>
 			</div>
 		</div>
 	</div>
@@ -397,6 +604,12 @@ import {
 	Mail,
 	Info,
 	Video,
+	ArrowDown,
+	Users,
+	PlayCircle,
+	Zap,
+	Briefcase,
+	X,
 } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
 
@@ -412,44 +625,52 @@ const benefits = [
 	{
 		icon: Award,
 		label: __('Certificados ilimitados'),
-		description: __('Paga una vez por certificado o desbloquealos todos con Plus.'),
+		description: __('Obtén certificados por cada curso completado y desbloquea todos los certificados premium.'),
 	},
 	{
 		icon: Bot,
-		label: __('TutorIA ilimitado'),
-		description: __('Mensajes ilimitados en el tutor global y tutor por curso.'),
+		label: __('Tutor IA ilimitado'),
+		description: __('Haz preguntas, resuelve dudas, practica temas y recibe ayuda personalizada sin límites.'),
 	},
 	{
-		icon: Sparkles,
-		label: __('IA motivacional'),
-		description: __('Beneficio incluido para herramientas inteligentes de estudio.'),
+		icon: FileText,
+		label: __('Biblioteca de prompts premium'),
+		description: __('Usa prompts listos para marketing, estudio, negocios, productividad e imágenes IA.'),
 	},
 	{
 		icon: Video,
 		label: __('Simulaciones con IA'),
-		description: __('Practica entrevistas, ventas, inglés y casos con transcripción.'),
-	},
-	{
-		icon: FileText,
-		label: __('Prompts listos'),
-		description: __('Biblioteca premium para productividad, marketing, negocios y estudio.'),
+		description: __('Practica entrevistas, ventas, inglés, exposiciones y casos reales con retroalimentación.'),
 	},
 	{
 		icon: CalendarDays,
-		label: __('Calendario y seguimiento'),
-		description: __('Organiza evaluaciones y actividades con funciones Plus.'),
+		label: __('Calendario inteligente'),
+		description: __('Organiza tus cursos, tareas y objetivos con seguimiento automático.'),
 	},
 	{
-		icon: CheckCircle2,
-		label: __('Insignia PRO'),
-		description: __('Tu perfil muestra que eres miembro Plus de StudyBadge.'),
-	},
-	{
-		icon: Crown,
-		label: __('Ideal para certificarte mas'),
-		description: __('Aprovecha Plus si planeas certificarte en varios cursos.'),
+		icon: Zap,
+		label: __('Herramientas de estudio IA'),
+		description: __('Resume, practica, genera quizzes y convierte temas difíciles en ejercicios simples.'),
 	},
 ]
+
+const faqs = [
+	{ q: __('¿Puedo cancelar cuando quiera?'), a: __('Sí, no hay contratos ni compromisos a largo plazo. Puedes cancelar tu suscripción en cualquier momento desde tu panel de configuración.') },
+	{ q: __('¿Qué incluye StudyBadge Plus?'), a: __('Acceso a certificados ilimitados, herramientas de IA sin restricciones (tutor, simulaciones, herramientas de estudio), calendario inteligente y toda la biblioteca de prompts premium.') },
+	{ q: __('¿Los certificados son verdaderamente ilimitados?'), a: __('Sí, una vez eres Plus puedes generar certificados de todos los cursos que hayas aprobado sin costos adicionales por emisión.') },
+	{ q: __('¿El pago es seguro?'), a: __('Totalmente. Utilizamos Mercado Pago como pasarela, garantizando seguridad y protección en tu transacción.') },
+	{ q: __('¿Puedo usarlo para estudiar y para negocios?'), a: __('¡Claro! Las herramientas de IA y los prompts están diseñados tanto para estudiantes como para emprendedores y profesionales.') },
+	{ q: __('¿Qué pasa después de pagar?'), a: __('Tu cuenta se actualizará instantáneamente y tendrás acceso a todas las funciones premium y certificados de inmediato.') }
+]
+
+function scrollToPricing() {
+	document.getElementById('pricing-card')?.scrollIntoView({ behavior: 'smooth' })
+}
+
+function scrollToBenefits() {
+	document.getElementById('benefits-section')?.scrollIntoView({ behavior: 'smooth' })
+}
+
 
 const trustPoints = [
 	{ icon: ShieldCheck, label: __('Pago seguro'), sub: __('Con Mercado Pago') },
