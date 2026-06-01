@@ -3,17 +3,22 @@
 		<header
 			class="sticky top-0 z-10 flex items-center justify-between gap-4 border-b bg-white/95 backdrop-blur-sm px-4 py-3 sm:px-6 shadow-sm"
 		>
-			<div class="min-w-0 flex-1">
+			<div class="min-w-0 flex-1 hidden sm:block">
 				<Breadcrumbs class="h-7 truncate-breadcrumbs" :items="breadcrumbs" />
 			</div>
+			<div class="min-w-0 flex-1 sm:hidden">
+				<Breadcrumbs class="h-7 truncate-breadcrumbs" :items="mobileBreadcrumbs" />
+			</div>
 			<div class="flex shrink-0 items-center gap-x-2">
-				<Tooltip v-if="canGoZen()" :text="__('Zen Mode')">
-					<Button @click="goFullScreen()">
-						<template #icon>
-							<Focus class="w-4 h-4 stroke-2" />
-						</template>
-					</Button>
-				</Tooltip>
+				<div class="hidden sm:inline-block">
+					<Tooltip v-if="canGoZen()" :text="__('Zen Mode')">
+						<Button @click="goFullScreen()">
+							<template #icon>
+								<Focus class="w-4 h-4 stroke-2" />
+							</template>
+						</Button>
+					</Tooltip>
+				</div>
 				<Button v-if="isAdmin" @click="showVideoStats()">
 					<template #icon>
 						<TrendingUp class="size-4 stroke-1.5" />
@@ -702,6 +707,31 @@ const breadcrumbs = computed(() => {
 	})
 	crumbs.push({
 		label: lesson?.data?.title,
+		route: {
+			name: 'Lesson',
+			params: {
+				courseName: props.courseName,
+				chapterNumber: props.chapterNumber,
+				lessonNumber: props.lessonNumber,
+			},
+		},
+	})
+	return crumbs
+})
+
+const truncateText = (text, maxLength) => {
+	if (!text) return ''
+	return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
+}
+
+const mobileBreadcrumbs = computed(() => {
+	let crumbs = [{ label: __('Cursos'), route: { name: 'Courses' } }]
+	crumbs.push({
+		label: '...',
+		route: { name: 'CourseDetail', params: { courseName: props.courseName } },
+	})
+	crumbs.push({
+		label: truncateText(lesson?.data?.title, 20),
 		route: {
 			name: 'Lesson',
 			params: {
