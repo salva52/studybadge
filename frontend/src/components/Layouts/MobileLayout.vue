@@ -6,7 +6,7 @@
 		>
 			<slot />
 			<!-- Espaciador para la barra de navegación móvil (previene que el contenido quede oculto) -->
-			<div class="h-28 shrink-0 w-full"></div>
+			<div v-if="!['AISessions', 'AISessionRoom', 'AISessionChat'].includes(router?.currentRoute?.value?.name)" class="h-28 shrink-0 w-full"></div>
 		</div>
 
 		<div class="relative z-20">
