@@ -312,9 +312,9 @@ async function startLiveVoice() {
 					generationConfig: {
 						responseModalities: ["AUDIO"],
 					},
-					systemInstruction: {
-						parts: [{ text: token.config.systemInstruction }]
-					}
+					systemInstruction: typeof token.config.systemInstruction === 'string'
+						? { parts: [{ text: token.config.systemInstruction }] }
+						: token.config.systemInstruction
 				}
 			}
 			console.log('Sending setup message:', JSON.stringify(setupMessage, null, 2))
