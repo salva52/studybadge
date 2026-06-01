@@ -190,16 +190,16 @@
 				<button class="icon-btn mobile-only" @click="showTools = false"><X class="size-4" /></button>
 			</div>
 
-			<div v-if="activeSession" class="tools-head" style="margin-top: 0">
+			<div v-if="activeSession" class="tools-head mt-0">
 				<h2>{{ __('Chats') }}</h2>
 				<p>{{ __('Historial de esta sesión') }}</p>
 			</div>
 			<button v-if="activeSession" class="secondary-btn full" @click="startNewThread">
 				<Plus class="size-4" /> {{ __('Nuevo chat') }}
 			</button>
-			<div v-if="activeSession" class="sources-list" style="margin-top: 0.5rem; margin-bottom: 1rem; max-height: 200px; overflow-y: auto;">
+			<div v-if="activeSession" class="sources-list scrollable-list">
 				<button v-for="thread in activeSession?.threads || []" :key="thread.name" class="session-item" :class="{ active: currentThread?.name === thread.name }" @click="switchThread(thread)">
-					<MessageCircle class="size-4" style="margin-top:0.2rem" />
+					<MessageCircle class="size-4 mt-1" />
 					<span>
 						<strong>{{ thread.title || __('Chat') }}</strong>
 						<small>{{ formatDate(thread.modified) }}</small>
@@ -207,7 +207,7 @@
 				</button>
 			</div>
 
-			<div class="tools-head" style="margin-top: 0">
+			<div class="tools-head mt-0">
 				<h2>{{ __('Fuentes') }}</h2>
 				<p>{{ materialCountText }}</p>
 			</div>
@@ -791,18 +791,21 @@ function formatDate(value) {
 .icon-btn.active-search { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
 .search-box { display: flex; align-items: center; gap: 0.5rem; margin: 0.85rem 0; border: 1px solid #dbe3ef; border-radius: 8px; background: #f8fafc; padding: 0.55rem 0.7rem; color: #64748b; }
 .search-box input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; color: #0f172a; font-size: 0.88rem; }
-.session-list, .sources-list, .tool-list { display: flex; flex-direction: column; gap: 0.55rem; }
-.session-item, .source-item, .tool-card { display: flex; align-items: flex-start; gap: 0.7rem; border: 1px solid transparent; border-radius: 8px; padding: 0.75rem; text-align: left; }
+.session-list, .sources-list, .tool-list { display: flex; flex-direction: column; gap: 0.65rem; }
+.scrollable-list { margin-top: 0.5rem; margin-bottom: 1rem; max-height: 250px; overflow-y: auto; padding-right: 0.25rem; }
+.session-item, .source-item, .tool-card { display: flex; align-items: flex-start; gap: 0.75rem; border: 1px solid transparent; border-radius: 12px; padding: 0.85rem; text-align: left; transition: all 0.2s ease; }
 .session-item { width: 100%; background: transparent; color: #334155; }
 .session-item:hover, .session-item.active { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
 .session-item span, .source-item span, .tool-card span { min-width: 0; display: flex; flex-direction: column; gap: 0.15rem; }
 .session-item strong, .source-item strong, .tool-card strong { color: #0f172a; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chat-main { display: grid; grid-template-rows: auto 1fr auto; min-width: 0; height: 100vh; }
 .chat-header { position: sticky; top: 0; z-index: 5; min-height: 68px; border-bottom: 1px solid #e5e7eb; background: rgba(255,255,255,0.92); padding: 0.75rem 1rem; backdrop-filter: blur(12px); }
+.header-left { flex: 1; min-width: 0; justify-content: flex-start; }
+.header-actions { flex-shrink: 0; }
 .session-title { display: flex; min-width: 0; flex-direction: column; }
 .session-title span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #0f172a; font-size: 1rem; font-weight: 900; }
 .model-switch { display: inline-flex; gap: 0.35rem; border: 1px solid #dbe3ef; border-radius: 999px; background: #f8fafc; padding: 0.25rem; }
-.model-switch button { display: inline-flex; align-items: center; gap: 0.35rem; border: 0; border-radius: 999px; background: transparent; color: #64748b; padding: 0.45rem 0.7rem; font-size: 0.78rem; font-weight: 900; }
+.model-switch button { display: inline-flex; align-items: center; gap: 0.35rem; border: 0; border-radius: 999px; background: transparent; color: #64748b; padding: 0.45rem 0.7rem; font-size: 0.78rem; font-weight: 900; white-space: nowrap; }
 .model-switch button.active { background: #2563eb; color: white; }
 .model-switch button.locked { color: #92400e; }
 .new-chat, .chat-thread { min-height: 0; overflow-y: auto; }
@@ -822,6 +825,8 @@ function formatDate(value) {
 .toggle-advanced-btn:hover { color: #2563eb; }
 .advanced-options { margin-top: 0.5rem; padding-top: 1rem; border-top: 1px dashed #e2e8f0; animation: fadeInDown 0.3s ease; }
 .mt-3 { margin-top: 0.75rem; }
+.mt-0 { margin-top: 0 !important; }
+.mt-1 { margin-top: 0.25rem !important; }
 
 @keyframes fadeInDown {
 	from { opacity: 0; transform: translateY(-5px); }
@@ -830,10 +835,10 @@ function formatDate(value) {
 
 .chat-thread { padding: 1.5rem max(1rem, calc((100% - 860px) / 2)); padding-bottom: 2rem; }
 .welcome-block { display: grid; place-items: center; min-height: 55vh; text-align: center; }
-.welcome-block h2 { margin-top: 0.75rem; color: #0f172a; font-size: 1.6rem; font-weight: 950; }
-.suggestions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.55rem; margin-top: 1rem; }
-.suggestions button { border: 1px solid #dbe3ef; border-radius: 999px; background: #fff; color: #334155; padding: 0.55rem 0.8rem; font-weight: 800; transition: all 0.2s ease; }
-.suggestions button:hover { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; transform: translateY(-1px); }
+.welcome-block h2 { margin-top: 0.75rem; color: #0f172a; font-size: clamp(1.2rem, 3.5vw, 1.8rem); font-weight: 950; text-wrap: balance; max-width: 800px; line-height: 1.35; }
+.suggestions { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.85rem; margin-top: 1.8rem; width: 100%; max-width: 720px; }
+.suggestions button { display: flex; align-items: center; justify-content: center; border: 1px solid #dbe3ef; border-radius: 12px; background: #fff; color: #334155; padding: 0.85rem 1.2rem; font-weight: 800; font-size: 0.95rem; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(15,23,42,0.02); }
+.suggestions button:hover { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(37,99,235,0.08); }
 
 /* Chat Messages Modernization */
 .message-row { 
@@ -929,10 +934,10 @@ function formatDate(value) {
 .pending-row { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.55rem; }
 .pending-row span { border-radius: 999px; background: #ecfdf5; color: #047857; padding: 0.25rem 0.55rem; font-size: 0.76rem; font-weight: 900; }
 .panel-head h2, .tools-head h2 { color: #0f172a; font-size: 1rem; font-weight: 950; }
-.source-item { background: #f8fafc; border-color: #edf2f7; }
+.source-item { background: #f8fafc; border-color: #edf2f7; box-shadow: 0 2px 10px rgba(15,23,42,0.02); }
 .source-item svg, .tool-card svg { flex-shrink: 0; color: #2563eb; margin-top: 0.1rem; }
-.tools-head { margin: 1.25rem 0 0.7rem; }
-.tool-card { position: relative; width: 100%; background: #fff; border-color: #dbe3ef; }
+.tools-head { margin: 1.5rem 0 0.8rem; }
+.tool-card { position: relative; width: 100%; background: #fff; border-color: #dbe3ef; box-shadow: 0 2px 10px rgba(15,23,42,0.03); }
 .tool-card:hover:not(:disabled) { border-color: #93c5fd; background: #eff6ff; }
 .tool-card.locked { background: #fffbeb; border-color: #fde68a; }
 .tool-card small { color: #64748b; }
@@ -994,7 +999,7 @@ function formatDate(value) {
 	.message-row.user .message-bubble { border-bottom-right-radius: 4px; }
 	.message-row.assistant .message-bubble { border-bottom-left-radius: 4px; }
 	
-	.composer-wrap { position: fixed; bottom: 60px; left: 0; width: 100%; z-index: 20; padding: 0.6rem; background: rgba(247,248,251,0.92); backdrop-filter: blur(12px); border-top: 1px solid rgba(229,231,235,0.7); padding-bottom: calc(0.6rem + env(safe-area-inset-bottom)); }
+	.composer-wrap { position: fixed; bottom: 65px; left: 0; width: 100%; z-index: 20; padding: 0.6rem; background: rgba(247,248,251,0.92); backdrop-filter: blur(12px); border-top: 1px solid rgba(229,231,235,0.7); padding-bottom: calc(0.6rem + env(safe-area-inset-bottom)); }
 	.composer { border-radius: 14px; padding: 0.4rem; box-shadow: 0 10px 25px rgba(15,23,42,0.05); }
 	.composer textarea { font-size: 16px; padding: 0.45rem; }
 	.composer-meta { justify-content: flex-start; font-size: 0.7rem; }
