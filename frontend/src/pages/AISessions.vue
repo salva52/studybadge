@@ -965,7 +965,9 @@ function formatDate(value) {
 :root[data-theme="dark"] .form-group label { color: #94a3b8; }
 @media (max-width: 1180px) {
 	.chat-page { grid-template-columns: 250px minmax(0, 1fr); }
-	.source-panel { position: fixed; top: 0; right: 0; z-index: 40; width: min(360px, 88vw); transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: none; }
+	.session-rail { position: fixed; top: 0; left: 0; z-index: 40; width: min(300px, 85vw); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); padding-bottom: 6rem; height: 100dvh; }
+	.session-rail.open { transform: translateX(0); box-shadow: 20px 0 60px rgba(15,23,42,0.15); }
+	.source-panel { position: fixed; top: 0; right: 0; z-index: 40; width: min(360px, 88vw); transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: none; padding-bottom: 6rem; height: 100dvh; }
 	.source-panel.open { transform: translateX(0); box-shadow: -20px 0 60px rgba(15,23,42,0.15); }
 	.mobile-only { display: inline-flex; }
 	.mobile-backdrop { display: block; position: fixed; inset: 0; z-index: 30; background: rgba(15,23,42,0.4); backdrop-filter: blur(2px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
@@ -973,7 +975,7 @@ function formatDate(value) {
 }
 @media (max-width: 760px) {
 	.chat-page { display: block; }
-	.session-rail { position: fixed; top: 0; left: 0; z-index: 40; width: min(340px, 88vw); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: none; }
+	.session-rail { position: fixed; top: 0; left: 0; z-index: 40; width: min(340px, 88vw); transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: none; padding-bottom: 6rem; height: 100dvh; }
 	.session-rail.open { transform: translateX(0); box-shadow: 20px 0 60px rgba(15,23,42,0.15); }
 	.chat-main { height: 100dvh; display: flex; flex-direction: column; }
 	.chat-header { min-height: 60px; padding: 0.5rem; }
