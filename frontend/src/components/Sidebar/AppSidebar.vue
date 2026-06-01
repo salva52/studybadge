@@ -189,15 +189,10 @@
 							</div>
 						</template>
 					</Tooltip>
-					<Tooltip v-if="showOnboarding" :text="__('Ayuda')">
-						<CircleHelp
-							class="size-4 stroke-1.5 text-blue-200/60 cursor-pointer"
-							@click="
-								() => {
-									showHelpModal = minimize ? true : !showHelpModal
-									minimize = !showHelpModal
-								}
-							"
+					<Tooltip :text="__('Tutor IA')">
+						<Bot
+							class="size-5 stroke-1.5 text-blue-400 cursor-pointer hover:text-blue-300 transition-colors"
+							@click="sidebarStore.isTutorOpen = !sidebarStore.isTutorOpen"
 						/>
 					</Tooltip>
 				</div>
@@ -282,6 +277,7 @@ import {
 	Users,
 	BookText,
 	Zap,
+	Bot,
 } from 'lucide-vue-next'
 import {
 	TrialBanner,

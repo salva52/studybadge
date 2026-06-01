@@ -1,12 +1,11 @@
 <template>
-	<!-- Floating Bubble -->
-	<div class="tutoria-bubble" @click="toggleChat" v-if="!isOpen && !['AISessions', 'AISessionRoom', 'AISessionChat'].includes(router?.currentRoute?.value?.name)">
-		<Bot class="w-8 h-8 text-white" />
-	</div>
+	<Transition name="tutoria-fade">
+		<div v-if="sidebarStore.isTutorOpen" class="tutoria-backdrop" @click="sidebarStore.isTutorOpen = false"></div>
+	</Transition>
 
 	<!-- Chat Panel -->
 	<Transition name="tutoria-slide">
-		<div v-if="isOpen" class="tutoria-panel">
+		<div v-show="sidebarStore.isTutorOpen" class="tutoria-panel">
 			<!-- Header -->
 			<div class="tutoria-header">
 				<div class="flex items-center gap-3 flex-1">
@@ -22,7 +21,7 @@
 					<button @click="clearHistory" class="text-white/80 hover:text-white transition-colors bg-transparent border-none cursor-pointer flex items-center justify-center p-1" title="Limpiar chat">
 						<Trash2 class="w-4 h-4" />
 					</button>
-					<button @click="toggleChat" class="text-white/80 hover:text-white transition-colors bg-transparent border-none cursor-pointer flex items-center justify-center p-1" title="Cerrar">
+					<button @click="sidebarStore.isTutorOpen = false" class="text-white/80 hover:text-white transition-colors bg-transparent border-none cursor-pointer flex items-center justify-center p-1" title="Cerrar">
 						<X class="w-5 h-5" />
 					</button>
 				</div>
@@ -111,9 +110,10 @@ import { call, toast } from 'frappe-ui'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import { useRouter } from 'vue-router'
+import { useSidebar } from '@/stores/sidebar'
 
 const router = useRouter()
-const isOpen = ref(false)
+const sidebarStore = useSidebar()
 const inputMessage = ref('')
 const isLoading = ref(false)
 const readScreen = ref(true)
@@ -162,13 +162,11 @@ const checkConfig = () => {
 		})
 }
 
-const toggleChat = async () => {
-	isOpen.value = !isOpen.value
-	if (isOpen.value) {
-		await nextTick()
-		scrollToBottom()
+watch(() => sidebarStore.isTutorOpen, (newVal) => {
+	if (newVal) {
+		nextTick(scrollToBottom)
 	}
-}
+})
 
 const formatMessage = (text) => {
 	if (!text) return ''
@@ -303,58 +301,34 @@ const sendMessage = async () => {
 </script>
 
 <style scoped>
-.tutoria-bubble {
+.tutoria-backdrop {
 	position: fixed;
-	bottom: 24px;
-	right: 24px;
-	width: 64px;
-	height: 64px;
-	border-radius: 50%;
-	background: linear-gradient(135deg, var(--sb-dark), var(--sb-primary));
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	cursor: pointer;
-	box-shadow: 0 4px 20px rgba(0, 123, 255, 0.4);
-	z-index: 9999;
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.tutoria-bubble:hover {
-	transform: scale(1.05) translateY(-4px);
-	box-shadow: 0 8px 25px rgba(0, 123, 255, 0.5);
-}
-
-.tutoria-bubble::before {
-	content: '';
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	border-radius: 50%;
-	border: 2px solid var(--sb-primary);
-	animation: tutoria-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	inset: 0;
+	background: rgba(15, 23, 42, 0.4);
+	backdrop-filter: blur(2px);
+	z-index: 9997;
 }
 
 .tutoria-panel {
 	position: fixed;
-	bottom: 100px;
-	right: 24px;
-	width: 380px;
-	height: 580px;
-	max-height: calc(100vh - 120px);
-	background: white;
-	border-radius: 24px;
-	box-shadow: 0 12px 48px rgba(6, 27, 73, 0.15);
+	top: 0;
+	right: 0;
+	width: min(400px, 90vw);
+	height: 100dvh;
+	background: rgba(255, 255, 255, 0.95);
+	backdrop-filter: blur(16px);
+	box-shadow: -10px 0 40px rgba(15, 23, 42, 0.15);
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
 	z-index: 9998;
-	border: 1px solid rgba(0, 123, 255, 0.1);
+	border-left: 1px solid rgba(226, 232, 240, 0.8);
 }
 
 .tutoria-header {
 	background: linear-gradient(135deg, var(--sb-dark), #0A2352);
 	padding: 16px 20px;
+	padding-top: calc(16px + env(safe-area-inset-top));
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -409,6 +383,7 @@ const sendMessage = async () => {
 
 .tutoria-footer {
 	padding: 16px;
+	padding-bottom: calc(16px + env(safe-area-inset-bottom));
 	border-top: 1px solid #f3f4f6;
 }
 
@@ -490,25 +465,19 @@ const sendMessage = async () => {
 .tutoria-typing span:nth-child(3) { animation-delay: 0.4s; }
 
 /* Transitions */
-.tutoria-slide-enter-active { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-.tutoria-slide-leave-active { transition: all 0.3s cubic-bezier(0.4, 0, 1, 1); }
+.tutoria-fade-enter-active, .tutoria-fade-leave-active { transition: opacity 0.3s ease; }
+.tutoria-fade-enter-from, .tutoria-fade-leave-to { opacity: 0; }
+
+.tutoria-slide-enter-active { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+.tutoria-slide-leave-active { transition: transform 0.3s cubic-bezier(0.4, 0, 1, 1); }
 .tutoria-slide-enter-from, .tutoria-slide-leave-to {
-	opacity: 0;
-	transform: translateY(20px) scale(0.95) !important;
+	transform: translateX(100%);
 }
 
 @media (max-width: 640px) {
 	.tutoria-panel {
-		width: calc(100vw - 32px);
-		height: calc(100vh - 140px);
-		bottom: 110px;
-		right: 16px;
-	}
-	.tutoria-bubble {
-		bottom: 96px;
-		right: 16px;
-		width: 56px;
-		height: 56px;
+		width: 100%;
+		border-left: none;
 	}
 }
 </style>

@@ -4,6 +4,7 @@ import { ref } from 'vue'
 export const useSidebar = defineStore('sidebar', () => {
 	const isSidebarCollapsed = ref(false)
 	const isWebpagesCollapsed = ref(true)
+	const isTutorOpen = ref(false)
 
 	if (localStorage.getItem('isSidebarCollapsed')) {
 		isSidebarCollapsed.value = JSON.parse(
@@ -20,5 +21,6 @@ export const useSidebar = defineStore('sidebar', () => {
 	return {
 		isSidebarCollapsed,
 		isWebpagesCollapsed,
+		isTutorOpen,
 	}
 })
