@@ -127,8 +127,8 @@
 			<section v-else class="chat-thread" ref="chatBox">
 				<div v-if="!chatMessages.length" class="welcome-block">
 					<div class="new-badge"><Bot class="size-5" /> {{ activeSession.model_label || modelLabel(activeSession.model_tier) }}</div>
-					<h2>{{ __('Listo. Este chat ya conoce tu sesion.') }}</h2>
-					<p>{{ __('Sube documentos o pregunta directamente. Las herramientas del panel derecho tambien responderan dentro de este chat.') }}</p>
+					<h2>{{ __('Listo. Este chat ya conoce tu sesión.') }}</h2>
+					<p>{{ __('Sube documentos o pregunta directamente. Las herramientas del panel derecho también responderán dentro de este chat.') }}</p>
 					<div class="suggestions">
 						<button v-for="item in starterPrompts" :key="item" @click="chatInput = item">{{ item }}</button>
 					</div>
