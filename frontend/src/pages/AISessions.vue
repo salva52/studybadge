@@ -74,7 +74,7 @@
 			<section v-if="!activeSession" class="new-chat">
 				<div class="new-chat-inner">
 					<div class="new-badge"><Bot class="size-5" /> {{ __('Study chat') }}</div>
-					<h1>{{ __('Que vas a estudiar hoy?') }}</h1>
+					<h1>{{ __('¿Qué vas a estudiar hoy?') }}</h1>
 					<p>{{ __('Crea una sesion, sube tus lecturas o trabajos, y conversa con la IA usando esos documentos como contexto.') }}</p>
 						<div class="new-form">
 						<div class="form-group main-group">
@@ -174,7 +174,10 @@
 				<div class="composer-meta">
 					<span>{{ remainingText }}</span>
 					<span>{{ materialCountText }}</span>
-					<span>Ctrl+V {{ __('para imagenes') }}</span>
+					<span class="mobile-only">{{ __('Ctrl+V para imagenes') }}</span>
+					<a v-if="access && !access.is_plus && access.messages_remaining <= 0" href="https://academy.studybadge.com/lms/plus" target="_blank" class="upgrade-link">
+						{{ __('👑 Mejora a Plus') }}
+					</a>
 				</div>
 			</footer>
 		</main>
@@ -776,7 +779,8 @@ function formatDate(value) {
 .session-rail { border-width: 0 1px 0 0; }
 .source-panel { border-width: 0 0 0 1px; }
 .rail-head, .panel-head, .chat-header, .header-left, .header-actions, .new-actions { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
-.rail-brand, .new-badge { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 900; color: #2563eb; }
+.rail-brand { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 900; color: #2563eb; }
+.new-badge { display: inline-flex; align-items: center; gap: 0.45rem; font-weight: 800; font-size: 0.95rem; color: #2563eb; background: #eff6ff; padding: 0.4rem 0.85rem; border-radius: 999px; margin-bottom: 0.5rem; }
 .rail-head p, .panel-head p, .tools-head p, .session-title small, .source-item small, .session-item small, .composer-meta, .new-chat p, .welcome-block p { color: #64748b; font-size: 0.78rem; }
 .primary-btn, .secondary-btn, .icon-btn, .send-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; border-radius: 8px; font-weight: 900; transition: 0.18s ease; }
 .primary-btn { min-height: 40px; border: 1px solid #2563eb; background: #2563eb; color: #fff; padding: 0.6rem 0.85rem; }
@@ -919,7 +923,9 @@ function formatDate(value) {
 .composer { display: flex; align-items: flex-end; gap: 0.55rem; border: 1px solid #dbe3ef; border-radius: 8px; background: #fff; padding: 0.55rem; box-shadow: 0 16px 40px rgba(15,23,42,0.07); }
 .composer textarea { min-height: 42px; max-height: 180px; flex: 1; resize: vertical; border: 0; outline: 0; padding: 0.55rem; line-height: 1.5; }
 .send-btn { width: 42px; height: 42px; border: 0; background: #2563eb; color: #fff; }
-.composer-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.8rem; padding-top: 0.45rem; font-weight: 700; }
+.composer-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.8rem; padding-top: 0.45rem; font-weight: 700; }
+.upgrade-link { color: #d97706; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem; background: #fef3c7; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.75rem; }
+.upgrade-link:hover { background: #fde68a; color: #b45309; }
 .pending-row { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.55rem; }
 .pending-row span { border-radius: 999px; background: #ecfdf5; color: #047857; padding: 0.25rem 0.55rem; font-size: 0.76rem; font-weight: 900; }
 .panel-head h2, .tools-head h2 { color: #0f172a; font-size: 1rem; font-weight: 950; }
