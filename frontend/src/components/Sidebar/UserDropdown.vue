@@ -4,24 +4,24 @@
 			<template #target="{ togglePopover }">
 				<button
 					@click="togglePopover()"
-					class="flex h-12 py-2 items-center rounded-lg duration-300 ease-in-out hover:bg-white/15 px-3 w-full"
-					:class="isCollapsed ? 'px-0 w-auto' : ''"
+					class="flex h-14 py-2 items-center rounded-xl duration-300 ease-in-out hover:bg-white/15 w-full transition-all group"
+					:class="isCollapsed ? 'justify-center px-0' : 'px-3'"
 				>
 					<img
 						v-if="branding.data?.banner_image"
 						:src="branding.data?.banner_image.file_url"
-						class="w-9 h-9 rounded-lg flex-shrink-0 object-contain bg-white/10"
+						class="w-10 h-10 rounded-lg flex-shrink-0 object-contain bg-white/10 ring-1 ring-white/20 shadow-sm group-hover:ring-white/40 duration-300"
 					/>
-					<img v-else :src="'/assets/lms/images/studybadge/studybadge-logo.png'" class="w-9 h-9 rounded-lg flex-shrink-0 object-contain bg-white/10 p-0.5" alt="StudyBadge" />
+					<img v-else :src="'/assets/lms/images/studybadge/studybadge-logo.png'" class="w-10 h-10 rounded-lg flex-shrink-0 object-contain bg-white/10 p-0.5 ring-1 ring-white/20 shadow-sm group-hover:ring-white/40 duration-300" alt="StudyBadge" />
 					<div
-						class="flex flex-1 flex-col text-start duration-300 ease-in-out"
+						class="flex flex-col text-start duration-300 ease-in-out transition-all"
 						:class="
 							isCollapsed
 								? 'opacity-0 ms-0 w-0 overflow-hidden'
-								: 'opacity-100 ms-2 w-auto'
+								: 'opacity-100 ms-3 flex-1 w-auto'
 						"
 					>
-						<div class="text-base font-medium text-white leading-none">
+						<div class="text-base font-semibold text-white leading-tight">
 							<span v-if="branding.data?.app_name && branding.data?.app_name != 'Frappe'">
 								{{ branding.data?.app_name }}
 							</span>
@@ -29,20 +29,20 @@
 						</div>
 						<div
 							v-if="userResource.data"
-							class="mt-1 text-sm text-blue-200/70 leading-none truncate max-w-[140px]"
+							class="mt-0.5 text-sm text-blue-100/80 leading-none truncate max-w-[140px]"
 						>
 							{{ convertToTitleCase(userResource.data?.full_name) }}
 						</div>
 					</div>
 					<div
-						class="duration-300 ease-in-out"
+						class="duration-300 ease-in-out transition-all flex items-center"
 						:class="
 							isCollapsed
 								? 'opacity-0 ms-0 w-0 overflow-hidden'
 								: 'opacity-100 ms-2 w-auto'
 						"
 					>
-						<ChevronDown class="h-4 w-4 text-blue-200/70" />
+						<ChevronDown class="h-4 w-4 text-blue-200/70 group-hover:text-white duration-300" />
 					</div>
 				</button>
 			</template>
