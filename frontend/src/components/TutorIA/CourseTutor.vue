@@ -82,7 +82,7 @@
 						<textarea 
 							ref="chatInput"
 							v-model="inputMessage" 
-							placeholder="Pregunta algo (Shift+Enter para saltar línea)..." 
+							:placeholder="__('Escribe tu mensaje...')" 
 							@keydown="handleKeydown"
 							@paste="handlePaste"
 							@dragover.prevent
@@ -108,7 +108,7 @@
 				</div>
 				
 				<div class="flex justify-between items-center mt-2 px-1">
-					<div class="text-[10px] text-gray-400 font-medium">Ctrl+V para pegar imágenes</div>
+					<div></div>
 					<div class="text-[10px] text-amber-600 font-semibold" v-if="unlimited">Plus: Ilimitado</div>
 					<div class="text-[10px] text-gray-400 font-medium" v-else-if="remaining !== null">Restantes: {{ remaining }}</div>
 				</div>
