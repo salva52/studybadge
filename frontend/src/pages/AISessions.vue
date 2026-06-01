@@ -960,7 +960,7 @@ function formatDate(value) {
 	overflow-y: hidden;
 }
 .message-row.user .message-bubble { 
-	background: linear-gradient(135deg, #2563eb 0%, #08204e 100%); 
+	background: #2563eb; 
 	color: #fff; 
 	border-bottom-right-radius: 4px;
 	box-shadow: 0 8px 24px rgba(37,99,235,0.2);
