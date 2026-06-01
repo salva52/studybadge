@@ -1,10 +1,12 @@
 <template>
 	<div v-if="course.data">
 		<header
-			class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-white px-3 py-2.5 sm:px-5"
+			class="sticky top-0 z-10 flex items-center justify-between gap-4 border-b bg-surface-white px-3 py-2.5 sm:px-5"
 		>
-			<Breadcrumbs class="h-7" :items="breadcrumbs" />
-			<div v-if="tabIndex == 2 && isAdmin" class="flex items-center gap-x-2">
+			<div class="min-w-0 flex-1">
+				<Breadcrumbs class="h-7 truncate-breadcrumbs" :items="breadcrumbs" />
+			</div>
+			<div v-if="tabIndex == 2 && isAdmin" class="flex shrink-0 items-center gap-x-2">
 				<Badge v-if="childRef?.isDirty" theme="orange">
 					{{ __('Not Saved') }}
 				</Badge>
@@ -244,5 +246,20 @@ usePageMeta(() => {
 
 .avatar-group .avatar {
 	transition: margin 0.1s ease-in-out;
+}
+
+.truncate-breadcrumbs :deep(.whitespace-nowrap) {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.truncate-breadcrumbs :deep(.whitespace-nowrap a) {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: block;
+}
+.truncate-breadcrumbs :deep(.whitespace-nowrap a span) {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: block;
 }
 </style>
