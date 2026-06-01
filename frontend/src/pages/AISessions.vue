@@ -76,31 +76,38 @@
 					<div class="new-badge"><Bot class="size-5" /> {{ __('Study chat') }}</div>
 					<h1>{{ __('Que vas a estudiar hoy?') }}</h1>
 					<p>{{ __('Crea una sesion, sube tus lecturas o trabajos, y conversa con la IA usando esos documentos como contexto.') }}</p>
-					<div class="new-form">
+						<div class="new-form">
 						<div class="form-group main-group">
-							<label>{{ __('Título de tu Sesión') }}</label>
-							<input v-model="draft.title" class="title-input" :placeholder="__('Ej: Preparación para Parcial de Cálculo')" />
+							<label>{{ __('¿Qué vas a estudiar?') }}</label>
+							<input v-model="draft.title" class="title-input" :placeholder="__('Ej: Parcial de Cálculo, Tesis, Lectura de Filosofía...')" />
 						</div>
+
+						<button class="toggle-advanced-btn" @click="showAdvanced = !showAdvanced">
+							<Settings class="size-4" /> 
+							{{ showAdvanced ? __('Ocultar detalles') : __('Añadir más detalles (opcional)') }}
+						</button>
 						
-						<div class="new-form-row">
-							<div class="form-group">
-								<label>{{ __('Nivel Académico') }}</label>
-								<select v-model="draft.student_level">
-									<option value="colegio">{{ __('Colegio') }}</option>
-									<option value="preuniversitario">{{ __('Preuniversitario') }}</option>
-									<option value="universitario">{{ __('Universitario') }}</option>
-									<option value="profesional">{{ __('Profesional') }}</option>
-								</select>
+						<div v-show="showAdvanced" class="advanced-options">
+							<div class="new-form-row">
+								<div class="form-group">
+									<label>{{ __('Tu Nivel Académico') }}</label>
+									<select v-model="draft.student_level">
+										<option value="colegio">{{ __('Colegio') }}</option>
+										<option value="preuniversitario">{{ __('Preuniversitario') }}</option>
+										<option value="universitario">{{ __('Universitario') }}</option>
+										<option value="profesional">{{ __('Profesional') }}</option>
+									</select>
+								</div>
+								<div class="form-group">
+									<label>{{ __('Materia o Contexto') }}</label>
+									<input v-model="draft.academic_context" :placeholder="__('Ej: Ingeniería de Sistemas')" />
+								</div>
 							</div>
-							<div class="form-group">
-								<label>{{ __('Materia o Contexto') }}</label>
-								<input v-model="draft.academic_context" :placeholder="__('Ej: Ingeniería de Sistemas')" />
+							
+							<div class="form-group mt-3">
+								<label>{{ __('Instrucciones para la IA') }}</label>
+								<textarea v-model="initialPrompt" rows="2" :placeholder="__('Ej: Resúmeme los conceptos clave con ejemplos...')" />
 							</div>
-						</div>
-						
-						<div class="form-group" style="margin-top: 1rem;">
-							<label>{{ __('Instrucción Inicial (Opcional)') }}</label>
-							<textarea v-model="initialPrompt" rows="2" :placeholder="__('Ej: Ayúdame a resumir los conceptos más importantes para el examen final.')" />
 						</div>
 						<div v-if="pendingFiles.length" class="pending-row">
 							<span v-for="file in pendingFiles" :key="file.file_url">{{ file.file_name || file.file_url }}</span>
@@ -272,8 +279,8 @@ import {
 	Plus,
 	Search,
 	SendHorizontal,
+	Settings,
 	Sigma,
-	Sparkles,
 	Upload,
 	User,
 	Wrench,
@@ -305,6 +312,8 @@ const chatBox = ref(null)
 const creating = ref(false)
 const chatLoading = ref(false)
 const toolLoading = ref(false)
+
+const showAdvanced = ref(false)
 
 const readerHistory = ref([])
 const showSessions = ref(false)
@@ -808,7 +817,17 @@ function formatDate(value) {
 .new-form input:focus, .new-form select:focus, .new-form textarea:focus { border-color: #3b82f6; background: #fff; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
 .title-input { font-size: 1.1rem !important; font-weight: 700; padding: 1rem !important; }
 .new-form textarea { resize: vertical; }
-.new-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+.new-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.5rem; }
+.toggle-advanced-btn { display: flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; font-weight: 700; color: #64748b; background: transparent; border: 0; padding: 0.5rem 0; margin-top: 0.75rem; cursor: pointer; transition: color 0.2s; }
+.toggle-advanced-btn:hover { color: #2563eb; }
+.advanced-options { margin-top: 0.5rem; padding-top: 1rem; border-top: 1px dashed #e2e8f0; animation: fadeInDown 0.3s ease; }
+.mt-3 { margin-top: 0.75rem; }
+
+@keyframes fadeInDown {
+	from { opacity: 0; transform: translateY(-5px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
 .chat-thread { padding: 1.5rem max(1rem, calc((100% - 860px) / 2)); padding-bottom: 5rem; }
 .welcome-block { display: grid; place-items: center; min-height: 55vh; text-align: center; }
 .welcome-block h2 { margin-top: 0.75rem; color: #0f172a; font-size: 1.6rem; font-weight: 950; }
