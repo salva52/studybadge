@@ -488,6 +488,15 @@ const getSidebarItems = (forMobile = false) => {
 					},
 				},
 				{
+					label: 'Sesiones IA',
+					icon: 'MessagesSquare',
+					to: 'AISessions',
+					activeFor: ['AISessions', 'AISessionRoom', 'AISessionChat'],
+					condition: () => {
+						return userResource?.data
+					},
+				},
+				{
 					label: 'Simulaciones IA',
 					icon: 'Video',
 					to: 'Practice',

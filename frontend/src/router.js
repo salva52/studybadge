@@ -21,6 +21,23 @@ const routes = [
 		component: () => import('@/pages/Study/Study.vue'),
 	},
 	{
+		path: '/ai-sessions',
+		name: 'AISessions',
+		component: () => import('@/pages/AISessions.vue'),
+	},
+	{
+		path: '/ai-sessions/:sessionId',
+		name: 'AISessionRoom',
+		component: () => import('@/pages/AISessions.vue'),
+		props: true,
+	},
+	{
+		path: '/ai-sessions/:sessionId/chat/:threadId',
+		name: 'AISessionChat',
+		component: () => import('@/pages/AISessions.vue'),
+		props: true,
+	},
+	{
 		path: '/practice',
 		name: 'Practice',
 		component: () => import('@/pages/Practice.vue'),
