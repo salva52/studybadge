@@ -7,7 +7,7 @@
 		<template #prefix>
 			<GraduationCap class="size-4 stroke-1.5" />
 		</template>
-		{{ __('Ver certificado') }}
+		<span class="hidden sm:inline">{{ __('Ver certificado') }}</span>
 	</Button>
 	<div
 		v-else-if="
@@ -31,11 +31,11 @@
 				},
 			}"
 		>
-			<Button class="w-full">
+			<Button>
 				<template #prefix>
 					<GraduationCap class="size-4 stroke-1.5" />
 				</template>
-				{{ __('Comprar certificado') }}
+				<span class="hidden sm:inline">{{ __('Comprar certificado') }}</span>
 			</Button>
 		</router-link>
 		<router-link
@@ -51,18 +51,18 @@
 				},
 			}"
 		>
-			<Button class="w-full">
+			<Button>
 				<template #prefix>
 					<GraduationCap class="size-4 stroke-1.5" />
 				</template>
-				{{ __('Emitir certificado') }}
+				<span class="hidden sm:inline">{{ __('Emitir certificado') }}</span>
 			</Button>
 		</router-link>
-		<Button v-else class="w-full" variant="subtle" disabled>
+		<Button v-else variant="subtle" disabled>
 			<template #prefix>
 				<GraduationCap class="size-4 stroke-1.5" />
 			</template>
-			{{ __('Completa el curso para certificarte') }}
+			<span class="hidden sm:inline">{{ __('Completa el curso para certificarte') }}</span>
 		</Button>
 	</div>
 </template>
