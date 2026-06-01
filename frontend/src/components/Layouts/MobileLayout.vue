@@ -1,10 +1,12 @@
 <template>
 	<div class="relative flex h-[100dvh] flex-col">
 		<div
-			class="flex flex-1 flex-col overflow-y-auto pb-32 bg-sb-bg"
+			class="flex flex-1 flex-col overflow-y-auto bg-sb-bg"
 			id="scrollContainer"
 		>
 			<slot />
+			<!-- Espaciador para la barra de navegación móvil (previene que el contenido quede oculto) -->
+			<div class="h-28 shrink-0 w-full"></div>
 		</div>
 
 		<div class="relative z-20">
