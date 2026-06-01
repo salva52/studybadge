@@ -22,7 +22,10 @@
 			</div>
 
 			<!-- Content -->
-			<h3 class="text-base font-black text-gray-900 mb-2 leading-tight group-hover:text-[#0b82e6] transition-colors line-clamp-2" :title="prompt.title">{{ prompt.title }}</h3>
+			<h3 class="text-base font-black text-gray-900 mb-2 leading-tight group-hover:text-[#0b82e6] transition-colors line-clamp-2" :title="prompt.title">
+				<Crown v-if="prompt.isPremium" class="size-4 inline text-amber-500 mr-1 align-text-top" />
+				{{ prompt.title }}
+			</h3>
 			<p class="text-sm text-gray-500 mb-4 line-clamp-3 leading-relaxed">{{ prompt.description }}</p>
 
 			<!-- Variables -->
@@ -30,8 +33,13 @@
 				<div class="flex items-center justify-between mb-3 text-xs text-gray-400 font-semibold">
 					<span class="flex items-center gap-1 text-gray-500"><Clock class="size-3.5 text-gray-400" /> {{ prompt.timeSaved }}</span>
 				</div>
-				<div class="flex flex-wrap gap-1.5 mb-2">
-					<span v-for="variable in prompt.variables" :key="variable" class="text-[10px] font-mono font-medium px-2 py-0.5 bg-gray-50 text-gray-600 rounded border border-gray-200">
+				<div class="flex flex-wrap gap-1.5 mb-2" :class="{ 'select-none': prompt.isPremium && !isPlus }">
+					<span 
+						v-for="variable in prompt.variables" 
+						:key="variable" 
+						class="text-[10px] font-mono font-medium px-2 py-0.5 bg-gray-50 text-gray-600 rounded border border-gray-200 transition-all"
+						:class="{ 'blur-[1.5px] opacity-50': prompt.isPremium && !isPlus }"
+					>
 						{{ '{' + '{' + variable + '}' + '}' }}
 					</span>
 				</div>
@@ -44,7 +52,7 @@
 				{{ __('Ver completo') }}
 			</button>
 			<div class="w-px bg-gray-200"></div>
-			<button v-if="!prompt.isPremium" @click="$emit('copy', prompt.prompt)" class="flex-1 py-3 text-sm font-bold text-[#0b82e6] hover:bg-blue-50 transition-colors flex justify-center items-center gap-1.5">
+			<button v-if="!prompt.isPremium || isPlus" @click="$emit('copy', prompt)" class="flex-1 py-3 text-sm font-bold text-[#0b82e6] hover:bg-blue-50 transition-colors flex justify-center items-center gap-1.5">
 				<Copy class="size-4" /> {{ __('Copiar') }}
 			</button>
 			<router-link v-else :to="{ name: 'Plus' }" class="flex-1 py-3 text-sm font-bold text-amber-600 hover:bg-amber-50 transition-colors flex justify-center items-center gap-1.5">
@@ -56,6 +64,7 @@
 
 <script setup>
 import { Clock, Copy, Crown } from 'lucide-vue-next'
+import { inject, computed } from 'vue'
 
 defineProps({
 	prompt: {
@@ -65,6 +74,9 @@ defineProps({
 })
 
 defineEmits(['view', 'copy'])
+
+const user = inject('$user')
+const isPlus = computed(() => !!user?.data?.is_plus)
 </script>
 
 <style scoped>

@@ -142,7 +142,7 @@
 					
 					<p class="text-gray-700 text-lg leading-relaxed">{{ selectedPrompt.description }}</p>
 					
-					<div v-if="selectedPrompt.variables?.length" class="bg-blue-50/50 border border-blue-100 rounded-lg p-4">
+					<div v-if="selectedPrompt.variables?.length && (!selectedPrompt.isPremium || isPlus)" class="bg-blue-50/50 border border-blue-100 rounded-lg p-4">
 						<h4 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-1.5"><ArrowRight class="size-4 text-blue-500"/> {{ __('Variables necesarias') }}</h4>
 						<div class="flex flex-wrap gap-2">
 							<span v-for="variable in selectedPrompt.variables" :key="variable" class="px-2.5 py-1 bg-white border border-gray-200 rounded text-sm text-gray-600 font-medium font-mono shadow-sm">
@@ -153,38 +153,50 @@
 
 					<div class="space-y-2">
 						<h4 class="text-sm font-bold text-gray-900">{{ __('Prompt completo') }}</h4>
-						<div class="relative group">
+						<div v-if="!selectedPrompt.isPremium || isPlus" class="relative group">
 							<pre class="bg-gray-100 text-gray-800 border border-gray-200 p-4 md:p-5 rounded-xl whitespace-pre-wrap font-mono text-sm leading-relaxed overflow-x-auto shadow-sm">{{ selectedPrompt.prompt }}</pre>
-							<button @click="copyPrompt(selectedPrompt.prompt)" class="absolute top-3 right-3 bg-white hover:bg-gray-50 text-gray-600 p-2 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 border border-gray-200 shadow-sm" :title="__('Copiar')">
+							<button @click="copyPrompt(selectedPrompt)" class="absolute top-3 right-3 bg-white hover:bg-gray-50 text-gray-600 p-2 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 border border-gray-200 shadow-sm" :title="__('Copiar')">
 								<Copy class="size-4" />
 							</button>
 						</div>
+						
+						<!-- Locked Prompt view for non-Plus users -->
+						<div v-else class="relative rounded-xl overflow-hidden border border-amber-200/60 bg-amber-50/10 p-6 flex flex-col items-center justify-center min-h-[180px] text-center backdrop-blur-sm">
+							<!-- Blurred dummy prompt background -->
+							<div class="absolute inset-0 select-none filter blur-[2.5px] opacity-20 font-mono text-xs p-5 text-left leading-relaxed">
+								Actúa como un experto en estrategia y crecimiento de negocios. Analiza la siguiente propuesta de valor y público objetivo para diseñar un plan estructurado... [BLOQUEADO]
+								Genera una respuesta en formato de tabla que contenga los siguientes campos clave para cada fase de atracción...
+							</div>
+							
+							<!-- Lock UI Content -->
+							<div class="relative z-10 flex flex-col items-center max-w-sm">
+								<div class="size-12 rounded-full bg-amber-100 flex items-center justify-center mb-3 shadow-sm border border-amber-200">
+									<Crown class="size-6 text-amber-600" />
+								</div>
+								<h5 class="text-base font-extrabold text-gray-900 mb-1">{{ __('Contenido exclusivo Plus') }}</h5>
+								<p class="text-xs text-gray-500 mb-4 leading-relaxed">{{ __('Este prompt de alta conversión está disponible únicamente para miembros de StudyBadge Plus.') }}</p>
+								<router-link :to="{ name: 'Plus' }" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-[#08204e] font-bold rounded-lg text-sm transition-colors shadow-md shadow-amber-400/20 flex items-center gap-1.5">
+									<Crown class="size-4" /> {{ __('Desbloquear Plus ahora') }}
+								</router-link>
+							</div>
+						</div>
 					</div>
 
-					<div v-if="!selectedPrompt.isPremium" class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+					<div v-if="!selectedPrompt.isPremium || isPlus" class="bg-amber-50 border border-amber-200 rounded-lg p-4">
 						<h4 class="text-sm font-bold text-amber-900 mb-1">{{ __('Recomendación de uso') }}</h4>
 						<p class="text-sm text-amber-800">{{ __('Copia este prompt y pégalo directamente en tu herramienta de IA favorita (ChatGPT, Claude o Gemini). Asegúrate de reemplazar las variables por tu información específica.') }}</p>
 					</div>
-					<div v-else class="bg-amber-50 border border-amber-200 rounded-lg p-5 flex flex-col sm:flex-row gap-4 items-center justify-between">
-						<div>
-							<h4 class="text-sm font-bold text-amber-900 mb-1 flex items-center gap-1"><Crown class="size-4 text-amber-600"/> {{ __('Prompt Premium') }}</h4>
-							<p class="text-sm text-amber-800">{{ __('Desbloquea StudyBadge Plus para usar este y más de 100 prompts exclusivos.') }}</p>
-						</div>
-						<router-link :to="{ name: 'Plus' }" class="flex-shrink-0 px-5 py-2.5 bg-amber-400 text-amber-900 font-bold rounded-lg text-sm hover:bg-amber-500 transition-colors shadow-sm">
-							{{ __('Desbloquear Plus') }}
-						</router-link>
-					</div>
 
 					<div class="flex flex-col sm:flex-row gap-3 pt-2">
-						<button v-if="!selectedPrompt.isPremium" @click="copyPrompt(selectedPrompt.prompt)" class="flex-1 flex justify-center items-center gap-2 bg-[#08204e] hover:bg-[#0a2966] text-white px-5 py-3 rounded-xl font-bold transition-colors shadow-md shadow-blue-900/20">
+						<button v-if="!selectedPrompt.isPremium || isPlus" @click="copyPrompt(selectedPrompt)" class="flex-1 flex justify-center items-center gap-2 bg-[#08204e] hover:bg-[#0a2966] text-white px-5 py-3 rounded-xl font-bold transition-colors shadow-md shadow-blue-900/20">
 							<Copy class="size-5" /> {{ __('Copiar prompt') }}
 						</button>
-						<router-link v-else :to="{ name: 'Plus' }" class="flex-1 flex justify-center items-center gap-2 bg-amber-400 hover:bg-amber-500 text-amber-900 px-5 py-3 rounded-xl font-bold transition-colors shadow-md shadow-amber-400/20">
+						<router-link v-else :to="{ name: 'Plus' }" class="flex-1 flex justify-center items-center gap-2 bg-amber-400 hover:bg-amber-50 text-amber-900 px-5 py-3 rounded-xl font-bold transition-colors shadow-md shadow-amber-400/20">
 							<Crown class="size-5" /> {{ __('Desbloquear Plus') }}
 						</router-link>
 						
-						<!-- Enlace para "Usar con IA" reparado para evitar error sessionId -->
-						<button @click="useWithAIFallback(selectedPrompt)" class="flex-1 flex justify-center items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 px-5 py-3 rounded-xl font-bold transition-colors border border-gray-200">
+						<!-- Enlace para "Usar con IA" visible solo si es gratis o es plus -->
+						<button v-if="!selectedPrompt.isPremium || isPlus" @click="useWithAIFallback(selectedPrompt)" class="flex-1 flex justify-center items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 px-5 py-3 rounded-xl font-bold transition-colors border border-gray-200">
 							<Zap class="size-5 text-amber-500" /> {{ __('Usar con IA') }}
 						</button>
 					</div>
@@ -195,7 +207,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, inject } from 'vue'
 import { Breadcrumbs, Dialog, toast, usePageMeta } from 'frappe-ui'
 import { Check, Copy, Crown, Zap, Video, Search, ArrowDown, Target, Star, Clock, ArrowRight } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
@@ -203,6 +215,8 @@ import { promptsData } from '@/data/prompts'
 import PromptCard from '@/components/PromptCard.vue'
 
 const { brand } = sessionStore()
+const user = inject('$user')
+const isPlus = computed(() => !!user?.data?.is_plus)
 
 const breadcrumbs = computed(() => [
 	{ label: __('Biblioteca de prompts'), route: { name: 'PromptLibrary' } },
@@ -267,7 +281,23 @@ function scrollToPrompts() {
 	document.getElementById('prompts-section')?.scrollIntoView({ behavior: 'smooth' })
 }
 
-async function copyPrompt(text) {
+async function copyPrompt(promptOrText) {
+	let text = ''
+	if (typeof promptOrText === 'object' && promptOrText !== null) {
+		if (promptOrText.isPremium && !isPlus.value) {
+			toast.error(__('Acceso denegado'), { description: __('Necesitas una membresía Plus para copiar este prompt.') })
+			return
+		}
+		text = promptOrText.prompt
+	} else {
+		text = promptOrText
+		const matchingPrompt = promptsData.find(p => p.prompt === text)
+		if (matchingPrompt?.isPremium && !isPlus.value) {
+			toast.error(__('Acceso denegado'), { description: __('Necesitas una membresía Plus para copiar este prompt.') })
+			return
+		}
+	}
+
 	try {
 		await navigator.clipboard.writeText(text)
 		toast.success(__('Copiado'), { description: __('El prompt se ha copiado al portapapeles.'), icon: Check })
@@ -281,7 +311,11 @@ function safeNavigateToPractice() {
 }
 
 function useWithAIFallback(prompt) {
-	copyPrompt(prompt.prompt)
+	if (prompt.isPremium && !isPlus.value) {
+		toast.error(__('Acceso denegado'), { description: __('Necesitas una membresía Plus para usar este prompt.') })
+		return
+	}
+	copyPrompt(prompt)
 	isModalOpen.value = false
 }
 </script>
