@@ -595,14 +595,14 @@ function stopMicrophoneOnly() {
 .side-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 1rem; }
 .side-head h2 { margin-top: 0.15rem; font-size: 1rem; font-weight: 900; }
 .side-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 8px; background: rgba(255,255,255,0.08); color: white; }
-.transcript-box { flex: 1; overflow-y: auto; padding: 1rem; }
+.transcript-box { flex: 1; overflow-y: auto; padding: 1rem; min-height: 0; }
 .empty-transcript { display: grid; place-items: center; gap: 0.75rem; height: 100%; color: #94a3b8; text-align: center; }
 .transcript-line { margin-bottom: 0.75rem; }
 .line-role { margin-bottom: 0.25rem; color: #93c5fd; font-size: 0.72rem; font-weight: 900; text-transform: uppercase; }
 .transcript-line.user .line-role { color: #fbbf24; text-align: right; }
 .line-content { border-radius: 8px; background: rgba(255,255,255,0.08); color: #e5e7eb; padding: 0.65rem 0.75rem; line-height: 1.55; font-size: 0.9rem; }
 .transcript-line.user .line-content { background: #0d6efd; color: white; }
-.chat-compose { border-top: 1px solid rgba(255,255,255,0.08); padding: 1rem; }
+.chat-compose { border-top: 1px solid rgba(255,255,255,0.08); padding: 1rem; flex-shrink: 0; }
 .chat-compose textarea, .notes-area { width: 100%; resize: vertical; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; background: #0b1220; color: white; padding: 0.75rem; outline: none; line-height: 1.5; }
 .chat-compose .room-primary { width: 100%; margin-top: 0.6rem; }
 .notes-area { border: 0; border-radius: 0; min-height: 150px; }
@@ -615,9 +615,10 @@ function stopMicrophoneOnly() {
 .feedback-grid ul { margin-top: 0.5rem; padding-left: 1rem; color: #cbd5e1; line-height: 1.6; }
 .better-answer { margin-top: 1rem; border-radius: 8px; background: rgba(255,255,255,0.07); padding: 1rem; }
 @media (max-width: 1100px) {
+	.room-page { height: auto; min-height: 100%; overflow: visible; }
 	.room-layout, .meeting-grid { grid-template-columns: 1fr; }
-	.room-layout { min-height: auto; }
-	.transcript-section { height: 620px; }
+	.room-layout { min-height: auto; overflow: visible; }
+	.transcript-section { height: 500px; max-height: 60vh; }
 	.user-tile { min-height: 210px; }
 }
 @media (max-width: 640px) {
