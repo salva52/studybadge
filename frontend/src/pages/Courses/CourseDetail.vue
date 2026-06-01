@@ -3,8 +3,11 @@
 		<header
 			class="sticky top-0 z-10 flex items-center justify-between gap-4 border-b bg-surface-white px-3 py-2.5 sm:px-5"
 		>
-			<div class="min-w-0 flex-1">
+			<div class="min-w-0 flex-1 hidden sm:block">
 				<Breadcrumbs class="h-7 truncate-breadcrumbs" :items="breadcrumbs" />
+			</div>
+			<div class="min-w-0 flex-1 sm:hidden">
+				<Breadcrumbs class="h-7 truncate-breadcrumbs" :items="mobileBreadcrumbs" />
 			</div>
 			<div v-if="tabIndex == 2 && isAdmin" class="flex shrink-0 items-center gap-x-2">
 				<Badge v-if="childRef?.isDirty" theme="orange">
@@ -226,6 +229,20 @@ const breadcrumbs = computed(() => {
 	let crumbs = [{ label: __('Courses'), route: { name: 'Courses' } }]
 	crumbs.push({
 		label: course?.data?.title,
+		route: { name: 'CourseDetail', params: { courseName: course?.data?.name } },
+	})
+	return crumbs
+})
+
+const truncateText = (text, maxLength) => {
+	if (!text) return ''
+	return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
+}
+
+const mobileBreadcrumbs = computed(() => {
+	let crumbs = [{ label: __('Courses'), route: { name: 'Courses' } }]
+	crumbs.push({
+		label: truncateText(course?.data?.title, 25),
 		route: { name: 'CourseDetail', params: { courseName: course?.data?.name } },
 	})
 	return crumbs
