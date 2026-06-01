@@ -597,8 +597,8 @@ function formatDate(value) {
 </script>
 
 <style scoped>
-.chat-page { display: grid; grid-template-columns: 280px minmax(0, 1fr) 330px; min-height: 100vh; background: #f7f8fb; color: #101827; }
-.session-rail, .source-panel { background: #fff; border-color: #e5e7eb; border-style: solid; min-height: 100vh; padding: 1rem; }
+.chat-page { display: grid; grid-template-columns: 280px minmax(0, 1fr) 330px; height: 100vh; overflow: hidden; background: #f7f8fb; color: #101827; }
+.session-rail, .source-panel { background: #fff; border-color: #e5e7eb; border-style: solid; height: 100vh; overflow-y: auto; padding: 1rem; }
 .session-rail { border-width: 0 1px 0 0; }
 .source-panel { border-width: 0 0 0 1px; }
 .rail-head, .panel-head, .chat-header, .header-left, .header-actions, .new-actions { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
