@@ -134,6 +134,9 @@
 					<button class="icon-btn" :title="__('Subir fuentes')" @click="openUploader">
 						<Paperclip class="size-5" />
 					</button>
+					<button class="icon-btn" :class="{ 'active-search': useSearch }" :title="__('Activar búsqueda en Google')" @click="useSearch = !useSearch">
+						<Globe class="size-5" />
+					</button>
 					<textarea
 						v-model="chatInput"
 						rows="1"
@@ -248,6 +251,7 @@ import {
 	Upload,
 	X,
 	Zap,
+	Globe,
 } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
 
@@ -272,6 +276,7 @@ const toolLoading = ref(false)
 const showSessions = ref(false)
 const showTools = ref(false)
 const sessionSearch = ref('')
+const useSearch = ref(false)
 
 const draft = ref({
 	title: '',
@@ -529,6 +534,7 @@ async function sendChat() {
 			message: text || __('Analiza las fuentes adjuntas.'),
 			files,
 			model_tier: activeSession.value.model_tier,
+			use_search: useSearch.value ? 1 : 0,
 		})
 		const isNewThread = !currentThread.value
 		currentThread.value = result.thread
@@ -610,6 +616,7 @@ function formatDate(value) {
 .primary-btn:disabled, .secondary-btn:disabled, .send-btn:disabled, .tool-card:disabled { cursor: not-allowed; opacity: 0.55; }
 .full { width: 100%; margin-top: 0.85rem; }
 .icon-btn { width: 38px; height: 38px; border: 1px solid #dbe3ef; background: #fff; color: #334155; }
+.icon-btn.active-search { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
 .search-box { display: flex; align-items: center; gap: 0.5rem; margin: 0.85rem 0; border: 1px solid #dbe3ef; border-radius: 8px; background: #f8fafc; padding: 0.55rem 0.7rem; color: #64748b; }
 .search-box input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; color: #0f172a; font-size: 0.88rem; }
 .session-list, .sources-list, .tool-list { display: flex; flex-direction: column; gap: 0.55rem; }
@@ -635,7 +642,7 @@ function formatDate(value) {
 .new-form input, .new-form select, .new-form textarea { width: 100%; border: 1px solid #dbe3ef; border-radius: 8px; background: #fff; color: #0f172a; outline: 0; padding: 0.75rem; }
 .new-form textarea { margin-top: 0.7rem; resize: vertical; }
 .new-form-row { display: grid; grid-template-columns: 190px 1fr; gap: 0.7rem; margin-top: 0.7rem; }
-.chat-thread { padding: 1.5rem max(1rem, calc((100% - 860px) / 2)); }
+.chat-thread { padding: 1.5rem max(1rem, calc((100% - 860px) / 2)); padding-bottom: 3.5rem; }
 .welcome-block { display: grid; place-items: center; min-height: 55vh; text-align: center; }
 .welcome-block h2 { margin-top: 0.75rem; color: #0f172a; font-size: 1.6rem; font-weight: 950; }
 .suggestions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.55rem; margin-top: 1rem; }
