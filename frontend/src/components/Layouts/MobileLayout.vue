@@ -143,6 +143,7 @@ const addLink = (label, icon, to = '') => {
 const updateSidebarLinks = () => {
 	sidebarLinks.value = getSidebarLinks(true)
 	destructureSidebarLinks()
+	otherLinks.value = []
 	sidebarSettings.reload(
 		{},
 		{
@@ -155,6 +156,20 @@ const updateSidebarLinks = () => {
 					addProgrammingExercises()
 				}
 				addOtherLinks()
+
+				if (sidebarLinks.value.length > 3) {
+					const extraLinks = sidebarLinks.value.slice(3)
+					sidebarLinks.value = sidebarLinks.value.slice(0, 3)
+					
+					const mappedExtra = extraLinks.map(link => ({
+						label: link.label,
+						icon: link.icon,
+						to: link.to,
+						activeFor: link.activeFor
+					}))
+					
+					otherLinks.value = [...mappedExtra, ...otherLinks.value]
+				}
 			},
 		}
 	)
