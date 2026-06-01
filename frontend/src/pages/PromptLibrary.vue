@@ -1,30 +1,30 @@
 <template>
-	<div class="prompt-page min-h-screen pb-14 bg-gray-50/50">
+	<div class="prompt-page min-h-screen pb-14 bg-[#f5f7fb]">
 		<header class="prompt-header sticky top-0 z-10 flex items-center justify-between border-b px-4 py-3 bg-white/90 backdrop-blur-md shadow-sm">
 			<Breadcrumbs class="h-7" :items="breadcrumbs" />
-			<router-link :to="{ name: 'Practice' }" class="prompt-top-link flex items-center gap-2 text-sm font-bold text-blue-700 hover:text-blue-800 transition-colors">
+			<button @click="safeNavigateToPractice" class="prompt-top-link flex items-center gap-2 text-sm font-bold text-blue-700 hover:text-blue-800 transition-colors">
 				<Video class="size-4" /> {{ __('Practicar') }}
-			</router-link>
+			</button>
 		</header>
 
-		<main class="mx-auto max-w-6xl px-4 py-8">
+		<main class="mx-auto max-w-7xl px-4 py-6">
 			<!-- Hero Section -->
-			<section class="prompt-hero mb-12 rounded-2xl bg-[#08204e] text-white p-8 md:p-12 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
-				<div class="relative z-10 max-w-2xl">
+			<section class="prompt-hero mb-8 rounded-2xl bg-[#08204e] text-white py-10 md:py-12 px-6 md:px-10 shadow-lg relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+				<div class="relative z-10 max-w-[650px]">
 					<div class="prompt-kicker flex items-center gap-2 text-amber-400 text-xs font-black uppercase tracking-wider mb-4">
 						<Zap class="size-4" /> {{ __('Biblioteca de prompts') }}
 					</div>
-					<h1 class="text-3xl md:text-5xl font-black leading-tight mb-4">
-						{{ __('Prompts listos para copiar, adaptar y usar en ChatGPT, Gemini o Claude.') }}
+					<h1 class="text-3xl md:text-4xl font-black leading-tight mb-4">
+						{{ __('Prompts listos para copiar, adaptar y usar con IA.') }}
 					</h1>
-					<p class="text-blue-100 text-lg md:text-xl max-w-xl mb-8 leading-relaxed">
-						{{ __('Ahorra horas creando contenido, estudiando, vendiendo, organizando ideas y generando imágenes con IA.') }}
+					<p class="text-blue-100 text-lg md:text-xl mb-6 leading-relaxed">
+						{{ __('Ahorra horas creando contenido, estudiando, vendiendo, organizando ideas y generando imágenes con ChatGPT, Gemini o Claude.') }}
 					</p>
-					<div class="flex flex-col sm:flex-row gap-4">
-						<router-link :to="{ name: 'Plus' }" class="btn-primary-custom flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-bold text-[#08204e] bg-amber-400 hover:bg-amber-300 transition-colors shadow-lg shadow-amber-400/20">
+					<div class="flex flex-col sm:flex-row gap-4 mt-6">
+						<router-link :to="{ name: 'Plus' }" class="btn-primary-custom flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-[#08204e] bg-amber-400 hover:bg-amber-300 transition-colors shadow-lg shadow-amber-400/20">
 							<Crown class="size-5" /> {{ __('Desbloquear Plus') }}
 						</router-link>
-						<button @click="scrollToPrompts" class="btn-secondary-custom flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-bold text-white border border-white/20 bg-white/5 hover:bg-white/10 transition-colors">
+						<button @click="scrollToPrompts" class="btn-secondary-custom flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-white border border-white/30 bg-white/5 hover:bg-white/10 transition-colors">
 							{{ __('Ver prompts gratis') }} <ArrowDown class="size-4" />
 						</button>
 					</div>
@@ -34,65 +34,67 @@
 			</section>
 
 			<!-- Search and Filters -->
-			<div id="prompts-section" class="mb-10 space-y-6">
-				<div class="relative max-w-2xl mx-auto">
+			<div id="prompts-section" class="mb-8 space-y-4">
+				<div class="relative max-w-3xl mx-auto">
 					<Search class="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-400" />
 					<input 
 						v-model="searchQuery" 
 						type="text" 
-						class="w-full pl-12 pr-4 py-4 rounded-xl border border-gray-200 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none text-lg transition-all"
+						class="w-full pl-12 pr-4 h-[52px] rounded-xl border border-gray-200 shadow-sm focus:border-[#08204e] focus:ring-2 focus:ring-[#08204e]/20 outline-none text-lg transition-all"
 						:placeholder="__('Buscar prompts para vender, estudiar, crear contenido, imágenes...')"
 					/>
 				</div>
 
-				<!-- Categorías -->
-				<div class="flex flex-col gap-3">
-					<span class="text-sm font-bold text-gray-500 uppercase tracking-wider">{{ __('Categorías') }}</span>
-					<div class="flex flex-wrap gap-2">
-						<button 
-							v-for="cat in categories" 
-							:key="cat"
-							@click="selectedCategory = cat"
-							:class="['px-4 py-2 rounded-full text-sm font-bold transition-all border', selectedCategory === cat ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20' : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:bg-blue-50']"
-						>
-							{{ cat }}
-						</button>
+				<div class="bg-white p-4 md:p-5 rounded-2xl border border-gray-200 shadow-sm overflow-x-auto">
+					<!-- Categorías -->
+					<div class="flex flex-col gap-2 mb-4">
+						<span class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ __('Categorías') }}</span>
+						<div class="flex flex-wrap gap-2">
+							<button 
+								v-for="cat in categories" 
+								:key="cat"
+								@click="selectedCategory = cat"
+								:class="['px-4 py-1.5 rounded-full text-sm font-bold transition-all border', selectedCategory === cat ? 'bg-[#0b82e6] text-white border-[#0b82e6] shadow-sm shadow-blue-500/20' : 'bg-white text-gray-700 border-gray-200 hover:border-blue-200 hover:bg-blue-50']"
+							>
+								{{ cat }}
+							</button>
+						</div>
 					</div>
-				</div>
 
-				<!-- Objetivos -->
-				<div class="flex flex-col gap-3 mt-4">
-					<span class="text-sm font-bold text-gray-500 uppercase tracking-wider">{{ __('Objetivos') }}</span>
-					<div class="flex flex-wrap gap-2">
-						<button 
-							v-for="obj in objectives" 
-							:key="obj"
-							@click="selectedObjective = obj"
-							:class="['px-4 py-2 rounded-full text-sm font-bold transition-all border flex items-center gap-1.5', selectedObjective === obj ? 'bg-slate-800 text-white border-slate-800 shadow-md shadow-slate-800/20' : 'bg-white text-gray-600 border-gray-200 hover:border-slate-300 hover:bg-slate-50']"
-						>
-							<Target class="size-3.5" v-if="selectedObjective === obj"/> {{ obj }}
-						</button>
+					<!-- Objetivos -->
+					<div class="flex flex-col gap-2">
+						<span class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ __('Objetivos') }}</span>
+						<div class="flex flex-wrap gap-2">
+							<button 
+								v-for="obj in objectives" 
+								:key="obj"
+								@click="selectedObjective = obj"
+								:class="['px-4 py-1.5 rounded-full text-sm font-bold transition-all border flex items-center gap-1.5', selectedObjective === obj ? 'bg-[#0b82e6] text-white border-[#0b82e6] shadow-sm shadow-blue-500/20' : 'bg-white text-gray-700 border-gray-200 hover:border-blue-200 hover:bg-blue-50']"
+							>
+								<Target class="size-3.5" v-if="selectedObjective === obj"/> {{ obj }}
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
 
 			<!-- Prompts Populares -->
-			<section v-if="showPopular" class="mb-14">
-				<div class="flex items-center gap-2 mb-6">
+			<section v-if="showPopular" class="mb-12">
+				<div class="flex items-center gap-2 mb-5">
 					<Star class="size-5 text-amber-500 fill-amber-500" />
-					<h2 class="text-2xl font-black text-[#08204e]">{{ __('Prompts populares') }}</h2>
+					<h2 class="text-xl font-black text-[#08204e]">{{ __('Prompts populares') }}</h2>
 				</div>
-				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
 					<PromptCard v-for="prompt in popularPrompts" :key="prompt.id" :prompt="prompt" @view="openModal" @copy="copyPrompt" />
 				</div>
 			</section>
 
 			<!-- All Prompts Grid -->
 			<section>
-				<h2 class="text-2xl font-black text-[#08204e] mb-6" v-if="searchQuery || selectedCategory !== 'Todos' || selectedObjective !== 'Todos'">{{ __('Resultados') }}</h2>
-				<h2 class="text-2xl font-black text-[#08204e] mb-6" v-else>{{ __('Todos los prompts') }}</h2>
+				<h2 class="text-xl font-black text-[#08204e] mb-5" v-if="searchQuery || selectedCategory !== 'Todos' || selectedObjective !== 'Todos'">{{ __('Resultados') }}</h2>
+				<h2 class="text-xl font-black text-[#08204e] mb-5" v-else>{{ __('Todos los prompts') }}</h2>
 				
-				<div v-if="filteredPrompts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+				<div v-if="filteredPrompts.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6">
 					<PromptCard v-for="prompt in filteredPrompts" :key="prompt.id" :prompt="prompt" @view="openModal" @copy="copyPrompt" />
 				</div>
 
@@ -129,10 +131,10 @@
 		</main>
 
 		<!-- Modal -->
-		<Dialog :options="{ title: selectedPrompt?.title || '' }" v-model="isModalOpen">
+		<Dialog :options="{ title: selectedPrompt?.title || '', size: '2xl' }" v-model="isModalOpen">
 			<template #body-content>
-				<div v-if="selectedPrompt" class="p-1 space-y-6">
-					<div class="flex items-center gap-2 text-sm font-bold text-blue-600 uppercase tracking-wider">
+				<div v-if="selectedPrompt" class="p-1 space-y-6 max-w-2xl mx-auto">
+					<div class="flex items-center gap-2 text-sm font-bold text-[#0b82e6] uppercase tracking-wider">
 						<span>{{ selectedPrompt.category }}</span>
 						<span class="text-gray-300">•</span>
 						<span class="flex items-center gap-1 text-gray-500"><Clock class="size-3.5"/> {{ selectedPrompt.timeSaved }}</span>
@@ -152,8 +154,8 @@
 					<div class="space-y-2">
 						<h4 class="text-sm font-bold text-gray-900">{{ __('Prompt completo') }}</h4>
 						<div class="relative group">
-							<pre class="bg-gray-900 text-gray-100 p-4 md:p-5 rounded-xl whitespace-pre-wrap font-mono text-sm leading-relaxed overflow-x-auto shadow-inner">{{ selectedPrompt.prompt }}</pre>
-							<button @click="copyPrompt(selectedPrompt.prompt)" class="absolute top-3 right-3 bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg backdrop-blur-sm transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 border border-white/10" :title="__('Copiar')">
+							<pre class="bg-gray-100 text-gray-800 border border-gray-200 p-4 md:p-5 rounded-xl whitespace-pre-wrap font-mono text-sm leading-relaxed overflow-x-auto shadow-sm">{{ selectedPrompt.prompt }}</pre>
+							<button @click="copyPrompt(selectedPrompt.prompt)" class="absolute top-3 right-3 bg-white hover:bg-gray-50 text-gray-600 p-2 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 border border-gray-200 shadow-sm" :title="__('Copiar')">
 								<Copy class="size-4" />
 							</button>
 						</div>
@@ -174,17 +176,17 @@
 					</div>
 
 					<div class="flex flex-col sm:flex-row gap-3 pt-2">
-						<button v-if="!selectedPrompt.isPremium" @click="copyPrompt(selectedPrompt.prompt)" class="flex-1 flex justify-center items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-bold transition-colors shadow-md shadow-blue-600/20">
+						<button v-if="!selectedPrompt.isPremium" @click="copyPrompt(selectedPrompt.prompt)" class="flex-1 flex justify-center items-center gap-2 bg-[#08204e] hover:bg-[#0a2966] text-white px-5 py-3 rounded-xl font-bold transition-colors shadow-md shadow-blue-900/20">
 							<Copy class="size-5" /> {{ __('Copiar prompt') }}
 						</button>
 						<router-link v-else :to="{ name: 'Plus' }" class="flex-1 flex justify-center items-center gap-2 bg-amber-400 hover:bg-amber-500 text-amber-900 px-5 py-3 rounded-xl font-bold transition-colors shadow-md shadow-amber-400/20">
 							<Crown class="size-5" /> {{ __('Desbloquear Plus') }}
 						</router-link>
 						
-						<!-- Enlace para "Usar con IA" dentro del LMS -->
-						<router-link :to="{ name: 'PracticeRoom' }" class="flex-1 flex justify-center items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 px-5 py-3 rounded-xl font-bold transition-colors border border-gray-200">
+						<!-- Enlace para "Usar con IA" reparado para evitar error sessionId -->
+						<button @click="useWithAIFallback(selectedPrompt)" class="flex-1 flex justify-center items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 px-5 py-3 rounded-xl font-bold transition-colors border border-gray-200">
 							<Zap class="size-5 text-amber-500" /> {{ __('Usar con IA') }}
-						</router-link>
+						</button>
 					</div>
 				</div>
 			</template>
@@ -272,6 +274,15 @@ async function copyPrompt(text) {
 	} catch (err) {
 		toast.error(__('Error al copiar'), { description: __('No se pudo copiar el prompt.') })
 	}
+}
+
+function safeNavigateToPractice() {
+	toast.info(__('Práctica con IA'), { description: __('Copia un prompt y pégalo en tu herramienta de IA favorita.') })
+}
+
+function useWithAIFallback(prompt) {
+	copyPrompt(prompt.prompt)
+	isModalOpen.value = false
 }
 </script>
 
