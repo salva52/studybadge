@@ -498,12 +498,12 @@ const sendMessage = async () => {
 @media (max-width: 640px) {
 	.tutoria-panel {
 		width: calc(100vw - 32px);
-		height: calc(100vh - 120px);
-		bottom: 100px;
+		height: calc(100vh - 140px);
+		bottom: 110px;
 		right: 16px;
 	}
 	.tutoria-bubble {
-		bottom: 84px;
+		bottom: 96px;
 		right: 16px;
 		width: 56px;
 		height: 56px;

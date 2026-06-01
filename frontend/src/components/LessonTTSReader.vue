@@ -320,8 +320,8 @@ watch(
 <style scoped>
 .lesson-tts-floating {
 	position: fixed;
-	right: 1rem;
-	bottom: 1rem;
+	right: 1.5rem;
+	bottom: 104px;
 	z-index: 2147483000;
 	display: flex;
 	flex-direction: column-reverse;
@@ -549,8 +549,8 @@ watch(
 
 @media (max-width: 640px) {
 	.lesson-tts-floating {
-		right: 0.75rem;
-		bottom: 0.75rem;
+		right: 1.5rem;
+		bottom: 160px;
 	}
 
 	.lesson-tts-panel {
