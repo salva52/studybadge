@@ -974,11 +974,11 @@ function formatDate(value) {
 	.header-actions { gap: 0.4rem; }
 	.model-switch button { padding: 0.42rem 0.55rem; }
 	.model-switch span { display: none; }
-	.new-chat { padding: 1.5rem 1rem 5rem 1rem; }
+	.new-chat { padding: 1.5rem 1rem 7rem 1rem; }
 	.new-chat h1 { font-size: 2rem; }
 	.new-form { padding: 1rem; }
 	.new-form-row { grid-template-columns: 1fr; gap: 0.75rem; }
-	.chat-thread { padding: 1rem 0.75rem; padding-bottom: 2rem; flex: 1; overflow-y: auto; }
+	.chat-thread { padding: 1rem 0.75rem; padding-bottom: 9rem; flex: 1; overflow-y: auto; }
 	.message-row { gap: 0.5rem; margin: 1.25rem 0; }
 	.avatar { width: 32px; height: 32px; border-radius: 10px; }
 	.avatar svg { width: 16px; height: 16px; }
@@ -986,7 +986,7 @@ function formatDate(value) {
 	.message-row.user .message-bubble { border-bottom-right-radius: 4px; }
 	.message-row.assistant .message-bubble { border-bottom-left-radius: 4px; }
 	
-	.composer-wrap { z-index: 20; padding: 0.6rem; background: rgba(247,248,251,0.92); backdrop-filter: blur(12px); border-top: 1px solid rgba(229,231,235,0.7); padding-bottom: calc(1rem + env(safe-area-inset-bottom, 15px)); }
+	.composer-wrap { position: fixed; bottom: 60px; left: 0; width: 100%; z-index: 20; padding: 0.6rem; background: rgba(247,248,251,0.92); backdrop-filter: blur(12px); border-top: 1px solid rgba(229,231,235,0.7); padding-bottom: calc(0.6rem + env(safe-area-inset-bottom)); }
 	.composer { border-radius: 14px; padding: 0.4rem; box-shadow: 0 10px 25px rgba(15,23,42,0.05); }
 	.composer textarea { font-size: 16px; padding: 0.45rem; }
 	.composer-meta { justify-content: flex-start; font-size: 0.7rem; }
