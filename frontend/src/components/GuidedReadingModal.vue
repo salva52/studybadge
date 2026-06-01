@@ -71,7 +71,7 @@
 							
 							<div class="response-area">
 								<textarea v-model="userAnswer" rows="3" :placeholder="__('Escribe tu respuesta o reflexión aquí...')"></textarea>
-								<button class="primary-btn mt-2 full-w" :disabled="!userAnswer.trim()" @click="$emit('verify-answer', userAnswer); userAnswer = ''">
+								<button class="primary-btn mt-2 full-w" :disabled="!userAnswer.trim()" @click="submitAnswer">
 									{{ __('Verificar respuesta') }}
 								</button>
 							</div>
@@ -92,7 +92,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { MessageCircle, X, FileText, Bot, Lightbulb } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -120,6 +120,12 @@ onUnmounted(() => {
 	window.removeEventListener('resize', checkMobile)
 })
 
+watch(selectedMaterial, (newVal) => {
+	if (newVal) {
+		emit('request-question', newVal)
+	}
+})
+
 const readingData = computed(() => {
 	if (!props.data) return null
 	if (props.data.question) return props.data
@@ -131,6 +137,12 @@ const readingData = computed(() => {
 
 function close() {
 	emit('update:show', false)
+}
+
+function submitAnswer() {
+	if (!userAnswer.value.trim()) return
+	emit('verify-answer', userAnswer.value)
+	userAnswer.value = ''
 }
 </script>
 

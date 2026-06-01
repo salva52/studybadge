@@ -614,7 +614,11 @@ async function runTool(tool) {
 		showTools.value = false
 		if (tool.id === 'quiz') showQuiz.value = true
 		if (tool.id === 'flashcards') showFlashcards.value = true
-		if (tool.id === 'reader_question') showGuidedReading.value = true
+		if (tool.id === 'reader_question') {
+			modalData.value = null
+			showGuidedReading.value = true
+			return
+		}
 		if (tool.id === 'math') showMath.value = true
 		
 		modalLoading.value = true
@@ -669,15 +673,21 @@ async function runTool(tool) {
 	}
 }
 
-async function requestGuidedQuestion() {
+async function requestGuidedQuestion(material) {
 	if (!activeSession.value) return
+	if (!material) return // Must select a material first
+	
 	modalLoading.value = true
 	try {
 		const result = await api('generate_ai_tool', {
 			session: activeSession.value.name,
 			thread: currentThread.value?.name,
 			tool: 'reader_question',
-			payload: { topic: activeSession.value.goal, position: activeSession.value.reader_progress || {} },
+			payload: { 
+				topic: activeSession.value.goal, 
+				material_selected: material.file_name,
+				instruction: 'Genera la primera pregunta sobre la Parte 1 del documento seleccionado.' 
+			},
 		})
 		modalData.value = result.result
 		access.value = result.access || access.value
