@@ -136,15 +136,23 @@
 						<button v-for="item in starterPrompts" :key="item" @click="chatInput = item">{{ item }}</button>
 					</div>
 				</div>
-				<div v-for="message in chatMessages" :key="message.created_at || message.content" class="message-row" :class="message.role === 'user' ? 'user' : 'assistant'">
-					<div class="avatar">
-						<User v-if="message.role === 'user'" class="size-4" />
-						<Bot v-else class="size-5" />
+				<div v-for="(message, index) in chatMessages" :key="message.created_at || message.content" class="message-row-wrapper">
+					<div class="message-row" :class="message.role === 'user' ? 'user' : 'assistant'">
+						<div class="avatar">
+							<User v-if="message.role === 'user'" class="size-4" />
+							<Bot v-else class="size-5" />
+						</div>
+						<div class="message-bubble">
+							<div v-if="message.model_label" class="message-model">{{ message.model_label }}</div>
+							<div v-if="message.content" v-html="renderMarkdown(message.content)" />
+							<img v-if="message.image_base64" class="chat-image" :src="`data:${message.mime_type || 'image/png'};base64,${message.image_base64}`" :alt="__('Infografia')" />
+						</div>
 					</div>
-					<div class="message-bubble">
-						<div v-if="message.model_label" class="message-model">{{ message.model_label }}</div>
-						<div v-if="message.content" v-html="renderMarkdown(message.content)" />
-						<img v-if="message.image_base64" class="chat-image" :src="`data:${message.mime_type || 'image/png'};base64,${message.image_base64}`" :alt="__('Infografia')" />
+					<div v-if="message.role !== 'user' && index === chatMessages.length - 1 && !chatLoading && !toolLoading" class="follow-up-actions">
+						<button @click="sendFollowUp('Entendí')">{{ __('Entendí') }}</button>
+						<button @click="sendFollowUp('Explícalo más simple')">{{ __('Explícalo más simple') }}</button>
+						<button @click="sendFollowUp('Dame otro ejemplo')">{{ __('Dame otro ejemplo') }}</button>
+						<button @click="sendFollowUp('Hazme practicar')">{{ __('Hazme practicar') }}</button>
 					</div>
 				</div>
 				<div v-if="chatLoading || toolLoading" class="message-row assistant">
@@ -157,9 +165,10 @@
 				<div v-if="pendingFiles.length" class="pending-row">
 					<span v-for="file in pendingFiles" :key="file.file_url">{{ file.file_name || file.file_url }}</span>
 				</div>
-				<div class="quick-chips" v-if="!chatLoading">
-					<button v-for="action in quickActions" :key="action" class="quick-chip" @click="chatInput = action">
-						{{ action }}
+				<div class="chat-modes" v-if="!chatLoading">
+					<span class="mode-label">{{ __('Modo:') }}</span>
+					<button v-for="m in chatModesList" :key="m.value" class="mode-chip" :class="{ active: chatMode === m.value }" @click="chatMode = m.value">
+						{{ m.label }}
 					</button>
 				</div>
 				<div class="composer">
@@ -329,7 +338,19 @@ const rightPanelCollapsed = ref(false)
 const sessionSearch = ref('')
 const useSearch = ref(false)
 
-const quickActions = [__('Resumir sesión'), __('Hacer quiz'), __('Explicar simple'), __('Ordenar temas')]
+const chatMode = ref('chat')
+const chatModesList = [
+	{ label: __('Libre'), value: 'chat' },
+	{ label: __('Simple'), value: 'simple' },
+	{ label: __('Paso a paso'), value: 'step' },
+	{ label: __('Examen'), value: 'exam' },
+	{ label: __('Resumen'), value: 'summary' },
+]
+
+function sendFollowUp(text) {
+	chatInput.value = text
+	sendChat()
+}
 
 const showQuiz = ref(false)
 const showFlashcards = ref(false)
@@ -604,6 +625,7 @@ async function sendChat() {
 			files,
 			model_tier: activeSession.value.model_tier,
 			use_search: useSearch.value ? 1 : 0,
+			mode: chatMode.value,
 		})
 		
 		if (result.trigger_modal) {
@@ -1071,15 +1093,52 @@ function formatDate(value) {
 	.chat-page.right-collapsed .source-panel { display: none; }
 }
 
-.quick-chips {
+.message-row-wrapper {
 	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	width: 100%;
+}
+.follow-up-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-left: 44px;
+	margin-top: 4px;
+	margin-bottom: 12px;
+}
+.follow-up-actions button {
+	font-size: 0.8rem;
+	padding: 4px 12px;
+	border-radius: 999px;
+	border: 1px solid #e2e8f0;
+	background: #fff;
+	color: #64748b;
+	cursor: pointer;
+	transition: all 0.2s;
+}
+.follow-up-actions button:hover {
+	background: #f1f5f9;
+	color: #0f172a;
+	border-color: #cbd5e1;
+}
+
+.chat-modes {
+	display: flex;
+	align-items: center;
 	gap: 0.5rem;
 	margin-bottom: 0.75rem;
 	overflow-x: auto;
 	padding-bottom: 0.25rem;
 }
-.quick-chips::-webkit-scrollbar { display: none; }
-.quick-chip {
+.chat-modes::-webkit-scrollbar { display: none; }
+.mode-label {
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: #64748b;
+	margin-right: 4px;
+}
+.mode-chip {
 	white-space: nowrap;
 	border: 1px solid #e2e8f0;
 	background: #fff;
@@ -1088,14 +1147,17 @@ function formatDate(value) {
 	padding: 0.4rem 0.8rem;
 	font-size: 0.78rem;
 	font-weight: 700;
-	box-shadow: 0 2px 8px rgba(15,23,42,0.03);
 	transition: all 0.2s;
 	cursor: pointer;
 }
-.quick-chip:hover {
+.mode-chip:hover {
 	background: #f8fafc;
 	border-color: #cbd5e1;
-	color: #0f172a;
+}
+.mode-chip.active {
+	background: #eff6ff;
+	color: #2563eb;
+	border-color: #bfdbfe;
 }
 @media (max-width: 760px) {
 	.chat-page { display: block; }

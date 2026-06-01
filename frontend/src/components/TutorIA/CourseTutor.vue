@@ -46,18 +46,27 @@
 					¿Tienes alguna duda sobre la lección actual?
 				</div>
 
-				<div v-for="(msg, i) in messages" :key="i" :class="msg.role === 'user' ? 'tutor-msg-user' : 'tutor-msg-ai'">
-					<div v-if="msg.role === 'model'" class="flex items-center gap-1.5 mb-1.5 text-indigo-600 dark:text-indigo-400 font-bold text-xs">
-						<Sparkles class="w-3.5 h-3.5" />
-						TutorIA
+				<div v-for="(msg, i) in messages" :key="i" class="w-full flex flex-col gap-1">
+					<div :class="msg.role === 'user' ? 'tutor-msg-user' : 'tutor-msg-ai'">
+						<div v-if="msg.role === 'model'" class="flex items-center gap-1.5 mb-1.5 text-indigo-600 dark:text-indigo-400 font-bold text-xs">
+							<Sparkles class="w-3.5 h-3.5" />
+							TutorIA
+						</div>
+						
+						<!-- Images in message -->
+						<div v-if="msg.images_base64 && msg.images_base64.length" class="flex flex-wrap gap-2 mb-2">
+							<img v-for="(img, idx) in msg.images_base64" :key="idx" :src="`data:image/jpeg;base64,${img}`" class="rounded-lg max-h-32 object-contain border border-gray-200 dark:border-gray-700 shadow-sm" />
+						</div>
+
+						<div v-html="formatMessage(msg.content)" class="prose prose-sm max-w-none text-current"></div>
 					</div>
 					
-					<!-- Images in message -->
-					<div v-if="msg.images_base64 && msg.images_base64.length" class="flex flex-wrap gap-2 mb-2">
-						<img v-for="(img, idx) in msg.images_base64" :key="idx" :src="`data:image/jpeg;base64,${img}`" class="rounded-lg max-h-32 object-contain border border-gray-200 dark:border-gray-700 shadow-sm" />
+					<!-- Follow-ups -->
+					<div v-if="msg.role === 'model' && i === messages.length - 1 && !isLoading" class="flex flex-wrap gap-1 mt-1 ml-2">
+						<button @click="sendFollowUp('Entendí')" class="text-[10px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 px-2.5 py-1 rounded-full hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">Entendí</button>
+						<button @click="sendFollowUp('Explícalo más simple')" class="text-[10px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 px-2.5 py-1 rounded-full hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">Más simple</button>
+						<button @click="sendFollowUp('Dame otro ejemplo')" class="text-[10px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 px-2.5 py-1 rounded-full hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">Otro ejemplo</button>
 					</div>
-
-					<div v-html="formatMessage(msg.content)" class="prose prose-sm max-w-none text-current"></div>
 				</div>
 
 				<div v-if="isLoading" class="tutor-typing self-start mt-1 p-3 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
@@ -66,7 +75,17 @@
 			</div>
 
 			<!-- Footer Input -->
-			<div class="tutor-footer p-3 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 z-10">
+			<div class="tutor-footer p-3 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 z-10 flex flex-col gap-2">
+				<!-- Chat modes -->
+				<div class="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none" v-if="!isLoading">
+					<span class="text-[10px] font-semibold text-gray-400 self-center mr-1">Modo:</span>
+					<button v-for="m in chatModesList" :key="m.value" @click="chatMode = m.value" 
+						class="text-[10px] font-bold px-2.5 py-1 rounded-full border transition-colors whitespace-nowrap"
+						:class="chatMode === m.value ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'">
+						{{ m.label }}
+					</button>
+				</div>
+				
 				<!-- Attached Images Preview -->
 				<div v-if="attachedImages.length" class="flex flex-wrap gap-2 mb-2 p-2 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
 					<div v-for="(img, idx) in attachedImages" :key="idx" class="relative group">
@@ -251,6 +270,21 @@ const unlimited = ref(false)
 // Images state
 const attachedImages = ref([])
 
+// Modes state
+const chatMode = ref('chat')
+const chatModesList = [
+	{ label: 'Libre', value: 'chat' },
+	{ label: 'Simple', value: 'simple' },
+	{ label: 'Paso a paso', value: 'step' },
+	{ label: 'Examen', value: 'exam' },
+	{ label: 'Resumen', value: 'summary' },
+]
+
+const sendFollowUp = (text) => {
+	inputMessage.value = text
+	sendMessage()
+}
+
 onMounted(() => {
 	call('lms.lms.subscriptions.get_plus_status')
 		.then((res) => {
@@ -366,7 +400,8 @@ const sendMessage = async () => {
 		lesson_name: props.lessonTitle,
 		lesson_content: props.lessonContent,
 		images_base64: imagesPayload,
-		history: JSON.stringify(historyForApi)
+		history: JSON.stringify(historyForApi),
+		mode: chatMode.value
 	}).then((res) => {
 		messages.value.push({ role: 'model', content: res.reply })
 		unlimited.value = !!res.unlimited
