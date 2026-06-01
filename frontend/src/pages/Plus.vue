@@ -1,255 +1,264 @@
 <template>
-	<div class="plus-page min-h-screen pb-16">
-		<header
-			class="sticky top-0 z-10 flex items-center justify-between border-b px-4 py-3 shadow-sm plus-header"
-		>
+	<div class="sb-plus-page min-h-screen">
+		<header class="sb-plus-header">
 			<Breadcrumbs class="h-7" :items="breadcrumbs" />
 		</header>
 
-		<!-- Loading State -->
-		<div v-if="billing.data === undefined" class="flex justify-center items-center py-24">
-			<div class="flex flex-col items-center gap-4">
-				<div class="relative">
-					<div class="size-16 rounded-full plus-loading-ring animate-spin"></div>
-					<Crown class="size-6 text-amber-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+		<!-- Loading -->
+		<div v-if="billing.data === undefined" class="sb-loading">
+			<div class="sb-loading-card">
+				<div class="sb-spinner-wrap">
+					<div class="sb-spinner"></div>
+					<Crown class="size-6 text-amber-400 sb-spinner-icon" />
 				</div>
-				<span class="text-sm font-medium plus-text-muted animate-pulse">{{ __('Cargando tu plan...') }}</span>
+				<p>{{ __('Cargando tu plan...') }}</p>
 			</div>
 		</div>
 
 		<div v-else>
+			<!-- =========================================================
+				PLAN ACTIVO
+			========================================================= -->
+			<div v-if="billing.data?.active" class="sb-active">
+				<section class="sb-active-hero">
+					<div class="sb-hero-decoration sb-hero-decoration-one"></div>
+					<div class="sb-hero-decoration sb-hero-decoration-two"></div>
+					<div class="sb-hero-grid"></div>
 
-			<!-- ═══════════════════════════════════════════
-			     ESTADO 2: PLAN ACTIVO
-			     ═══════════════════════════════════════════ -->
-			<div v-if="billing.data?.active">
-
-				<!-- Hero Activo -->
-				<div class="plus-hero-active relative overflow-hidden">
-					<div class="plus-hero-glow-1"></div>
-					<div class="plus-hero-glow-2"></div>
-					<div class="plus-hero-grid"></div>
-					<div class="mx-auto max-w-5xl relative z-10 px-6 py-14 sm:py-20">
-						<div class="flex flex-col sm:flex-row items-center sm:items-start gap-8">
-							<div class="plus-crown-badge shrink-0">
-								<Crown class="size-10 sm:size-12 text-amber-400 drop-shadow-lg" />
+					<div class="sb-container sb-active-hero-inner">
+						<div class="sb-active-hero-content">
+							<div class="sb-crown-badge">
+								<Crown class="size-11 text-amber-300" />
 							</div>
-							<div class="text-center sm:text-left">
-								<div class="inline-flex items-center gap-2 rounded-full bg-green-500/20 border border-green-400/30 px-4 py-1.5 text-xs font-bold text-green-300 uppercase tracking-wider mb-4 backdrop-blur-sm">
-									<span class="relative flex h-2 w-2">
-										<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-										<span class="relative inline-flex rounded-full h-2 w-2 bg-green-400"></span>
-									</span>
+
+							<div class="sb-active-copy">
+								<div class="sb-status-pill">
+									<span class="sb-status-dot"></span>
 									{{ __('Plan activo') }}
 								</div>
-								<h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+
+								<h1>
 									{{ __('Tu membresía') }}
-									<span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400">Plus</span>
+									<span>StudyBadge Plus</span>
 								</h1>
-								<p class="mt-4 text-base sm:text-lg text-blue-100/80 max-w-xl font-medium">
-									{{ __('Gestiona tu plan, revisa tus beneficios y descarga tus recibos.') }}
+
+								<p>
+									{{ __('Gestiona tu plan, revisa tus beneficios activos y descarga tus comprobantes de pago.') }}
 								</p>
 							</div>
 						</div>
 					</div>
-				</div>
+				</section>
 
-				<!-- Contenido Activo -->
-				<div class="mx-auto max-w-5xl px-5 py-10">
-					<div class="grid gap-8 lg:grid-cols-3 items-start">
-
-						<!-- Main: Beneficios + Recibos -->
-						<div class="lg:col-span-2 space-y-8">
-
-							<!-- Beneficios Activos -->
-							<div class="plus-card p-6 sm:p-8">
-								<h2 class="text-xl font-bold plus-text-primary mb-6 flex items-center gap-3">
-									<div class="plus-icon-badge bg-blue-500/10 text-blue-500">
-										<Sparkles class="size-5" />
-									</div>
-									{{ __('Tus beneficios activos') }}
-								</h2>
-								<div class="grid gap-3 sm:grid-cols-2">
-									<div
-										v-for="benefit in benefits"
-										:key="benefit.label"
-										class="plus-benefit-item group"
-									>
-										<div class="plus-benefit-icon">
-											<component :is="benefit.icon" class="size-5" />
-										</div>
-										<div class="min-w-0">
-											<div class="font-bold text-sm plus-text-primary">{{ benefit.label }}</div>
-											<div class="mt-0.5 text-xs plus-text-muted leading-relaxed">{{ benefit.description }}</div>
-										</div>
-										<CheckCircle2 class="size-4 text-green-500 shrink-0 ml-auto opacity-60" />
-									</div>
+				<main class="sb-container sb-active-layout">
+					<div class="sb-active-main">
+						<section class="sb-panel">
+							<div class="sb-section-heading">
+								<div class="sb-section-icon">
+									<Sparkles class="size-5" />
+								</div>
+								<div>
+									<h2>{{ __('Tus beneficios activos') }}</h2>
+									<p>{{ __('Todo esto está desbloqueado en tu cuenta.') }}</p>
 								</div>
 							</div>
 
-							<!-- Historial de Pagos -->
-							<div class="plus-card p-6 sm:p-8">
-								<div class="flex items-center justify-between gap-4 border-b plus-border pb-5 mb-5">
-									<h2 class="text-xl font-bold plus-text-primary flex items-center gap-3">
-										<div class="plus-icon-badge bg-gray-500/10 text-gray-500">
-											<Download class="size-5" />
-										</div>
-										{{ __('Historial de pagos') }}
-									</h2>
-									<button
-										class="plus-btn-ghost text-xs"
-										@click="billing.reload()"
-									>
-										<RefreshCcw class="size-3.5" :class="{'animate-spin': billing.loading}" />
-										{{ __('Actualizar') }}
-									</button>
-								</div>
-
-								<!-- Receipts List -->
-								<div v-if="receipts.length" class="space-y-3">
-									<div
-										v-for="receipt in receipts"
-										:key="receipt.name"
-										class="plus-receipt-row"
-									>
-										<div class="min-w-0 flex-1">
-											<div class="font-bold text-sm plus-text-primary truncate">
-												{{ receipt.receipt_number || receipt.name }}
-											</div>
-											<div class="flex items-center gap-2 mt-1 text-xs plus-text-muted">
-												<CalendarDays class="size-3.5 shrink-0" />
-												{{ formatDate(receipt.paid_at || receipt.date_created) }}
-												<span class="plus-status-pill" :class="receipt.status === 'paid' ? 'plus-status-paid' : 'plus-status-default'">
-													{{ receipt.status }}
-												</span>
-											</div>
-										</div>
-										<div class="flex items-center gap-4 shrink-0">
-											<span class="font-bold text-sm plus-text-primary">{{ formatMoney(receipt.amount, receipt.currency) }}</span>
-											<button class="plus-btn-outline text-xs" @click="downloadReceipt(receipt)">
-												<Download class="size-3.5" /> PDF
-											</button>
-										</div>
-									</div>
-								</div>
-
-								<!-- Empty Receipts -->
-								<div v-else class="plus-empty-state py-12">
-									<div class="plus-empty-icon">
-										<Download class="size-8" />
-									</div>
-									<h3 class="text-base font-bold plus-text-primary mt-4">{{ __('Todavía no hay recibos') }}</h3>
-									<p class="text-sm plus-text-muted mt-1 max-w-xs">{{ __('Cuando Mercado Pago confirme un cobro, aparecerá aquí tu comprobante.') }}</p>
-								</div>
-							</div>
-						</div>
-
-						<!-- Sidebar -->
-						<div class="space-y-6">
-
-							<!-- Estado del Plan -->
-							<div class="plus-card relative overflow-hidden">
-								<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400"></div>
-								<div class="p-6">
-									<div class="flex justify-between items-start mb-5">
-										<div>
-											<h3 class="font-bold text-lg plus-text-primary">StudyBadge Plus</h3>
-											<div class="text-sm plus-text-muted mt-0.5">{{ formattedPrice }} / {{ __('mes') }}</div>
-										</div>
-										<Badge theme="green" class="font-bold text-xs">
-											<CheckCircle2 class="size-3 mr-1" /> {{ __('Activo') }}
-										</Badge>
-									</div>
-
-									<div class="space-y-3">
-										<div class="plus-info-row">
-											<CalendarDays class="size-4 plus-text-muted shrink-0" />
-											<div class="min-w-0">
-												<div class="text-[10px] plus-text-muted font-bold uppercase tracking-wider">{{ __('Próximo cobro') }}</div>
-												<div class="text-sm font-semibold plus-text-primary mt-0.5">{{ formatDate(subscription.next_payment_date) }}</div>
-											</div>
-										</div>
-										<div class="plus-info-row">
-											<CreditCard class="size-4 plus-text-muted shrink-0" />
-											<div class="min-w-0">
-												<div class="text-[10px] plus-text-muted font-bold uppercase tracking-wider">{{ __('Método de pago') }}</div>
-												<div class="text-sm font-semibold plus-text-primary mt-0.5 truncate">{{ paymentMethodLabel }}</div>
-											</div>
-										</div>
-									</div>
-
-									<!-- Cancellation Warning -->
-									<div v-if="subscription.cancel_at_period_end" class="mt-5 rounded-xl bg-amber-500/10 border border-amber-500/20 p-4 text-sm">
-										<span class="font-bold text-amber-600 dark:text-amber-400 block mb-1">{{ __('Cancelación programada') }}</span>
-										<span class="text-amber-700 dark:text-amber-300 text-xs">
-											{{ __('Tu suscripción se cancelará el {0}.', [formatDate(subscription.cancel_scheduled_for)]) }}
-										</span>
-									</div>
-
-									<!-- Action Buttons -->
-									<div class="mt-6 space-y-2.5">
-										<button
-											v-if="!subscription.cancel_at_period_end"
-											class="plus-btn-primary w-full"
-											@click="showPaymentMethodForm"
-										>
-											<CreditCard class="size-4" /> {{ __('Gestionar suscripción') }}
-										</button>
-										<button
-											v-if="!subscription.cancel_at_period_end"
-											class="plus-btn-danger-ghost w-full"
-											:disabled="cancelResource.loading"
-											@click="requestCancellation"
-										>
-											{{ __('Cancelar plan') }}
-										</button>
-										<button
-											v-if="subscription.cancel_at_period_end"
-											class="plus-btn-primary w-full"
-											:disabled="reactivateResource.loading"
-											@click="reactivateSubscription"
-										>
-											<RefreshCcw class="size-4" /> {{ __('Reactivar mi Plus') }}
-										</button>
-									</div>
-								</div>
-							</div>
-
-							<!-- Soporte -->
-							<div class="plus-card-support p-6 text-center">
-								<LifeBuoy class="size-7 mx-auto mb-3 opacity-70" />
-								<h3 class="font-bold text-sm plus-text-primary">{{ __('¿Necesitas ayuda?') }}</h3>
-								<p class="mt-1.5 text-xs plus-text-muted mb-4 leading-relaxed">{{ __('Nuestro equipo está listo para ayudarte.') }}</p>
-								<a
-									class="plus-btn-ghost text-xs inline-flex"
-									:href="`mailto:${billing.data?.support_email || 'soporte@studybadge.com'}`"
+							<div class="sb-active-benefits-grid">
+								<div
+									v-for="benefit in benefits"
+									:key="benefit.label"
+									class="sb-active-benefit"
 								>
-									<Mail class="size-3.5" /> {{ __('Contactar Soporte') }}
-								</a>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<!-- Card Form Modal -->
-				<Teleport to="body">
-					<Transition name="plus-modal">
-						<div v-if="cardFormVisible" class="fixed inset-0 z-[60] flex items-center justify-center p-4" @click.self="hidePaymentMethodForm">
-							<div class="fixed inset-0 bg-black/60 backdrop-blur-sm"></div>
-							<div class="plus-modal-content relative z-10 w-full max-w-md max-h-[90vh] flex flex-col">
-								<div class="flex justify-between items-center px-6 py-4 border-b plus-border">
-									<div class="flex items-center gap-3">
-										<ShieldCheck class="size-5 text-green-500" />
-										<span class="font-bold plus-text-primary">{{ __('Actualizar método de pago') }}</span>
+									<div class="sb-active-benefit-icon">
+										<component :is="benefit.icon" class="size-5" />
 									</div>
-									<button @click="hidePaymentMethodForm" class="plus-text-muted hover:plus-text-primary transition-colors p-1 rounded-lg">
+									<div>
+										<h3>{{ benefit.label }}</h3>
+										<p>{{ benefit.description }}</p>
+									</div>
+									<CheckCircle2 class="size-4 text-emerald-500 sb-active-check" />
+								</div>
+							</div>
+						</section>
+
+						<section class="sb-panel">
+							<div class="sb-panel-header">
+								<div class="sb-section-heading sb-section-heading-tight">
+									<div class="sb-section-icon sb-section-icon-muted">
+										<Download class="size-5" />
+									</div>
+									<div>
+										<h2>{{ __('Historial de pagos') }}</h2>
+										<p>{{ __('Tus comprobantes aparecerán aquí cuando se confirmen los cobros.') }}</p>
+									</div>
+								</div>
+
+								<button class="sb-ghost-btn" @click="billing.reload()">
+									<RefreshCcw class="size-4" :class="{ 'animate-spin': billing.loading }" />
+									{{ __('Actualizar') }}
+								</button>
+							</div>
+
+							<div v-if="receipts.length" class="sb-receipts">
+								<div
+									v-for="receipt in receipts"
+									:key="receipt.name"
+									class="sb-receipt-row"
+								>
+									<div class="sb-receipt-main">
+										<h3>{{ receipt.receipt_number || receipt.name }}</h3>
+										<div class="sb-receipt-meta">
+											<CalendarDays class="size-3.5" />
+											<span>{{ formatDate(receipt.paid_at || receipt.date_created) }}</span>
+											<span
+												class="sb-mini-status"
+												:class="receipt.status === 'paid' ? 'sb-mini-status-paid' : 'sb-mini-status-default'"
+											>
+												{{ receipt.status || __('pendiente') }}
+											</span>
+										</div>
+									</div>
+
+									<div class="sb-receipt-actions">
+										<strong>{{ formatMoney(receipt.amount, receipt.currency) }}</strong>
+										<button
+											class="sb-outline-btn sb-outline-btn-small"
+											@click="downloadReceipt(receipt)"
+										>
+											<Download class="size-3.5" />
+											PDF
+										</button>
+									</div>
+								</div>
+							</div>
+
+							<div v-else class="sb-empty">
+								<div class="sb-empty-icon">
+									<Download class="size-8" />
+								</div>
+								<h3>{{ __('Todavía no hay recibos') }}</h3>
+								<p>{{ __('Cuando Mercado Pago confirme un cobro, aparecerá aquí tu comprobante.') }}</p>
+							</div>
+						</section>
+					</div>
+
+					<aside class="sb-active-sidebar">
+						<section class="sb-plan-card">
+							<div class="sb-plan-card-accent"></div>
+
+							<div class="sb-plan-top">
+								<div>
+									<h2>StudyBadge Plus</h2>
+									<p>{{ formattedPrice }} / {{ __('mes') }}</p>
+								</div>
+
+								<Badge theme="green" class="font-bold text-xs">
+									<CheckCircle2 class="size-3 mr-1" />
+									{{ __('Activo') }}
+								</Badge>
+							</div>
+
+							<div class="sb-plan-info-list">
+								<div class="sb-plan-info">
+									<CalendarDays class="size-4" />
+									<div>
+										<span>{{ __('Próximo cobro') }}</span>
+										<strong>{{ formatDate(subscription?.next_payment_date) }}</strong>
+									</div>
+								</div>
+
+								<div class="sb-plan-info">
+									<CreditCard class="size-4" />
+									<div>
+										<span>{{ __('Método de pago') }}</span>
+										<strong>{{ paymentMethodLabel }}</strong>
+									</div>
+								</div>
+							</div>
+
+							<div
+								v-if="subscription?.cancel_at_period_end"
+								class="sb-cancel-warning"
+							>
+								<strong>{{ __('Cancelación programada') }}</strong>
+								<p>
+									{{ __('Tu suscripción se cancelará el {0}.', [formatDate(subscription.cancel_scheduled_for)]) }}
+								</p>
+							</div>
+
+							<div class="sb-plan-actions">
+								<button
+									v-if="!subscription?.cancel_at_period_end"
+									class="sb-primary-btn"
+									@click="showPaymentMethodForm"
+								>
+									<CreditCard class="size-4" />
+									{{ __('Gestionar suscripción') }}
+								</button>
+
+								<button
+									v-if="!subscription?.cancel_at_period_end"
+									class="sb-danger-btn"
+									:disabled="cancelResource.loading"
+									@click="requestCancellation"
+								>
+									{{ cancelResource.loading ? __('Cancelando...') : __('Cancelar plan') }}
+								</button>
+
+								<button
+									v-if="subscription?.cancel_at_period_end"
+									class="sb-primary-btn"
+									:disabled="reactivateResource.loading"
+									@click="reactivateSubscription"
+								>
+									<RefreshCcw class="size-4" />
+									{{ reactivateResource.loading ? __('Reactivando...') : __('Reactivar mi Plus') }}
+								</button>
+							</div>
+						</section>
+
+						<section class="sb-support-card">
+							<LifeBuoy class="size-8" />
+							<h3>{{ __('¿Necesitas ayuda?') }}</h3>
+							<p>{{ __('Nuestro equipo está listo para ayudarte con pagos, certificados o tu cuenta.') }}</p>
+
+							<a
+								class="sb-ghost-btn sb-support-link"
+								:href="`mailto:${billing.data?.support_email || 'soporte@studybadge.com'}`"
+							>
+								<Mail class="size-4" />
+								{{ __('Contactar soporte') }}
+							</a>
+						</section>
+					</aside>
+				</main>
+
+				<Teleport to="body">
+					<Transition name="sb-modal">
+						<div
+							v-if="cardFormVisible"
+							class="sb-modal-shell"
+							@click.self="hidePaymentMethodForm"
+						>
+							<div class="sb-modal-overlay"></div>
+
+							<div class="sb-modal-content">
+								<div class="sb-modal-header">
+									<div>
+										<ShieldCheck class="size-5 text-emerald-500" />
+										<strong>{{ __('Actualizar método de pago') }}</strong>
+									</div>
+
+									<button class="sb-modal-close" @click="hidePaymentMethodForm">
 										<XCircle class="size-5" />
 									</button>
 								</div>
-								<div class="p-6 overflow-y-auto">
-									<div v-if="cardFormLoading" class="flex justify-center py-10 text-sm plus-text-muted animate-pulse">
+
+								<div class="sb-modal-body">
+									<div v-if="cardFormLoading" class="sb-card-loading">
 										{{ __('Estableciendo conexión segura...') }}
 									</div>
+
 									<div id="studybadge-mp-card-form"></div>
 								</div>
 							</div>
@@ -258,324 +267,307 @@
 				</Teleport>
 			</div>
 
-			<!-- ═══════════════════════════════════════════
-			     ESTADO 1: SIN PLAN — PÁGINA DE VENTA
-			     ═══════════════════════════════════════════ -->
-			<div v-else class="bg-[#f5f7fb]">
-				<!-- Hero de Venta -->
-				<section class="relative bg-[#08204e] text-white pt-12 pb-20 overflow-hidden">
-					<div class="absolute top-0 right-0 w-3/4 h-full bg-gradient-to-l from-blue-600/20 to-transparent pointer-events-none"></div>
-					<div class="absolute -top-24 -left-24 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
-					<div class="absolute bottom-0 right-0 w-full h-24 bg-gradient-to-t from-[#f5f7fb] to-transparent pointer-events-none z-10"></div>
-					
-					<div class="max-w-7xl mx-auto px-6 relative z-20">
-						<div class="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
-							<!-- Columna Izquierda: Copy -->
-							<div>
-								<div class="inline-block px-3 py-1 mb-6 rounded-full bg-white/10 border border-white/20 text-amber-400 text-xs font-black uppercase tracking-widest backdrop-blur-sm">
-									STUDYBADGE PLUS
-								</div>
-								<h1 class="text-4xl md:text-5xl lg:text-6xl font-black leading-tight mb-6">
-									{{ __('Desbloquea todo el poder de StudyBadge') }}
-								</h1>
-								<p class="text-lg md:text-xl text-blue-100/90 leading-relaxed mb-8 max-w-xl">
-									{{ __('Certificados ilimitados, Tutor IA sin límites, prompts premium, simulaciones y herramientas inteligentes para estudiar mejor, crear más rápido y avanzar todos los días.') }}
-								</p>
-								
-								<div class="flex flex-col sm:flex-row gap-4 mb-8">
-									<button @click="scrollToPricing" class="plus-btn-cta text-lg bg-amber-400 hover:bg-amber-300 text-[#08204e] border-none shadow-amber-500/30">
-										{{ __('Desbloquear Plus ahora') }}
-									</button>
-									<button @click="scrollToBenefits" class="plus-btn-outline border-white/30 text-white hover:bg-white/10 hover:border-white/50 text-base">
-										{{ __('Ver beneficios') }} <ArrowDown class="size-4" />
-									</button>
-								</div>
-								
-								<div class="flex flex-wrap items-center gap-4 text-sm text-blue-200 font-medium">
-									<span class="flex items-center gap-1.5"><Sparkles class="size-4 text-amber-400"/> {{ __('Acceso inmediato') }}</span>
-									<span class="flex items-center gap-1.5"><RefreshCcw class="size-4 text-amber-400"/> {{ __('Cancela cuando quieras') }}</span>
-									<span class="flex items-center gap-1.5"><ShieldCheck class="size-4 text-green-400"/> {{ __('Pago seguro con Mercado Pago') }}</span>
-								</div>
+			<!-- =========================================================
+				SIN PLAN — LANDING DE CONVERSIÓN
+			========================================================= -->
+			<div v-else class="sb-sales">
+				<section class="sb-sales-hero">
+					<div class="sb-hero-decoration sb-hero-decoration-one"></div>
+					<div class="sb-hero-decoration sb-hero-decoration-two"></div>
+					<div class="sb-hero-grid"></div>
+
+					<div class="sb-container sb-sales-hero-inner">
+						<div class="sb-sales-copy">
+							<div class="sb-eyebrow">
+								<Crown class="size-4" />
+								STUDYBADGE PLUS
 							</div>
-							
-							<!-- Columna Derecha: Pricing Card -->
-							<div id="pricing-card" class="w-full max-w-md mx-auto lg:ml-auto mt-6 lg:mt-0">
-								<div class="bg-white rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100 text-gray-900 relative">
-									<div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-amber-400 to-amber-500"></div>
-									<div class="p-8 pb-6">
-										<div class="text-center mb-6">
-											<span class="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-black uppercase tracking-widest mb-4">
-												{{ __('Membresía Plus') }}
-											</span>
-											<div class="flex items-end justify-center gap-1 mb-2">
-												<span class="text-5xl font-black tracking-tight">{{ formattedPrice }}</span>
-												<span class="text-gray-500 font-medium pb-1">/ {{ __('mes') }}</span>
-											</div>
-											<p class="text-sm font-bold text-gray-500">{{ __('Menos de S/1 al día') }}</p>
-										</div>
-										
-										<div class="space-y-4 mb-8 bg-blue-50/50 p-5 rounded-2xl border border-blue-100/50">
-											<div class="flex items-start gap-3">
-												<CheckCircle2 class="size-5 text-[#0b82e6] shrink-0" />
-												<span class="text-sm font-semibold text-gray-700">{{ __('Certificados ilimitados') }}</span>
-											</div>
-											<div class="flex items-start gap-3">
-												<CheckCircle2 class="size-5 text-[#0b82e6] shrink-0" />
-												<span class="text-sm font-semibold text-gray-700">{{ __('Tutor IA ilimitado') }}</span>
-											</div>
-											<div class="flex items-start gap-3">
-												<CheckCircle2 class="size-5 text-[#0b82e6] shrink-0" />
-												<span class="text-sm font-semibold text-gray-700">{{ __('Prompts premium') }}</span>
-											</div>
-											<div class="flex items-start gap-3">
-												<CheckCircle2 class="size-5 text-[#0b82e6] shrink-0" />
-												<span class="text-sm font-semibold text-gray-700">{{ __('Calendario inteligente') }}</span>
-											</div>
-										</div>
-										
-										<button
-											class="w-full py-4 rounded-xl font-bold text-white text-[17px] bg-[#1473e6] hover:bg-[#0f5ebd] transition-all shadow-lg shadow-blue-500/30 flex justify-center items-center gap-2 mb-4"
-											:disabled="activating"
-											@click="subscription?.init_point ? openExistingCheckout() : activatePlus()"
-										>
-											<span v-if="activating" class="animate-spin">⏳</span>
-											<Crown v-else class="size-5" />
-											{{ subscription?.init_point ? __('Continuar pago pendiente') : __('Desbloquear StudyBadge Plus') }}
-										</button>
-										
-										<div class="flex items-center justify-center gap-2 text-xs font-semibold text-gray-500">
-											<ShieldCheck class="size-4 text-green-500" />
-											{{ __('Pago 100% seguro con Mercado Pago') }}
-										</div>
-									</div>
-									<div class="bg-gray-50 p-4 text-center border-t border-gray-100">
-										<p class="text-sm font-bold text-gray-600">{{ __('Próximamente: Plan anual con descuento especial') }}</p>
-									</div>
-								</div>
+
+							<h1>{{ __('Estudia mejor, crea más rápido y avanza con IA sin límites.') }}</h1>
+
+							<p>
+								{{ __('Desbloquea certificados ilimitados, Tutor IA, prompts premium, simulaciones y herramientas inteligentes para convertir StudyBadge en tu ventaja académica y profesional.') }}
+							</p>
+
+							<div class="sb-hero-actions">
+								<button
+									class="sb-hero-primary"
+									:disabled="activating"
+									@click="subscription?.init_point ? openExistingCheckout() : activatePlus()"
+								>
+									<span v-if="activating" class="sb-button-spinner"></span>
+									<Crown v-else class="size-5" />
+									{{ subscription?.init_point ? __('Continuar pago pendiente') : __('Desbloquear Plus ahora') }}
+								</button>
+
+								<button class="sb-hero-secondary" @click="scrollToBenefits">
+									{{ __('Ver beneficios') }}
+									<ArrowDown class="size-4" />
+								</button>
+							</div>
+
+							<div class="sb-trust-row">
+								<span>
+									<Sparkles class="size-4" />
+									{{ __('Acceso inmediato') }}
+								</span>
+								<span>
+									<RefreshCcw class="size-4" />
+									{{ __('Cancela cuando quieras') }}
+								</span>
+								<span>
+									<ShieldCheck class="size-4" />
+									{{ __('Pago seguro') }}
+								</span>
 							</div>
 						</div>
-					</div>
-				</section>
-				
-				<!-- Prueba Social -->
-				<section class="border-y border-gray-200 bg-white py-6">
-					<div class="max-w-7xl mx-auto px-6">
-						<div class="flex flex-wrap justify-center md:justify-between items-center gap-6 text-center">
-							<div class="flex items-center gap-2">
-								<div class="p-2 bg-blue-50 rounded-lg"><Users class="size-5 text-blue-600" /></div>
-								<span class="font-bold text-gray-700">+1,000 estudiantes</span>
-							</div>
-							<div class="flex items-center gap-2">
-								<div class="p-2 bg-amber-50 rounded-lg"><FileText class="size-5 text-amber-600" /></div>
-								<span class="font-bold text-gray-700">+100 prompts listos</span>
-							</div>
-							<div class="flex items-center gap-2">
-								<div class="p-2 bg-emerald-50 rounded-lg"><PlayCircle class="size-5 text-emerald-600" /></div>
-								<span class="font-bold text-gray-700">+30 cursos y recursos</span>
-							</div>
-							<div class="flex items-center gap-2">
-								<div class="p-2 bg-indigo-50 rounded-lg"><Clock class="size-5 text-indigo-600" /></div>
-								<span class="font-bold text-gray-700">Disponible 24/7</span>
-							</div>
+
+						<div id="pricing-card" class="sb-pricing-wrap">
+							<section class="sb-pricing-card">
+								<div class="sb-pricing-ribbon">
+									<Crown class="size-4" />
+									{{ __('Membresía Plus') }}
+								</div>
+
+								<div class="sb-pricing-body">
+									<div class="sb-price-head">
+										<span class="sb-price-label">{{ __('Plan mensual') }}</span>
+
+										<div class="sb-price">
+											<span>{{ formattedPrice }}</span>
+											<small>/ {{ __('mes') }}</small>
+										</div>
+
+										<p>{{ __('Menos de S/1 al día para desbloquear todas las herramientas premium.') }}</p>
+									</div>
+
+									<ul class="sb-price-list">
+										<li>
+											<CheckCircle2 class="size-5" />
+											{{ __('Certificados ilimitados') }}
+										</li>
+										<li>
+											<CheckCircle2 class="size-5" />
+											{{ __('Tutor IA ilimitado') }}
+										</li>
+										<li>
+											<CheckCircle2 class="size-5" />
+											{{ __('Prompts premium listos') }}
+										</li>
+										<li>
+											<CheckCircle2 class="size-5" />
+											{{ __('Simulaciones y calendario inteligente') }}
+										</li>
+									</ul>
+
+									<button
+										class="sb-pricing-cta"
+										:disabled="activating"
+										@click="subscription?.init_point ? openExistingCheckout() : activatePlus()"
+									>
+										<span v-if="activating" class="sb-button-spinner sb-button-spinner-light"></span>
+										<Crown v-else class="size-5" />
+										{{ subscription?.init_point ? __('Continuar pago pendiente') : __('Desbloquear StudyBadge Plus') }}
+									</button>
+
+									<div class="sb-payment-note">
+										<ShieldCheck class="size-4" />
+										{{ __('Pago 100% seguro con Mercado Pago') }}
+									</div>
+								</div>
+
+								<div class="sb-pricing-footer">
+									<strong>{{ __('Próximamente plan anual') }}</strong>
+									<span>{{ __('Ahorra más pagando por año.') }}</span>
+								</div>
+							</section>
 						</div>
 					</div>
 				</section>
 
-				<!-- Beneficios (Cards) -->
-				<section id="benefits-section" class="py-20 max-w-7xl mx-auto px-6">
-					<div class="text-center mb-16">
-						<h2 class="text-3xl md:text-4xl font-black text-[#08204e] mb-4">{{ __('Herramientas creadas para tu éxito') }}</h2>
-						<p class="text-lg text-gray-600 max-w-2xl mx-auto">{{ __('Todo lo que necesitas para estudiar, crear y trabajar en un solo lugar.') }}</p>
+				<section class="sb-social-proof">
+					<div class="sb-container sb-stats-grid">
+						<div class="sb-stat">
+							<div><Users class="size-5" /></div>
+							<strong>+1,000</strong>
+							<span>{{ __('estudiantes') }}</span>
+						</div>
+
+						<div class="sb-stat">
+							<div><FileText class="size-5" /></div>
+							<strong>+100</strong>
+							<span>{{ __('prompts listos') }}</span>
+						</div>
+
+						<div class="sb-stat">
+							<div><PlayCircle class="size-5" /></div>
+							<strong>+30</strong>
+							<span>{{ __('cursos y recursos') }}</span>
+						</div>
+
+						<div class="sb-stat">
+							<div><ClockIcon class="size-5" /></div>
+							<strong>24/7</strong>
+							<span>{{ __('disponible') }}</span>
+						</div>
 					</div>
-					
-					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-						<div v-for="benefit in benefits" :key="benefit.label" class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-							<div class="w-14 h-14 rounded-xl bg-blue-50 text-[#0b82e6] flex items-center justify-center mb-6 transition-transform hover:scale-110">
+				</section>
+
+				<section id="benefits-section" class="sb-container sb-section">
+					<div class="sb-section-title">
+						<span>{{ __('Beneficios premium') }}</span>
+						<h2>{{ __('Todo lo que desbloqueas con StudyBadge Plus') }}</h2>
+						<p>{{ __('No es solo pagar por funciones. Es ahorrar tiempo, estudiar con más claridad y crear mejores resultados con IA.') }}</p>
+					</div>
+
+					<div class="sb-benefits-grid">
+						<article
+							v-for="benefit in benefits"
+							:key="benefit.label"
+							class="sb-benefit-card"
+						>
+							<div class="sb-benefit-icon">
 								<component :is="benefit.icon" class="size-7" />
 							</div>
-							<h3 class="text-xl font-bold text-gray-900 mb-3">{{ benefit.label }}</h3>
-							<p class="text-gray-600 leading-relaxed">{{ benefit.description }}</p>
+							<h3>{{ benefit.label }}</h3>
+							<p>{{ benefit.description }}</p>
+						</article>
+					</div>
+				</section>
+
+				<section class="sb-white-section">
+					<div class="sb-container sb-results-layout">
+						<div class="sb-results-copy">
+							<div class="sb-section-title sb-section-title-left">
+								<span>{{ __('Resultados desde hoy') }}</span>
+								<h2>{{ __('Tu flujo de estudio y creación se vuelve más rápido.') }}</h2>
+								<p>{{ __('StudyBadge Plus está pensado para que no empieces desde cero cada vez que tengas una tarea, exposición, proyecto o idea de negocio.') }}</p>
+							</div>
+
+							<div class="sb-results-list">
+								<div
+									v-for="result in results"
+									:key="result.title"
+									class="sb-result-item"
+								>
+									<div :class="['sb-result-icon', result.className]">
+										<component :is="result.icon" class="size-5" />
+									</div>
+									<div>
+										<h3>{{ result.title }}</h3>
+										<p>{{ result.description }}</p>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="sb-ai-preview">
+							<div class="sb-ai-window">
+								<div class="sb-ai-header">
+									<div class="sb-ai-avatar">
+										<Bot class="size-6" />
+									</div>
+									<div>
+										<strong>Tutor IA StudyBadge</strong>
+										<span>{{ __('En línea') }}</span>
+									</div>
+								</div>
+
+								<div class="sb-ai-message sb-ai-message-left">
+									{{ __('Analicé tu documento. Te preparé un resumen, 5 preguntas tipo examen y una explicación simple de los conceptos más difíciles.') }}
+								</div>
+
+								<div class="sb-ai-message sb-ai-message-right">
+									{{ __('Perfecto, empecemos con preguntas difíciles.') }}
+								</div>
+
+								<div class="sb-ai-suggestions">
+									<span>{{ __('Resumen') }}</span>
+									<span>{{ __('Quiz') }}</span>
+									<span>{{ __('Exposición') }}</span>
+								</div>
+							</div>
 						</div>
 					</div>
 				</section>
 
-				<!-- Lo que desbloqueas hoy -->
-				<section class="bg-white py-20 border-t border-gray-100">
-					<div class="max-w-7xl mx-auto px-6">
-						<div class="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
+				<section class="sb-container sb-section">
+					<div class="sb-section-title">
+						<span>{{ __('Comparación') }}</span>
+						<h2>{{ __('Gratis vs Plus') }}</h2>
+						<p>{{ __('Muestra claramente por qué Plus vale la pena desde el primer mes.') }}</p>
+					</div>
+
+					<div class="sb-comparison">
+						<div class="sb-comparison-head">
 							<div>
-								<h2 class="text-3xl md:text-4xl font-black text-[#08204e] mb-10">{{ __('Resultados desde el primer día') }}</h2>
-								<div class="space-y-8">
-									<div class="flex gap-4">
-										<div class="mt-1"><div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600"><Zap class="size-5" /></div></div>
-										<div>
-											<h4 class="text-lg font-bold text-gray-900 mb-1">{{ __('Aprende más rápido') }}</h4>
-											<p class="text-gray-600">{{ __('Convierte una clase larga en un resumen detallado y un quiz práctico en minutos.') }}</p>
-										</div>
-									</div>
-									<div class="flex gap-4">
-										<div class="mt-1"><div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"><Briefcase class="size-5" /></div></div>
-										<div>
-											<h4 class="text-lg font-bold text-gray-900 mb-1">{{ __('Crea mejores trabajos') }}</h4>
-											<p class="text-gray-600">{{ __('Prepara exposiciones, presentaciones y entrevistas con simulaciones realistas.') }}</p>
-										</div>
-									</div>
-									<div class="flex gap-4">
-										<div class="mt-1"><div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600"><Clock class="size-5" /></div></div>
-										<div>
-											<h4 class="text-lg font-bold text-gray-900 mb-1">{{ __('Ahorra horas con prompts') }}</h4>
-											<p class="text-gray-600">{{ __('Genera contenido, planes de marketing y tareas sin empezar desde cero.') }}</p>
-										</div>
-									</div>
-									<div class="flex gap-4">
-										<div class="mt-1"><div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600"><Bot class="size-5" /></div></div>
-										<div>
-											<h4 class="text-lg font-bold text-gray-900 mb-1">{{ __('Practica con IA sin límites') }}</h4>
-											<p class="text-gray-600">{{ __('Recibe retroalimentación inmediata en tus respuestas y mejora tus habilidades.') }}</p>
-										</div>
-									</div>
-								</div>
+								<h3>{{ __('Plan Gratis') }}</h3>
+								<p>{{ __('Para probar la plataforma') }}</p>
 							</div>
-							<div class="bg-gray-50 rounded-[2rem] p-6 lg:p-8 border border-gray-200 shadow-inner relative overflow-hidden">
-								<div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiNlNWU3ZWIiLz48L3N2Zz4=')] opacity-50"></div>
-								<div class="relative z-10 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-									<div class="flex items-center gap-3 mb-5">
-										<div class="w-10 h-10 bg-[#0b82e6] rounded-full flex items-center justify-center text-white"><Bot class="size-6" /></div>
-										<div>
-											<div class="font-bold text-sm text-gray-900">Tutor IA StudyBadge</div>
-											<div class="text-xs text-green-500 font-semibold">En línea</div>
-										</div>
-									</div>
-									<p class="text-sm text-gray-700 mb-4 bg-gray-50 p-4 rounded-xl rounded-tl-none border border-gray-100 leading-relaxed">
-										¡Hola! He analizado tu documento sobre <b>Estrategias de Marketing</b>. Aquí tienes el resumen y las 5 preguntas clave para tu examen de mañana. ¿Empezamos el quiz interactivo?
-									</p>
-									<div class="text-right">
-										<p class="inline-block text-sm text-white bg-[#0b82e6] p-4 rounded-xl rounded-tr-none shadow-sm shadow-blue-500/20">
-											¡Sí, por favor! Empecemos con preguntas difíciles.
-										</p>
-									</div>
+
+							<div class="sb-comparison-plus">
+								<span>{{ __('Recomendado') }}</span>
+								<h3>StudyBadge Plus</h3>
+								<p>{{ __('Para avanzar más rápido') }}</p>
+							</div>
+						</div>
+
+						<div class="sb-comparison-rows">
+							<div
+								v-for="row in comparisonRows"
+								:key="row.free + row.plus"
+								class="sb-comparison-row"
+							>
+								<div class="sb-free-col">
+									<X v-if="row.freeNegative" class="size-4" />
+									<span>{{ row.free }}</span>
+								</div>
+
+								<div class="sb-plus-col">
+									<CheckCircle2 class="size-5" />
+									<strong>{{ row.plus }}</strong>
 								</div>
 							</div>
 						</div>
 					</div>
 				</section>
 
-				<!-- Gratis vs Plus -->
-				<section class="py-20 max-w-5xl mx-auto px-6">
-					<div class="text-center mb-12">
-						<h2 class="text-3xl font-black text-[#08204e] mb-4">{{ __('Compara los planes') }}</h2>
-					</div>
-					
-					<div class="bg-white rounded-3xl overflow-hidden shadow-xl border border-gray-200">
-						<div class="grid grid-cols-2 bg-gray-50">
-							<div class="p-6 text-center border-r border-gray-200">
-								<h3 class="text-xl font-bold text-gray-500 mb-2">{{ __('Plan Gratis') }}</h3>
-								<p class="text-sm text-gray-400">{{ __('Ideal para empezar') }}</p>
-							</div>
-							<div class="p-6 text-center bg-blue-50 border-b-2 border-[#0b82e6] relative">
-								<div class="absolute -top-3 inset-x-0 flex justify-center"><span class="bg-amber-400 text-amber-900 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-sm">{{ __('Recomendado') }}</span></div>
-								<h3 class="text-xl font-black text-[#08204e] mb-2">StudyBadge Plus</h3>
-								<p class="text-sm text-[#0b82e6] font-medium">{{ __('Para lograr más') }}</p>
-							</div>
+				<section class="sb-white-section">
+					<div class="sb-container sb-faq-section">
+						<div class="sb-section-title">
+							<span>{{ __('Dudas frecuentes') }}</span>
+							<h2>{{ __('Preguntas frecuentes') }}</h2>
 						</div>
-						
-						<div class="divide-y divide-gray-100">
-							<div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
-								<div class="p-5 border-r border-gray-200 flex flex-col items-center justify-center text-center gap-2">
-									<span class="text-sm text-gray-600">{{ __('Acceso limitado a cursos') }}</span>
-								</div>
-								<div class="p-5 flex flex-col items-center text-center gap-2 bg-blue-50/30">
-									<CheckCircle2 class="size-5 text-[#0b82e6]" />
-									<span class="text-sm font-bold text-gray-900">{{ __('Cursos y recursos premium') }}</span>
-								</div>
-							</div>
-							<div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
-								<div class="p-5 border-r border-gray-200 flex flex-col items-center justify-center text-center gap-2">
-									<span class="text-sm text-gray-600">{{ __('Certificados limitados') }}</span>
-								</div>
-								<div class="p-5 flex flex-col items-center text-center gap-2 bg-blue-50/30">
-									<CheckCircle2 class="size-5 text-[#0b82e6]" />
-									<span class="text-sm font-bold text-gray-900">{{ __('Certificados ilimitados') }}</span>
-								</div>
-							</div>
-							<div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
-								<div class="p-5 border-r border-gray-200 flex flex-col items-center justify-center text-center gap-2">
-									<span class="text-sm text-gray-600">{{ __('Prompts básicos') }}</span>
-								</div>
-								<div class="p-5 flex flex-col items-center text-center gap-2 bg-blue-50/30">
-									<CheckCircle2 class="size-5 text-[#0b82e6]" />
-									<span class="text-sm font-bold text-gray-900">{{ __('Prompts premium ilimitados') }}</span>
-								</div>
-							</div>
-							<div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
-								<div class="p-5 border-r border-gray-200 flex flex-col items-center justify-center text-center gap-2">
-									<span class="text-sm text-gray-600">{{ __('Tutor IA limitado') }}</span>
-								</div>
-								<div class="p-5 flex flex-col items-center text-center gap-2 bg-blue-50/30">
-									<CheckCircle2 class="size-5 text-[#0b82e6]" />
-									<span class="text-sm font-bold text-gray-900">{{ __('Tutor IA ilimitado') }}</span>
-								</div>
-							</div>
-							<div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
-								<div class="p-5 border-r border-gray-200 flex flex-col items-center justify-center text-center gap-2">
-									<X class="size-5 text-gray-300" />
-									<span class="text-sm text-gray-500">{{ __('Sin simulaciones premium') }}</span>
-								</div>
-								<div class="p-5 flex flex-col items-center text-center gap-2 bg-blue-50/30">
-									<CheckCircle2 class="size-5 text-[#0b82e6]" />
-									<span class="text-sm font-bold text-gray-900">{{ __('Simulaciones con IA completas') }}</span>
-								</div>
-							</div>
-							<div class="grid grid-cols-2 hover:bg-gray-50 transition-colors">
-								<div class="p-5 border-r border-gray-200 flex flex-col items-center justify-center text-center gap-2">
-									<X class="size-5 text-gray-300" />
-									<span class="text-sm text-gray-500">{{ __('Sin calendario inteligente') }}</span>
-								</div>
-								<div class="p-5 flex flex-col items-center text-center gap-2 bg-blue-50/30">
-									<CheckCircle2 class="size-5 text-[#0b82e6]" />
-									<span class="text-sm font-bold text-gray-900">{{ __('Calendario y seguimiento total') }}</span>
-								</div>
-							</div>
+
+						<div class="sb-faq-grid">
+							<article v-for="faq in faqs" :key="faq.q" class="sb-faq-card">
+								<h3>{{ faq.q }}</h3>
+								<p>{{ faq.a }}</p>
+							</article>
 						</div>
 					</div>
 				</section>
 
-				<!-- FAQ -->
-				<section class="py-20 bg-white border-t border-gray-100">
-					<div class="max-w-4xl mx-auto px-6">
-						<div class="text-center mb-12">
-							<h2 class="text-3xl font-black text-[#08204e] mb-4">{{ __('Preguntas frecuentes') }}</h2>
-						</div>
-						
-						<div class="grid gap-6 md:grid-cols-2">
-							<div v-for="(faq, index) in faqs" :key="index" class="bg-gray-50 rounded-2xl p-6 border border-gray-100">
-								<h3 class="text-base font-bold text-gray-900 mb-2">{{ faq.q }}</h3>
-								<p class="text-sm text-gray-600 leading-relaxed">{{ faq.a }}</p>
-							</div>
-						</div>
-					</div>
-				</section>
+				<section class="sb-final-cta">
+					<div class="sb-hero-decoration sb-hero-decoration-two"></div>
+					<div class="sb-container sb-final-inner">
+						<Crown class="size-11 text-amber-300" />
+						<h2>{{ __('Empieza hoy con StudyBadge Plus') }}</h2>
+						<p>{{ __('Desbloquea herramientas inteligentes para estudiar, crear y avanzar más rápido.') }}</p>
 
-				<!-- Final CTA -->
-				<section class="py-24 bg-[#08204e] text-center px-6 relative overflow-hidden">
-					<div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiNmZmYiLz48L3N2Zz4=')] opacity-[0.03]"></div>
-					<div class="relative z-10 max-w-2xl mx-auto">
-						<h2 class="text-4xl font-black text-white mb-6">{{ __('Empieza hoy con StudyBadge Plus') }}</h2>
-						<p class="text-xl text-blue-100 mb-10">{{ __('Desbloquea herramientas inteligentes para estudiar, crear y avanzar más rápido.') }}</p>
-						
 						<button
-							class="plus-btn-cta text-lg bg-amber-400 hover:bg-amber-300 text-[#08204e] border-none shadow-amber-500/30 px-10 py-5 w-full sm:w-auto"
+							class="sb-final-btn"
 							:disabled="activating"
 							@click="subscription?.init_point ? openExistingCheckout() : activatePlus()"
 						>
-							<span v-if="activating" class="animate-spin mr-2">⏳</span>
+							<span v-if="activating" class="sb-button-spinner"></span>
 							{{ subscription?.init_point ? __('Continuar pago pendiente') : __('Desbloquear Plus por ') + formattedPrice }}
 						</button>
-						
-						<div class="mt-6 flex flex-wrap justify-center gap-4 text-sm text-blue-200 font-medium">
-							<span class="flex items-center gap-1.5"><Sparkles class="size-4" /> {{ __('Acceso inmediato') }}</span> 
-							<span class="flex items-center gap-1.5"><RefreshCcw class="size-4" /> {{ __('Cancela cuando quieras') }}</span> 
-							<span class="flex items-center gap-1.5"><ShieldCheck class="size-4" /> {{ __('Pago seguro') }}</span>
+
+						<div class="sb-final-trust">
+							<span>{{ __('Acceso inmediato') }}</span>
+							<span>{{ __('Cancela cuando quieras') }}</span>
+							<span>{{ __('Pago seguro') }}</span>
 						</div>
 					</div>
 				</section>
@@ -586,40 +578,41 @@
 
 <script setup>
 import { computed, inject, nextTick, onBeforeUnmount, ref } from 'vue'
-import { Badge, Breadcrumbs, Button, createResource, toast, usePageMeta } from 'frappe-ui'
+import { Badge, Breadcrumbs, createResource, toast, usePageMeta } from 'frappe-ui'
 import {
 	Award,
 	Bot,
+	Briefcase,
 	CalendarDays,
 	CheckCircle2,
+	Clock as ClockIcon,
 	CreditCard,
 	Crown,
 	Download,
 	FileText,
 	LifeBuoy,
-	RefreshCcw,
-	Sparkles,
-	XCircle,
-	ShieldCheck,
 	Mail,
-	Info,
-	Video,
-	ArrowDown,
-	Users,
 	PlayCircle,
-	Zap,
-	Briefcase,
+	RefreshCcw,
+	ShieldCheck,
+	Sparkles,
+	Users,
+	Video,
 	X,
+	XCircle,
+	Zap,
+	ArrowDown,
 } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
 
 const { brand } = sessionStore()
+const user = inject('$user')
+
 const activating = ref(false)
 const cardFormVisible = ref(false)
 const cardFormLoading = ref(false)
 const cardController = ref(null)
 const mercadoPagoLoader = ref(null)
-const user = inject('$user')
 
 const benefits = [
 	{
@@ -654,37 +647,95 @@ const benefits = [
 	},
 ]
 
-const faqs = [
-	{ q: __('¿Puedo cancelar cuando quiera?'), a: __('Sí, no hay contratos ni compromisos a largo plazo. Puedes cancelar tu suscripción en cualquier momento desde tu panel de configuración.') },
-	{ q: __('¿Qué incluye StudyBadge Plus?'), a: __('Acceso a certificados ilimitados, herramientas de IA sin restricciones (tutor, simulaciones, herramientas de estudio), calendario inteligente y toda la biblioteca de prompts premium.') },
-	{ q: __('¿Los certificados son verdaderamente ilimitados?'), a: __('Sí, una vez eres Plus puedes generar certificados de todos los cursos que hayas aprobado sin costos adicionales por emisión.') },
-	{ q: __('¿El pago es seguro?'), a: __('Totalmente. Utilizamos Mercado Pago como pasarela, garantizando seguridad y protección en tu transacción.') },
-	{ q: __('¿Puedo usarlo para estudiar y para negocios?'), a: __('¡Claro! Las herramientas de IA y los prompts están diseñados tanto para estudiantes como para emprendedores y profesionales.') },
-	{ q: __('¿Qué pasa después de pagar?'), a: __('Tu cuenta se actualizará instantáneamente y tendrás acceso a todas las funciones premium y certificados de inmediato.') }
+const results = [
+	{
+		icon: Zap,
+		className: 'sb-result-green',
+		title: __('Aprende más rápido'),
+		description: __('Convierte clases largas en resúmenes, quizzes y ejemplos simples en minutos.'),
+	},
+	{
+		icon: Briefcase,
+		className: 'sb-result-blue',
+		title: __('Crea mejores trabajos'),
+		description: __('Prepara exposiciones, tareas, presentaciones y entrevistas con ayuda guiada.'),
+	},
+	{
+		icon: ClockIcon,
+		className: 'sb-result-amber',
+		title: __('Ahorra horas con prompts'),
+		description: __('Genera contenido, planes, ideas de negocio y tareas sin empezar desde cero.'),
+	},
+	{
+		icon: Bot,
+		className: 'sb-result-purple',
+		title: __('Practica con IA sin límites'),
+		description: __('Recibe retroalimentación inmediata y mejora tus respuestas paso a paso.'),
+	},
 ]
 
-function scrollToPricing() {
-	document.getElementById('pricing-card')?.scrollIntoView({ behavior: 'smooth' })
-}
+const comparisonRows = [
+	{
+		free: __('Acceso limitado a cursos'),
+		plus: __('Cursos y recursos premium'),
+	},
+	{
+		free: __('Certificados limitados'),
+		plus: __('Certificados ilimitados'),
+	},
+	{
+		free: __('Prompts básicos'),
+		plus: __('Prompts premium ilimitados'),
+	},
+	{
+		free: __('Tutor IA limitado'),
+		plus: __('Tutor IA ilimitado'),
+	},
+	{
+		free: __('Sin simulaciones premium'),
+		plus: __('Simulaciones con IA completas'),
+		freeNegative: true,
+	},
+	{
+		free: __('Sin calendario inteligente'),
+		plus: __('Calendario y seguimiento total'),
+		freeNegative: true,
+	},
+]
 
-function scrollToBenefits() {
-	document.getElementById('benefits-section')?.scrollIntoView({ behavior: 'smooth' })
-}
-
-
-const trustPoints = [
-	{ icon: ShieldCheck, label: __('Pago seguro'), sub: __('Con Mercado Pago') },
-	{ icon: RefreshCcw, label: __('Cancela cuando quieras'), sub: __('Sin contratos') },
-	{ icon: Sparkles, label: __('Activación inmediata'), sub: __('Disfruta al instante') },
-	{ icon: Download, label: __('Recibos en PDF'), sub: __('Comprobantes claros') },
+const faqs = [
+	{
+		q: __('¿Puedo cancelar cuando quiera?'),
+		a: __('Sí. No hay contratos largos. Puedes cancelar tu suscripción cuando quieras y mantener el acceso hasta el final del periodo pagado.'),
+	},
+	{
+		q: __('¿Qué incluye StudyBadge Plus?'),
+		a: __('Incluye certificados ilimitados, Tutor IA ilimitado, simulaciones, prompts premium, calendario inteligente y herramientas de estudio con IA.'),
+	},
+	{
+		q: __('¿Los certificados son ilimitados?'),
+		a: __('Sí. Con Plus puedes generar certificados de los cursos que completes y apruebes, sin pagar extra por cada certificado.'),
+	},
+	{
+		q: __('¿El pago es seguro?'),
+		a: __('Sí. El pago se procesa con Mercado Pago, una pasarela segura y conocida en Latinoamérica.'),
+	},
+	{
+		q: __('¿Sirve para estudiar y para negocios?'),
+		a: __('Sí. StudyBadge Plus está pensado para estudiantes, emprendedores, freelancers y pequeños negocios que quieren avanzar con IA.'),
+	},
+	{
+		q: __('¿Qué pasa después de pagar?'),
+		a: __('Tu cuenta se actualiza y tendrás acceso a las funciones Plus cuando el pago sea confirmado.'),
+	},
 ]
 
 const billing = createResource({
 	url: 'lms.lms.subscriptions.get_plus_billing',
 	auto: true,
 	onSuccess(data) {
-		if (data.active) {
-			user.reload?.()
+		if (data?.active) {
+			user?.reload?.()
 		}
 	},
 })
@@ -705,60 +756,117 @@ const paymentMethodResource = createResource({
 	url: 'lms.lms.subscriptions.update_plus_payment_method',
 })
 
-const subscription = computed(() => billing.data?.subscription)
+const subscription = computed(() => billing.data?.subscription || null)
 const receipts = computed(() => billing.data?.receipts || [])
 
 const formattedPrice = computed(() => {
 	const plan = billing.data?.plan
 	if (!plan) return 'S/ 29.90'
-	if (plan.currency === 'PEN') return `S/ ${Number(plan.amount).toFixed(2)}`
-	return `${plan.currency} ${Number(plan.amount).toFixed(2)}`
+
+	const amount = Number(plan.amount || 29.9).toFixed(2)
+
+	if (plan.currency === 'PEN') {
+		return `S/ ${amount}`
+	}
+
+	return `${plan.currency || 'S/'} ${amount}`
 })
 
 const paymentMethodLabel = computed(() => {
 	const method = subscription.value?.payment_method
+
 	if (!method?.id && !method?.card_last_four) {
 		return __('Mercado Pago')
 	}
+
 	if (method.card_last_four) {
 		return `${method.card_brand || method.name || __('Tarjeta')} **** ${method.card_last_four}`
 	}
-	return method.name || method.id
+
+	return method.name || method.id || __('Mercado Pago')
 })
 
+const breadcrumbs = computed(() => [
+	{
+		label: __('StudyBadge Plus'),
+		route: { name: 'Plus' },
+	},
+])
+
+function scrollToPricing() {
+	document.getElementById('pricing-card')?.scrollIntoView({
+		behavior: 'smooth',
+		block: 'center',
+	})
+}
+
+function scrollToBenefits() {
+	document.getElementById('benefits-section')?.scrollIntoView({
+		behavior: 'smooth',
+		block: 'start',
+	})
+}
+
+function getErrorMessage(err) {
+	if (!err) return __('Ocurrió un error.')
+	if (typeof err === 'string') return err
+	if (err.messages?.length) return err.messages[0]
+	if (err.message) return err.message
+	return __('Ocurrió un error.')
+}
+
 function activatePlus() {
+	if (activating.value) return
+
 	activating.value = true
+
 	checkout.submit(
 		{},
 		{
 			onSuccess(url) {
+				if (!url) {
+					activating.value = false
+					toast.error(__('No se recibió el enlace de pago.'))
+					return
+				}
+
 				window.location.href = url
 			},
 			onError(err) {
 				activating.value = false
-				toast.error(err.messages?.[0] || err)
+				toast.error(getErrorMessage(err))
 			},
 		}
 	)
 }
 
 function openExistingCheckout() {
-	window.location.href = subscription.value.init_point
+	const url = subscription.value?.init_point
+
+	if (!url) {
+		activatePlus()
+		return
+	}
+
+	window.location.href = url
 }
 
 function requestCancellation() {
-	if (!window.confirm(__('Tu Plus seguira activo hasta el final del periodo.'))) {
-		return
-	}
+	const confirmed = window.confirm(
+		__('Tu Plus seguirá activo hasta el final del periodo pagado. ¿Quieres cancelar la renovación?')
+	)
+
+	if (!confirmed) return
+
 	cancelResource.submit(
 		{},
 		{
 			onSuccess(data) {
 				billing.data = data
-				toast.success(__('Cancelacion programada.'))
+				toast.success(__('Cancelación programada.'))
 			},
 			onError(err) {
-				toast.error(err.messages?.[0] || err)
+				toast.error(getErrorMessage(err))
 			},
 		}
 	)
@@ -773,7 +881,7 @@ function reactivateSubscription() {
 				toast.success(__('Tu Plus sigue activo.'))
 			},
 			onError(err) {
-				toast.error(err.messages?.[0] || err)
+				toast.error(getErrorMessage(err))
 			},
 		}
 	)
@@ -794,9 +902,11 @@ function loadMercadoPago() {
 	if (window.MercadoPago) {
 		return Promise.resolve(window.MercadoPago)
 	}
+
 	if (mercadoPagoLoader.value) {
 		return mercadoPagoLoader.value
 	}
+
 	mercadoPagoLoader.value = new Promise((resolve, reject) => {
 		const script = document.createElement('script')
 		script.src = 'https://sdk.mercadopago.com/js/v2'
@@ -804,26 +914,31 @@ function loadMercadoPago() {
 		script.onerror = reject
 		document.body.appendChild(script)
 	})
+
 	return mercadoPagoLoader.value
 }
 
 async function initMercadoPagoCardForm() {
 	if (!billing.data?.public_key) {
+		cardFormLoading.value = false
 		toast.error(__('Falta configurar la public key de Mercado Pago.'))
 		return
 	}
+
 	cardFormLoading.value = true
 	destroyCardForm()
+
 	try {
 		const MercadoPago = await loadMercadoPago()
 		const mp = new MercadoPago(billing.data.public_key, { locale: 'es-PE' })
 		const bricksBuilder = mp.bricks()
+
 		cardController.value = await bricksBuilder.create(
 			'cardPayment',
 			'studybadge-mp-card-form',
 			{
 				initialization: {
-					amount: Number(billing.data?.plan?.amount || 29),
+					amount: Number(billing.data?.plan?.amount || 29.9),
 				},
 				customization: {
 					paymentMethods: {
@@ -841,17 +956,25 @@ async function initMercadoPagoCardForm() {
 					onSubmit(cardFormData) {
 						return new Promise((resolve, reject) => {
 							const cardToken = cardFormData.token || cardFormData.card_token_id
+
+							if (!cardToken) {
+								const error = __('No se pudo generar el token de la tarjeta.')
+								toast.error(error)
+								reject(error)
+								return
+							}
+
 							paymentMethodResource.submit(
 								{ card_token_id: cardToken },
 								{
 									onSuccess(data) {
 										billing.data = data
 										hidePaymentMethodForm()
-										toast.success(__('Metodo de pago actualizado.'))
+										toast.success(__('Método de pago actualizado.'))
 										resolve()
 									},
 									onError(err) {
-										toast.error(err.messages?.[0] || err)
+										toast.error(getErrorMessage(err))
 										reject(err)
 									},
 								}
@@ -871,605 +994,1782 @@ function destroyCardForm() {
 	if (cardController.value?.unmount) {
 		cardController.value.unmount()
 	}
+
 	cardController.value = null
 }
 
 function downloadReceipt(receipt) {
+	if (!receipt?.download_url) {
+		toast.error(__('Este recibo todavía no tiene PDF disponible.'))
+		return
+	}
+
 	window.open(receipt.download_url, '_blank', 'noopener')
 }
 
 function formatDate(value) {
 	if (!value) return __('Pendiente')
+
+	const date = new Date(value)
+
+	if (Number.isNaN(date.getTime())) {
+		return __('Pendiente')
+	}
+
 	return new Intl.DateTimeFormat('es-PE', {
 		dateStyle: 'medium',
 		timeStyle: 'short',
-	}).format(new Date(value))
+	}).format(date)
 }
 
 function formatMoney(amount, currency) {
-	if (currency === 'PEN' || !currency) {
-		return `S/ ${Number(amount || 0).toFixed(2)}`
-	}
-	return `${currency} ${Number(amount || 0).toFixed(2)}`
-}
+	const parsedAmount = Number(amount || 0).toFixed(2)
 
-function formatSubscriptionStatus(status) {
-	if (!status) return ''
-	if (status === 'authorized' || status === 'active') return __('Activa')
-	if (status === 'pending') return __('Pendiente de pago')
-	if (status === 'cancelled') return __('Cancelada')
-	return status.charAt(0).toUpperCase() + status.slice(1)
+	if (currency === 'PEN' || !currency) {
+		return `S/ ${parsedAmount}`
+	}
+
+	return `${currency} ${parsedAmount}`
 }
 
 onBeforeUnmount(() => {
 	destroyCardForm()
 })
 
-const breadcrumbs = computed(() => [
-	{
-		label: __('StudyBadge Plus'),
-		route: { name: 'Plus' },
-	},
-])
-
-usePageMeta(() => {
-	return {
-		title: __('StudyBadge Plus'),
-		icon: brand.favicon,
-	}
-})
+usePageMeta(() => ({
+	title: __('StudyBadge Plus'),
+	icon: brand.favicon,
+}))
 </script>
 
 <style scoped>
-/* ═══════════════════════════════════════
-   PLUS PAGE — LIGHT & DARK TOKENS
-   ═══════════════════════════════════════ */
-
-.plus-page {
-	background: var(--sb-bg);
-	font-family: 'Inter', system-ui, -apple-system, sans-serif;
+.sb-plus-page {
+	background: #f5f7fb;
+	color: #111827;
+	font-family:
+		Inter,
+		ui-sans-serif,
+		system-ui,
+		-apple-system,
+		BlinkMacSystemFont,
+		"Segoe UI",
+		sans-serif;
 }
 
-.plus-header {
-	background: var(--sb-white);
-	border-color: rgba(6, 27, 73, 0.06);
+.sb-container {
+	width: min(1180px, calc(100% - 32px));
+	margin-inline: auto;
 }
 
-:root[data-theme="dark"] .plus-header {
-	border-color: rgba(255, 255, 255, 0.06);
+.sb-plus-header {
+	position: sticky;
+	top: 0;
+	z-index: 40;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	height: 48px;
+	padding: 0 16px;
+	background: rgba(255, 255, 255, 0.92);
+	border-bottom: 1px solid rgba(8, 32, 78, 0.08);
+	backdrop-filter: blur(16px);
 }
 
-/* Text */
-.plus-text-primary { color: #111827; }
-.plus-text-muted { color: #6b7280; }
-:root[data-theme="dark"] .plus-text-primary { color: #f3f4f6; }
-:root[data-theme="dark"] .plus-text-muted { color: #9ca3af; }
-
-/* Border */
-.plus-border { border-color: rgba(0, 0, 0, 0.06); }
-:root[data-theme="dark"] .plus-border { border-color: rgba(255, 255, 255, 0.08); }
-
-/* ═══════════════════════════════════════
-   HERO SECTIONS
-   ═══════════════════════════════════════ */
-
-.plus-hero-active,
-.plus-hero-sell {
-	background: linear-gradient(145deg, #061B49 0%, #0b2f73 40%, #0a2259 100%);
+.sb-loading {
+	display: grid;
+	place-items: center;
+	min-height: calc(100vh - 48px);
+	padding: 48px 16px;
 }
 
-.plus-hero-glow-1 {
-	position: absolute;
-	top: -120px;
-	right: -80px;
-	width: 400px;
-	height: 400px;
-	background: radial-gradient(circle, rgba(59, 130, 246, 0.25), transparent 70%);
-	border-radius: 50%;
-	filter: blur(60px);
+.sb-loading-card {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+	padding: 32px;
+	background: #ffffff;
+	border: 1px solid rgba(8, 32, 78, 0.08);
+	border-radius: 24px;
+	box-shadow: 0 20px 60px rgba(8, 32, 78, 0.08);
 }
 
-.plus-hero-glow-2 {
-	position: absolute;
-	bottom: -100px;
-	left: -60px;
-	width: 300px;
-	height: 300px;
-	background: radial-gradient(circle, rgba(245, 179, 1, 0.12), transparent 70%);
-	border-radius: 50%;
-	filter: blur(50px);
+.sb-loading-card p {
+	margin: 0;
+	color: #6b7280;
+	font-size: 14px;
+	font-weight: 700;
 }
 
-.plus-hero-grid {
+.sb-spinner-wrap {
+	position: relative;
+	width: 64px;
+	height: 64px;
+}
+
+.sb-spinner {
+	width: 64px;
+	height: 64px;
+	border: 4px solid #e5e7eb;
+	border-top-color: #1473e6;
+	border-radius: 999px;
+	animation: sb-spin 0.9s linear infinite;
+}
+
+.sb-spinner-icon {
 	position: absolute;
 	inset: 0;
-	background-image:
-		linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-	background-size: 48px 48px;
+	margin: auto;
 }
 
-.plus-crown-badge {
+@keyframes sb-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* Shared hero */
+.sb-active-hero,
+.sb-sales-hero,
+.sb-final-cta {
+	position: relative;
+	overflow: hidden;
+	background:
+		radial-gradient(circle at 82% 18%, rgba(36, 101, 222, 0.46), transparent 32%),
+		linear-gradient(135deg, #061942 0%, #08204e 42%, #0d347a 100%);
+	color: white;
+}
+
+.sb-hero-grid {
+	position: absolute;
+	inset: 0;
+	opacity: 0.32;
+	background-image:
+		linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+	background-size: 56px 56px;
+	pointer-events: none;
+}
+
+.sb-hero-decoration {
+	position: absolute;
+	border-radius: 999px;
+	filter: blur(64px);
+	pointer-events: none;
+}
+
+.sb-hero-decoration-one {
+	top: -160px;
+	left: -120px;
+	width: 380px;
+	height: 380px;
+	background: rgba(20, 115, 230, 0.35);
+}
+
+.sb-hero-decoration-two {
+	right: -120px;
+	bottom: -180px;
+	width: 420px;
+	height: 420px;
+	background: rgba(250, 204, 21, 0.16);
+}
+
+.sb-crown-badge {
+	display: inline-grid;
+	place-items: center;
+	width: 88px;
+	height: 88px;
+	border-radius: 24px;
+	background: rgba(255, 255, 255, 0.1);
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	box-shadow: 0 24px 70px rgba(0, 0, 0, 0.16);
+	backdrop-filter: blur(12px);
+}
+
+/* Active state */
+.sb-active-hero-inner {
+	position: relative;
+	z-index: 2;
+	padding: 64px 0;
+}
+
+.sb-active-hero-content {
+	display: flex;
+	align-items: center;
+	gap: 28px;
+}
+
+.sb-status-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	margin-bottom: 16px;
+	color: #bbf7d0;
+	background: rgba(34, 197, 94, 0.16);
+	border: 1px solid rgba(74, 222, 128, 0.22);
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 900;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.sb-status-dot {
+	position: relative;
+	width: 8px;
+	height: 8px;
+	background: #22c55e;
+	border-radius: 999px;
+	box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.14);
+}
+
+.sb-active-copy h1 {
+	margin: 0;
+	color: #ffffff;
+	font-size: clamp(34px, 5vw, 56px);
+	font-weight: 950;
+	letter-spacing: -0.055em;
+	line-height: 0.98;
+}
+
+.sb-active-copy h1 span {
+	display: block;
+	margin-top: 8px;
+	color: #facc15;
+}
+
+.sb-active-copy p {
+	max-width: 620px;
+	margin: 18px 0 0;
+	color: rgba(219, 234, 254, 0.84);
+	font-size: 18px;
+	font-weight: 600;
+	line-height: 1.55;
+}
+
+.sb-active-layout {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 340px;
+	gap: 28px;
+	align-items: start;
+	padding: 36px 0 64px;
+}
+
+.sb-active-main {
+	display: grid;
+	gap: 24px;
+}
+
+.sb-panel,
+.sb-plan-card,
+.sb-support-card {
+	background: #ffffff;
+	border: 1px solid rgba(8, 32, 78, 0.08);
+	border-radius: 24px;
+	box-shadow:
+		0 1px 2px rgba(8, 32, 78, 0.04),
+		0 16px 50px rgba(8, 32, 78, 0.06);
+}
+
+.sb-panel {
+	padding: 28px;
+}
+
+.sb-section-heading {
+	display: flex;
+	align-items: flex-start;
+	gap: 14px;
+	margin-bottom: 24px;
+}
+
+.sb-section-heading-tight {
+	margin-bottom: 0;
+}
+
+.sb-section-icon {
+	display: grid;
+	place-items: center;
+	flex: 0 0 auto;
+	width: 42px;
+	height: 42px;
+	color: #1473e6;
+	background: #eff6ff;
+	border-radius: 14px;
+}
+
+.sb-section-icon-muted {
+	color: #64748b;
+	background: #f1f5f9;
+}
+
+.sb-section-heading h2 {
+	margin: 0;
+	color: #08204e;
+	font-size: 21px;
+	font-weight: 900;
+	letter-spacing: -0.02em;
+}
+
+.sb-section-heading p {
+	margin: 4px 0 0;
+	color: #64748b;
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.sb-active-benefits-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 14px;
+}
+
+.sb-active-benefit {
+	position: relative;
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	min-height: 112px;
+	padding: 16px;
+	background: #f8fbff;
+	border: 1px solid #e8f0ff;
+	border-radius: 18px;
+	transition: 0.2s ease;
+}
+
+.sb-active-benefit:hover {
+	transform: translateY(-2px);
+	border-color: rgba(20, 115, 230, 0.28);
+	box-shadow: 0 16px 35px rgba(8, 32, 78, 0.08);
+}
+
+.sb-active-benefit-icon {
+	display: grid;
+	place-items: center;
+	width: 40px;
+	height: 40px;
+	flex: 0 0 auto;
+	color: #1473e6;
+	background: #eaf3ff;
+	border-radius: 14px;
+}
+
+.sb-active-benefit h3 {
+	margin: 0;
+	color: #111827;
+	font-size: 14px;
+	font-weight: 900;
+}
+
+.sb-active-benefit p {
+	margin: 5px 0 0;
+	color: #64748b;
+	font-size: 12.5px;
+	line-height: 1.45;
+}
+
+.sb-active-check {
+	margin-left: auto;
+	opacity: 0.8;
+}
+
+.sb-panel-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding-bottom: 20px;
+	margin-bottom: 20px;
+	border-bottom: 1px solid #edf1f7;
+}
+
+.sb-ghost-btn,
+.sb-outline-btn {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	padding: 1.25rem;
-	border-radius: 1.25rem;
-	background: rgba(255, 255, 255, 0.08);
-	border: 1px solid rgba(255, 255, 255, 0.12);
-	backdrop-filter: blur(12px);
-	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-}
-
-/* ═══════════════════════════════════════
-   CARDS
-   ═══════════════════════════════════════ */
-
-.plus-card {
-	background: var(--sb-white);
-	border: 1px solid rgba(6, 27, 73, 0.06);
-	border-radius: 20px;
-	box-shadow: 0 1px 3px rgba(6, 27, 73, 0.04), 0 4px 12px rgba(6, 27, 73, 0.03);
-	transition: all 0.2s ease;
-}
-
-:root[data-theme="dark"] .plus-card {
-	border-color: rgba(255, 255, 255, 0.06);
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.plus-card-support {
-	background: rgba(59, 130, 246, 0.04);
-	border: 1px solid rgba(59, 130, 246, 0.1);
-	border-radius: 20px;
-}
-
-:root[data-theme="dark"] .plus-card-support {
-	background: rgba(59, 130, 246, 0.08);
-	border-color: rgba(59, 130, 246, 0.15);
-}
-
-/* ═══════════════════════════════════════
-   PRICING CARD
-   ═══════════════════════════════════════ */
-
-.plus-pricing-card {
-	background: var(--sb-white);
-	border: 1px solid rgba(6, 27, 73, 0.08);
-	border-radius: 24px;
-	box-shadow: 0 4px 6px rgba(6, 27, 73, 0.04), 0 20px 48px rgba(6, 27, 73, 0.08);
-}
-
-:root[data-theme="dark"] .plus-pricing-card {
-	border-color: rgba(255, 255, 255, 0.08);
-	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2), 0 20px 48px rgba(0, 0, 0, 0.3);
-}
-
-/* ═══════════════════════════════════════
-   BENEFIT ITEMS (Active state)
-   ═══════════════════════════════════════ */
-
-.plus-benefit-item {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-	padding: 14px 16px;
-	border-radius: 14px;
-	background: rgba(59, 130, 246, 0.03);
-	border: 1px solid rgba(59, 130, 246, 0.06);
-	transition: all 0.2s ease;
-}
-
-.plus-benefit-item:hover {
-	background: rgba(59, 130, 246, 0.06);
-	border-color: rgba(59, 130, 246, 0.12);
-}
-
-:root[data-theme="dark"] .plus-benefit-item {
-	background: rgba(59, 130, 246, 0.05);
-	border-color: rgba(59, 130, 246, 0.1);
-}
-
-:root[data-theme="dark"] .plus-benefit-item:hover {
-	background: rgba(59, 130, 246, 0.1);
-	border-color: rgba(59, 130, 246, 0.18);
-}
-
-.plus-benefit-icon {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 36px;
-	height: 36px;
-	border-radius: 10px;
-	background: rgba(59, 130, 246, 0.08);
-	color: #3b82f6;
-	flex-shrink: 0;
-}
-
-:root[data-theme="dark"] .plus-benefit-icon {
-	background: rgba(59, 130, 246, 0.15);
-	color: #60a5fa;
-}
-
-/* BENEFIT CARDS (Sale state) */
-.plus-benefit-card {
-	display: flex;
-	align-items: flex-start;
-	gap: 16px;
-	padding: 20px;
-	border-radius: 18px;
-	background: var(--sb-white);
-	border: 1px solid rgba(6, 27, 73, 0.06);
-	box-shadow: 0 1px 4px rgba(6, 27, 73, 0.04);
-	transition: all 0.25s ease;
-}
-
-.plus-benefit-card:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 8px 24px rgba(6, 27, 73, 0.1);
-	border-color: rgba(59, 130, 246, 0.15);
-}
-
-:root[data-theme="dark"] .plus-benefit-card {
-	border-color: rgba(255, 255, 255, 0.06);
-	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-}
-
-:root[data-theme="dark"] .plus-benefit-card:hover {
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-	border-color: rgba(59, 130, 246, 0.25);
-}
-
-.plus-benefit-card-icon {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 48px;
-	height: 48px;
-	border-radius: 14px;
-	background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.04));
-	color: #3b82f6;
-	flex-shrink: 0;
-	transition: transform 0.2s ease;
-}
-
-:root[data-theme="dark"] .plus-benefit-card-icon {
-	background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.08));
-	color: #60a5fa;
-}
-
-/* ═══════════════════════════════════════
-   ICON BADGES
-   ═══════════════════════════════════════ */
-
-.plus-icon-badge {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 36px;
-	height: 36px;
-	border-radius: 10px;
-	flex-shrink: 0;
-}
-
-/* ═══════════════════════════════════════
-   TRUST ICONS
-   ═══════════════════════════════════════ */
-
-.plus-trust-icon {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 48px;
-	height: 48px;
-	border-radius: 14px;
-	background: rgba(16, 185, 129, 0.06);
-	color: #10b981;
-	margin-bottom: 4px;
-}
-
-:root[data-theme="dark"] .plus-trust-icon {
-	background: rgba(16, 185, 129, 0.1);
-	color: #34d399;
-}
-
-/* ═══════════════════════════════════════
-   INFO ROWS
-   ═══════════════════════════════════════ */
-
-.plus-info-row {
-	display: flex;
-	align-items: flex-start;
-	gap: 12px;
-	padding: 12px 14px;
+	gap: 8px;
+	border: 0;
 	border-radius: 12px;
-	background: rgba(0, 0, 0, 0.02);
+	font-weight: 800;
+	cursor: pointer;
+	transition: 0.18s ease;
 }
 
-:root[data-theme="dark"] .plus-info-row {
-	background: rgba(255, 255, 255, 0.04);
+.sb-ghost-btn {
+	padding: 10px 12px;
+	color: #64748b;
+	background: transparent;
+	font-size: 13px;
 }
 
-/* ═══════════════════════════════════════
-   RECEIPT ROWS
-   ═══════════════════════════════════════ */
+.sb-ghost-btn:hover {
+	color: #08204e;
+	background: #f1f5f9;
+}
 
-.plus-receipt-row {
+.sb-outline-btn {
+	padding: 10px 14px;
+	color: #334155;
+	background: #ffffff;
+	border: 1px solid #e2e8f0;
+	font-size: 13px;
+}
+
+.sb-outline-btn:hover {
+	color: #1473e6;
+	border-color: rgba(20, 115, 230, 0.32);
+	background: #f8fbff;
+}
+
+.sb-outline-btn-small {
+	padding: 8px 10px;
+	font-size: 12px;
+}
+
+.sb-receipts {
+	display: grid;
+	gap: 10px;
+}
+
+.sb-receipt-row {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 16px;
 	padding: 14px 16px;
-	border-radius: 14px;
-	background: rgba(0, 0, 0, 0.015);
-	border: 1px solid transparent;
-	transition: all 0.15s ease;
+	background: #f8fafc;
+	border: 1px solid #eef2f7;
+	border-radius: 16px;
 }
 
-.plus-receipt-row:hover {
-	background: rgba(59, 130, 246, 0.03);
-	border-color: rgba(59, 130, 246, 0.08);
+.sb-receipt-main {
+	min-width: 0;
 }
 
-:root[data-theme="dark"] .plus-receipt-row {
-	background: rgba(255, 255, 255, 0.03);
+.sb-receipt-main h3 {
+	margin: 0;
+	color: #111827;
+	font-size: 14px;
+	font-weight: 900;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
-:root[data-theme="dark"] .plus-receipt-row:hover {
-	background: rgba(59, 130, 246, 0.06);
-	border-color: rgba(59, 130, 246, 0.12);
+.sb-receipt-meta {
+	display: flex;
+	align-items: center;
+	gap: 7px;
+	margin-top: 6px;
+	color: #64748b;
+	font-size: 12px;
 }
 
-/* ═══════════════════════════════════════
-   STATUS PILLS
-   ═══════════════════════════════════════ */
-
-.plus-status-pill {
+.sb-mini-status {
 	display: inline-flex;
 	align-items: center;
-	padding: 2px 8px;
-	border-radius: 20px;
+	padding: 2px 7px;
+	border-radius: 999px;
 	font-size: 10px;
-	font-weight: 700;
-	text-transform: uppercase;
+	font-weight: 900;
 	letter-spacing: 0.04em;
+	text-transform: uppercase;
 }
 
-.plus-status-paid {
-	background: rgba(16, 185, 129, 0.1);
-	color: #059669;
+.sb-mini-status-paid {
+	color: #047857;
+	background: #d1fae5;
 }
 
-:root[data-theme="dark"] .plus-status-paid {
-	background: rgba(16, 185, 129, 0.15);
-	color: #34d399;
+.sb-mini-status-default {
+	color: #475569;
+	background: #e2e8f0;
 }
 
-.plus-status-default {
-	background: rgba(107, 114, 128, 0.1);
-	color: #6b7280;
-}
-
-/* ═══════════════════════════════════════
-   EMPTY STATE
-   ═══════════════════════════════════════ */
-
-.plus-empty-state {
+.sb-receipt-actions {
 	display: flex;
-	flex-direction: column;
 	align-items: center;
+	gap: 12px;
+	flex: 0 0 auto;
+}
+
+.sb-receipt-actions strong {
+	color: #0f172a;
+	font-size: 14px;
+}
+
+.sb-empty {
+	display: grid;
+	place-items: center;
 	text-align: center;
+	padding: 42px 16px;
 }
 
-.plus-empty-icon {
+.sb-empty-icon {
+	display: grid;
+	place-items: center;
+	width: 68px;
+	height: 68px;
+	color: #94a3b8;
+	background: #f1f5f9;
+	border-radius: 22px;
+}
+
+.sb-empty h3 {
+	margin: 16px 0 0;
+	color: #111827;
+	font-size: 16px;
+	font-weight: 900;
+}
+
+.sb-empty p {
+	max-width: 340px;
+	margin: 6px 0 0;
+	color: #64748b;
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.sb-active-sidebar {
+	position: sticky;
+	top: 72px;
+	display: grid;
+	gap: 18px;
+}
+
+.sb-plan-card {
+	position: relative;
+	overflow: hidden;
+	padding: 24px;
+}
+
+.sb-plan-card-accent {
+	position: absolute;
+	inset: 0 0 auto;
+	height: 5px;
+	background: linear-gradient(90deg, #1473e6, #22c55e);
+}
+
+.sb-plan-top {
 	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 64px;
-	height: 64px;
-	border-radius: 20px;
-	background: rgba(0, 0, 0, 0.03);
-	color: #d1d5db;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 22px;
 }
 
-:root[data-theme="dark"] .plus-empty-icon {
-	background: rgba(255, 255, 255, 0.05);
-	color: #4b5563;
+.sb-plan-top h2 {
+	margin: 0;
+	color: #08204e;
+	font-size: 20px;
+	font-weight: 950;
 }
 
-/* ═══════════════════════════════════════
-   LOADING RING
-   ═══════════════════════════════════════ */
-
-.plus-loading-ring {
-	border: 3px solid rgba(0, 0, 0, 0.05);
-	border-top-color: #3b82f6;
-	border-radius: 50%;
-}
-
-:root[data-theme="dark"] .plus-loading-ring {
-	border-color: rgba(255, 255, 255, 0.08);
-	border-top-color: #60a5fa;
-}
-
-/* ═══════════════════════════════════════
-   BUTTONS
-   ═══════════════════════════════════════ */
-
-.plus-btn-primary {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: 8px;
-	padding: 12px 20px;
-	border-radius: 12px;
+.sb-plan-top p {
+	margin: 4px 0 0;
+	color: #64748b;
 	font-size: 14px;
 	font-weight: 700;
-	color: #fff;
-	background: linear-gradient(135deg, #0d6efd, #0b5ed7);
-	border: none;
-	cursor: pointer;
-	transition: all 0.2s ease;
-	box-shadow: 0 2px 8px rgba(13, 110, 253, 0.25);
 }
 
-.plus-btn-primary:hover {
-	background: linear-gradient(135deg, #0b5ed7, #084298);
-	transform: translateY(-1px);
-	box-shadow: 0 4px 16px rgba(13, 110, 253, 0.35);
+.sb-plan-info-list {
+	display: grid;
+	gap: 10px;
 }
 
-.plus-btn-primary:disabled {
-	opacity: 0.6;
-	pointer-events: none;
+.sb-plan-info {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	padding: 13px 14px;
+	color: #64748b;
+	background: #f8fafc;
+	border-radius: 16px;
 }
 
-.plus-btn-cta {
+.sb-plan-info span {
+	display: block;
+	color: #64748b;
+	font-size: 10px;
+	font-weight: 900;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.sb-plan-info strong {
+	display: block;
+	margin-top: 3px;
+	color: #111827;
+	font-size: 13px;
+	line-height: 1.35;
+	overflow-wrap: anywhere;
+}
+
+.sb-cancel-warning {
+	margin-top: 18px;
+	padding: 14px;
+	background: #fffbeb;
+	border: 1px solid #fde68a;
+	border-radius: 16px;
+}
+
+.sb-cancel-warning strong {
+	color: #92400e;
+	font-size: 13px;
+}
+
+.sb-cancel-warning p {
+	margin: 4px 0 0;
+	color: #b45309;
+	font-size: 12px;
+	line-height: 1.45;
+}
+
+.sb-plan-actions {
+	display: grid;
+	gap: 10px;
+	margin-top: 20px;
+}
+
+.sb-primary-btn,
+.sb-danger-btn {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	gap: 8px;
-	padding: 16px 24px;
+	width: 100%;
+	min-height: 46px;
+	border: 0;
 	border-radius: 14px;
-	font-size: 15px;
-	font-weight: 800;
-	color: #fff;
-	background: linear-gradient(135deg, #0d6efd, #0b5ed7);
-	border: none;
+	font-size: 14px;
+	font-weight: 900;
 	cursor: pointer;
-	transition: all 0.25s ease;
-	box-shadow: 0 4px 16px rgba(13, 110, 253, 0.3);
+	transition: 0.18s ease;
 }
 
-.plus-btn-cta:hover {
-	transform: translateY(-2px);
-	box-shadow: 0 8px 32px rgba(13, 110, 253, 0.4);
+.sb-primary-btn {
+	color: #ffffff;
+	background: linear-gradient(135deg, #1473e6, #0b5ed7);
+	box-shadow: 0 12px 26px rgba(20, 115, 230, 0.23);
 }
 
-.plus-btn-cta:disabled {
-	opacity: 0.7;
-	pointer-events: none;
+.sb-primary-btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 16px 34px rgba(20, 115, 230, 0.3);
 }
 
-.plus-btn-outline {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: 6px;
-	padding: 8px 14px;
-	border-radius: 10px;
-	font-weight: 600;
-	color: #374151;
-	background: transparent;
-	border: 1.5px solid rgba(0, 0, 0, 0.1);
-	cursor: pointer;
-	transition: all 0.15s ease;
-}
-
-.plus-btn-outline:hover {
-	background: rgba(0, 0, 0, 0.03);
-	border-color: rgba(0, 0, 0, 0.18);
-}
-
-:root[data-theme="dark"] .plus-btn-outline {
-	color: #d1d5db;
-	border-color: rgba(255, 255, 255, 0.12);
-}
-
-:root[data-theme="dark"] .plus-btn-outline:hover {
-	background: rgba(255, 255, 255, 0.06);
-	border-color: rgba(255, 255, 255, 0.2);
-}
-
-.plus-btn-ghost {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: 6px;
-	padding: 8px 14px;
-	border-radius: 10px;
-	font-weight: 600;
-	color: #6b7280;
-	background: transparent;
-	border: none;
-	cursor: pointer;
-	transition: all 0.15s ease;
-}
-
-.plus-btn-ghost:hover {
-	background: rgba(0, 0, 0, 0.04);
-	color: #374151;
-}
-
-:root[data-theme="dark"] .plus-btn-ghost:hover {
-	background: rgba(255, 255, 255, 0.06);
-	color: #e5e7eb;
-}
-
-.plus-btn-danger-ghost {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	gap: 6px;
-	padding: 10px 16px;
-	border-radius: 12px;
-	font-size: 13px;
-	font-weight: 600;
-	color: #9ca3af;
-	background: transparent;
-	border: none;
-	cursor: pointer;
-	transition: all 0.15s ease;
-}
-
-.plus-btn-danger-ghost:hover {
+.sb-danger-btn {
 	color: #ef4444;
-	background: rgba(239, 68, 68, 0.06);
+	background: #fff1f2;
 }
 
-:root[data-theme="dark"] .plus-btn-danger-ghost:hover {
-	background: rgba(239, 68, 68, 0.1);
+.sb-danger-btn:hover {
+	background: #ffe4e6;
 }
 
-/* ═══════════════════════════════════════
-   MODAL
-   ═══════════════════════════════════════ */
+.sb-primary-btn:disabled,
+.sb-danger-btn:disabled,
+.sb-hero-primary:disabled,
+.sb-pricing-cta:disabled,
+.sb-final-btn:disabled {
+	cursor: not-allowed;
+	opacity: 0.72;
+	transform: none;
+	box-shadow: none;
+}
 
-.plus-modal-content {
-	background: var(--sb-white);
-	border-radius: 20px;
-	box-shadow: 0 24px 64px rgba(0, 0, 0, 0.3);
+.sb-support-card {
+	padding: 24px;
+	text-align: center;
+	color: #64748b;
+	background: linear-gradient(180deg, #ffffff, #f8fbff);
+}
+
+.sb-support-card svg {
+	margin-inline: auto;
+	color: #1473e6;
+}
+
+.sb-support-card h3 {
+	margin: 12px 0 0;
+	color: #08204e;
+	font-size: 15px;
+	font-weight: 900;
+}
+
+.sb-support-card p {
+	margin: 6px 0 18px;
+	color: #64748b;
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+.sb-support-link {
+	text-decoration: none;
+}
+
+/* Modal */
+.sb-modal-shell {
+	position: fixed;
+	inset: 0;
+	z-index: 70;
+	display: grid;
+	place-items: center;
+	padding: 16px;
+}
+
+.sb-modal-overlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(2, 6, 23, 0.68);
+	backdrop-filter: blur(8px);
+}
+
+.sb-modal-content {
+	position: relative;
+	z-index: 1;
+	width: min(100%, 480px);
+	max-height: 90vh;
 	overflow: hidden;
+	background: #ffffff;
+	border-radius: 24px;
+	box-shadow: 0 28px 90px rgba(0, 0, 0, 0.36);
 }
 
-/* Modal Transition */
-.plus-modal-enter-active,
-.plus-modal-leave-active {
-	transition: all 0.25s ease;
+.sb-modal-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 18px 20px;
+	border-bottom: 1px solid #edf1f7;
 }
 
-.plus-modal-enter-from,
-.plus-modal-leave-to {
+.sb-modal-header > div {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	color: #08204e;
+}
+
+.sb-modal-header strong {
+	font-size: 15px;
+	font-weight: 950;
+}
+
+.sb-modal-close {
+	display: grid;
+	place-items: center;
+	width: 36px;
+	height: 36px;
+	color: #64748b;
+	background: transparent;
+	border: 0;
+	border-radius: 12px;
+	cursor: pointer;
+}
+
+.sb-modal-close:hover {
+	color: #ef4444;
+	background: #fff1f2;
+}
+
+.sb-modal-body {
+	max-height: calc(90vh - 74px);
+	overflow-y: auto;
+	padding: 22px;
+}
+
+.sb-card-loading {
+	display: grid;
+	place-items: center;
+	min-height: 120px;
+	color: #64748b;
+	font-size: 14px;
+	font-weight: 700;
+}
+
+.sb-modal-enter-active,
+.sb-modal-leave-active {
+	transition: opacity 0.2s ease;
+}
+
+.sb-modal-enter-from,
+.sb-modal-leave-to {
 	opacity: 0;
 }
 
-.plus-modal-enter-from .plus-modal-content,
-.plus-modal-leave-to .plus-modal-content {
-	transform: scale(0.95) translateY(10px);
+.sb-modal-enter-active .sb-modal-content,
+.sb-modal-leave-active .sb-modal-content {
+	transition: transform 0.2s ease;
 }
 
-/* ═══════════════════════════════════════
-   GRADIENT ANIMATION
-   ═══════════════════════════════════════ */
-
-@keyframes gradient-x {
-	0%, 100% { background-position: 0% 50%; }
-	50% { background-position: 100% 50%; }
+.sb-modal-enter-from .sb-modal-content,
+.sb-modal-leave-to .sb-modal-content {
+	transform: translateY(10px) scale(0.97);
 }
 
-.animate-gradient-x {
-	background-size: 200% auto;
-	animation: gradient-x 4s ease infinite;
+/* Sales page */
+.sb-sales {
+	background: #f5f7fb;
+}
+
+.sb-sales-hero {
+	padding: 72px 0 92px;
+}
+
+.sb-sales-hero-inner {
+	position: relative;
+	z-index: 2;
+	display: grid;
+	grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.72fr);
+	gap: 56px;
+	align-items: center;
+}
+
+.sb-sales-copy {
+	max-width: 720px;
+}
+
+.sb-eyebrow {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 12px;
+	margin-bottom: 22px;
+	color: #facc15;
+	background: rgba(255, 255, 255, 0.1);
+	border: 1px solid rgba(255, 255, 255, 0.16);
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 950;
+	letter-spacing: 0.1em;
+}
+
+.sb-sales-copy h1 {
+	margin: 0;
+	color: #ffffff;
+	font-size: clamp(42px, 6vw, 72px);
+	font-weight: 950;
+	letter-spacing: -0.065em;
+	line-height: 0.94;
+}
+
+.sb-sales-copy p {
+	max-width: 680px;
+	margin: 24px 0 0;
+	color: rgba(219, 234, 254, 0.9);
+	font-size: clamp(17px, 2vw, 21px);
+	font-weight: 600;
+	line-height: 1.55;
+}
+
+.sb-hero-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 14px;
+	margin-top: 34px;
+}
+
+.sb-hero-primary,
+.sb-hero-secondary,
+.sb-pricing-cta,
+.sb-final-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 9px;
+	min-height: 54px;
+	border: 0;
+	border-radius: 16px;
+	font-size: 15px;
+	font-weight: 950;
+	cursor: pointer;
+	transition:
+		transform 0.18s ease,
+		box-shadow 0.18s ease,
+		background 0.18s ease;
+}
+
+.sb-hero-primary,
+.sb-final-btn {
+	padding: 0 24px;
+	color: #08204e;
+	background: #facc15;
+	box-shadow: 0 16px 32px rgba(250, 204, 21, 0.22);
+}
+
+.sb-hero-primary:hover,
+.sb-final-btn:hover {
+	transform: translateY(-2px);
+	background: #fde047;
+	box-shadow: 0 20px 42px rgba(250, 204, 21, 0.28);
+}
+
+.sb-hero-secondary {
+	padding: 0 20px;
+	color: #ffffff;
+	background: rgba(255, 255, 255, 0.08);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sb-hero-secondary:hover {
+	transform: translateY(-2px);
+	background: rgba(255, 255, 255, 0.14);
+	border-color: rgba(255, 255, 255, 0.34);
+}
+
+.sb-button-spinner {
+	width: 18px;
+	height: 18px;
+	border: 3px solid rgba(8, 32, 78, 0.22);
+	border-top-color: #08204e;
+	border-radius: 999px;
+	animation: sb-spin 0.85s linear infinite;
+}
+
+.sb-button-spinner-light {
+	border-color: rgba(255, 255, 255, 0.24);
+	border-top-color: #ffffff;
+}
+
+.sb-trust-row,
+.sb-final-trust {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 14px 20px;
+	margin-top: 24px;
+	color: rgba(219, 234, 254, 0.86);
+	font-size: 14px;
+	font-weight: 800;
+}
+
+.sb-trust-row span,
+.sb-final-trust span {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+}
+
+.sb-trust-row svg {
+	color: #facc15;
+}
+
+.sb-pricing-wrap {
+	width: 100%;
+}
+
+.sb-pricing-card {
+	position: relative;
+	overflow: hidden;
+	background: #ffffff;
+	border: 1px solid rgba(255, 255, 255, 0.65);
+	border-radius: 32px;
+	box-shadow:
+		0 34px 90px rgba(2, 8, 23, 0.34),
+		0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+}
+
+.sb-pricing-ribbon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 16px;
+	color: #78350f;
+	background: linear-gradient(135deg, #fde047, #f59e0b);
+	font-size: 13px;
+	font-weight: 950;
+	letter-spacing: 0.11em;
+	text-transform: uppercase;
+}
+
+.sb-pricing-body {
+	padding: 30px;
+}
+
+.sb-price-head {
+	text-align: center;
+}
+
+.sb-price-label {
+	display: inline-flex;
+	padding: 7px 10px;
+	color: #0b5ed7;
+	background: #eff6ff;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 900;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+}
+
+.sb-price {
+	display: flex;
+	align-items: flex-end;
+	justify-content: center;
+	gap: 6px;
+	margin-top: 18px;
+}
+
+.sb-price span {
+	color: #0f172a;
+	font-size: 52px;
+	font-weight: 950;
+	letter-spacing: -0.06em;
+	line-height: 1;
+}
+
+.sb-price small {
+	padding-bottom: 7px;
+	color: #64748b;
+	font-size: 15px;
+	font-weight: 800;
+}
+
+.sb-price-head p {
+	max-width: 290px;
+	margin: 10px auto 0;
+	color: #64748b;
+	font-size: 14px;
+	font-weight: 650;
+	line-height: 1.45;
+}
+
+.sb-price-list {
+	display: grid;
+	gap: 12px;
+	padding: 18px;
+	margin: 26px 0;
+	list-style: none;
+	background: #f8fbff;
+	border: 1px solid #e7f0ff;
+	border-radius: 20px;
+}
+
+.sb-price-list li {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	color: #334155;
+	font-size: 14px;
+	font-weight: 850;
+}
+
+.sb-price-list svg {
+	flex: 0 0 auto;
+	color: #1473e6;
+}
+
+.sb-pricing-cta {
+	width: 100%;
+	padding: 0 20px;
+	color: #ffffff;
+	background: linear-gradient(135deg, #1473e6, #0b5ed7);
+	box-shadow: 0 18px 40px rgba(20, 115, 230, 0.25);
+}
+
+.sb-pricing-cta:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 22px 48px rgba(20, 115, 230, 0.33);
+}
+
+.sb-payment-note {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 7px;
+	margin-top: 14px;
+	color: #64748b;
+	font-size: 12.5px;
+	font-weight: 800;
+}
+
+.sb-payment-note svg {
+	color: #10b981;
+}
+
+.sb-pricing-footer {
+	display: grid;
+	place-items: center;
+	gap: 3px;
+	padding: 16px;
+	text-align: center;
+	background: #f8fafc;
+	border-top: 1px solid #edf1f7;
+}
+
+.sb-pricing-footer strong {
+	color: #08204e;
+	font-size: 13px;
+	font-weight: 950;
+}
+
+.sb-pricing-footer span {
+	color: #64748b;
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.sb-social-proof {
+	position: relative;
+	z-index: 5;
+	margin-top: -34px;
+}
+
+.sb-stats-grid {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 14px;
+	padding: 18px;
+	background: #ffffff;
+	border: 1px solid rgba(8, 32, 78, 0.08);
+	border-radius: 24px;
+	box-shadow: 0 20px 60px rgba(8, 32, 78, 0.09);
+}
+
+.sb-stat {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 14px;
+	background: #f8fafc;
+	border: 1px solid #eef2f7;
+	border-radius: 18px;
+}
+
+.sb-stat div {
+	display: grid;
+	place-items: center;
+	width: 42px;
+	height: 42px;
+	color: #1473e6;
+	background: #eff6ff;
+	border-radius: 14px;
+}
+
+.sb-stat strong {
+	display: block;
+	color: #08204e;
+	font-size: 18px;
+	font-weight: 950;
+	line-height: 1;
+}
+
+.sb-stat span {
+	display: block;
+	margin-top: 3px;
+	color: #64748b;
+	font-size: 12px;
+	font-weight: 800;
+}
+
+.sb-section {
+	padding: 86px 0;
+}
+
+.sb-section-title {
+	max-width: 720px;
+	margin: 0 auto 42px;
+	text-align: center;
+}
+
+.sb-section-title-left {
+	margin: 0 0 34px;
+	text-align: left;
+}
+
+.sb-section-title span {
+	display: inline-flex;
+	margin-bottom: 10px;
+	color: #1473e6;
+	font-size: 12px;
+	font-weight: 950;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+.sb-section-title h2 {
+	margin: 0;
+	color: #08204e;
+	font-size: clamp(30px, 4vw, 46px);
+	font-weight: 950;
+	letter-spacing: -0.055em;
+	line-height: 1.02;
+}
+
+.sb-section-title p {
+	margin: 14px 0 0;
+	color: #64748b;
+	font-size: 17px;
+	font-weight: 600;
+	line-height: 1.6;
+}
+
+.sb-benefits-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 20px;
+}
+
+.sb-benefit-card {
+	min-height: 260px;
+	padding: 26px;
+	background: #ffffff;
+	border: 1px solid rgba(8, 32, 78, 0.08);
+	border-radius: 24px;
+	box-shadow:
+		0 1px 2px rgba(8, 32, 78, 0.04),
+		0 16px 45px rgba(8, 32, 78, 0.045);
+	transition: 0.2s ease;
+}
+
+.sb-benefit-card:hover {
+	transform: translateY(-4px);
+	border-color: rgba(20, 115, 230, 0.25);
+	box-shadow: 0 24px 65px rgba(8, 32, 78, 0.1);
+}
+
+.sb-benefit-icon {
+	display: grid;
+	place-items: center;
+	width: 58px;
+	height: 58px;
+	margin-bottom: 22px;
+	color: #1473e6;
+	background: linear-gradient(135deg, #eff6ff, #e0f2fe);
+	border-radius: 18px;
+}
+
+.sb-benefit-card h3 {
+	margin: 0;
+	color: #111827;
+	font-size: 20px;
+	font-weight: 950;
+	letter-spacing: -0.02em;
+}
+
+.sb-benefit-card p {
+	margin: 10px 0 0;
+	color: #64748b;
+	font-size: 15px;
+	line-height: 1.6;
+}
+
+.sb-white-section {
+	padding: 86px 0;
+	background: #ffffff;
+	border-top: 1px solid #edf1f7;
+	border-bottom: 1px solid #edf1f7;
+}
+
+.sb-results-layout {
+	display: grid;
+	grid-template-columns: minmax(0, 0.94fr) minmax(330px, 0.72fr);
+	gap: 70px;
+	align-items: center;
+}
+
+.sb-results-list {
+	display: grid;
+	gap: 18px;
+}
+
+.sb-result-item {
+	display: flex;
+	align-items: flex-start;
+	gap: 15px;
+}
+
+.sb-result-icon {
+	display: grid;
+	place-items: center;
+	flex: 0 0 auto;
+	width: 46px;
+	height: 46px;
+	border-radius: 16px;
+}
+
+.sb-result-green {
+	color: #059669;
+	background: #d1fae5;
+}
+
+.sb-result-blue {
+	color: #1473e6;
+	background: #dbeafe;
+}
+
+.sb-result-amber {
+	color: #b45309;
+	background: #fef3c7;
+}
+
+.sb-result-purple {
+	color: #7c3aed;
+	background: #ede9fe;
+}
+
+.sb-result-item h3 {
+	margin: 0;
+	color: #111827;
+	font-size: 18px;
+	font-weight: 950;
+}
+
+.sb-result-item p {
+	margin: 5px 0 0;
+	color: #64748b;
+	font-size: 15px;
+	line-height: 1.55;
+}
+
+.sb-ai-preview {
+	position: relative;
+	padding: 20px;
+	background:
+		radial-gradient(circle at top right, rgba(20, 115, 230, 0.12), transparent 34%),
+		#f8fafc;
+	border: 1px solid #e2e8f0;
+	border-radius: 34px;
+	box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+}
+
+.sb-ai-window {
+	position: relative;
+	padding: 24px;
+	background: #ffffff;
+	border: 1px solid #edf1f7;
+	border-radius: 26px;
+	box-shadow: 0 22px 60px rgba(8, 32, 78, 0.1);
+}
+
+.sb-ai-header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 20px;
+}
+
+.sb-ai-avatar {
+	display: grid;
+	place-items: center;
+	width: 46px;
+	height: 46px;
+	color: #ffffff;
+	background: linear-gradient(135deg, #1473e6, #0b5ed7);
+	border-radius: 999px;
+}
+
+.sb-ai-header strong {
+	display: block;
+	color: #111827;
+	font-size: 14px;
+	font-weight: 950;
+}
+
+.sb-ai-header span {
+	display: block;
+	margin-top: 2px;
+	color: #10b981;
+	font-size: 12px;
+	font-weight: 900;
+}
+
+.sb-ai-message {
+	width: fit-content;
+	max-width: 92%;
+	padding: 14px 16px;
+	border-radius: 18px;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.55;
+}
+
+.sb-ai-message-left {
+	color: #334155;
+	background: #f1f5f9;
+	border-top-left-radius: 6px;
+}
+
+.sb-ai-message-right {
+	margin: 14px 0 0 auto;
+	color: #ffffff;
+	background: #1473e6;
+	border-top-right-radius: 6px;
+	box-shadow: 0 12px 22px rgba(20, 115, 230, 0.2);
+}
+
+.sb-ai-suggestions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 18px;
+}
+
+.sb-ai-suggestions span {
+	padding: 7px 10px;
+	color: #1473e6;
+	background: #eff6ff;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 900;
+}
+
+.sb-comparison {
+	overflow: hidden;
+	background: #ffffff;
+	border: 1px solid rgba(8, 32, 78, 0.08);
+	border-radius: 28px;
+	box-shadow: 0 24px 70px rgba(8, 32, 78, 0.08);
+}
+
+.sb-comparison-head {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	background: #f8fafc;
+}
+
+.sb-comparison-head > div {
+	position: relative;
+	padding: 26px;
+	text-align: center;
+}
+
+.sb-comparison-head > div:first-child {
+	border-right: 1px solid #e2e8f0;
+}
+
+.sb-comparison-head h3 {
+	margin: 0;
+	color: #64748b;
+	font-size: 22px;
+	font-weight: 950;
+}
+
+.sb-comparison-head p {
+	margin: 6px 0 0;
+	color: #94a3b8;
+	font-size: 13px;
+	font-weight: 800;
+}
+
+.sb-comparison-head .sb-comparison-plus {
+	background: #eff6ff;
+}
+
+.sb-comparison-plus span {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	display: inline-flex;
+	padding: 6px 12px;
+	color: #78350f;
+	background: #facc15;
+	border-radius: 999px;
+	font-size: 10px;
+	font-weight: 950;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	box-shadow: 0 8px 20px rgba(250, 204, 21, 0.22);
+}
+
+.sb-comparison-plus h3 {
+	color: #08204e;
+}
+
+.sb-comparison-plus p {
+	color: #1473e6;
+}
+
+.sb-comparison-rows {
+	display: grid;
+}
+
+.sb-comparison-row {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	border-top: 1px solid #edf1f7;
+}
+
+.sb-free-col,
+.sb-plus-col {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 62px;
+	padding: 16px;
+	text-align: center;
+	font-size: 14px;
+}
+
+.sb-free-col {
+	gap: 8px;
+	color: #64748b;
+	border-right: 1px solid #edf1f7;
+	background: #ffffff;
+}
+
+.sb-free-col svg {
+	color: #cbd5e1;
+}
+
+.sb-plus-col {
+	gap: 9px;
+	color: #0f172a;
+	background: rgba(239, 246, 255, 0.52);
+}
+
+.sb-plus-col svg {
+	flex: 0 0 auto;
+	color: #1473e6;
+}
+
+.sb-plus-col strong {
+	font-weight: 950;
+}
+
+.sb-faq-section {
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+.sb-faq-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 16px;
+}
+
+.sb-faq-card {
+	padding: 22px;
+	background: #f8fafc;
+	border: 1px solid #edf1f7;
+	border-radius: 22px;
+}
+
+.sb-faq-card h3 {
+	margin: 0;
+	color: #111827;
+	font-size: 16px;
+	font-weight: 950;
+}
+
+.sb-faq-card p {
+	margin: 8px 0 0;
+	color: #64748b;
+	font-size: 14px;
+	line-height: 1.55;
+}
+
+.sb-final-cta {
+	padding: 86px 0;
+	text-align: center;
+}
+
+.sb-final-inner {
+	position: relative;
+	z-index: 2;
+	display: grid;
+	place-items: center;
+}
+
+.sb-final-inner h2 {
+	max-width: 720px;
+	margin: 20px auto 0;
+	color: #ffffff;
+	font-size: clamp(34px, 5vw, 56px);
+	font-weight: 950;
+	letter-spacing: -0.055em;
+	line-height: 1;
+}
+
+.sb-final-inner p {
+	max-width: 640px;
+	margin: 18px auto 0;
+	color: rgba(219, 234, 254, 0.88);
+	font-size: 18px;
+	font-weight: 650;
+	line-height: 1.55;
+}
+
+.sb-final-btn {
+	margin-top: 30px;
+	padding: 0 30px;
+}
+
+.sb-final-trust {
+	justify-content: center;
+	color: rgba(219, 234, 254, 0.85);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+	.sb-sales-hero-inner,
+	.sb-active-layout,
+	.sb-results-layout {
+		grid-template-columns: 1fr;
+	}
+
+	.sb-pricing-wrap {
+		max-width: 460px;
+		margin-inline: auto;
+	}
+
+	.sb-active-sidebar {
+		position: static;
+	}
+
+	.sb-benefits-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.sb-stats-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 720px) {
+	.sb-container {
+		width: min(100% - 24px, 1180px);
+	}
+
+	.sb-plus-header {
+		height: 46px;
+		padding: 0 12px;
+	}
+
+	.sb-sales-hero {
+		padding: 42px 0 62px;
+	}
+
+	.sb-sales-hero-inner {
+		gap: 34px;
+	}
+
+	.sb-sales-copy h1 {
+		font-size: 42px;
+		letter-spacing: -0.055em;
+		line-height: 0.98;
+	}
+
+	.sb-sales-copy p {
+		font-size: 16px;
+	}
+
+	.sb-hero-actions {
+		display: grid;
+		grid-template-columns: 1fr;
+	}
+
+	.sb-hero-primary,
+	.sb-hero-secondary,
+	.sb-final-btn {
+		width: 100%;
+	}
+
+	.sb-trust-row {
+		gap: 10px;
+		font-size: 12.5px;
+	}
+
+	.sb-pricing-card {
+		border-radius: 26px;
+	}
+
+	.sb-pricing-body {
+		padding: 22px;
+	}
+
+	.sb-price span {
+		font-size: 44px;
+	}
+
+	.sb-social-proof {
+		margin-top: -22px;
+	}
+
+	.sb-stats-grid {
+		grid-template-columns: 1fr;
+		padding: 12px;
+	}
+
+	.sb-section,
+	.sb-white-section {
+		padding: 58px 0;
+	}
+
+	.sb-section-title {
+		margin-bottom: 28px;
+	}
+
+	.sb-benefits-grid,
+	.sb-active-benefits-grid,
+	.sb-faq-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.sb-benefit-card {
+		min-height: auto;
+		padding: 22px;
+	}
+
+	.sb-results-layout {
+		gap: 32px;
+	}
+
+	.sb-comparison-head,
+	.sb-comparison-row {
+		grid-template-columns: 1fr;
+	}
+
+	.sb-comparison-head > div:first-child,
+	.sb-free-col {
+		border-right: 0;
+		border-bottom: 1px solid #edf1f7;
+	}
+
+	.sb-comparison-plus span {
+		top: 8px;
+		transform: translateX(-50%);
+	}
+
+	.sb-active-hero-inner {
+		padding: 42px 0;
+	}
+
+	.sb-active-hero-content {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 20px;
+	}
+
+	.sb-active-copy h1 {
+		font-size: 40px;
+	}
+
+	.sb-active-copy p {
+		font-size: 16px;
+	}
+
+	.sb-panel {
+		padding: 20px;
+	}
+
+	.sb-panel-header {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.sb-receipt-row {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.sb-receipt-actions {
+		width: 100%;
+		justify-content: space-between;
+	}
 }
 </style>
