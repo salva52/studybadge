@@ -1,7 +1,7 @@
 <template>
-	<div class="relative flex h-screen flex-col">
+	<div class="relative flex h-[100dvh] flex-col">
 		<div
-			class="flex flex-1 flex-col overflow-y-auto pb-24 bg-sb-bg"
+			class="flex flex-1 flex-col overflow-y-auto pb-32 bg-sb-bg"
 			id="scrollContainer"
 		>
 			<slot />
