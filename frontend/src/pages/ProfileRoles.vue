@@ -58,6 +58,13 @@ const batch_evaluator = ref(false)
 const lms_student = ref(false)
 const readOnlyMode = window.read_only_mode
 
+const roleRefs = {
+	moderator,
+	course_creator,
+	batch_evaluator,
+	lms_student
+}
+
 const props = defineProps({
 	profile: {
 		type: Object,
@@ -80,7 +87,7 @@ const roles = createResource({
 			'lms_student',
 		]
 		for (let role of roles) {
-			if (data[role]) eval(role).value = true
+			if (data[role] && roleRefs[role]) roleRefs[role].value = true
 		}
 	},
 })
@@ -100,7 +107,7 @@ const saveRole = async (role) => {
 		role == 'lms_student'
 			? 'LMS Student'
 			: convertToTitleCase(role.split('_').join(' '))
-	const value = eval(role).value
+	const value = roleRefs[role].value
 
 	await call('lms.lms.api.save_role', {
 		user: props.profile.data?.name,
