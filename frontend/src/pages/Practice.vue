@@ -221,4 +221,16 @@ async function createPractice() {
 :root[data-theme="dark"] .practice-page { background: #0f172a; color: #e5e7eb; }
 :root[data-theme="dark"] .practice-header, :root[data-theme="dark"] .practice-access, :root[data-theme="dark"] .practice-panel { background: #111827; border-color: rgba(255,255,255,0.08); }
 :root[data-theme="dark"] .practice-field select, :root[data-theme="dark"] .practice-field textarea, :root[data-theme="dark"] .practice-upload { background: #0b1220; border-color: rgba(255,255,255,0.12); color: #e5e7eb; }
+
+@media (max-width: 768px) {
+	.practice-hero { padding: 1.5rem; min-height: auto; }
+	.practice-hero h1 { font-size: 1.75rem; }
+	.practice-hero p { font-size: 0.95rem; }
+	.practice-hero-actions { flex-direction: column; width: 100%; gap: 0.5rem; margin-top: 1.5rem; }
+	.practice-primary, .practice-secondary { width: 100%; }
+	.practice-access { padding: 1.25rem; }
+	.practice-panel { padding: 1.25rem; }
+	.practice-grid { gap: 0.75rem; }
+	.practice-panel-head { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+}
 </style>

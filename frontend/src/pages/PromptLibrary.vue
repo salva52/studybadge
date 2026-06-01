@@ -114,4 +114,15 @@ async function copyPrompt(text) {
 :root[data-theme="dark"] .prompt-page { background: #0f172a; color: #e5e7eb; }
 :root[data-theme="dark"] .prompt-header, :root[data-theme="dark"] .prompt-card, :root[data-theme="dark"] .prompt-tabs button { background: #111827; border-color: rgba(255,255,255,0.08); }
 :root[data-theme="dark"] .prompt-card pre { background: #0b1220; color: #cbd5e1; }
+
+@media (max-width: 768px) {
+	.prompt-hero { padding: 1.25rem; align-items: flex-start; flex-direction: column; }
+	.prompt-hero h1 { font-size: 1.75rem; margin-top: 0.5rem; }
+	.prompt-hero p { font-size: 0.95rem; margin-top: 0.5rem; }
+	.prompt-cta { width: 100%; justify-content: center; margin-top: 0.5rem; }
+	.prompt-tabs { padding: 0.75rem 0; }
+	.prompt-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+	.prompt-card { min-height: auto; padding: 1rem; }
+	.prompt-card pre { max-height: 200px; overflow-y: auto; }
+}
 </style>

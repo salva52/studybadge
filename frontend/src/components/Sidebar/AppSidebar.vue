@@ -37,7 +37,7 @@
 				>
 					<div
 						v-if="!sidebarStore.isSidebarCollapsed"
-						class="flex items-center text-blue-300/60 my-1"
+						class="my-1 hidden items-center text-blue-300/60 md:flex"
 					>
 						<span class="grid h-5 w-6 flex-shrink-0 place-items-center">
 							<ChevronRight
@@ -54,6 +54,7 @@
 					</div>
 					<Button
 						v-if="isModerator && !readOnlyMode"
+						class="hidden md:flex"
 						variant="ghost"
 						@click="openPageModal()"
 					>
@@ -163,7 +164,7 @@
 			/>
 
 			<div
-				class="flex items-center mt-4"
+				class="mt-4 hidden items-center md:flex"
 				:class="
 					sidebarStore.isSidebarCollapsed ? 'flex-col space-y-3' : 'flex-row'
 				"
