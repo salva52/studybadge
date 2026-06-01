@@ -221,6 +221,11 @@
 		</aside>
 
 		<div v-if="showSessions || showTools" class="mobile-backdrop" @click="showSessions = false; showTools = false"></div>
+
+		<QuizModal v-model:show="showQuiz" :loading="modalLoading" :data="modalData" />
+		<FlashcardsModal v-model:show="showFlashcards" :loading="modalLoading" :data="modalData" />
+		<GuidedReadingModal v-model:show="showGuidedReading" :loading="modalLoading" :data="modalData" @request-question="requestGuidedQuestion" />
+		<MathModal v-model:show="showMath" :loading="modalLoading" :data="modalData" />
 	</div>
 </template>
 
@@ -258,6 +263,10 @@ import {
 	Globe,
 } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
+import QuizModal from '@/components/QuizModal.vue'
+import FlashcardsModal from '@/components/FlashcardsModal.vue'
+import GuidedReadingModal from '@/components/GuidedReadingModal.vue'
+import MathModal from '@/components/MathModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -281,6 +290,13 @@ const showSessions = ref(false)
 const showTools = ref(false)
 const sessionSearch = ref('')
 const useSearch = ref(false)
+
+const showQuiz = ref(false)
+const showFlashcards = ref(false)
+const showGuidedReading = ref(false)
+const showMath = ref(false)
+const modalData = ref(null)
+const modalLoading = ref(false)
 
 const draft = ref({
 	title: '',
@@ -540,6 +556,35 @@ async function sendChat() {
 			model_tier: activeSession.value.model_tier,
 			use_search: useSearch.value ? 1 : 0,
 		})
+		
+		if (result.trigger_modal) {
+			const toolId = result.trigger_modal
+			if (toolId === 'quiz') showQuiz.value = true
+			if (toolId === 'flashcards') showFlashcards.value = true
+			if (toolId === 'reader_question') showGuidedReading.value = true
+			if (toolId === 'math') showMath.value = true
+			
+			modalLoading.value = true
+			modalData.value = null
+			chatMessages.value = chatMessages.value.filter(m => m !== optimistic)
+			
+			try {
+				const toolResult = await api('generate_ai_tool', {
+					session: activeSession.value.name,
+					thread: currentThread.value?.name,
+					tool: toolId,
+					payload: { prompt: text || '' },
+				})
+				modalData.value = toolResult.result
+				access.value = toolResult.access || access.value
+			} catch (e) {
+				toast.error(__('No se pudo generar el contenido. Intenta de nuevo.'))
+			} finally {
+				modalLoading.value = false
+			}
+			return
+		}
+
 		const isNewThread = !currentThread.value
 		currentThread.value = result.thread
 		chatMessages.value = result.thread.messages || []
@@ -559,6 +604,37 @@ async function runTool(tool) {
 		return
 	}
 	if (!activeSession.value) return
+	
+	if (['quiz', 'flashcards', 'reader_question', 'math'].includes(tool.id)) {
+		showTools.value = false
+		if (tool.id === 'quiz') showQuiz.value = true
+		if (tool.id === 'flashcards') showFlashcards.value = true
+		if (tool.id === 'reader_question') showGuidedReading.value = true
+		if (tool.id === 'math') showMath.value = true
+		
+		modalLoading.value = true
+		modalData.value = null
+		try {
+			const result = await api('generate_ai_tool', {
+				session: activeSession.value.name,
+				thread: currentThread.value?.name,
+				tool: tool.id,
+				payload: {
+					prompt: tool.prompt,
+					topic: activeSession.value.goal || activeSession.value.title,
+					position: activeSession.value.reader_progress || {},
+				},
+			})
+			modalData.value = result.result
+			access.value = result.access || access.value
+		} catch (err) {
+			toast.error(__('Ocurrió un error al cargar la herramienta.'))
+		} finally {
+			modalLoading.value = false
+		}
+		return
+	}
+
 	toolLoading.value = true
 	showTools.value = false
 	try {
@@ -585,6 +661,25 @@ async function runTool(tool) {
 		await nextTick(scrollChat)
 	} finally {
 		toolLoading.value = false
+	}
+}
+
+async function requestGuidedQuestion() {
+	if (!activeSession.value) return
+	modalLoading.value = true
+	try {
+		const result = await api('generate_ai_tool', {
+			session: activeSession.value.name,
+			thread: currentThread.value?.name,
+			tool: 'reader_question',
+			payload: { topic: activeSession.value.goal, position: activeSession.value.reader_progress || {} },
+		})
+		modalData.value = result.result
+		access.value = result.access || access.value
+	} catch (e) {
+		toast.error(__('No se pudo generar la pregunta.'))
+	} finally {
+		modalLoading.value = false
 	}
 }
 
