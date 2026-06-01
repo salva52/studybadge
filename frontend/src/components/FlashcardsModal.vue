@@ -152,12 +152,25 @@ function prevCard() {
 .spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+@keyframes slideUpSheet { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
 @media (max-width: 640px) {
-	.flashcard-container { aspect-ratio: 1; }
-	.controls-row { flex-wrap: wrap; justify-content: center; gap: 1rem; }
+	.modal-content.flashcards-modal { 
+		position: absolute; bottom: 0; left: 0; width: 100%; height: auto; max-height: 90vh;
+		border-radius: 24px 24px 0 0; 
+		animation: slideUpSheet 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+		margin: 0; border: none;
+	}
+	.modal-content::before {
+		content: ''; display: block; width: 40px; height: 5px; background: #cbd5e1; border-radius: 4px; position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 20;
+	}
+	.modal-header { padding-top: 1.75rem; }
+	.flashcard-container { aspect-ratio: 3/4; max-height: 60vh; }
+	.controls-row { flex-wrap: wrap; justify-content: center; gap: 1rem; padding-bottom: env(safe-area-inset-bottom); }
 	.control-btn.prev { order: 1; margin-right: auto; }
 	.control-btn.next { order: 2; margin-left: auto; }
 	.knowledge-btns { order: 3; width: 100%; justify-content: center; }
+	.know-btn { min-height: 48px; flex: 1; display: flex; align-items: center; justify-content: center; }
 }
 
 :root[data-theme="dark"] .modal-content { background: #1e293b; color: #f8fafc; }
@@ -169,4 +182,5 @@ function prevCard() {
 :root[data-theme="dark"] .flashcard-back p { color: #e2e8f0; }
 :root[data-theme="dark"] .know-btn.wrong { background: rgba(239,68,68,0.2); color: #fca5a5; }
 :root[data-theme="dark"] .know-btn.right { background: rgba(34,197,94,0.2); color: #86efac; }
+:root[data-theme="dark"] .modal-content::before { background: #475569; }
 </style>

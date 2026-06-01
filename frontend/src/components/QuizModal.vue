@@ -181,4 +181,20 @@ function nextQuestion() {
 :root[data-theme="dark"] .option-btn.incorrect { border-color: #ef4444; background: rgba(239,68,68,0.1); color: #f87171; }
 :root[data-theme="dark"] .explanation-box.is-correct { background: rgba(16,185,129,0.1); color: #34d399; }
 :root[data-theme="dark"] .explanation-box.is-incorrect { background: rgba(239,68,68,0.1); color: #f87171; }
+
+@keyframes slideUpSheet { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+@media (max-width: 768px) {
+	.modal-content.quiz-modal { 
+		position: absolute; bottom: 0; left: 0; width: 100%; height: auto; max-height: 90vh;
+		border-radius: 24px 24px 0 0; 
+		animation: slideUpSheet 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+		margin: 0; border: none;
+	}
+	.modal-content::before {
+		content: ''; display: block; width: 40px; height: 5px; background: #cbd5e1; border-radius: 4px; position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 20;
+	}
+	.modal-header { padding-top: 1.75rem; }
+}
+:root[data-theme="dark"] .modal-content::before { background: #475569; }
 </style>

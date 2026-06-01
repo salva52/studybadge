@@ -7,24 +7,43 @@
 			</div>
 			
 			<div class="split-view">
-				<!-- Left Column: Document Viewer Placeholder (User will integrate actual PDF viewer here later) -->
-				<div class="document-pane">
+				<!-- Mobile Tabs -->
+				<div class="mobile-tabs">
+					<button class="tab-btn" :class="{ active: activeTab === 'doc' }" @click="activeTab = 'doc'">
+						<FileText class="size-4" /> {{ __('Documento') }}
+					</button>
+					<button class="tab-btn" :class="{ active: activeTab === 'assistant' }" @click="activeTab = 'assistant'">
+						<Bot class="size-4" /> {{ __('Asistente') }}
+					</button>
+				</div>
+				
+				<!-- Left Column: Document Viewer -->
+				<div class="document-pane" :class="{ 'd-none': activeTab !== 'doc' && isMobile }">
 					<div class="doc-toolbar">
-						<span class="doc-title">{{ __('Documento de Estudio') }}</span>
-						<div class="doc-actions">
-							<button class="doc-btn"><ZoomIn class="size-4" /></button>
-							<button class="doc-btn"><ZoomOut class="size-4" /></button>
+						<div class="doc-selector-wrap">
+							<FileText class="size-4 text-slate-400 doc-icon" />
+							<select v-model="selectedMaterial" class="doc-select" v-if="materials && materials.length">
+								<option :value="null">{{ __('Selecciona un documento') }}</option>
+								<option v-for="mat in materials" :key="mat.file" :value="mat">
+									{{ mat.file_name || mat.file.split('/').pop() }}
+								</option>
+							</select>
+							<span v-else class="doc-title">{{ __('Sin documentos adjuntos') }}</span>
 						</div>
 					</div>
-					<div class="doc-content-placeholder">
+					
+					<div v-if="selectedMaterial" class="pdf-container">
+						<iframe :src="selectedMaterial.file" class="pdf-viewer" frameborder="0"></iframe>
+					</div>
+					<div v-else class="doc-content-placeholder">
 						<FileText class="size-10 text-slate-300 mb-2" />
 						<p>{{ __('Área de lectura del documento') }}</p>
-						<small>{{ __('A medida que avanzas, la IA generará preguntas sobre lo que estás leyendo.') }}</small>
+						<small>{{ __('Selecciona un documento para empezar a leer. La IA generará preguntas sobre tu avance.') }}</small>
 					</div>
 				</div>
 				
 				<!-- Right Column: AI Guided Questions -->
-				<div class="assistant-pane">
+				<div class="assistant-pane" :class="{ 'd-none': activeTab !== 'assistant' && isMobile }">
 					<div class="assistant-header">
 						<Bot class="size-5 text-blue-600" />
 						<span>{{ __('Asistente de Lectura') }}</span>
@@ -66,16 +85,32 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { MessageCircle, X, FileText, ZoomIn, ZoomOut, Bot, Lightbulb } from 'lucide-vue-next'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { MessageCircle, X, FileText, Bot, Lightbulb } from 'lucide-vue-next'
 
 const props = defineProps({
 	show: Boolean,
 	loading: Boolean,
-	data: Object
+	data: Object,
+	materials: { type: Array, default: () => [] }
 })
 
 const emit = defineEmits(['update:show', 'request-question'])
+
+const selectedMaterial = ref(null)
+const activeTab = ref('doc') // 'doc' or 'assistant'
+const isMobile = ref(false)
+
+const checkMobile = () => { isMobile.value = window.innerWidth <= 768 }
+
+onMounted(() => {
+	checkMobile()
+	window.addEventListener('resize', checkMobile)
+})
+
+onUnmounted(() => {
+	window.removeEventListener('resize', checkMobile)
+})
 
 const readingData = computed(() => {
 	if (!props.data) return null
@@ -146,14 +181,36 @@ function close() {
 .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
 .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
 
+/* Document Viewer */
+.doc-selector-wrap { display: flex; align-items: center; gap: 0.5rem; background: #f1f5f9; padding: 0.35rem 0.75rem; border-radius: 8px; flex: 1; }
+.doc-select { flex: 1; background: transparent; border: none; outline: none; font-size: 0.9rem; font-weight: 600; color: #334155; cursor: pointer; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
+.pdf-container { flex: 1; width: 100%; height: 100%; display: flex; }
+.pdf-viewer { width: 100%; height: 100%; border: none; }
+
+/* Mobile Tabs */
+.mobile-tabs { display: none; padding: 0.5rem; background: #fff; border-bottom: 1px solid #e2e8f0; gap: 0.5rem; }
+.tab-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem; background: transparent; border: none; border-radius: 8px; font-weight: 600; font-size: 0.9rem; color: #64748b; cursor: pointer; transition: all 0.2s; }
+.tab-btn.active { background: #eff6ff; color: #2563eb; }
+
 @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideUpSheet { from { transform: translateY(100%); } to { transform: translateY(0); } }
 @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
 
 @media (max-width: 768px) {
+	.modal-content.reading-modal { 
+		position: absolute; bottom: 0; left: 0; width: 100%; height: 90vh; 
+		border-radius: 24px 24px 0 0; 
+		animation: slideUpSheet 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+		margin: 0; max-width: 100%; border: none;
+	}
+	.modal-content::before {
+		content: ''; display: block; width: 40px; height: 5px; background: #cbd5e1; border-radius: 4px; position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 20;
+	}
+	.modal-header { padding-top: 1.75rem; }
 	.split-view { flex-direction: column; }
-	.document-pane { flex: 1; border-right: none; border-bottom: 1px solid #e2e8f0; }
-	.assistant-pane { flex: 1; max-width: 100%; }
-	.modal-content { height: 95vh; }
+	.mobile-tabs { display: flex; }
+	.document-pane, .assistant-pane { flex: 1; max-width: 100%; height: 100%; border: none; }
+	.d-none { display: none !important; }
 }
 
 :root[data-theme="dark"] .modal-content, :root[data-theme="dark"] .assistant-pane, :root[data-theme="dark"] .modal-header { background: #1e293b; color: #f8fafc; border-color: #334155; }
@@ -168,6 +225,10 @@ function close() {
 :root[data-theme="dark"] .badge { background: rgba(37,99,235,0.2); color: #93c5fd; }
 :root[data-theme="dark"] .hint-box { background: rgba(234,179,8,0.1); border-color: transparent; }
 :root[data-theme="dark"] .hint-box p { color: #fde047; }
-:root[data-theme="dark"] .response-area { border-color: #334155; }
-:root[data-theme="dark"] .response-area textarea { background: #1e293b; border-color: #475569; color: #f8fafc; }
+:root[data-theme="dark"] .doc-selector-wrap { background: #0f172a; }
+:root[data-theme="dark"] .doc-select { color: #f8fafc; }
+:root[data-theme="dark"] .mobile-tabs { background: #1e293b; border-color: #334155; }
+:root[data-theme="dark"] .tab-btn { color: #94a3b8; }
+:root[data-theme="dark"] .tab-btn.active { background: rgba(37,99,235,0.1); color: #60a5fa; }
+:root[data-theme="dark"] .modal-content::before { background: #475569; }
 </style>

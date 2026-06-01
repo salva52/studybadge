@@ -222,9 +222,13 @@
 
 		<div v-if="showSessions || showTools" class="mobile-backdrop" @click="showSessions = false; showTools = false"></div>
 
+		<button class="mobile-fab" @click="showTools = !showTools">
+			<Wrench class="size-6" />
+		</button>
+
 		<QuizModal v-model:show="showQuiz" :loading="modalLoading" :data="modalData" />
 		<FlashcardsModal v-model:show="showFlashcards" :loading="modalLoading" :data="modalData" />
-		<GuidedReadingModal v-model:show="showGuidedReading" :loading="modalLoading" :data="modalData" @request-question="requestGuidedQuestion" />
+		<GuidedReadingModal v-model:show="showGuidedReading" :loading="modalLoading" :data="modalData" :materials="activeSession?.materials || []" @request-question="requestGuidedQuestion" />
 		<MathModal v-model:show="showMath" :loading="modalLoading" :data="modalData" />
 	</div>
 </template>
@@ -258,6 +262,7 @@ import {
 	Sparkles,
 	Upload,
 	User,
+	Wrench,
 	X,
 	Zap,
 	Globe,
@@ -851,6 +856,8 @@ function formatDate(value) {
 .soft-empty { display: grid; min-height: 110px; place-items: center; border: 1px dashed #cbd5e1; border-radius: 8px; color: #64748b; padding: 1rem; text-align: center; font-size: 0.86rem; }
 .mobile-only { display: none; }
 .mobile-backdrop { display: none; }
+.mobile-fab { display: none; position: fixed; bottom: 1.5rem; right: 1.5rem; width: 56px; height: 56px; border-radius: 50%; background: #2563eb; color: white; border: none; box-shadow: 0 10px 25px -5px rgba(37,99,235,0.5); z-index: 90; cursor: pointer; align-items: center; justify-content: center; transition: transform 0.2s; }
+.mobile-fab:active { transform: scale(0.95); }
 :root[data-theme="dark"] .chat-page { background: #0f172a; color: #e5e7eb; }
 :root[data-theme="dark"] .session-rail,
 :root[data-theme="dark"] .source-panel,

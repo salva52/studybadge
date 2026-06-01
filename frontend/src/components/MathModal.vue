@@ -120,4 +120,20 @@ function renderMarkdown(text) {
 :root[data-theme="dark"] .math-solution h3, :root[data-theme="dark"] .solution-content { color: #93c5fd; }
 :root[data-theme="dark"] .practice-box { background: rgba(234,179,8,0.1); border-color: rgba(234,179,8,0.3); }
 :root[data-theme="dark"] .practice-box h3, :root[data-theme="dark"] .practice-box p, :root[data-theme="dark"] .practice-content { color: #fde047; }
+
+@keyframes slideUpSheet { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+@media (max-width: 768px) {
+	.modal-content.math-modal { 
+		position: absolute; bottom: 0; left: 0; width: 100%; height: auto; max-height: 90vh;
+		border-radius: 24px 24px 0 0; 
+		animation: slideUpSheet 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+		margin: 0; border: none;
+	}
+	.modal-content::before {
+		content: ''; display: block; width: 40px; height: 5px; background: #cbd5e1; border-radius: 4px; position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 20;
+	}
+	.modal-header { padding-top: 1.75rem; }
+}
+:root[data-theme="dark"] .modal-content::before { background: #475569; }
 </style>
