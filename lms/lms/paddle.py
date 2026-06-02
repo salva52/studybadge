@@ -154,7 +154,16 @@ def _request(method: str, path: str, settings=None, **kwargs) -> dict:
 		payload = {"message": response.text}
 	if response.status_code >= 400:
 		frappe.log_error(json.dumps(payload, indent=2, default=str), "StudyBadge Paddle Error")
-		frappe.throw(_("Paddle could not process this payment. Please try again."))
+		
+		# Extraer el mensaje detallado de Paddle si existe
+		paddle_err = payload.get("error", {})
+		error_detail = paddle_err.get("detail") or payload.get("message")
+		
+		if error_detail:
+			frappe.throw(_("Paddle Error: {0}").format(error_detail))
+		else:
+			frappe.throw(_("Paddle could not process this payment. Please try again."))
+			
 	return payload
 
 
