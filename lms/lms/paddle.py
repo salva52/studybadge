@@ -158,7 +158,12 @@ def _request(method: str, path: str, settings=None, **kwargs) -> dict:
 		# Extraer el mensaje detallado de Paddle si existe
 		paddle_err = payload.get("error", {})
 		error_detail = paddle_err.get("detail") or payload.get("message")
+		errors_list = paddle_err.get("errors", [])
 		
+		if errors_list:
+			fields_errs = ", ".join([f"{e.get('field')}: {e.get('message')}" for e in errors_list])
+			error_detail = f"{error_detail} Detalles: {fields_errs}"
+			
 		if error_detail:
 			frappe.throw(_("Paddle Error: {0}").format(error_detail))
 		else:
@@ -420,15 +425,16 @@ def create_paddle_checkout(
 			"payment": payment.name,
 		}
 
-	custom_data = {
+	custom_data_raw = {
 		"gateway": "paddle",
 		"lms_payment": payment.name,
-		"external_reference": payment.external_reference,
+		"external_reference": payment.external_reference or "",
 		"member": frappe.session.user,
 		"doctype": doctype,
 		"docname": docname,
 		"payment_for": _payment_for_label(payment_for_certificate, doctype),
 	}
+	custom_data = {k: str(v) for k, v in custom_data_raw.items() if v is not None}
 	billing_slug = "certificate" if int(payment_for_certificate) else ("course" if doctype == "LMS Course" else "batch")
 	checkout_url = f"{_get_public_base_url(settings)}{get_lms_route(f'billing/{billing_slug}/{docname}')}"
 	transaction = _create_checkout_transaction(details, custom_data, checkout_url, settings=settings)
