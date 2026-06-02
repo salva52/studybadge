@@ -787,10 +787,14 @@ def apply_gst(amount: float, country: str = None) -> tuple:
 
 def get_current_exchange_rate(source: str, target: str = "USD") -> float:
 	url = f"https://api.frankfurter.app/latest?from={source}&to={target}"
-
-	response = requests.request("GET", url)
-	details = response.json()
-	return details["rates"][target]
+	try:
+		response = requests.get(url, timeout=5)
+		details = response.json()
+		if "rates" in details and target in details["rates"]:
+			return details["rates"][target]
+	except Exception:
+		pass
+	frappe.throw(_("No se pudo obtener el tipo de cambio de {0} a {1} automáticamente. Por favor configura el precio en {1} manualmente en el curso/grupo.").format(source, target))
 
 
 def guest_access_allowed():
