@@ -922,6 +922,7 @@ function startPayPalPlusCheckout() {
 	if (activating.value) return
 	activating.value = true
 	destroyPayPalButtons()
+	scrollToPricing()
 	paypalPlus.submit(
 		{ currency: 'USD' },
 		{
