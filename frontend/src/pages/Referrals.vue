@@ -177,13 +177,13 @@
 						</a>
 
 						<a
-							:href="twitterShareLink"
+							:href="xShareLink"
 							target="_blank"
 							rel="noopener noreferrer"
 							class="share-button"
 						>
 							<Send class="size-4" />
-							<span>{{ __('Compartir en Twitter') }}</span>
+							<span>{{ __('Compartir en X') }}</span>
 						</a>
 					</div>
 				</section>
@@ -339,9 +339,9 @@ const whatsappShareLink = computed(() => {
 	return `https://wa.me/?text=${encodeURIComponent(text)}`
 })
 
-const twitterShareLink = computed(() => {
+const xShareLink = computed(() => {
 	const text = `Estoy usando StudyBadge para aprender con cursos prácticos. Únete con mi enlace: ${referralLink.value}`
-	return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`
+	return `https://x.com/intent/tweet?text=${encodeURIComponent(text)}`
 })
 
 const statusLabel = (status) => {
