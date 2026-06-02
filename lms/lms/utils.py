@@ -786,11 +786,11 @@ def apply_gst(amount: float, country: str = None) -> tuple:
 
 
 def get_current_exchange_rate(source: str, target: str = "USD") -> float:
-	url = f"https://api.frankfurter.app/latest?from={source}&to={target}"
+	url = f"https://open.er-api.com/v6/latest/{source}"
 	try:
 		response = requests.get(url, timeout=5)
 		details = response.json()
-		if "rates" in details and target in details["rates"]:
+		if details.get("result") == "success" and "rates" in details and target in details["rates"]:
 			return details["rates"][target]
 	except Exception:
 		pass
