@@ -1199,7 +1199,7 @@ usePageMeta(() => ({
 	color: #344054;
 }
 
-.application-card :deep(input),
+.application-card :deep(input:not([type="checkbox"]):not([type="radio"])),
 .application-card :deep(textarea),
 .application-card :deep(select) {
 	border-radius: 15px !important;
@@ -1210,7 +1210,7 @@ usePageMeta(() => ({
 	transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-.application-card :deep(input:focus),
+.application-card :deep(input:not([type="checkbox"]):not([type="radio"]):focus),
 .application-card :deep(textarea:focus),
 .application-card :deep(select:focus) {
 	border-color: var(--sb-blue) !important;
@@ -1392,6 +1392,7 @@ usePageMeta(() => ({
 	color: #344054;
 	font-weight: 720;
 	line-height: 1.45;
+	cursor: pointer;
 }
 
 .check-row input {
