@@ -22,6 +22,8 @@ from lms.lms.subscriptions import (
 	_get_settings,
 )
 
+DEFAULT_PAYMENT_SOURCE = "StudyBadge Checkout"
+
 
 def get_payment_gateway():
 	return frappe.db.get_single_value("LMS Settings", "payment_gateway")
@@ -629,6 +631,27 @@ def record_payment(
 	coupon: str | None = None,
 ):
 	address = frappe._dict(address)
+	if not address.billing_name:
+		address.billing_name = frappe.db.get_value("User", frappe.session.user, "full_name") or frappe.session.user
+	if not address.source:
+		address.source = DEFAULT_PAYMENT_SOURCE
+		ensure_default_payment_source()
+	missing_fields = [
+		label
+		for fieldname, label in (
+			("billing_name", _("Billing Name")),
+			("address_line1", _("Address Line 1")),
+			("city", _("City")),
+			("country", _("Country")),
+		)
+		if not address.get(fieldname)
+	]
+	if missing_fields:
+		frappe.throw(
+			_("Please complete these billing fields before payment: {0}").format(
+				", ".join(missing_fields)
+			)
+		)
 	address_name = save_address(address)
 
 	payment_doc = frappe.new_doc("LMS Payment")
@@ -662,6 +685,14 @@ def record_payment(
 
 	payment_doc.save(ignore_permissions=True)
 	return payment_doc
+
+
+def ensure_default_payment_source():
+	if frappe.db.exists("LMS Source", DEFAULT_PAYMENT_SOURCE):
+		return
+	source = frappe.new_doc("LMS Source")
+	source.source = DEFAULT_PAYMENT_SOURCE
+	source.insert(ignore_permissions=True)
 
 
 def get_redirect_url(doctype: str, docname: str, payment_for_certificate: int) -> str:

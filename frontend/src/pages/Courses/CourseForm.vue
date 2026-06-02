@@ -276,10 +276,10 @@
 									:label="__('Amount')"
 									@input="makeFormDirty()"
 								/>
-								<Link
-									doctype="Currency"
+								<FormControl
+									type="select"
 									v-model="courseResource.doc.currency"
-									:filters="{ enabled: 1 }"
+									:options="courseCurrencyOptions"
 									:label="__('Currency')"
 									:required="
 										courseResource.doc.paid_course ||
@@ -287,6 +287,9 @@
 									"
 									@update:modelValue="makeFormDirty()"
 								/>
+								<p class="text-sm text-ink-gray-6">
+									{{ __('Puedes configurar tu precio en soles o dólares; nosotros haremos la conversión para compradores internacionales.') }}
+								</p>
 							</div>
 						</div>
 					</div>
@@ -370,6 +373,10 @@ const app = getCurrentInstance()
 const { $dialog } = app.appContext.config.globalProperties
 const isDirty = ref(false)
 const showMemberModal = ref(false)
+const courseCurrencyOptions = [
+	{ label: 'S/ PEN', value: 'PEN' },
+	{ label: '$ USD', value: 'USD' },
+]
 
 const selfEnrollment = computed({
 	get: () => !courseResource.doc?.disable_self_learning,
