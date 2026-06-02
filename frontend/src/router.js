@@ -405,6 +405,11 @@ const routes = [
 		component: () => import('@/pages/DataImport.vue'),
 		props: true,
 	},
+	{
+		path: '/referrals',
+		name: 'Referrals',
+		component: () => import('@/pages/Referrals.vue'),
+	},
 ]
 
 let router = createRouter({

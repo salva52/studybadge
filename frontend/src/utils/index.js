@@ -452,6 +452,15 @@ const getSidebarItems = (forMobile = false) => {
 						return !forMobile && userResource?.data
 					},
 				},
+				{
+					label: 'Referidos',
+					icon: 'Gift',
+					to: 'Referrals',
+					activeFor: ['Referrals'],
+					condition: () => {
+						return userResource?.data
+					},
+				},
 			],
 		},
 		{
