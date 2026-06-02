@@ -562,7 +562,11 @@ const access = createResource({
 		name: props.name,
 	},
 	onSuccess(data) {
-		Object.assign(fieldMeta, data.billing_field_meta || {})
+		let meta = data.billing_field_meta || {}
+		if (meta.source) {
+			meta.source.reqd = 0
+		}
+		Object.assign(fieldMeta, meta)
 		setBillingDetails(data.address)
 		selectedPaymentCurrency.value = data.preferred_payment_currency || 'PEN'
 		orderSummary.submit()
