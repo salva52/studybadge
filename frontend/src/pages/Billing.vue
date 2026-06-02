@@ -23,7 +23,7 @@
 							{{ __('Paga este certificado una vez') }}
 						</h1>
 						<p class="mt-3 max-w-2xl text-sm leading-6 text-blue-100 sm:text-base">
-							{{ __('Completa el pago seguro en soles y agenda tu evaluacion para obtener una credencial verificable de este curso.') }}
+							{{ selectedPaymentCurrency === 'PEN' ? __('Completa el pago seguro en soles y agenda tu evaluacion para obtener una credencial verificable de este curso.') : __('Completa el pago seguro en dolares con PayPal y agenda tu evaluacion para obtener una credencial verificable de este curso.') }}
 						</p>
 						<div class="mt-5 grid gap-3 text-sm text-white sm:grid-cols-3">
 							<div class="certificate-proof">
@@ -54,12 +54,23 @@
 									{{ __('Total') }}
 								</div>
 								<div class="text-xs text-ink-gray-5">
-									{{ __('Pago unico en PEN') }}
+									{{ __('Pago unico en') }} {{ selectedPaymentCurrency }}
 								</div>
 							</div>
 							<div class="text-3xl font-black text-[#0a2351]">
-								{{ formatCertificateMoney(orderSummary.data.total_amount) }}
+								{{ orderSummary.data.total_amount_formatted }}
 							</div>
+						</div>
+						<div class="mt-5 grid grid-cols-2 gap-2 rounded-md bg-surface-gray-2 p-1">
+							<button
+								v-for="option in paymentCurrencyOptions"
+								:key="option.currency"
+								class="currency-option"
+								:class="{ 'currency-option-active': selectedPaymentCurrency === option.currency }"
+								@click="selectPaymentCurrency(option.currency)"
+							>
+								{{ option.label }}
+							</button>
 						</div>
 						<router-link
 							:to="{ name: 'Plus', query: { from: 'certificate', course: name } }"
@@ -152,13 +163,13 @@
 							variant="solid"
 							size="md"
 							class="certificate-primary w-full"
-							:disabled="certificateCheckout.loading || brickLoading"
-							@click="prepareCertificateCheckout"
+							:disabled="certificateCheckout.loading || brickLoading || paypalLoading"
+							@click="prepareSelectedCheckout"
 						>
 							<template #prefix>
 								<CreditCard class="size-4" />
 							</template>
-							{{ certificateCheckout.data ? __('Reiniciar pago seguro') : __('Continuar al pago seguro') }}
+							{{ checkoutButtonLabel }}
 						</Button>
 					</div>
 				</section>
@@ -167,17 +178,17 @@
 					<div class="mb-5 flex items-start justify-between gap-4">
 						<div>
 							<h2 class="text-lg font-semibold text-ink-gray-9">
-								{{ __('Mercado Pago Checkout') }}
+								{{ selectedPaymentCurrency === 'PEN' ? __('Mercado Pago Checkout') : __('PayPal Checkout') }}
 							</h2>
 							<p class="mt-1 text-sm text-ink-gray-6">
-								{{ __('Elige tarjeta, saldo de Mercado Pago, Yape u otros metodos disponibles para Peru.') }}
+								{{ selectedPaymentCurrency === 'PEN' ? __('Elige tarjeta, saldo de Mercado Pago, Yape u otros metodos disponibles para Peru.') : __('Paga en dolares con PayPal, tarjeta internacional o los metodos disponibles para tu cuenta.') }}
 							</p>
 						</div>
 						<div class="rounded-md bg-blue-50 px-3 py-1 text-xs font-semibold text-[#0a2351]">
-							{{ __('PEN') }}
+							{{ selectedPaymentCurrency }}
 						</div>
 					</div>
-					<div class="mb-4 rounded-md border border-blue-100 bg-blue-50 p-3 text-sm text-[#0a2351]">
+					<div v-if="selectedPaymentCurrency === 'PEN'" class="mb-4 rounded-md border border-blue-100 bg-blue-50 p-3 text-sm text-[#0a2351]">
 						<div class="font-semibold">
 							{{ __('Si quieres pagar con Yape') }}
 						</div>
@@ -186,7 +197,7 @@
 						</div>
 					</div>
 					<div
-						v-if="!certificateCheckout.data"
+						v-if="!hasCheckoutData"
 						class="certificate-empty"
 					>
 						<ShieldCheck class="size-8 text-[#0a2351]" />
@@ -194,14 +205,15 @@
 							{{ __('Confirma tus datos para cargar la pasarela') }}
 						</div>
 						<p class="mt-1 max-w-sm text-center text-sm text-ink-gray-6">
-							{{ __('Mercado Pago se abrira aqui mismo, sin salir de StudyBadge.') }}
+							{{ selectedPaymentCurrency === 'PEN' ? __('Mercado Pago se abrira aqui mismo, sin salir de StudyBadge.') : __('PayPal se cargara aqui mismo para confirmar el pago en dolares.') }}
 						</p>
 					</div>
 					<div v-else>
-						<div v-if="brickLoading" class="py-8 text-center text-sm text-ink-gray-6">
+						<div v-if="brickLoading || paypalLoading" class="py-8 text-center text-sm text-ink-gray-6">
 							{{ __('Cargando pasarela segura...') }}
 						</div>
-						<div id="studybadge-mp-payment-brick"></div>
+						<div v-show="selectedPaymentCurrency === 'PEN'" id="studybadge-mp-payment-brick"></div>
+						<div v-show="selectedPaymentCurrency === 'USD'" id="studybadge-paypal-buttons-certificate"></div>
 						<div
 							v-if="certificatePaymentStatus"
 							class="mt-4 rounded-md border p-4 text-sm"
@@ -279,6 +291,17 @@
 							<div class="font-bold text-ink-gray-9">
 								{{ orderSummary.data.total_amount_formatted }}
 							</div>
+						</div>
+						<div class="grid grid-cols-2 gap-2 rounded-md bg-white p-1">
+							<button
+								v-for="option in paymentCurrencyOptions"
+								:key="option.currency"
+								class="currency-option"
+								:class="{ 'currency-option-active': selectedPaymentCurrency === option.currency }"
+								@click="selectPaymentCurrency(option.currency)"
+							>
+								{{ option.label }}
+							</button>
 						</div>
 					</div>
 
@@ -426,12 +449,22 @@
 							variant="solid"
 							size="md"
 							class="ms-auto"
-							@click="generatePaymentLink()"
+							:disabled="paypalLoading"
+							@click="selectedPaymentCurrency === 'USD' ? preparePayPalCheckout() : generatePaymentLink()"
 						>
 							{{
-								isZeroAmount ? __('Enroll for Free') : __('Proceed to Payment')
+								selectedPaymentCurrency === 'USD' && !isZeroAmount ? __('Continuar con PayPal') : isZeroAmount ? __('Enroll for Free') : __('Proceed to Payment')
 							}}
 						</Button>
+					</div>
+					<div
+						v-if="selectedPaymentCurrency === 'USD' && paypalCheckout.data"
+						class="mt-5 rounded-md border border-outline-gray-2 bg-surface-gray-1 p-4"
+					>
+						<div v-if="paypalLoading" class="py-4 text-center text-sm text-ink-gray-6">
+							{{ __('Cargando PayPal...') }}
+						</div>
+						<div id="studybadge-paypal-buttons-standard"></div>
 					</div>
 				</div>
 			</div>
@@ -502,10 +535,14 @@ const user = inject('$user')
 const { brand } = sessionStore()
 const showConsentWarning = ref(false)
 const mercadoPagoLoader = ref(null)
+const paypalLoader = ref(null)
 const paymentBrickController = ref(null)
+const paypalButtonsController = ref(null)
 const brickLoading = ref(false)
+const paypalLoading = ref(false)
 const certificatePaymentStatus = ref('')
 const certificatePaymentMessage = ref('')
+const selectedPaymentCurrency = ref('PEN')
 const { capture } = useTelemetry()
 
 onMounted(() => {
@@ -545,6 +582,7 @@ const access = createResource({
 	onSuccess(data) {
 		Object.assign(fieldMeta, data.billing_field_meta || {})
 		setBillingDetails(data.address)
+		selectedPaymentCurrency.value = data.preferred_payment_currency || 'PEN'
 		orderSummary.submit()
 	},
 })
@@ -557,6 +595,7 @@ const orderSummary = createResource({
 			docname: props.name,
 			country: billingDetails.country,
 			coupon: appliedCoupon.value,
+			currency: selectedPaymentCurrency.value,
 		}
 	},
 	onError(err) {
@@ -596,6 +635,7 @@ const paymentLink = createResource({
 			payment_for_certificate: props.type == 'certificate',
 			coupon_code: appliedCoupon.value,
 			country: billingDetails.country,
+			currency: selectedPaymentCurrency.value,
 		}
 		return data
 	},
@@ -619,6 +659,42 @@ const certificatePayment = createResource({
 
 const paymentStatus = createResource({
 	url: 'lms.lms.payments.get_certificate_payment_status',
+})
+
+const paypalCheckout = createResource({
+	url: 'lms.lms.payments.create_paypal_checkout',
+	makeParams() {
+		return {
+			doctype: props.type == 'batch' ? 'LMS Batch' : 'LMS Course',
+			docname: props.name,
+			address: billingDetails,
+			payment_for_certificate: props.type == 'certificate',
+			coupon_code: appliedCoupon.value,
+			country: billingDetails.country,
+		}
+	},
+})
+
+const paypalCapture = createResource({
+	url: 'lms.lms.payments.capture_paypal_checkout',
+})
+
+const paymentCurrencyOptions = [
+	{ currency: 'PEN', label: 'S/ PEN' },
+	{ currency: 'USD', label: '$ USD' },
+]
+
+const checkoutButtonLabel = computed(() => {
+	if (selectedPaymentCurrency.value === 'USD') {
+		return paypalCheckout.data ? __('Reiniciar PayPal') : __('Continuar con PayPal')
+	}
+	return certificateCheckout.data ? __('Reiniciar pago seguro') : __('Continuar al pago seguro')
+})
+
+const hasCheckoutData = computed(() => {
+	return selectedPaymentCurrency.value === 'USD'
+		? !!paypalCheckout.data
+		: !!certificateCheckout.data
 })
 
 const paymentStatusTitle = computed(() => {
@@ -694,6 +770,8 @@ const prepareCertificateCheckout = () => {
 		return
 	}
 	destroyPaymentBrick()
+	destroyPayPalButtons()
+	paypalCheckout.data = null
 	certificatePaymentStatus.value = ''
 	certificatePaymentMessage.value = ''
 	certificateCheckout.submit(
@@ -714,6 +792,14 @@ const prepareCertificateCheckout = () => {
 	)
 }
 
+const prepareSelectedCheckout = () => {
+	if (selectedPaymentCurrency.value === 'USD') {
+		preparePayPalCheckout()
+		return
+	}
+	prepareCertificateCheckout()
+}
+
 function loadMercadoPago() {
 	if (window.MercadoPago) {
 		return Promise.resolve(window.MercadoPago)
@@ -729,6 +815,26 @@ function loadMercadoPago() {
 		document.body.appendChild(script)
 	})
 	return mercadoPagoLoader.value
+}
+
+function loadPayPal(clientId) {
+	if (!clientId) {
+		return Promise.reject(new Error(__('Falta configurar el client ID de PayPal.')))
+	}
+	if (window.paypal) {
+		return Promise.resolve(window.paypal)
+	}
+	if (paypalLoader.value) {
+		return paypalLoader.value
+	}
+	paypalLoader.value = new Promise((resolve, reject) => {
+		const script = document.createElement('script')
+		script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD&intent=capture`
+		script.onload = () => resolve(window.paypal)
+		script.onerror = reject
+		document.body.appendChild(script)
+	})
+	return paypalLoader.value
 }
 
 async function initMercadoPagoPaymentBrick() {
@@ -828,6 +934,98 @@ function handleCertificatePaymentResult(data) {
 	toast.error(__('Mercado Pago no aprobo la operacion.'))
 }
 
+function handlePayPalPaymentResult(data) {
+	certificatePaymentStatus.value = data.status
+	certificatePaymentMessage.value = ''
+	if (data.status === 'COMPLETED') {
+		toast.success(__('Pago aprobado.'))
+		setTimeout(() => {
+			window.location.href = data.redirect_url
+		}, 700)
+		return
+	}
+	toast.error(__('PayPal no aprobo la operacion.'))
+}
+
+function preparePayPalCheckout() {
+	const validationError = validateBillingDetails()
+	if (validationError) {
+		toast.error(validationError)
+		return
+	}
+	destroyPaymentBrick()
+	destroyPayPalButtons()
+	certificateCheckout.data = null
+	certificatePaymentStatus.value = ''
+	certificatePaymentMessage.value = ''
+	paypalCheckout.submit(
+		{},
+		{
+			onSuccess(data) {
+				capture('checkout_initiated', { type: props.type, gateway: 'paypal' })
+				if (data.status === 'COMPLETED') {
+					window.location.href = data.redirect_url
+					return
+				}
+				nextTick(() => initPayPalButtons())
+			},
+			onError(err) {
+				toast.error(err.messages?.[0] || err)
+			},
+		}
+	)
+}
+
+async function initPayPalButtons() {
+	if (!paypalCheckout.data?.client_id || !paypalCheckout.data?.order_id) {
+		toast.error(__('PayPal no devolvio los datos del checkout.'))
+		return
+	}
+	paypalLoading.value = true
+	try {
+		const paypal = await loadPayPal(paypalCheckout.data.client_id)
+		const containerId = isCertificateCheckout.value
+			? 'studybadge-paypal-buttons-certificate'
+			: 'studybadge-paypal-buttons-standard'
+		paypalButtonsController.value = paypal.Buttons({
+			createOrder() {
+				return paypalCheckout.data.order_id
+			},
+			onApprove(data) {
+				return new Promise((resolve, reject) => {
+					paypalCapture.submit(
+						{
+							payment: paypalCheckout.data.payment,
+							order_id: data.orderID,
+						},
+						{
+							onSuccess(result) {
+								handlePayPalPaymentResult(result)
+								resolve()
+							},
+							onError(err) {
+								const message = err.messages?.[0] || err
+								certificatePaymentStatus.value = 'FAILED'
+								certificatePaymentMessage.value = message
+								toast.error(message)
+								reject(err)
+							},
+						}
+					)
+				})
+			},
+			onError(error) {
+				toast.error(error?.message || __('PayPal no pudo cargar.'))
+			},
+		})
+		await paypalButtonsController.value.render(`#${containerId}`)
+	} catch (error) {
+		toast.error(error?.message || __('No se pudo cargar PayPal.'))
+	} finally {
+		paypalLoading.value = false
+	}
+}
+
 function refreshCertificatePayment() {
 	if (!certificateCheckout.data?.payment) return
 	paymentStatus.submit(
@@ -848,6 +1046,13 @@ function destroyPaymentBrick() {
 		paymentBrickController.value.unmount()
 	}
 	paymentBrickController.value = null
+}
+
+function destroyPayPalButtons() {
+	if (paypalButtonsController.value?.close) {
+		paypalButtonsController.value.close()
+	}
+	paypalButtonsController.value = null
 }
 
 function applyCouponCode() {
@@ -939,6 +1144,20 @@ const showError = (err) => {
 
 const changeCurrency = (country) => {
 	billingDetails.country = country
+	if (country === 'Peru' || country === 'Perú') {
+		selectedPaymentCurrency.value = 'PEN'
+	} else if (country) {
+		selectedPaymentCurrency.value = 'USD'
+	}
+	orderSummary.reload()
+}
+
+const selectPaymentCurrency = (currency) => {
+	selectedPaymentCurrency.value = currency
+	certificateCheckout.data = null
+	paypalCheckout.data = null
+	destroyPaymentBrick()
+	destroyPayPalButtons()
 	orderSummary.reload()
 }
 
@@ -954,6 +1173,7 @@ watch(billingDetails, () => {
 
 onBeforeUnmount(() => {
 	destroyPaymentBrick()
+	destroyPayPalButtons()
 })
 
 usePageMeta(() => {
@@ -1020,6 +1240,22 @@ usePageMeta(() => {
 
 .certificate-primary {
 	background: #0a2351 !important;
+}
+
+.currency-option {
+	min-height: 34px;
+	border: 0;
+	border-radius: 6px;
+	background: transparent;
+	color: #64748b;
+	font-size: 12px;
+	font-weight: 800;
+}
+
+.currency-option-active {
+	background: #ffffff;
+	color: #0a2351;
+	box-shadow: 0 1px 4px rgba(10, 35, 81, 0.12);
 }
 
 :root[data-theme='dark'] .certificate-checkout {

@@ -8,8 +8,11 @@
  "field_order": [
   "member",
   "status",
+  "payment_gateway",
   "column_break_main",
   "mp_preapproval_id",
+  "paypal_subscription_id",
+  "paypal_plan_id",
   "external_reference",
   "billing_section",
   "amount",
@@ -59,12 +62,32 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "payment_gateway",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Payment Gateway"
+  },
+  {
    "fieldname": "mp_preapproval_id",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Mercado Pago Preapproval ID",
    "search_index": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "paypal_subscription_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "PayPal Subscription ID",
+   "search_index": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "paypal_plan_id",
+   "fieldtype": "Data",
+   "label": "PayPal Plan ID"
   },
   {
    "fieldname": "external_reference",

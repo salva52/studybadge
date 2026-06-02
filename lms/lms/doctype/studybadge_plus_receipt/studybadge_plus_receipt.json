@@ -10,6 +10,7 @@
   "receipt_number",
   "member",
   "subscription",
+  "payment_gateway",
   "column_break_main",
   "status",
   "status_detail",
@@ -17,6 +18,9 @@
   "mp_authorized_payment_id",
   "mp_payment_id",
   "mp_preapproval_id",
+  "paypal_section",
+  "paypal_capture_id",
+  "paypal_subscription_id",
   "amount_section",
   "amount",
   "currency",
@@ -59,6 +63,12 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "payment_gateway",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Payment Gateway"
+  },
+  {
    "fieldname": "status",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -92,6 +102,24 @@
    "fieldname": "mp_preapproval_id",
    "fieldtype": "Data",
    "label": "Mercado Pago Preapproval ID",
+   "search_index": 1
+  },
+  {
+   "fieldname": "paypal_section",
+   "fieldtype": "Section Break",
+   "label": "PayPal"
+  },
+  {
+   "fieldname": "paypal_capture_id",
+   "fieldtype": "Data",
+   "label": "PayPal Capture ID",
+   "search_index": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "paypal_subscription_id",
+   "fieldtype": "Data",
+   "label": "PayPal Subscription ID",
    "search_index": 1
   },
   {

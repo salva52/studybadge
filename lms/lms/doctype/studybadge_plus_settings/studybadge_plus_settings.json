@@ -10,6 +10,8 @@
   "plan_name",
   "amount",
   "currency",
+  "plus_amount_pen",
+  "plus_amount_usd",
   "column_break_plan",
   "frequency",
   "frequency_type",
@@ -17,7 +19,14 @@
   "public_base_url",
   "public_key",
   "access_token",
-  "webhook_secret"
+  "webhook_secret",
+  "paypal_section",
+  "paypal_enabled",
+  "paypal_mode",
+  "paypal_client_id",
+  "paypal_client_secret",
+  "paypal_webhook_id",
+  "paypal_plus_plan_id_usd"
  ],
  "fields": [
   {
@@ -51,6 +60,20 @@
    "fieldtype": "Link",
    "label": "Currency",
    "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "default": "29.90",
+   "fieldname": "plus_amount_pen",
+   "fieldtype": "Currency",
+   "label": "Plus Amount PEN",
+   "reqd": 1
+  },
+  {
+   "default": "9.90",
+   "fieldname": "plus_amount_usd",
+   "fieldtype": "Currency",
+   "label": "Plus Amount USD",
    "reqd": 1
   },
   {
@@ -100,6 +123,44 @@
    "fieldtype": "Password",
    "label": "Webhook Secret",
    "reqd": 1
+  },
+  {
+   "fieldname": "paypal_section",
+   "fieldtype": "Section Break",
+   "label": "PayPal"
+  },
+  {
+   "default": "0",
+   "fieldname": "paypal_enabled",
+   "fieldtype": "Check",
+   "label": "PayPal Enabled"
+  },
+  {
+   "default": "sandbox",
+   "fieldname": "paypal_mode",
+   "fieldtype": "Select",
+   "label": "PayPal Mode",
+   "options": "sandbox\nlive"
+  },
+  {
+   "fieldname": "paypal_client_id",
+   "fieldtype": "Data",
+   "label": "PayPal Client ID"
+  },
+  {
+   "fieldname": "paypal_client_secret",
+   "fieldtype": "Password",
+   "label": "PayPal Client Secret"
+  },
+  {
+   "fieldname": "paypal_webhook_id",
+   "fieldtype": "Data",
+   "label": "PayPal Webhook ID"
+  },
+  {
+   "fieldname": "paypal_plus_plan_id_usd",
+   "fieldtype": "Data",
+   "label": "PayPal Plus Plan ID USD"
   }
  ],
  "issingle": 1,

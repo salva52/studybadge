@@ -38,6 +38,7 @@ from lms.lms.utils import (
 	get_batch_details,
 	get_course_details,
 	get_field_meta,
+	get_preferred_payment_currency,
 	get_instructors,
 	get_lms_route,
 	has_course_instructor_role,
@@ -104,6 +105,7 @@ def validate_billing_access(billing_type: str, name: str):
 		],
 		as_dict=1,
 	)
+	country = (address or {}).get("country") or frappe.db.get_value("User", frappe.session.user, "country")
 
 	payment_fields = get_payment_field_meta()
 	address_fields = get_field_meta(
@@ -125,6 +127,7 @@ def validate_billing_access(billing_type: str, name: str):
 		"message": message,
 		"address": address,
 		"billing_field_meta": billing_field_meta,
+		"preferred_payment_currency": get_preferred_payment_currency(country),
 	}
 
 

@@ -188,7 +188,7 @@
 
 							<div class="sb-plan-actions">
 								<button
-									v-if="!subscription?.cancel_at_period_end"
+									v-if="!subscription?.cancel_at_period_end && subscription?.payment_gateway !== 'PayPal'"
 									class="sb-primary-btn"
 									@click="showPaymentMethodForm"
 								>
@@ -293,7 +293,7 @@
 								<button
 									class="sb-hero-primary"
 									:disabled="activating"
-									@click="subscription?.init_point ? openExistingCheckout() : activatePlus()"
+									@click="subscription?.init_point && selectedPaymentCurrency === 'PEN' ? openExistingCheckout() : startPlusCheckout()"
 								>
 									<span v-if="activating" class="sb-button-spinner"></span>
 									<Crown v-else class="size-5" />
@@ -341,6 +341,17 @@
 										<p>{{ __('Menos de S/1 al día para desbloquear todas las herramientas premium.') }}</p>
 									</div>
 
+									<div class="sb-currency-switch">
+										<button
+											v-for="option in paymentCurrencyOptions"
+											:key="option.currency"
+											:class="{ 'sb-currency-active': selectedPaymentCurrency === option.currency }"
+											@click="selectPaymentCurrency(option.currency)"
+										>
+											{{ option.label }}
+										</button>
+									</div>
+
 									<ul class="sb-price-list">
 										<li>
 											<CheckCircle2 class="size-5" />
@@ -363,16 +374,26 @@
 									<button
 										class="sb-pricing-cta"
 										:disabled="activating"
-										@click="subscription?.init_point ? openExistingCheckout() : activatePlus()"
+										@click="subscription?.init_point && selectedPaymentCurrency === 'PEN' ? openExistingCheckout() : startPlusCheckout()"
 									>
 										<span v-if="activating" class="sb-button-spinner sb-button-spinner-light"></span>
 										<Crown v-else class="size-5" />
 										{{ subscription?.init_point ? __('Continuar pago pendiente') : __('Desbloquear StudyBadge Plus') }}
 									</button>
 
+									<div
+										v-if="selectedPaymentCurrency === 'USD' && paypalPlus.data && !paypalPlus.data.active"
+										class="sb-paypal-shell"
+									>
+										<div v-if="paypalLoading" class="sb-card-loading">
+											{{ __('Cargando PayPal...') }}
+										</div>
+										<div id="studybadge-paypal-plus-buttons"></div>
+									</div>
+
 									<div class="sb-payment-note">
 										<ShieldCheck class="size-4" />
-										{{ __('Pago 100% seguro con Mercado Pago') }}
+										{{ selectedPaymentCurrency === 'PEN' ? __('Pago 100% seguro con Mercado Pago') : __('Pago 100% seguro con PayPal') }}
 									</div>
 								</div>
 
@@ -558,7 +579,7 @@
 						<button
 							class="sb-final-btn"
 							:disabled="activating"
-							@click="subscription?.init_point ? openExistingCheckout() : activatePlus()"
+							@click="subscription?.init_point && selectedPaymentCurrency === 'PEN' ? openExistingCheckout() : startPlusCheckout()"
 						>
 							<span v-if="activating" class="sb-button-spinner"></span>
 							{{ subscription?.init_point ? __('Continuar pago pendiente') : __('Desbloquear Plus por ') + formattedPrice }}
@@ -613,6 +634,15 @@ const cardFormVisible = ref(false)
 const cardFormLoading = ref(false)
 const cardController = ref(null)
 const mercadoPagoLoader = ref(null)
+const paypalLoader = ref(null)
+const paypalButtonsController = ref(null)
+const paypalLoading = ref(false)
+const selectedPaymentCurrency = ref('PEN')
+
+const paymentCurrencyOptions = [
+	{ currency: 'PEN', label: 'S/ PEN' },
+	{ currency: 'USD', label: '$ USD' },
+]
 
 const benefits = [
 	{
@@ -734,6 +764,9 @@ const billing = createResource({
 	url: 'lms.lms.subscriptions.get_plus_billing',
 	auto: true,
 	onSuccess(data) {
+		if (!data?.active) {
+			selectedPaymentCurrency.value = data?.preferred_payment_currency || 'PEN'
+		}
 		if (data?.active) {
 			user?.reload?.()
 		}
@@ -742,6 +775,14 @@ const billing = createResource({
 
 const checkout = createResource({
 	url: 'lms.lms.subscriptions.create_plus_checkout',
+})
+
+const paypalPlus = createResource({
+	url: 'lms.lms.subscriptions.create_paypal_plus_subscription',
+})
+
+const paypalPlusSync = createResource({
+	url: 'lms.lms.subscriptions.sync_paypal_plus_subscription',
 })
 
 const cancelResource = createResource({
@@ -760,7 +801,7 @@ const subscription = computed(() => billing.data?.subscription || null)
 const receipts = computed(() => billing.data?.receipts || [])
 
 const formattedPrice = computed(() => {
-	const plan = billing.data?.plan
+	const plan = billing.data?.plans?.[selectedPaymentCurrency.value] || billing.data?.plan
 	if (!plan) return 'S/ 29.90'
 
 	const amount = Number(plan.amount || 29.9).toFixed(2)
@@ -773,6 +814,9 @@ const formattedPrice = computed(() => {
 })
 
 const paymentMethodLabel = computed(() => {
+	if (subscription.value?.payment_gateway === 'PayPal') {
+		return __('PayPal')
+	}
 	const method = subscription.value?.payment_method
 
 	if (!method?.id && !method?.card_last_four) {
@@ -821,7 +865,7 @@ function activatePlus() {
 	activating.value = true
 
 	checkout.submit(
-		{},
+		{ currency: 'PEN' },
 		{
 			onSuccess(url) {
 				if (!url) {
@@ -838,6 +882,115 @@ function activatePlus() {
 			},
 		}
 	)
+}
+
+function startPlusCheckout() {
+	if (selectedPaymentCurrency.value === 'USD') {
+		startPayPalPlusCheckout()
+		return
+	}
+	activatePlus()
+}
+
+function selectPaymentCurrency(currency) {
+	selectedPaymentCurrency.value = currency
+	paypalPlus.data = null
+	destroyPayPalButtons()
+}
+
+function loadPayPal(clientId) {
+	if (!clientId) {
+		return Promise.reject(new Error(__('Falta configurar el client ID de PayPal.')))
+	}
+	if (window.paypal) {
+		return Promise.resolve(window.paypal)
+	}
+	if (paypalLoader.value) {
+		return paypalLoader.value
+	}
+	paypalLoader.value = new Promise((resolve, reject) => {
+		const script = document.createElement('script')
+		script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&vault=true&intent=subscription&currency=USD`
+		script.onload = () => resolve(window.paypal)
+		script.onerror = reject
+		document.body.appendChild(script)
+	})
+	return paypalLoader.value
+}
+
+function startPayPalPlusCheckout() {
+	if (activating.value) return
+	activating.value = true
+	destroyPayPalButtons()
+	paypalPlus.submit(
+		{ currency: 'USD' },
+		{
+			onSuccess(data) {
+				activating.value = false
+				if (data?.active && data?.redirect_url) {
+					window.location.href = data.redirect_url
+					return
+				}
+				nextTick(() => initPayPalPlusButtons())
+			},
+			onError(err) {
+				activating.value = false
+				toast.error(getErrorMessage(err))
+			},
+		}
+	)
+}
+
+async function initPayPalPlusButtons() {
+	if (!paypalPlus.data?.client_id || !paypalPlus.data?.plan_id) {
+		toast.error(__('Falta configurar PayPal para StudyBadge Plus.'))
+		return
+	}
+	paypalLoading.value = true
+	try {
+		const paypal = await loadPayPal(paypalPlus.data.client_id)
+		paypalButtonsController.value = paypal.Buttons({
+			createSubscription(data, actions) {
+				return actions.subscription.create({
+					plan_id: paypalPlus.data.plan_id,
+					custom_id: paypalPlus.data.external_reference,
+				})
+			},
+			onApprove(data) {
+				paypalPlusSync.submit(
+					{
+						subscription_id: data.subscriptionID,
+						subscription: paypalPlus.data.subscription,
+					},
+					{
+						onSuccess(result) {
+							billing.data = result
+							user?.reload?.()
+							toast.success(__('Tu Plus esta activo.'))
+						},
+						onError(err) {
+							toast.error(getErrorMessage(err))
+						},
+					}
+				)
+			},
+			onError(error) {
+				toast.error(error?.message || __('PayPal no pudo cargar.'))
+			},
+		})
+		await paypalButtonsController.value.render('#studybadge-paypal-plus-buttons')
+	} catch (error) {
+		toast.error(error?.message || __('No se pudo cargar PayPal.'))
+	} finally {
+		paypalLoading.value = false
+	}
+}
+
+function destroyPayPalButtons() {
+	if (paypalButtonsController.value?.close) {
+		paypalButtonsController.value.close()
+	}
+	paypalButtonsController.value = null
 }
 
 function openExistingCheckout() {
@@ -1034,6 +1187,7 @@ function formatMoney(amount, currency) {
 
 onBeforeUnmount(() => {
 	destroyCardForm()
+	destroyPayPalButtons()
 })
 
 usePageMeta(() => ({
@@ -2037,6 +2191,34 @@ usePageMeta(() => ({
 	line-height: 1.45;
 }
 
+.sb-currency-switch {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 6px;
+	margin-top: 18px;
+	padding: 6px;
+	background: #f1f5f9;
+	border: 1px solid #e2e8f0;
+	border-radius: 14px;
+}
+
+.sb-currency-switch button {
+	min-height: 38px;
+	border: 0;
+	border-radius: 10px;
+	background: transparent;
+	color: #64748b;
+	font-size: 13px;
+	font-weight: 950;
+	cursor: pointer;
+}
+
+.sb-currency-switch .sb-currency-active {
+	background: #ffffff;
+	color: #08204e;
+	box-shadow: 0 8px 18px rgba(8, 32, 78, 0.08);
+}
+
 .sb-price-list {
 	display: grid;
 	gap: 12px;
@@ -2084,6 +2266,10 @@ usePageMeta(() => ({
 	color: #64748b;
 	font-size: 12.5px;
 	font-weight: 800;
+}
+
+.sb-paypal-shell {
+	margin-top: 14px;
 }
 
 .sb-payment-note svg {

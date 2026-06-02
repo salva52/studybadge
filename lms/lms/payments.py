@@ -13,6 +13,7 @@ from lms.lms.utils import (
 	get_gst_details,
 	get_lms_route,
 	get_order_summary,
+	set_checkout_currency,
 )
 from lms.lms.subscriptions import (
 	MERCADOPAGO_API_BASE,
@@ -97,13 +98,14 @@ def _get_certificate_payment_total(course: str, coupon_code: str | None = None, 
 	details = frappe.db.get_value(
 		"LMS Course",
 		course,
-		["title", "name", "paid_certificate", "course_price as amount", "currency"],
+		["title", "name", "paid_certificate", "course_price as amount", "currency", "amount_usd"],
 		as_dict=True,
 	)
 	if not details or not details.paid_certificate:
 		frappe.throw(_("This course does not require a paid certificate checkout."))
 
 	details = frappe._dict(details)
+	set_checkout_currency(details, "PEN")
 	details.original_amount = details.amount
 	adjust_amount_for_coupon(details, coupon_code, "LMS Course", course)
 	get_gst_details(details, country)
@@ -419,12 +421,23 @@ def get_payment_link(
 	payment_for_certificate: int,
 	coupon_code: str | None = None,
 	country: str | None = None,
+	currency: str | None = None,
 ):
 	payment_gateway = get_payment_gateway()
 	address = frappe._dict(address)
 	redirect_to = get_redirect_url(doctype, docname, payment_for_certificate)
 
-	details = frappe._dict(get_order_summary(doctype, docname, coupon=coupon_code, country=country))
+	if currency == "USD":
+		return create_paypal_checkout(
+			doctype,
+			docname,
+			address,
+			payment_for_certificate,
+			coupon_code=coupon_code,
+			country=country,
+		).get("approval_url")
+
+	details = frappe._dict(get_order_summary(doctype, docname, coupon=coupon_code, country=country, currency=currency))
 	title = details.title
 	currency = details.currency
 	original_amount = details.original_amount
@@ -474,6 +487,129 @@ def get_payment_link(
 	url = controller.get_payment_url(**payment_details)
 
 	return url
+
+
+def _make_payment_external_reference(payment_name: str, payment_for: str) -> str:
+	return f"studybadge-{payment_for}::{payment_name}"
+
+
+def _payment_for_label(payment_for_certificate: int, doctype: str) -> str:
+	if int(payment_for_certificate):
+		return "certificate"
+	return "course" if doctype == "LMS Course" else "batch"
+
+
+def _validate_paypal_payment_access(doctype: str, docname: str, payment_for_certificate: int):
+	if int(payment_for_certificate):
+		return _validate_certificate_payment_access(docname)
+	if frappe.session.user == "Guest":
+		frappe.throw(_("Please login to continue with payment."), frappe.AuthenticationError)
+	from lms.lms.api import verify_billing_access
+
+	billing_type = "course" if doctype == "LMS Course" else "batch"
+	access, message = verify_billing_access(doctype, docname, billing_type)
+	if not access:
+		frappe.throw(message)
+
+
+@frappe.whitelist()
+def create_paypal_checkout(
+	doctype: str,
+	docname: str,
+	address: dict,
+	payment_for_certificate: int = 0,
+	coupon_code: str | None = None,
+	country: str | None = None,
+):
+	_validate_paypal_payment_access(doctype, docname, payment_for_certificate)
+	address = frappe._dict(address)
+	redirect_to = get_redirect_url(doctype, docname, payment_for_certificate)
+	cancel_to = get_lms_route(f"billing/{'certificate' if int(payment_for_certificate) else doctype.split(' ')[-1].lower()}/{docname}")
+	details = frappe._dict(
+		get_order_summary(doctype, docname, coupon=coupon_code, country=country, currency="USD")
+	)
+
+	amount = details.original_amount - details.get("discount_amount", 0)
+	total_amount = details.amount
+	payment = record_payment(
+		address,
+		doctype,
+		docname,
+		amount,
+		details.original_amount,
+		details.currency,
+		total_amount if details.get("gst_applied") else 0,
+		details.get("discount_amount", 0),
+		payment_for_certificate,
+		coupon_code,
+		details.get("coupon"),
+	)
+	payment.payment_gateway = "PayPal"
+	payment.payment_status = "CREATED"
+	payment.external_reference = _make_payment_external_reference(
+		payment.name,
+		_payment_for_label(payment_for_certificate, doctype),
+	)
+	payment.save(ignore_permissions=True)
+
+	if flt(details.total_amount) <= 0:
+		frappe.db.set_value("LMS Payment", payment.name, "payment_received", 1)
+		complete_enrollment(payment.name, doctype, docname)
+		return {
+			"status": "COMPLETED",
+			"redirect_url": redirect_to,
+			"payment": payment.name,
+		}
+
+	from lms.lms.paypal import create_order
+
+	order = create_order(payment, details, redirect_to, cancel_to)
+	return {
+		**order,
+		"payment": payment.name,
+		"amount": flt(details.total_amount),
+		"currency": "USD",
+		"title": details.title,
+		"status": "CREATED",
+		"redirect_url": redirect_to,
+	}
+
+
+@frappe.whitelist()
+def capture_paypal_checkout(payment: str, order_id: str):
+	if frappe.session.user == "Guest":
+		frappe.throw(_("Please login to complete this payment."), frappe.AuthenticationError)
+
+	payment_doc = frappe.get_doc("LMS Payment", payment)
+	if payment_doc.member != frappe.session.user:
+		frappe.throw(_("You cannot pay this checkout."), frappe.PermissionError)
+	if payment_doc.order_id != order_id:
+		frappe.throw(_("This PayPal order does not match the checkout."))
+	if payment_doc.payment_received:
+		return {
+			"payment": payment_doc.name,
+			"status": "COMPLETED",
+			"redirect_url": get_redirect_url(
+				payment_doc.payment_for_document_type,
+				payment_doc.payment_for_document,
+				payment_doc.payment_for_certificate,
+			),
+		}
+
+	from lms.lms.paypal import capture_order, process_captured_order
+
+	order = capture_order(order_id)
+	payment_doc = process_captured_order(order, payment_doc) or payment_doc
+	return {
+		"payment": payment_doc.name,
+		"status": payment_doc.payment_status,
+		"payment_id": payment_doc.payment_id,
+		"redirect_url": get_redirect_url(
+			payment_doc.payment_for_document_type,
+			payment_doc.payment_for_document,
+			payment_doc.payment_for_certificate,
+		),
+	}
 
 
 def create_order(payment_gateway: str, payment_details: dict, controller: object):

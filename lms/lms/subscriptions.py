@@ -10,7 +10,7 @@ import requests
 from frappe import _
 from frappe.utils import cint, flt, format_datetime, now_datetime
 
-from lms.lms.utils import get_lms_path
+from lms.lms.utils import get_lms_path, get_preferred_payment_currency
 
 MERCADOPAGO_API_BASE = "https://api.mercadopago.com"
 PLUS_ACTIVE_STATUSES = {"authorized", "active"}
@@ -82,14 +82,30 @@ def _get_public_base_url(settings) -> str:
 
 def _get_plus_plan(settings=None) -> dict:
 	settings = settings or _get_settings()
+	amount_pen = flt(getattr(settings, "plus_amount_pen", 0) or settings.amount or 29.9)
+	amount_usd = flt(getattr(settings, "plus_amount_usd", 0) or 9.9)
 	return {
 		"enabled": bool(settings.enabled),
 		"plan_name": settings.plan_name,
-		"amount": flt(settings.amount),
-		"currency": settings.currency,
+		"amount": amount_pen,
+		"currency": "PEN",
+		"amount_pen": amount_pen,
+		"amount_usd": amount_usd,
 		"frequency": settings.frequency or 1,
 		"frequency_type": settings.frequency_type or "months",
 	}
+
+
+def _get_plus_plan_for_currency(currency: str | None = None, settings=None) -> dict:
+	plan = _get_plus_plan(settings)
+	currency = (currency or "PEN").upper()
+	if currency == "USD":
+		plan["amount"] = plan["amount_usd"]
+		plan["currency"] = "USD"
+	else:
+		plan["amount"] = plan["amount_pen"]
+		plan["currency"] = "PEN"
+	return plan
 
 
 def _headers(settings=None) -> dict:
@@ -299,6 +315,7 @@ def _sync_subscription(mp_subscription: dict):
 	doc.update(
 		{
 			"status": status,
+			"payment_gateway": "Mercado Pago",
 			"mp_preapproval_id": mp_subscription.get("id"),
 			"external_reference": mp_subscription.get("external_reference"),
 			"init_point": mp_subscription.get("init_point"),
@@ -358,13 +375,19 @@ def get_plus_status() -> dict:
 	if frappe.session.user == "Guest":
 		frappe.throw(_("Please login to view your Plus status."), frappe.AuthenticationError)
 
-	plan = _get_plus_plan()
+	preferred_currency = get_preferred_payment_currency()
+	plan = _get_plus_plan_for_currency(preferred_currency)
 	subscription = _get_latest_subscription(frappe.session.user)
-	if subscription:
+	if subscription and getattr(subscription, "mp_preapproval_id", None):
 		subscription = _refresh_subscription_from_mercadopago(subscription)
 	data = {
 		"active": has_active_plus(),
 		"plan": plan,
+		"plans": {
+			"PEN": _get_plus_plan_for_currency("PEN"),
+			"USD": _get_plus_plan_for_currency("USD"),
+		},
+		"preferred_payment_currency": preferred_currency,
 		"subscription": None,
 	}
 
@@ -375,11 +398,14 @@ def get_plus_status() -> dict:
 
 
 @frappe.whitelist()
-def create_plus_checkout() -> str:
+def create_plus_checkout(currency: str | None = "PEN") -> str:
 	if frappe.session.user == "Guest":
 		frappe.throw(_("Please login to activate StudyBadge Plus."), frappe.AuthenticationError)
 
 	settings = _get_settings()
+	currency = (currency or "PEN").upper()
+	if currency == "USD":
+		frappe.throw(_("Use PayPal checkout for USD Plus subscriptions."))
 	if has_active_plus():
 		return f"{get_lms_path_url(settings)}/plus?status=active"
 
@@ -405,8 +431,8 @@ def create_plus_checkout() -> str:
 		"auto_recurring": {
 			"frequency": settings.frequency or 1,
 			"frequency_type": settings.frequency_type or "months",
-			"transaction_amount": flt(settings.amount),
-			"currency_id": settings.currency,
+			"transaction_amount": flt(getattr(settings, "plus_amount_pen", 0) or settings.amount or 29.9),
+			"currency_id": "PEN",
 		},
 		"status": "pending",
 	}
@@ -417,11 +443,12 @@ def create_plus_checkout() -> str:
 		{
 			"member": frappe.session.user,
 			"status": _normalize_status(response.get("status")),
+			"payment_gateway": "Mercado Pago",
 			"mp_preapproval_id": response.get("id"),
 			"external_reference": response.get("external_reference") or external_reference,
 			"init_point": response.get("init_point"),
-			"amount": flt(settings.amount),
-			"currency": settings.currency,
+			"amount": flt(getattr(settings, "plus_amount_pen", 0) or settings.amount or 29.9),
+			"currency": "PEN",
 			"next_payment_date": _parse_mp_datetime(response.get("next_payment_date")),
 			"date_created": _parse_mp_datetime(response.get("date_created")),
 			"last_modified": _parse_mp_datetime(response.get("last_modified")),
@@ -435,6 +462,33 @@ def create_plus_checkout() -> str:
 		frappe.throw(_("Mercado Pago did not return a checkout URL."))
 
 	return subscription.init_point
+
+
+@frappe.whitelist()
+def create_paypal_plus_subscription(currency: str = "USD") -> dict:
+	if frappe.session.user == "Guest":
+		frappe.throw(_("Please login to activate StudyBadge Plus."), frappe.AuthenticationError)
+	if has_active_plus():
+		return {"active": True, "redirect_url": f"{get_lms_path_url()}/plus?status=active"}
+
+	from lms.lms.paypal import create_pending_plus_subscription
+
+	return create_pending_plus_subscription(currency=currency)
+
+
+@frappe.whitelist()
+def sync_paypal_plus_subscription(subscription_id: str, subscription: str | None = None) -> dict:
+	if frappe.session.user == "Guest":
+		frappe.throw(_("Please login to activate StudyBadge Plus."), frappe.AuthenticationError)
+	if not subscription_id:
+		frappe.throw(_("PayPal did not return a subscription ID."))
+
+	from lms.lms.paypal import fetch_subscription, sync_plus_subscription
+
+	doc = sync_plus_subscription(fetch_subscription(subscription_id), local_subscription=subscription)
+	if doc and doc.member != frappe.session.user:
+		frappe.throw(_("You cannot activate this subscription."), frappe.PermissionError)
+	return get_plus_billing()
 
 
 def get_lms_path_url(settings=None) -> str:
@@ -463,6 +517,7 @@ def _serialize_subscription(subscription) -> dict | None:
 	return {
 		"name": subscription.name,
 		"status": subscription.status,
+		"payment_gateway": getattr(subscription, "payment_gateway", None) or "Mercado Pago",
 		"init_point": subscription.init_point,
 		"next_payment_date": subscription.next_payment_date,
 		"last_synced_at": subscription.last_synced_at,
@@ -474,6 +529,10 @@ def _serialize_subscription(subscription) -> dict | None:
 			"name": getattr(subscription, "payment_method_name", None),
 			"card_last_four": getattr(subscription, "card_last_four", None),
 			"card_brand": getattr(subscription, "card_brand", None),
+		},
+		"paypal": {
+			"subscription_id": getattr(subscription, "paypal_subscription_id", None),
+			"plan_id": getattr(subscription, "paypal_plan_id", None),
 		},
 	}
 
@@ -497,8 +556,11 @@ def _serialize_receipts(subscription) -> list[dict]:
 			"receipt_number",
 			"status",
 			"status_detail",
+			"payment_gateway",
 			"mp_authorized_payment_id",
 			"mp_payment_id",
+			"paypal_capture_id",
+			"paypal_subscription_id",
 			"amount",
 			"currency",
 			"paid_at",
@@ -537,6 +599,7 @@ def _sync_receipt(payment: dict, subscription):
 			"receipt_number": receipt.receipt_number or _receipt_number(payment),
 			"status": _get_payment_status(payment),
 			"status_detail": _get_payment_status_detail(payment),
+			"payment_gateway": "Mercado Pago",
 			"mp_authorized_payment_id": authorized_payment_id,
 			"mp_payment_id": payment_id,
 			"mp_preapproval_id": payment.get("preapproval_id") or subscription.mp_preapproval_id,
@@ -646,13 +709,26 @@ def get_plus_billing() -> dict:
 	settings = _get_settings()
 	subscription = _get_latest_subscription(frappe.session.user)
 	if subscription:
-		subscription = _refresh_subscription_from_mercadopago(subscription, settings=settings)
-		_sync_subscription_receipts(subscription, settings=settings)
+		if getattr(subscription, "mp_preapproval_id", None):
+			subscription = _refresh_subscription_from_mercadopago(subscription, settings=settings)
+			_sync_subscription_receipts(subscription, settings=settings)
 
+	preferred_currency = get_preferred_payment_currency()
 	return {
 		"active": has_active_plus(),
-		"plan": _get_plus_plan(settings),
+		"plan": _get_plus_plan_for_currency(preferred_currency, settings),
+		"plans": {
+			"PEN": _get_plus_plan_for_currency("PEN", settings),
+			"USD": _get_plus_plan_for_currency("USD", settings),
+		},
+		"preferred_payment_currency": preferred_currency,
 		"public_key": settings.public_key,
+		"paypal": {
+			"enabled": bool(getattr(settings, "paypal_enabled", 0)),
+			"mode": getattr(settings, "paypal_mode", None) or "sandbox",
+			"client_id": getattr(settings, "paypal_client_id", None),
+			"plan_id_usd": getattr(settings, "paypal_plus_plan_id_usd", None),
+		},
 		"support_email": _get_support_email(),
 		"subscription": _serialize_subscription(subscription),
 		"receipts": _serialize_receipts(subscription),
@@ -665,7 +741,7 @@ def _get_manageable_subscription():
 		frappe.throw(_("You do not have a StudyBadge Plus subscription yet."))
 	if subscription.status not in PLUS_ACTIVE_STATUSES:
 		frappe.throw(_("Your StudyBadge Plus subscription is not active."))
-	if not subscription.mp_preapproval_id:
+	if not subscription.mp_preapproval_id and not getattr(subscription, "paypal_subscription_id", None):
 		frappe.throw(_("This subscription is missing its Mercado Pago ID."))
 	return subscription
 
@@ -676,6 +752,17 @@ def request_plus_cancellation() -> dict:
 		frappe.throw(_("Please login to manage your Plus subscription."), frappe.AuthenticationError)
 
 	subscription = _get_manageable_subscription()
+	if getattr(subscription, "payment_gateway", None) == "PayPal":
+		from lms.lms.paypal import cancel_subscription
+
+		cancel_subscription(subscription.paypal_subscription_id)
+		subscription.status = "cancelled"
+		subscription.cancel_at_period_end = 0
+		subscription.cancel_requested_at = now_datetime()
+		subscription.save(ignore_permissions=True)
+		frappe.db.commit()
+		return get_plus_billing()
+
 	if not subscription.next_payment_date:
 		frappe.throw(_("We could not find your next billing date. Please contact support."))
 

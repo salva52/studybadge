@@ -688,6 +688,46 @@ def get_evaluator(course: str, batch: str = None):
 	return evaluator
 
 
+def is_peru_country(country: str | None) -> bool:
+	return (country or "").strip().lower() in {"peru", "perú", "pe"}
+
+
+def get_preferred_payment_currency(country: str | None = None) -> str:
+	if not country:
+		country = frappe.db.get_value("Address", {"email_id": frappe.session.user}, "country")
+	if not country:
+		country = frappe.db.get_value("User", frappe.session.user, "country")
+	if not country:
+		country = get_country_code()
+	return "PEN" if is_peru_country(country) else "USD"
+
+
+def convert_to_usd_amount(amount: float, currency: str, amount_usd: float = None):
+	if currency == "USD":
+		return amount
+	if amount_usd:
+		return amount_usd
+	exchange_rate = get_current_exchange_rate(currency, "USD")
+	return rounded(flt(amount * exchange_rate, 2))
+
+
+def set_checkout_currency(details: dict, preferred_currency: str | None = None):
+	preferred_currency = (preferred_currency or "").upper()
+	if not preferred_currency:
+		return
+
+	if preferred_currency == details.currency:
+		return
+
+	if preferred_currency == "USD":
+		details.amount = convert_to_usd_amount(details.amount, details.currency, details.get("amount_usd"))
+		details.currency = "USD"
+		return
+
+	if preferred_currency == "PEN" and details.currency != "PEN":
+		frappe.throw(_("This item is not configured with a PEN price. Please choose USD or ask the creator to set a PEN price."))
+
+
 def check_multicurrency(amount: float, currency: str, country: str = None, amount_usd: float = None):
 	settings = frappe.get_single("LMS Settings")
 	show_usd_equivalent = settings.show_usd_equivalent
@@ -1837,10 +1877,18 @@ def get_discussion_replies(topic: str):
 
 
 @frappe.whitelist()
-def get_order_summary(doctype: str, docname: str, coupon: str | None = None, country: str | None = None):
+def get_order_summary(
+	doctype: str,
+	docname: str,
+	coupon: str | None = None,
+	country: str | None = None,
+	currency: str | None = None,
+):
 	details = get_paid_course_details(docname) if doctype == "LMS Course" else get_paid_batch_details(docname)
 
-	if not (doctype == "LMS Course" and details.paid_certificate):
+	if currency:
+		set_checkout_currency(details, currency)
+	elif not (doctype == "LMS Course" and details.paid_certificate):
 		details.amount, details.currency = check_multicurrency(
 			details.amount, details.currency, country, details.amount_usd
 		)
