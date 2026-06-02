@@ -267,7 +267,7 @@ def _custom_price_payload(title: str, amount: float, currency: str = "USD", desc
 	}
 
 
-def _create_checkout_transaction(details: dict, custom_data: dict, settings=None) -> dict:
+def _create_checkout_transaction(details: dict, custom_data: dict, checkout_url: str, settings=None) -> dict:
 	title = details.get("title") or "StudyBadge"
 	payload = {
 		"items": [
@@ -284,7 +284,7 @@ def _create_checkout_transaction(details: dict, custom_data: dict, settings=None
 		"collection_mode": "automatic",
 		"currency_code": details.currency or "USD",
 		"custom_data": custom_data,
-		"enable_checkout": True,
+		"checkout": {"url": checkout_url},
 	}
 	response = _request("POST", "/transactions", settings=settings, data=json.dumps(payload))
 	return response.get("data") or response
@@ -387,7 +387,9 @@ def create_paddle_checkout(
 		"docname": docname,
 		"payment_for": _payment_for_label(payment_for_certificate, doctype),
 	}
-	transaction = _create_checkout_transaction(details, custom_data, settings=settings)
+	billing_slug = "certificate" if int(payment_for_certificate) else ("course" if doctype == "LMS Course" else "batch")
+	checkout_url = f"{_get_public_base_url(settings)}{get_lms_route(f'billing/{billing_slug}/{docname}')}"
+	transaction = _create_checkout_transaction(details, custom_data, checkout_url, settings=settings)
 	payment.paddle_transaction_id = transaction.get("id")
 	payment.order_id = transaction.get("id")
 	payment.raw_response = _safe_json({"transaction": transaction})
