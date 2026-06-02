@@ -1229,16 +1229,13 @@ def list_block(items, style="unordered"):
         "type": "list",
         "data": {
             "style": style if style in {"ordered", "unordered"} else "unordered",
-            "items": clean_items,
+            "items": [{"content": item, "items": []} for item in clean_items],
         }
     }
 
 
 def delimiter_block():
-    return {
-        "type": "delimiter",
-        "data": {}
-    }
+    return paragraph_block("---")
 
 def _safe_filename_part(value):
     value = str(value or "").strip().lower()
