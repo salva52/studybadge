@@ -420,19 +420,20 @@
 							variant="solid"
 							size="md"
 							class="certificate-primary"
-							:disabled="paypalLoading"
-							@click="selectedPaymentCurrency === 'USD' ? preparePayPalCheckout() : generatePaymentLink()"
+							:disabled="paypalLoading || brickLoading"
+							@click="prepareSelectedCheckout()"
 						>
-							{{ selectedPaymentCurrency === 'USD' && !isZeroAmount ? __('Continuar con PayPal') : isZeroAmount ? __('Inscribirme gratis') : __('Continuar al pago') }}
+							{{ checkoutButtonLabel }}
 						</Button>
 					</div>
 
-					<div v-if="selectedPaymentCurrency === 'USD' && paypalCheckout.data" class="paypal-standard-box">
-						<div v-if="paypalLoading" class="gateway-loading">
+					<div v-if="hasCheckoutData" class="paypal-standard-box">
+						<div v-if="paypalLoading || brickLoading" class="gateway-loading">
 							<RefreshCcw class="size-4 animate-spin" />
-							{{ __('Cargando PayPal...') }}
+							{{ __('Cargando pasarela segura...') }}
 						</div>
-						<div id="studybadge-paypal-buttons-standard"></div>
+						<div v-show="selectedPaymentCurrency === 'USD'" id="studybadge-paypal-buttons-standard"></div>
+						<div v-show="selectedPaymentCurrency === 'PEN'" id="studybadge-mp-payment-brick-standard"></div>
 					</div>
 
 					<a class="support-box standard-support" :href="`mailto:${SUPPORT_EMAIL}`">
@@ -623,11 +624,13 @@ const paymentLink = createResource({
 })
 
 const certificateCheckout = createResource({
-	url: 'lms.lms.payments.create_certificate_brick_checkout',
+	url: 'lms.lms.payments.create_mp_brick_checkout',
 	makeParams() {
 		return {
-			course: props.name,
+			doctype: props.type == 'batch' ? 'LMS Batch' : 'LMS Course',
+			docname: props.name,
 			address: billingDetails,
+			payment_for_certificate: props.type == 'certificate',
 			coupon_code: appliedCoupon.value,
 			country: billingDetails.country,
 		}
@@ -635,11 +638,11 @@ const certificateCheckout = createResource({
 })
 
 const certificatePayment = createResource({
-	url: 'lms.lms.payments.process_certificate_brick_payment',
+	url: 'lms.lms.payments.process_mp_brick_payment',
 })
 
 const paymentStatus = createResource({
-	url: 'lms.lms.payments.get_certificate_payment_status',
+	url: 'lms.lms.payments.get_mp_payment_status',
 })
 
 const paypalCheckout = createResource({
@@ -830,9 +833,10 @@ async function initMercadoPagoPaymentBrick() {
 			locale: 'es-PE',
 		})
 		const bricksBuilder = mp.bricks()
+		const containerId = isCertificateCheckout.value ? 'studybadge-mp-payment-brick' : 'studybadge-mp-payment-brick-standard'
 		paymentBrickController.value = await bricksBuilder.create(
 			'payment',
-			'studybadge-mp-payment-brick',
+			containerId,
 			{
 				initialization: {
 					amount: Number(certificateCheckout.data.amount),

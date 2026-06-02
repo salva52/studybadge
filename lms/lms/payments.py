@@ -125,16 +125,27 @@ def _notification_url(settings=None) -> str:
 	)
 
 
-def _create_certificate_preference(payment_doc, details, settings=None) -> dict:
+def _create_mp_preference(payment_doc, details, settings=None) -> dict:
 	settings = settings or _get_settings()
 	base_url = _get_public_base_url(settings)
-	redirect_url = f"{base_url}{_certificate_redirect(payment_doc.payment_for_document)}"
+	redirect_url = f"{base_url}{get_redirect_url(payment_doc.payment_for_document_type, payment_doc.payment_for_document, payment_doc.payment_for_certificate)}"
+	
+	if payment_doc.payment_for_certificate:
+		title = _("Certificate for {0}").format(details.title)
+		description = _("StudyBadge course certificate")
+		failure_url = f"{base_url}{get_lms_route(f'billing/certificate/{payment_doc.payment_for_document}')}"
+	else:
+		title = _("Payment for {0}").format(details.title)
+		description = _("StudyBadge course enrollment")
+		doctype_slug = "course" if payment_doc.payment_for_document_type == "LMS Course" else "batch"
+		failure_url = f"{base_url}{get_lms_route(f'billing/{doctype_slug}/{payment_doc.payment_for_document}')}"
+
 	payload = {
 		"items": [
 			{
 				"id": payment_doc.payment_for_document,
-				"title": _("Certificate for {0}").format(details.title),
-				"description": _("StudyBadge course certificate"),
+				"title": title,
+				"description": description,
 				"quantity": 1,
 				"unit_price": flt(details.total_amount),
 				"currency_id": details.currency,
@@ -146,65 +157,80 @@ def _create_certificate_preference(payment_doc, details, settings=None) -> dict:
 		"back_urls": {
 			"success": redirect_url,
 			"pending": redirect_url,
-			"failure": f"{base_url}{get_lms_route(f'billing/certificate/{payment_doc.payment_for_document}')}",
+			"failure": failure_url,
 		},
 		"metadata": {
 			"lms_payment": payment_doc.name,
 			"course": payment_doc.payment_for_document,
 			"member": payment_doc.member,
-			"payment_for": "certificate",
+			"payment_for": "certificate" if payment_doc.payment_for_certificate else "course",
 		},
 	}
 	return _mp_request("POST", "/checkout/preferences", settings=settings, data=json.dumps(payload))
 
 
 @frappe.whitelist()
-def create_certificate_brick_checkout(
-	course: str,
+def create_mp_brick_checkout(
+	doctype: str,
+	docname: str,
 	address: dict,
+	payment_for_certificate: int = 0,
 	coupon_code: str | None = None,
 	country: str | None = None,
 ):
-	_validate_certificate_payment_access(course)
+	_validate_paypal_payment_access(doctype, docname, payment_for_certificate)
 	settings = _get_settings()
 	if not settings.public_key:
 		frappe.throw(_("Mercado Pago public key is missing in StudyBadge Plus Settings."))
 
 	address = frappe._dict(address)
-	details = _get_certificate_payment_total(course, coupon_code=coupon_code, country=country)
-	if details.currency != "PEN":
-		frappe.throw(_("Certificate payments through Mercado Pago must be configured in PEN."))
+	
+	if int(payment_for_certificate):
+		details = _get_certificate_payment_total(docname, coupon_code=coupon_code, country=country)
+		if details.currency != "PEN":
+			frappe.throw(_("Certificate payments through Mercado Pago must be configured in PEN."))
+		amount = details.original_amount - details.get("discount_amount", 0)
+		total_amount = amount + details.get("gst_applied", 0)
+	else:
+		details = frappe._dict(get_order_summary(doctype, docname, coupon=coupon_code, country=country, currency="PEN"))
+		if details.currency != "PEN":
+			frappe.throw(_("Mercado Pago payments must be configured in PEN."))
+		amount = details.original_amount - details.get("discount_amount", 0)
+		total_amount = details.amount
 
-	amount = details.original_amount - details.get("discount_amount", 0)
-	total_amount = amount + details.get("gst_applied", 0)
 	payment = record_payment(
 		address,
-		"LMS Course",
-		course,
+		doctype,
+		docname,
 		amount,
 		details.original_amount,
 		details.currency,
 		total_amount if details.get("gst_applied") else 0,
 		details.get("discount_amount", 0),
-		1,
+		payment_for_certificate,
 		coupon_code,
 		details.get("coupon"),
 	)
-	payment.external_reference = _make_certificate_external_reference(payment.name)
+	payment.external_reference = _make_payment_external_reference(
+		payment.name,
+		_payment_for_label(payment_for_certificate, doctype),
+	)
 	payment.payment_gateway = "Mercado Pago"
 	payment.payment_status = "pending"
 	payment.save(ignore_permissions=True)
 
+	redirect_to = get_redirect_url(doctype, docname, payment_for_certificate)
+
 	if flt(details.total_amount) <= 0:
 		frappe.db.set_value("LMS Payment", payment.name, "payment_received", 1)
-		complete_enrollment(payment.name, "LMS Course", course)
+		complete_enrollment(payment.name, doctype, docname)
 		return {
 			"status": "approved",
-			"redirect_url": _certificate_redirect(course),
+			"redirect_url": redirect_to,
 			"payment": payment.name,
 		}
 
-	preference = _create_certificate_preference(payment, details, settings=settings)
+	preference = _create_mp_preference(payment, details, settings=settings)
 	frappe.db.set_value(
 		"LMS Payment",
 		payment.name,
@@ -222,7 +248,7 @@ def create_certificate_brick_checkout(
 		"currency": details.currency,
 		"title": details.title,
 		"status": "pending",
-		"redirect_url": _certificate_redirect(course),
+		"redirect_url": redirect_to,
 	}
 
 
@@ -307,47 +333,53 @@ def _send_certificate_receipt_email(payment_doc, mp_payment: dict):
 		frappe.log_error(frappe.get_traceback(), f"StudyBadge Certificate Receipt Email Failed: {payment_doc.name}")
 
 
-def process_mercadopago_certificate_payment(mp_payment: dict):
+def process_mercadopago_payment(mp_payment: dict):
 	payment_doc = _get_payment_from_mp_payload(mp_payment)
 	if not payment_doc:
-		frappe.log_error(_safe_json(mp_payment), "StudyBadge Certificate Payment Not Found")
+		frappe.log_error(_safe_json(mp_payment), "StudyBadge Mercado Pago Payment Not Found")
 		return None
 
 	already_received = bool(payment_doc.payment_received)
 	payment_doc = _update_lms_payment_from_mp(payment_doc, mp_payment)
-	if payment_doc.payment_received and not already_received and payment_doc.payment_for_certificate:
+	if payment_doc.payment_received and not already_received:
 		complete_enrollment(
 			payment_doc.name,
 			payment_doc.payment_for_document_type,
 			payment_doc.payment_for_document,
 		)
-		from lms.lms.doctype.lms_certificate.lms_certificate import auto_issue_course_certificate
-
-		auto_issue_course_certificate(payment_doc.payment_for_document, payment_doc.member)
-		_send_certificate_receipt_email(payment_doc, mp_payment)
+		if payment_doc.payment_for_certificate:
+			from lms.lms.doctype.lms_certificate.lms_certificate import auto_issue_course_certificate
+			auto_issue_course_certificate(payment_doc.payment_for_document, payment_doc.member)
+			_send_certificate_receipt_email(payment_doc, mp_payment)
 	return payment_doc
 
 
 @frappe.whitelist()
-def process_certificate_brick_payment(payment: str, form_data: dict | str):
+def process_mp_brick_payment(payment: str, form_data: dict | str):
 	if frappe.session.user == "Guest":
 		frappe.throw(_("Please login to continue with payment."), frappe.AuthenticationError)
 
 	payment_doc = frappe.get_doc("LMS Payment", payment)
 	if payment_doc.member != frappe.session.user:
-		frappe.throw(_("You cannot pay this certificate checkout."), frappe.PermissionError)
+		frappe.throw(_("You cannot pay this checkout."), frappe.PermissionError)
+		
+	redirect_to = get_redirect_url(payment_doc.payment_for_document_type, payment_doc.payment_for_document, payment_doc.payment_for_certificate)
 	if payment_doc.payment_received:
-		return {"status": "approved", "redirect_url": _certificate_redirect(payment_doc.payment_for_document)}
+		return {"status": "approved", "redirect_url": redirect_to}
 
 	data = _coerce_form_data(form_data)
 	payer = data.get("payer") if isinstance(data.get("payer"), dict) else {}
 	payer["email"] = payer.get("email") or frappe.session.user
+	
+	if payment_doc.payment_for_certificate:
+		description = _("Certificate payment for {0}").format(frappe.db.get_value("LMS Course", payment_doc.payment_for_document, "title"))
+	else:
+		description = _("Payment for {0}").format(frappe.db.get_value(payment_doc.payment_for_document_type, payment_doc.payment_for_document, "title"))
+
 	payload = {
 		**data,
 		"transaction_amount": flt(payment_doc.amount_with_gst or payment_doc.amount),
-		"description": _("Certificate payment for {0}").format(
-			frappe.db.get_value("LMS Course", payment_doc.payment_for_document, "title")
-		),
+		"description": description,
 		"external_reference": payment_doc.external_reference,
 		"notification_url": _notification_url(),
 		"payer": payer,
@@ -356,48 +388,48 @@ def process_certificate_brick_payment(payment: str, form_data: dict | str):
 			"lms_payment": payment_doc.name,
 			"course": payment_doc.payment_for_document,
 			"member": payment_doc.member,
-			"payment_for": "certificate",
+			"payment_for": "certificate" if payment_doc.payment_for_certificate else "course",
 		},
 	}
 	payload = {key: value for key, value in payload.items() if value not in (None, "")}
 	idempotency_source = data.get("token") or data.get("payment_method_id") or uuid.uuid4().hex
 	idempotency_hash = hashlib.sha256(str(idempotency_source).encode()).hexdigest()[:24]
-	idempotency_key = f"lms-cert-{payment_doc.name}-{idempotency_hash}"
+	idempotency_key = f"lms-mp-{payment_doc.name}-{idempotency_hash}"
 	mp_payment = _mp_request(
 		"POST",
 		"/v1/payments",
 		idempotency_key=idempotency_key,
 		data=json.dumps(payload),
 	)
-	payment_doc = process_mercadopago_certificate_payment(mp_payment)
+	payment_doc = process_mercadopago_payment(mp_payment)
 	return {
 		"payment": payment_doc.name if payment_doc else payment,
 		"status": mp_payment.get("status"),
 		"status_detail": mp_payment.get("status_detail"),
 		"payment_id": mp_payment.get("id"),
-		"redirect_url": _certificate_redirect(payment_doc.payment_for_document if payment_doc else ""),
+		"redirect_url": redirect_to,
 	}
 
 
 @frappe.whitelist()
-def get_certificate_payment_status(payment: str):
+def get_mp_payment_status(payment: str):
 	if frappe.session.user == "Guest":
 		frappe.throw(_("Please login to view payment status."), frappe.AuthenticationError)
 
 	payment_doc = frappe.get_doc("LMS Payment", payment)
 	if payment_doc.member != frappe.session.user:
-		frappe.throw(_("You cannot view this certificate payment."), frappe.PermissionError)
+		frappe.throw(_("You cannot view this payment."), frappe.PermissionError)
 
 	if payment_doc.payment_id:
 		mp_payment = _mp_request("GET", f"/v1/payments/{payment_doc.payment_id}")
-		payment_doc = process_mercadopago_certificate_payment(mp_payment) or payment_doc
+		payment_doc = process_mercadopago_payment(mp_payment) or payment_doc
 
 	return {
 		"payment": payment_doc.name,
 		"status": payment_doc.payment_status or ("approved" if payment_doc.payment_received else "pending"),
 		"status_detail": payment_doc.payment_status_detail,
 		"payment_received": bool(payment_doc.payment_received),
-		"redirect_url": _certificate_redirect(payment_doc.payment_for_document),
+		"redirect_url": get_redirect_url(payment_doc.payment_for_document_type, payment_doc.payment_for_document, payment_doc.payment_for_certificate),
 	}
 
 
