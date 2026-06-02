@@ -22,6 +22,7 @@ from ...utils import (
 
 class LMSCourse(Document):
 	def validate(self):
+		self.validate_instructor_restrictions()
 		self.validate_published()
 		self.validate_instructors()
 		self.validate_video_link()
@@ -35,6 +36,23 @@ class LMSCourse(Document):
 	def validate_published(self):
 		if self.published and not self.published_on:
 			self.published_on = today()
+
+	def validate_instructor_restrictions(self):
+		if frappe.session.user in ("Administrator", "Guest"):
+			return
+
+		roles = frappe.get_roles()
+		if "Moderator" in roles or "System Manager" in roles:
+			return
+
+		if self.published:
+			frappe.throw(_("Only Moderators can publish courses."))
+
+		self.featured = 0
+		self.upcoming = 0
+		if "Course Creator" in roles:
+			self.instructors = []
+			self.append("instructors", {"instructor": frappe.session.user})
 
 	def validate_instructors(self):
 		if self.is_new() and not self.instructors:
@@ -227,3 +245,53 @@ def update_course_statistics():
 			course.name,
 			{"lessons": lessons, "enrollments": enrollments, "rating": avg_rating},
 		)
+
+
+def has_permission(doc, user=None, permission_type=None):
+	user = user or frappe.session.user
+	if user == "Administrator":
+		return True
+
+	roles = frappe.get_roles(user)
+	if "System Manager" in roles or "Moderator" in roles:
+		return True
+
+	if permission_type == "create":
+		return "Course Creator" in roles
+
+	is_course_instructor = frappe.db.exists(
+		"Course Instructor",
+		{"parent": doc.name, "parenttype": "LMS Course", "instructor": user},
+	)
+	if is_course_instructor:
+		return True
+
+	if permission_type == "read" and getattr(doc, "published", 0):
+		return True
+
+	return False
+
+
+def get_permission_query_conditions(user=None):
+	user = user or frappe.session.user
+	if user == "Administrator":
+		return None
+
+	roles = frappe.get_roles(user)
+	if "System Manager" in roles or "Moderator" in roles:
+		return None
+
+	escaped_user = frappe.db.escape(user)
+	if "Course Creator" in roles:
+		return f"""(
+			`tabLMS Course`.`published` = 1
+			or exists (
+				select `tabCourse Instructor`.`name`
+				from `tabCourse Instructor`
+				where `tabCourse Instructor`.`parenttype` = 'LMS Course'
+				and `tabCourse Instructor`.`parent` = `tabLMS Course`.`name`
+				and `tabCourse Instructor`.`instructor` = {escaped_user}
+			)
+		)"""
+
+	return "`tabLMS Course`.`published` = 1"

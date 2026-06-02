@@ -92,9 +92,11 @@ after_migrate = [
 
 permission_query_conditions = {
 	"LMS Certificate": "lms.lms.doctype.lms_certificate.lms_certificate.get_permission_query_conditions",
+	"LMS Course": "lms.lms.doctype.lms_course.lms_course.get_permission_query_conditions",
 }
 
 has_permission = {
+	"LMS Course": "lms.lms.doctype.lms_course.lms_course.has_permission",
 	"LMS Live Class": "lms.lms.doctype.lms_live_class.lms_live_class.has_permission",
 	"LMS Batch": "lms.lms.doctype.lms_batch.lms_batch.has_permission",
 	"LMS Program": "lms.lms.doctype.lms_program.lms_program.has_permission",
@@ -207,6 +209,14 @@ website_redirects = [
 		"match_with_query_string": True,
 	},
 	{"source": "/statistics", "target": f"/{get_lms_path()}/statistics"},
+	{"source": "/ensenar", "target": f"/{get_lms_path()}/ensenar"},
+	{"source": "/enseñar", "target": f"/{get_lms_path()}/ensenar"},
+	{"source": "/instructor", "target": f"/{get_lms_path()}/instructor/dashboard"},
+	{
+		"source": r"/instructor/(.*)",
+		"target": f"/{get_lms_path()}/instructor",
+		"match_with_query_string": True,
+	},
 	{"source": "_lms", "target": f"/{get_lms_path()}"},
 ]
 

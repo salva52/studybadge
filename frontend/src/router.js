@@ -59,6 +59,67 @@ const routes = [
 		component: () => import('@/pages/Plus.vue'),
 	},
 	{
+		path: '/ensenar',
+		name: 'Teach',
+		component: () => import('@/pages/Teach.vue'),
+		meta: { allowGuest: true },
+	},
+	{
+		path: '/enseñar',
+		redirect: { name: 'Teach' },
+		meta: { allowGuest: true },
+	},
+	{
+		path: '/instructor',
+		redirect: { name: 'InstructorDashboard' },
+	},
+	{
+		path: '/instructor/dashboard',
+		name: 'InstructorDashboard',
+		component: () => import('@/pages/InstructorPortal.vue'),
+		meta: { instructorView: 'dashboard' },
+	},
+	{
+		path: '/instructor/courses',
+		name: 'InstructorCourses',
+		component: () => import('@/pages/InstructorPortal.vue'),
+		meta: { instructorView: 'courses' },
+	},
+	{
+		path: '/instructor/courses/new',
+		redirect: { name: 'Courses', query: { newCourse: '1' } },
+	},
+	{
+		path: '/instructor/sales',
+		name: 'InstructorSales',
+		component: () => import('@/pages/InstructorPortal.vue'),
+		meta: { instructorView: 'sales' },
+	},
+	{
+		path: '/instructor/students',
+		name: 'InstructorStudents',
+		component: () => import('@/pages/InstructorPortal.vue'),
+		meta: { instructorView: 'students' },
+	},
+	{
+		path: '/instructor/wallet',
+		name: 'InstructorWallet',
+		component: () => import('@/pages/InstructorPortal.vue'),
+		meta: { instructorView: 'wallet' },
+	},
+	{
+		path: '/instructor/withdrawals',
+		name: 'InstructorWithdrawals',
+		component: () => import('@/pages/InstructorPortal.vue'),
+		meta: { instructorView: 'withdrawals' },
+	},
+	{
+		path: '/instructor/payout-account',
+		name: 'InstructorPayout',
+		component: () => import('@/pages/InstructorPortal.vue'),
+		meta: { instructorView: 'payout' },
+	},
+	{
 		path: '/help',
 		name: 'Help',
 		component: () => import('@/pages/Help.vue'),
@@ -368,7 +429,7 @@ router.beforeEach(async (to, from, next) => {
 		if (to.name == 'Home') router.push({ name: 'Courses' })
 
 		await settings.promise
-		if (!settings.data.allow_guest_access) {
+		if (!settings.data.allow_guest_access && !to.meta.allowGuest) {
 			window.location.href = '/login'
 			return
 		}

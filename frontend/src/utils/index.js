@@ -524,6 +524,23 @@ const getSidebarItems = (forMobile = false) => {
 					},
 				},
 				{
+					label: 'Panel instructor',
+					icon: 'LayoutDashboard',
+					to: 'InstructorDashboard',
+					activeFor: [
+						'InstructorDashboard',
+						'InstructorCourses',
+						'InstructorSales',
+						'InstructorStudents',
+						'InstructorWallet',
+						'InstructorWithdrawals',
+						'InstructorPayout',
+					],
+					condition: () => {
+						return userResource?.data?.is_instructor
+					},
+				},
+				{
 					label: 'Programas',
 					icon: 'Route',
 					to: 'Programs',

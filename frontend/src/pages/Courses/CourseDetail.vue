@@ -22,6 +22,13 @@
 						</Button>
 					</template>
 				</Dropdown>
+				<Button
+					v-if="!course.data?.published && !user.data?.is_moderator"
+					:loading="reviewLoading"
+					@click="submitForReview"
+				>
+					{{ __('Enviar a revisión') }}
+				</Button>
 				<Button variant="solid" @click="childRef.submitCourse()">
 					{{ __('Save') }}
 				</Button>
@@ -70,6 +77,7 @@ const route = useRoute()
 const user = inject('$user')
 const tabIndex = ref(0)
 const childRef = ref(null)
+const reviewLoading = ref(false)
 
 const props = defineProps({
 	courseName: {
@@ -195,6 +203,24 @@ const exportCourse = async () => {
 	} catch (err) {
 		console.error(err)
 		toast.error('Export failed')
+	}
+}
+
+const submitForReview = async () => {
+	reviewLoading.value = true
+	try {
+		if (childRef.value?.isDirty) {
+			await childRef.value.submitCourse()
+		}
+		await call('studybadge_ai.instructor_review.submit_course_for_review', {
+			course: course.data.name,
+		})
+		toast.success(__('Curso enviado a revisión'))
+		course.reload()
+	} catch (error) {
+		toast.error(error.messages?.[0] || __('No pudimos enviar el curso a revisión'))
+	} finally {
+		reviewLoading.value = false
 	}
 }
 

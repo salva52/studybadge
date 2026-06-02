@@ -28,6 +28,7 @@
 						</div>
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 							<MultiSelect
+								v-if="user.data?.is_moderator"
 								v-model="instructors"
 								doctype="User"
 								:label="__('Instructors')"
@@ -44,6 +45,14 @@
 								:required="true"
 								@update:modelValue="makeFormDirty()"
 							/>
+							<div v-else class="rounded-lg border border-outline-gray-2 bg-surface-gray-2 p-3">
+								<div class="text-xs text-ink-gray-5 mb-1">
+									{{ __('Instructor') }}
+								</div>
+								<div class="text-sm font-semibold text-ink-gray-8">
+									{{ user.data?.full_name || user.data?.name }}
+								</div>
+							</div>
 							<div>
 								<label class="block mb-1 text-xs text-ink-gray-5">
 									{{ __('Tags') }}
@@ -122,7 +131,7 @@
 									@change="makeFormDirty()"
 								/>
 							</div>
-							<div class="flex flex-col space-y-5">
+							<div v-if="user.data?.is_moderator" class="flex flex-col space-y-5">
 								<Switch
 									size="sm"
 									v-model="courseResource.doc.upcoming"
@@ -147,6 +156,16 @@
 									:label="__('Allow Self Enrollment')"
 									:description="
 										__('Allow users to enroll in this course on their own.')
+									"
+								/>
+							</div>
+							<div v-else class="flex flex-col space-y-5">
+								<Switch
+									size="sm"
+									v-model="selfEnrollment"
+									:label="__('Allow Self Enrollment')"
+									:description="
+										__('Allow users to enroll in this course on their own after approval.')
 									"
 								/>
 							</div>
@@ -430,7 +449,7 @@ const updateCourseData = () => {
 }
 
 const submitCourse = () => {
-	updateCourse()
+	return updateCourse()
 }
 
 const onMemberCreated = (user) => {
@@ -444,10 +463,16 @@ const onMemberCreated = (user) => {
 }
 
 const updateCourse = () => {
-	courseResource.setValue.submit(
+	const nextInstructors = user.data?.is_moderator
+		? instructors.value
+		: [user.data?.name]
+	return courseResource.setValue.submit(
 		{
 			...courseResource.doc,
-			instructors: instructors.value.map((instructor) => ({
+			published: user.data?.is_moderator ? courseResource.doc.published : false,
+			featured: user.data?.is_moderator ? courseResource.doc.featured : false,
+			upcoming: user.data?.is_moderator ? courseResource.doc.upcoming : false,
+			instructors: nextInstructors.filter(Boolean).map((instructor) => ({
 				instructor: instructor,
 			})),
 			related_courses: related_courses.value.map((course) => ({

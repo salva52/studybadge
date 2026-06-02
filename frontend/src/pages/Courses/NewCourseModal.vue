@@ -23,6 +23,7 @@
 						:onCreate="createCategory"
 					/>
 					<MultiSelect
+						v-if="user.data?.is_moderator"
 						v-model="course.instructors"
 						doctype="User"
 						:label="__('Instructors')"
@@ -33,6 +34,12 @@
 						:onCreate="() => (showMemberModal = true)"
 						:required="true"
 					/>
+					<div v-else class="rounded-lg border border-outline-gray-2 bg-surface-gray-2 p-3">
+						<div class="text-xs text-ink-gray-5 mb-1">{{ __('Instructor') }}</div>
+						<div class="text-sm font-semibold text-ink-gray-8">
+							{{ user.data?.full_name || user.data?.name }}
+						</div>
+					</div>
 					<Uploader
 						v-model="course.image"
 						:label="__('Course Image')"
@@ -142,6 +149,9 @@ const validateFields = () => {
 
 const saveCourse = (close: () => void = () => {}) => {
 	validateFields()
+	if (!user.data?.is_moderator && user.data?.name) {
+		course.value.instructors = [user.data.name]
+	}
 	props.courses.insert.submit(
 		{
 			...course.value,
@@ -188,6 +198,9 @@ const keyboardShortcut = (e: KeyboardEvent) => {
 }
 
 onMounted(() => {
+	if (!user.data?.is_moderator && user.data?.name) {
+		course.value.instructors = [user.data.name]
+	}
 	window.addEventListener('keydown', keyboardShortcut)
 	capture('course_form_opened')
 })
