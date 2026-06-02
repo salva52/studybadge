@@ -1,67 +1,67 @@
 <template>
-	<div class="">
-		<header
-			class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-white px-3 py-2.5 sm:px-5"
-		>
+	<div class="billing-page">
+		<header class="billing-topbar">
 			<Breadcrumbs
-				class="h-7"
+				class="billing-breadcrumbs"
 				:items="[{ label: pageTitle, route: { name: 'Billing' } }]"
 			/>
+			<a class="support-chip" :href="`mailto:${SUPPORT_EMAIL}`">
+				<Mail class="size-4" />
+				<span>{{ SUPPORT_EMAIL }}</span>
+			</a>
 		</header>
+
 		<div
 			v-if="isCertificateCheckout && access.data?.access && orderSummary.data"
-			class="certificate-checkout min-h-[calc(100vh-49px)] pb-12"
+			class="certificate-checkout"
 		>
 			<section class="certificate-band">
-				<div class="mx-auto grid max-w-6xl gap-6 px-5 py-8 lg:grid-cols-[1.15fr_0.85fr] lg:py-10">
+				<div class="certificate-band-grid">
 					<div class="certificate-hero-panel">
-						<div class="mb-4 inline-flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-white">
+						<div class="certificate-eyebrow">
 							<BadgeCheck class="size-4" />
-							{{ __('Certificacion StudyBadge') }}
+							{{ __('Certificación StudyBadge') }}
 						</div>
-						<h1 class="max-w-2xl text-3xl font-bold leading-tight text-white sm:text-4xl">
-							{{ __('Paga este certificado una vez') }}
-						</h1>
-						<p class="mt-3 max-w-2xl text-sm leading-6 text-blue-100 sm:text-base">
-							{{ selectedPaymentCurrency === 'PEN' ? __('Completa el pago seguro en soles y agenda tu evaluacion para obtener una credencial verificable de este curso.') : __('Completa el pago seguro en dolares con PayPal y agenda tu evaluacion para obtener una credencial verificable de este curso.') }}
+						<h1>{{ __('Desbloquea tu certificado verificable') }}</h1>
+						<p>
+							{{ selectedPaymentCurrency === 'PEN' ? __('Completa el pago seguro en soles, registra tus datos y continúa con tu certificación oficial de este curso.') : __('Completa el pago seguro en dólares con PayPal, registra tus datos y continúa con tu certificación oficial de este curso.') }}
 						</p>
-						<div class="mt-5 grid gap-3 text-sm text-white sm:grid-cols-3">
+						<div class="certificate-proof-grid">
 							<div class="certificate-proof">
-								<ShieldCheck class="size-4" />
-								{{ __('Pago seguro') }}
+								<LockKeyhole class="size-4" />
+								<span>{{ __('Pago protegido') }}</span>
 							</div>
 							<div class="certificate-proof">
 								<CreditCard class="size-4" />
-								{{ __('Tarjetas, Yape y mas') }}
+								<span>{{ selectedPaymentCurrency === 'PEN' ? __('Tarjetas, Yape y más') : __('PayPal y tarjetas') }}</span>
 							</div>
 							<div class="certificate-proof">
 								<Award class="size-4" />
-								{{ __('Certificado premium') }}
+								<span>{{ __('PDF verificable') }}</span>
 							</div>
 						</div>
 					</div>
 
 					<aside class="certificate-summary">
-						<div class="text-xs font-semibold uppercase tracking-wide text-ink-gray-5">
-							{{ __('Certificado para') }}
-						</div>
-						<div class="mt-1 text-lg font-bold text-ink-gray-9">
-							{{ orderSummary.data.title }}
-						</div>
-						<div class="mt-5 flex items-end justify-between border-t pt-5">
+						<div class="summary-top">
+							<div class="summary-icon">
+								<ReceiptText class="size-5" />
+							</div>
 							<div>
-								<div class="text-xs font-semibold uppercase tracking-wide text-ink-gray-5">
-									{{ __('Total') }}
-								</div>
-								<div class="text-xs text-ink-gray-5">
-									{{ __('Pago unico en') }} {{ selectedPaymentCurrency }}
-								</div>
-							</div>
-							<div class="text-3xl font-black text-[#0a2351]">
-								{{ orderSummary.data.total_amount_formatted }}
+								<div class="summary-kicker">{{ __('Certificado para') }}</div>
+								<h2>{{ orderSummary.data.title }}</h2>
 							</div>
 						</div>
-						<div class="mt-5 grid grid-cols-2 gap-2 rounded-md bg-surface-gray-2 p-1">
+
+						<div class="summary-total-card">
+							<div>
+								<span>{{ __('Total a pagar') }}</span>
+								<small>{{ __('Pago único en') }} {{ selectedPaymentCurrency }}</small>
+							</div>
+							<strong>{{ orderSummary.data.total_amount_formatted }}</strong>
+						</div>
+
+						<div class="currency-switch" aria-label="Selector de moneda">
 							<button
 								v-for="option in paymentCurrencyOptions"
 								:key="option.currency"
@@ -72,66 +72,69 @@
 								{{ option.label }}
 							</button>
 						</div>
+
 						<router-link
 							:to="{ name: 'Plus', query: { from: 'certificate', course: name } }"
-							class="mt-5 flex items-start gap-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 hover:bg-amber-100"
+							class="plus-callout"
 						>
-							<Crown class="mt-0.5 size-4 shrink-0" />
+							<Crown class="size-5" />
 							<span>
 								<strong>{{ __('Con StudyBadge Plus tienes certificados ilimitados.') }}</strong>
-								{{ __(' Ideal si planeas certificarte en varios cursos.') }}
+								{{ __('Ideal si planeas certificarte en varios cursos.') }}
 							</span>
 						</router-link>
 					</aside>
 				</div>
 			</section>
 
-			<div class="mx-auto grid max-w-6xl gap-6 px-5 py-8 lg:grid-cols-[0.9fr_1.1fr]">
-				<section class="certificate-card p-5">
-					<div class="mb-5">
-						<h2 class="text-lg font-semibold text-ink-gray-9">
-							{{ __('Datos de facturacion') }}
-						</h2>
-						<p class="mt-1 text-sm text-ink-gray-6">
-							{{ __('Usaremos estos datos para registrar tu compra del certificado.') }}
-						</p>
+			<section class="checkout-grid">
+				<div class="certificate-card billing-card">
+					<div class="card-heading">
+						<div class="card-icon">
+							<MapPin class="size-5" />
+						</div>
+						<div>
+							<h2>{{ __('Datos de facturación') }}</h2>
+							<p>{{ __('Usaremos estos datos para registrar tu compra y emitir el comprobante correspondiente.') }}</p>
+						</div>
 					</div>
-					<div class="space-y-4">
+
+					<div class="form-stack">
 						<FormControl
-							label="Nombre completo"
+							:label="__('Nombre completo')"
 							v-model="billingDetails.billing_name"
 							:required="!!fieldMeta.billing_name?.reqd"
 						/>
 						<FormControl
-							:label="__('Address Line 1')"
+							:label="__('Dirección principal')"
 							v-model="billingDetails.address_line1"
 							:required="!!fieldMeta.address_line1?.reqd"
 						/>
 						<FormControl
-							:label="__('Address Line 2')"
+							:label="__('Referencia, departamento o piso')"
 							v-model="billingDetails.address_line2"
 							:required="!!fieldMeta.address_line2?.reqd"
 						/>
-						<div class="grid gap-4 sm:grid-cols-2">
+						<div class="field-pair">
 							<FormControl
-								:label="__('City')"
+								:label="__('Ciudad')"
 								v-model="billingDetails.city"
 								:required="!!fieldMeta.city?.reqd"
 							/>
 							<FormControl
-								:label="__('State/Province')"
+								:label="__('Provincia o región')"
 								v-model="billingDetails.state"
 								:required="!!fieldMeta.state?.reqd"
 							/>
 						</div>
-						<div class="grid gap-4 sm:grid-cols-2">
+						<div class="field-pair">
 							<FormControl
-								:label="__('Postal Code')"
+								:label="__('Código postal')"
 								v-model="billingDetails.pincode"
 								:required="!!fieldMeta.pincode?.reqd"
 							/>
 							<FormControl
-								:label="__('Phone Number')"
+								:label="__('Teléfono')"
 								v-model="billingDetails.phone"
 								:required="!!fieldMeta.phone?.reqd"
 							/>
@@ -140,29 +143,30 @@
 							doctype="Country"
 							:value="billingDetails.country"
 							@change="(option) => changeCurrency(option)"
-							:label="__('Country')"
+							:label="__('País')"
 							:required="!!fieldMeta.country?.reqd"
 						/>
 						<Link
 							doctype="LMS Source"
 							:value="billingDetails.source"
 							@change="(option) => (billingDetails.source = option)"
-							:label="__('Where did you hear about us?')"
+							:label="__('¿Dónde conociste StudyBadge?')"
 							:required="!!fieldMeta.source?.reqd"
 						/>
 						<FormControl
-							label="Autorizo el uso de mis datos para registrar esta compra"
+							:label="__('Autorizo el uso de mis datos para registrar esta compra')"
 							type="checkbox"
-							class="leading-6"
+							class="consent-control"
 							v-model="billingDetails.member_consent"
 						/>
-						<div v-if="showConsentWarning" class="text-xs text-ink-red-3">
-							{{ __('Please provide your consent to proceed with the payment') }}
+						<div v-if="showConsentWarning" class="consent-warning">
+							{{ __('Autoriza el uso de tus datos para continuar con el pago.') }}
 						</div>
+
 						<Button
 							variant="solid"
 							size="md"
-							class="certificate-primary w-full"
+							class="certificate-primary"
 							:disabled="certificateCheckout.loading || brickLoading || paypalLoading"
 							@click="prepareSelectedCheckout"
 						>
@@ -172,64 +176,59 @@
 							{{ checkoutButtonLabel }}
 						</Button>
 					</div>
-				</section>
+				</div>
 
-				<section class="certificate-card min-h-[420px] p-5">
-					<div class="mb-5 flex items-start justify-between gap-4">
+				<div class="certificate-card gateway-card">
+					<div class="card-heading gateway-heading">
+						<div class="card-icon gateway-icon">
+							<ShieldCheck class="size-5" />
+						</div>
 						<div>
-							<h2 class="text-lg font-semibold text-ink-gray-9">
-								{{ selectedPaymentCurrency === 'PEN' ? __('Mercado Pago Checkout') : __('PayPal Checkout') }}
-							</h2>
-							<p class="mt-1 text-sm text-ink-gray-6">
-								{{ selectedPaymentCurrency === 'PEN' ? __('Elige tarjeta, saldo de Mercado Pago, Yape u otros metodos disponibles para Peru.') : __('Paga en dolares con PayPal, tarjeta internacional o los metodos disponibles para tu cuenta.') }}
+							<h2>{{ selectedPaymentCurrency === 'PEN' ? __('Pago con Mercado Pago') : __('Pago con PayPal') }}</h2>
+							<p>
+								{{ selectedPaymentCurrency === 'PEN' ? __('Paga en soles con tarjeta, saldo de Mercado Pago, Yape u otros métodos disponibles para Perú.') : __('Paga en dólares con PayPal, tarjeta internacional o los métodos disponibles en tu cuenta.') }}
 							</p>
 						</div>
-						<div class="rounded-md bg-blue-50 px-3 py-1 text-xs font-semibold text-[#0a2351]">
-							{{ selectedPaymentCurrency }}
+						<div class="gateway-currency">{{ selectedPaymentCurrency }}</div>
+					</div>
+
+					<div v-if="selectedPaymentCurrency === 'PEN'" class="gateway-tip">
+						<CreditCard class="size-4" />
+						<div>
+							<strong>{{ __('¿Quieres pagar con Yape?') }}</strong>
+							<p>{{ __('En medios de pago, elige Mercado Pago Wallet. Allí aparecerán tus métodos favoritos, incluido Yape si está disponible para tu cuenta.') }}</p>
 						</div>
 					</div>
-					<div v-if="selectedPaymentCurrency === 'PEN'" class="mb-4 rounded-md border border-blue-100 bg-blue-50 p-3 text-sm text-[#0a2351]">
-						<div class="font-semibold">
-							{{ __('Si quieres pagar con Yape') }}
+
+					<div v-if="!hasCheckoutData" class="certificate-empty">
+						<div class="empty-icon">
+							<ShieldCheck class="size-8" />
 						</div>
-						<div class="mt-1 leading-5">
-							{{ __('En Medios de pago, elige Mercado Pago Wallet. Ahi apareceran tus medios favoritos, incluido Yape si esta disponible para tu cuenta.') }}
-						</div>
-					</div>
-					<div
-						v-if="!hasCheckoutData"
-						class="certificate-empty"
-					>
-						<ShieldCheck class="size-8 text-[#0a2351]" />
-						<div class="mt-3 font-semibold text-ink-gray-9">
-							{{ __('Confirma tus datos para cargar la pasarela') }}
-						</div>
-						<p class="mt-1 max-w-sm text-center text-sm text-ink-gray-6">
-							{{ selectedPaymentCurrency === 'PEN' ? __('Mercado Pago se abrira aqui mismo, sin salir de StudyBadge.') : __('PayPal se cargara aqui mismo para confirmar el pago en dolares.') }}
+						<h3>{{ __('Confirma tus datos para cargar la pasarela') }}</h3>
+						<p>
+							{{ selectedPaymentCurrency === 'PEN' ? __('Mercado Pago se abrirá aquí mismo, sin salir de StudyBadge.') : __('PayPal se cargará aquí mismo para confirmar el pago en dólares.') }}
 						</p>
 					</div>
 					<div v-else>
-						<div v-if="brickLoading || paypalLoading" class="py-8 text-center text-sm text-ink-gray-6">
+						<div v-if="brickLoading || paypalLoading" class="gateway-loading">
+							<RefreshCcw class="size-4 animate-spin" />
 							{{ __('Cargando pasarela segura...') }}
 						</div>
 						<div v-show="selectedPaymentCurrency === 'PEN'" id="studybadge-mp-payment-brick"></div>
 						<div v-show="selectedPaymentCurrency === 'USD'" id="studybadge-paypal-buttons-certificate"></div>
 						<div
 							v-if="certificatePaymentStatus"
-							class="mt-4 rounded-md border p-4 text-sm"
-							:class="certificatePaymentStatus === 'approved' ? 'border-green-200 bg-green-50 text-green-800' : 'border-amber-200 bg-amber-50 text-amber-800'"
+							class="payment-status"
+							:class="certificatePaymentStatus === 'approved' || certificatePaymentStatus === 'COMPLETED' ? 'payment-status-success' : 'payment-status-warning'"
 						>
-							<div class="font-semibold">
-								{{ paymentStatusTitle }}
-							</div>
-							<div class="mt-1">
-								{{ paymentStatusMessage }}
+							<div>
+								<strong>{{ paymentStatusTitle }}</strong>
+								<p>{{ paymentStatusMessage }}</p>
 							</div>
 							<Button
-								v-if="certificatePaymentStatus !== 'approved'"
+								v-if="certificatePaymentStatus !== 'approved' && selectedPaymentCurrency === 'PEN'"
 								variant="outline"
 								size="sm"
-								class="mt-3"
 								:disabled="paymentStatus.loading"
 								@click="refreshCertificatePayment"
 							>
@@ -240,76 +239,66 @@
 							</Button>
 						</div>
 					</div>
-				</section>
-			</div>
+
+					<a class="support-box" :href="`mailto:${SUPPORT_EMAIL}`">
+						<Mail class="size-4" />
+						<span>{{ __('Si tienes problemas con el pago, escríbenos a') }} <strong>{{ SUPPORT_EMAIL }}</strong></span>
+					</a>
+				</div>
+			</section>
 		</div>
+
 		<div
 			v-else-if="access.data?.access && orderSummary.data"
-			class="pt-5 pb-10 mx-5"
+			class="standard-checkout"
 		>
-			<div class="flex flex-col lg:flex-row justify-between">
-				<div class="flex flex-col lg:order-last mb-10 lg:mt-10 lg:w-1/4">
-					<div class="h-fit bg-surface-gray-2 rounded-md p-5 space-y-4">
-						<div class="space-y-1">
-							<div class="text-ink-gray-5 uppercase text-xs">
-								{{ __('Payment for ') }} {{ type }}:
-							</div>
-							<div class="leading-5 text-ink-gray-9">
-								{{ orderSummary.data.title }}
-							</div>
+			<div class="standard-layout">
+				<aside class="standard-summary">
+					<div class="summary-top">
+						<div class="summary-icon">
+							<ReceiptText class="size-5" />
 						</div>
-						<div
-							v-if="
-								orderSummary.data.gst_applied ||
-								orderSummary.data.discount_amount
-							"
-							class="space-y-1"
-						>
-							<div class="text-ink-gray-5 uppercase text-xs">
-								{{ __('Original Amount') }}:
-							</div>
-							<div class="text-ink-gray-9">
-								{{ orderSummary.data.original_amount_formatted }}
-							</div>
-						</div>
-						<div v-if="orderSummary.data.discount_amount" class="space-y-1">
-							<div class="text-ink-gray-5">{{ __('Discount') }}:</div>
-							<div>- {{ orderSummary.data.discount_amount_formatted }}</div>
-						</div>
-						<div v-if="orderSummary.data.gst_applied" class="space-y-1">
-							<div class="text-ink-gray-5 uppercase text-xs">
-								{{ __('GST Amount') }}:
-							</div>
-							<div class="text-ink-gray-9">
-								{{ orderSummary.data.gst_amount_formatted }}
-							</div>
-						</div>
-						<div class="space-y-1 border-t border-outline-gray-3 pt-4 mt-2">
-							<div class="uppercase text-ink-gray-5 text-xs">
-								{{ __('Total') }}:
-							</div>
-							<div class="font-bold text-ink-gray-9">
-								{{ orderSummary.data.total_amount_formatted }}
-							</div>
-						</div>
-						<div class="grid grid-cols-2 gap-2 rounded-md bg-white p-1">
-							<button
-								v-for="option in paymentCurrencyOptions"
-								:key="option.currency"
-								class="currency-option"
-								:class="{ 'currency-option-active': selectedPaymentCurrency === option.currency }"
-								@click="selectPaymentCurrency(option.currency)"
-							>
-								{{ option.label }}
-							</button>
+						<div>
+							<div class="summary-kicker">{{ __('Pago de') }} {{ type }}</div>
+							<h2>{{ orderSummary.data.title }}</h2>
 						</div>
 					</div>
 
-					<div class="bg-surface-gray-2 rounded-md p-4 space-y-2 my-5">
-						<span class="text-ink-gray-5 uppercase text-xs">
-							{{ __('Enter a Coupon Code') }}:
-						</span>
-						<div class="flex items-center gap-x-2">
+					<div v-if="orderSummary.data.gst_applied || orderSummary.data.discount_amount" class="price-row">
+						<span>{{ __('Importe original') }}</span>
+						<strong>{{ orderSummary.data.original_amount_formatted }}</strong>
+					</div>
+					<div v-if="orderSummary.data.discount_amount" class="price-row discount-row">
+						<span>{{ __('Descuento') }}</span>
+						<strong>- {{ orderSummary.data.discount_amount_formatted }}</strong>
+					</div>
+					<div v-if="orderSummary.data.gst_applied" class="price-row">
+						<span>{{ __('Impuesto') }}</span>
+						<strong>{{ orderSummary.data.gst_amount_formatted }}</strong>
+					</div>
+					<div class="summary-total-card compact-total">
+						<div>
+							<span>{{ __('Total') }}</span>
+							<small>{{ selectedPaymentCurrency }}</small>
+						</div>
+						<strong>{{ orderSummary.data.total_amount_formatted }}</strong>
+					</div>
+
+					<div class="currency-switch">
+						<button
+							v-for="option in paymentCurrencyOptions"
+							:key="option.currency"
+							class="currency-option"
+							:class="{ 'currency-option-active': selectedPaymentCurrency === option.currency }"
+							@click="selectPaymentCurrency(option.currency)"
+						>
+							{{ option.label }}
+						</button>
+					</div>
+
+					<div class="coupon-box">
+						<label>{{ __('Código de cupón') }}</label>
+						<div class="coupon-actions">
 							<FormControl
 								v-model="appliedCoupon"
 								:disabled="orderSummary.data.discount_amount > 0"
@@ -317,20 +306,12 @@
 								@keydown.enter="applyCouponCode"
 								placeholder="COUPON2025"
 								autocomplete="off"
-								class="flex-1 [&_input]:bg-white"
+								class="coupon-input"
 							/>
-							<Button
-								v-if="!orderSummary.data.discount_amount"
-								@click="applyCouponCode"
-								variant="outline"
-							>
-								{{ __('Apply') }}
+							<Button v-if="!orderSummary.data.discount_amount" @click="applyCouponCode" variant="outline">
+								{{ __('Aplicar') }}
 							</Button>
-							<Button
-								v-if="orderSummary.data.discount_amount"
-								@click="removeCoupon"
-								variant="outline"
-							>
+							<Button v-if="orderSummary.data.discount_amount" @click="removeCoupon" variant="outline">
 								<template #icon>
 									<X class="size-4 stroke-1.5" />
 								</template>
@@ -338,66 +319,66 @@
 						</div>
 					</div>
 
-					<p
-						class="bg-surface-amber-2 text-ink-amber-2 text-sm leading-5 p-2 rounded-md"
-					>
-						{{
-							__(
-								'Please ensure that the billing name you enter is correct, as it will be used on your invoice.'
-							)
-						}}
-					</p>
-				</div>
+					<div class="name-note">
+						<HelpCircle class="size-4" />
+						<span>{{ __('Verifica que el nombre de facturación sea correcto, porque se usará en tu comprobante.') }}</span>
+					</div>
+				</aside>
 
-				<div class="flex-1 lg:me-10">
-					<div class="mb-5">
-						<div class="text-lg font-semibold text-ink-gray-9">
-							{{ __('Address') }}
+				<section class="standard-form certificate-card">
+					<div class="card-heading">
+						<div class="card-icon">
+							<MapPin class="size-5" />
+						</div>
+						<div>
+							<h2>{{ __('Datos de facturación') }}</h2>
+							<p>{{ __('Completa tu información para continuar con el pago de forma segura.') }}</p>
 						</div>
 					</div>
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-						<div class="space-y-4">
+
+					<div class="standard-fields">
+						<div class="field-column">
 							<FormControl
-								:label="__('Billing Name')"
+								:label="__('Nombre de facturación')"
 								v-model="billingDetails.billing_name"
 								:required="!!fieldMeta.billing_name?.reqd"
 							/>
 							<FormControl
-								:label="__('Address Line 1')"
+								:label="__('Dirección principal')"
 								v-model="billingDetails.address_line1"
 								:required="!!fieldMeta.address_line1?.reqd"
 							/>
 							<FormControl
-								:label="__('Address Line 2')"
+								:label="__('Referencia, departamento o piso')"
 								v-model="billingDetails.address_line2"
 								:required="!!fieldMeta.address_line2?.reqd"
 							/>
 							<FormControl
-								:label="__('City')"
+								:label="__('Ciudad')"
 								v-model="billingDetails.city"
 								:required="!!fieldMeta.city?.reqd"
 							/>
 							<FormControl
-								:label="__('State/Province')"
+								:label="__('Provincia o región')"
 								v-model="billingDetails.state"
 								:required="!!fieldMeta.state?.reqd"
 							/>
 						</div>
-						<div class="space-y-4">
+						<div class="field-column">
 							<Link
 								doctype="Country"
 								:value="billingDetails.country"
 								@change="(option) => changeCurrency(option)"
-								:label="__('Country')"
+								:label="__('País')"
 								:required="!!fieldMeta.country?.reqd"
 							/>
 							<FormControl
-								:label="__('Postal Code')"
+								:label="__('Código postal')"
 								v-model="billingDetails.pincode"
 								:required="!!fieldMeta.pincode?.reqd"
 							/>
 							<FormControl
-								:label="__('Phone Number')"
+								:label="__('Teléfono')"
 								v-model="billingDetails.phone"
 								:required="!!fieldMeta.phone?.reqd"
 							/>
@@ -405,79 +386,72 @@
 								doctype="LMS Source"
 								:value="billingDetails.source"
 								@change="(option) => (billingDetails.source = option)"
-								:label="__('Where did you hear about us?')"
+								:label="__('¿Dónde conociste StudyBadge?')"
 								:required="!!fieldMeta.source?.reqd"
 							/>
 							<FormControl
 								v-if="billingDetails.country == 'India'"
-								:label="__('GST Number')"
+								:label="__('Número GST')"
 								v-model="billingDetails.gstin"
 								:required="!!fieldMeta.gstin?.reqd"
 							/>
 							<FormControl
 								v-if="billingDetails.country == 'India'"
-								:label="__('PAN Number')"
+								:label="__('Número PAN')"
 								v-model="billingDetails.pan"
 								:required="!!fieldMeta.pan?.reqd"
 							/>
 						</div>
 					</div>
-					<div
-						class="flex flex-col lg:flex-row items-start lg:items-center justify-between border-t pt-4 mt-8 space-y-4 lg:space-y-0"
-					>
+
+					<div class="standard-footer">
 						<div>
 							<FormControl
-								:label="
-									__(
-										'I consent to my personal information being stored for invoicing'
-									)
-								"
+								:label="__('Autorizo que mi información personal se almacene para facturación')"
 								type="checkbox"
-								class="leading-6"
+								class="consent-control"
 								v-model="billingDetails.member_consent"
 							/>
-							<div
-								v-if="showConsentWarning"
-								class="mt-1 text-xs text-ink-red-3"
-							>
-								{{
-									__('Please provide your consent to proceed with the payment')
-								}}
+							<div v-if="showConsentWarning" class="consent-warning">
+								{{ __('Autoriza el uso de tus datos para continuar con el pago.') }}
 							</div>
 						</div>
 						<Button
 							variant="solid"
 							size="md"
-							class="ms-auto"
+							class="certificate-primary"
 							:disabled="paypalLoading"
 							@click="selectedPaymentCurrency === 'USD' ? preparePayPalCheckout() : generatePaymentLink()"
 						>
-							{{
-								selectedPaymentCurrency === 'USD' && !isZeroAmount ? __('Continuar con PayPal') : isZeroAmount ? __('Enroll for Free') : __('Proceed to Payment')
-							}}
+							{{ selectedPaymentCurrency === 'USD' && !isZeroAmount ? __('Continuar con PayPal') : isZeroAmount ? __('Inscribirme gratis') : __('Continuar al pago') }}
 						</Button>
 					</div>
-					<div
-						v-if="selectedPaymentCurrency === 'USD' && paypalCheckout.data"
-						class="mt-5 rounded-md border border-outline-gray-2 bg-surface-gray-1 p-4"
-					>
-						<div v-if="paypalLoading" class="py-4 text-center text-sm text-ink-gray-6">
+
+					<div v-if="selectedPaymentCurrency === 'USD' && paypalCheckout.data" class="paypal-standard-box">
+						<div v-if="paypalLoading" class="gateway-loading">
+							<RefreshCcw class="size-4 animate-spin" />
 							{{ __('Cargando PayPal...') }}
 						</div>
 						<div id="studybadge-paypal-buttons-standard"></div>
 					</div>
-				</div>
+
+					<a class="support-box standard-support" :href="`mailto:${SUPPORT_EMAIL}`">
+						<Mail class="size-4" />
+						<span>{{ __('¿Necesitas ayuda? Escríbenos a') }} <strong>{{ SUPPORT_EMAIL }}</strong></span>
+					</a>
+				</section>
 			</div>
 		</div>
-		<div v-else-if="access.data?.message">
+
+		<div v-else-if="access.data?.message" class="permission-shell">
 			<NotPermitted
 				:text="access.data.message"
 				:buttonLabel="
 					type == 'course'
-						? 'Checkout Course'
+						? 'Pagar curso'
 						: type == 'certificate'
 							? 'Volver al curso'
-							: 'Checkout Batch'
+							: 'Pagar batch'
 				"
 				:buttonLink="
 					type == 'course' || type == 'certificate'
@@ -486,9 +460,9 @@
 				"
 			/>
 		</div>
-		<div v-else-if="!user.data?.name">
+		<div v-else-if="!user.data?.name" class="permission-shell">
 			<NotPermitted
-				text="Please login to access this page."
+				text="Inicia sesión para acceder a esta página."
 				:buttonLink="`/login?redirect-to=${getLmsRoute(
 					`billing/${type}/${name}`
 				)}`"
@@ -496,6 +470,7 @@
 		</div>
 	</div>
 </template>
+
 <script setup>
 import {
 	Button,
@@ -524,6 +499,11 @@ import {
 	BadgeCheck,
 	CreditCard,
 	Crown,
+	HelpCircle,
+	LockKeyhole,
+	Mail,
+	MapPin,
+	ReceiptText,
 	RefreshCcw,
 	ShieldCheck,
 	X,
@@ -533,6 +513,7 @@ import { getLmsRoute } from '@/utils/basePath'
 
 const user = inject('$user')
 const { brand } = sessionStore()
+const SUPPORT_EMAIL = 'soporte@studybadge.com'
 const showConsentWarning = ref(false)
 const mercadoPagoLoader = ref(null)
 const paypalLoader = ref(null)
@@ -570,7 +551,7 @@ const props = defineProps({
 const isCertificateCheckout = computed(() => props.type == 'certificate')
 
 const pageTitle = computed(() =>
-	isCertificateCheckout.value ? __('Pagar certificado') : __('Billing Details')
+	isCertificateCheckout.value ? __('Pagar certificado') : __('Datos de facturación')
 )
 
 const access = createResource({
@@ -698,29 +679,29 @@ const hasCheckoutData = computed(() => {
 })
 
 const paymentStatusTitle = computed(() => {
-	if (certificatePaymentStatus.value === 'approved') {
+	if (certificatePaymentStatus.value === 'approved' || certificatePaymentStatus.value === 'COMPLETED') {
 		return __('Pago aprobado')
 	}
 	if (
 		certificatePaymentStatus.value === 'pending' ||
 		certificatePaymentStatus.value === 'in_process'
 	) {
-		return __('Pago en revision')
+		return __('Pago en revisión')
 	}
 	return __('No pudimos confirmar el pago')
 })
 
 const paymentStatusMessage = computed(() => {
-	if (certificatePaymentStatus.value === 'approved') {
-		return __('Tu certificado ya esta desbloqueado. Te llevaremos a la pantalla de certificacion.')
+	if (certificatePaymentStatus.value === 'approved' || certificatePaymentStatus.value === 'COMPLETED') {
+		return __('Tu certificado ya está desbloqueado. Te llevaremos a la pantalla de certificación.')
 	}
 	if (
 		certificatePaymentStatus.value === 'pending' ||
 		certificatePaymentStatus.value === 'in_process'
 	) {
-		return __('Mercado Pago esta procesando la operacion. Puedes actualizar el estado en unos segundos.')
+		return __('Mercado Pago está procesando la operación. Puedes actualizar el estado en unos segundos.')
 	}
-	return certificatePaymentMessage.value || __('Revisa los datos del metodo de pago e intenta nuevamente.')
+	return certificatePaymentMessage.value || __('Revisa los datos del método de pago e intenta nuevamente. Si el problema continúa, escribe a soporte@studybadge.com.')
 })
 
 function formatCertificateMoney(amount) {
@@ -733,11 +714,11 @@ const generatePaymentLink = () => {
 		{
 			validate() {
 				if (!billingDetails.source && fieldMeta.source?.reqd) {
-					return __('Please let us know where you heard about us from.')
+					return __('Cuéntanos dónde conociste StudyBadge.')
 				}
 				if (!billingDetails.member_consent) {
 					showConsentWarning.value = true
-					return __('Please provide your consent to proceed with the payment.')
+					return __('Autoriza el uso de tus datos para continuar con el pago.')
 				}
 				return validateAddress()
 			},
@@ -754,11 +735,11 @@ const generatePaymentLink = () => {
 
 const validateBillingDetails = () => {
 	if (!billingDetails.source && fieldMeta.source?.reqd) {
-		return __('Please let us know where you heard about us from.')
+		return __('Cuéntanos dónde conociste StudyBadge.')
 	}
 	if (!billingDetails.member_consent) {
 		showConsentWarning.value = true
-		return __('Please provide your consent to proceed with the payment.')
+		return __('Autoriza el uso de tus datos para continuar con el pago.')
 	}
 	return validateAddress()
 }
@@ -819,7 +800,7 @@ function loadMercadoPago() {
 
 function loadPayPal(clientId) {
 	if (!clientId) {
-		return Promise.reject(new Error(__('Falta configurar el client ID de PayPal.')))
+		return Promise.reject(new Error(__('Falta configurar el Client ID de PayPal. Escribe a soporte@studybadge.com si necesitas ayuda.')))
 	}
 	if (window.paypal) {
 		return Promise.resolve(window.paypal)
@@ -839,7 +820,7 @@ function loadPayPal(clientId) {
 
 async function initMercadoPagoPaymentBrick() {
 	if (!certificateCheckout.data?.public_key || !certificateCheckout.data?.preference_id) {
-		toast.error(__('Mercado Pago no devolvio los datos del checkout.'))
+		toast.error(__('Mercado Pago no devolvió los datos del checkout. Intenta nuevamente o escribe a soporte@studybadge.com.'))
 		return
 	}
 	brickLoading.value = true
@@ -883,7 +864,7 @@ async function initMercadoPagoPaymentBrick() {
 					},
 					onError(error) {
 						brickLoading.value = false
-						toast.error(error?.message || __('Mercado Pago no pudo cargar.'))
+						toast.error(error?.message || __('Mercado Pago no pudo cargar. Revisa tu conexión o escribe a soporte@studybadge.com.'))
 					},
 					onSubmit({ formData }) {
 						return new Promise((resolve, reject) => {
@@ -913,7 +894,7 @@ async function initMercadoPagoPaymentBrick() {
 		)
 	} catch (error) {
 		brickLoading.value = false
-		toast.error(error?.message || __('No se pudo cargar Mercado Pago.'))
+		toast.error(error?.message || __('No se pudo cargar Mercado Pago. Intenta nuevamente o escribe a soporte@studybadge.com.'))
 	}
 }
 
@@ -928,10 +909,10 @@ function handleCertificatePaymentResult(data) {
 		return
 	}
 	if (data.status === 'pending' || data.status === 'in_process') {
-		toast.success(__('Pago recibido por Mercado Pago. Esperando confirmacion.'))
+		toast.success(__('Pago recibido por Mercado Pago. Esperando confirmación.'))
 		return
 	}
-	toast.error(__('Mercado Pago no aprobo la operacion.'))
+	toast.error(__('Mercado Pago no aprobó la operación. Intenta nuevamente o escribe a soporte@studybadge.com.'))
 }
 
 function handlePayPalPaymentResult(data) {
@@ -944,7 +925,7 @@ function handlePayPalPaymentResult(data) {
 		}, 700)
 		return
 	}
-	toast.error(__('PayPal no aprobo la operacion.'))
+	toast.error(__('PayPal no aprobó la operación. Intenta nuevamente o escribe a soporte@studybadge.com.'))
 }
 
 function preparePayPalCheckout() {
@@ -978,7 +959,7 @@ function preparePayPalCheckout() {
 
 async function initPayPalButtons() {
 	if (!paypalCheckout.data?.client_id || !paypalCheckout.data?.order_id) {
-		toast.error(__('PayPal no devolvio los datos del checkout.'))
+		toast.error(__('PayPal no devolvió los datos del checkout. Intenta nuevamente o escribe a soporte@studybadge.com.'))
 		return
 	}
 	paypalLoading.value = true
@@ -1015,12 +996,12 @@ async function initPayPalButtons() {
 				})
 			},
 			onError(error) {
-				toast.error(error?.message || __('PayPal no pudo cargar.'))
+				toast.error(error?.message || __('PayPal no pudo cargar. Revisa tu conexión o escribe a soporte@studybadge.com.'))
 			},
 		})
 		await paypalButtonsController.value.render(`#${containerId}`)
 	} catch (error) {
-		toast.error(error?.message || __('No se pudo cargar PayPal.'))
+		toast.error(error?.message || __('No se pudo cargar PayPal. Intenta nuevamente o escribe a soporte@studybadge.com.'))
 	} finally {
 		paypalLoading.value = false
 	}
@@ -1057,7 +1038,7 @@ function destroyPayPalButtons() {
 
 function applyCouponCode() {
 	if (!appliedCoupon.value) {
-		toast.error(__('Please enter a coupon code'))
+		toast.error(__('Ingresa un código de cupón.'))
 		return
 	}
 	orderSummary.reload()
@@ -1085,19 +1066,18 @@ const validateAddress = () => {
 	for (let field of mandatoryFields) {
 		if (!billingDetails[field])
 			return (
-				'Please enter a valid ' +
+				__('Completa el campo obligatorio: ') +
 				field
 					.replaceAll('_', ' ')
 					.toLowerCase()
-					.replace(/\b\w/g, (s) => s.toUpperCase())
 			)
 	}
 
 	if (billingDetails.gstin && !billingDetails.pan)
-		return 'Please enter a valid pan number.'
+		return __('Ingresa un número PAN válido.')
 
 	if (billingDetails.country == 'India' && !billingDetails.state)
-		return 'Please enter a valid state with correct spelling and the first letter capitalized.'
+		return __('Ingresa una provincia o región válida.')
 
 	const states = [
 		'Andhra Pradesh',
@@ -1135,11 +1115,11 @@ const validateAddress = () => {
 		billingDetails.country == 'India' &&
 		!states.includes(billingDetails.state)
 	)
-		return 'Please enter a valid state with correct spelling and the first letter capitalized.'
+		return __('Ingresa una provincia o región válida.')
 }
 
 const showError = (err) => {
-	toast.error(err.messages?.[0] || err)
+	toast.error(err.messages?.[0] || err || __('No pudimos procesar la solicitud. Escríbenos a soporte@studybadge.com.'))
 }
 
 const changeCurrency = (country) => {
@@ -1185,91 +1165,738 @@ usePageMeta(() => {
 </script>
 
 <style scoped>
-.certificate-checkout {
-	background: #f6f8fb;
+.billing-page {
+	min-height: 100vh;
+	background:
+		radial-gradient(circle at 12% 0%, rgba(216, 165, 56, 0.14), transparent 28%),
+		radial-gradient(circle at 90% 8%, rgba(10, 35, 81, 0.10), transparent 26%),
+		linear-gradient(180deg, #f7f9fd 0%, #eef4fb 44%, #ffffff 100%);
+	color: #172033;
+}
+
+.billing-topbar {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 14px;
+	border-bottom: 1px solid rgba(10, 35, 81, 0.08);
+	background: rgba(255, 255, 255, 0.86);
+	padding: 12px 18px;
+	backdrop-filter: blur(18px);
+	-webkit-backdrop-filter: blur(18px);
+}
+
+.billing-breadcrumbs {
+	height: 28px;
+}
+
+.support-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 34px;
+	border-radius: 999px;
+	border: 1px solid rgba(10, 35, 81, 0.12);
+	background: #ffffff;
+	padding: 0 12px;
+	color: #0a2351;
+	font-size: 12px;
+	font-weight: 800;
+	text-decoration: none;
+	box-shadow: 0 8px 22px rgba(10, 35, 81, 0.07);
+}
+
+.support-chip:hover,
+.support-box:hover,
+.plus-callout:hover {
+	text-decoration: none;
+}
+
+.certificate-checkout,
+.standard-checkout {
+	min-height: calc(100vh - 53px);
 }
 
 .certificate-band {
-	background: #0a2351;
+	position: relative;
+	overflow: hidden;
+	background:
+		radial-gradient(circle at 76% 16%, rgba(216, 165, 56, 0.30), transparent 28%),
+		radial-gradient(circle at 10% 84%, rgba(255, 255, 255, 0.13), transparent 30%),
+		linear-gradient(135deg, #061b49 0%, #0a2351 52%, #12346f 100%);
 }
 
-.certificate-hero-panel,
-.certificate-summary,
-.certificate-card {
-	border-radius: 8px;
+.certificate-band::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background:
+		linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+		linear-gradient(180deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+	background-size: 54px 54px;
+	mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.70), transparent 92%);
+	pointer-events: none;
+}
+
+.certificate-band-grid {
+	position: relative;
+	z-index: 1;
+	display: grid;
+	grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+	gap: 26px;
+	width: min(1120px, calc(100% - 40px));
+	margin: 0 auto;
+	padding: 44px 0 72px;
 }
 
 .certificate-hero-panel {
-	border: 1px solid rgba(255, 255, 255, 0.12);
-	background: rgba(255, 255, 255, 0.06);
-	padding: 28px;
+	border: 1px solid rgba(255, 255, 255, 0.16);
+	border-radius: 30px;
+	background: rgba(255, 255, 255, 0.075);
+	padding: 34px;
+	box-shadow: 0 24px 60px rgba(0, 0, 0, 0.16);
+	backdrop-filter: blur(18px);
+	-webkit-backdrop-filter: blur(18px);
+}
+
+.certificate-eyebrow {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 18px;
+	border: 1px solid rgba(216, 165, 56, 0.32);
+	border-radius: 999px;
+	background: rgba(216, 165, 56, 0.16);
+	padding: 8px 12px;
+	color: #ffe7a8;
+	font-size: 12px;
+	font-weight: 900;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.certificate-hero-panel h1 {
+	max-width: 780px;
+	margin: 0;
+	color: #ffffff;
+	font-size: clamp(36px, 5vw, 62px);
+	font-weight: 950;
+	letter-spacing: -0.055em;
+	line-height: 0.98;
+}
+
+.certificate-hero-panel p {
+	max-width: 720px;
+	margin: 18px 0 0;
+	color: rgba(232, 240, 255, 0.86);
+	font-size: 16px;
+	line-height: 1.75;
+}
+
+.certificate-proof-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 12px;
+	margin-top: 28px;
 }
 
 .certificate-proof {
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	border-radius: 8px;
-	background: rgba(255, 255, 255, 0.1);
-	padding: 10px 12px;
-	font-weight: 600;
+	gap: 9px;
+	min-height: 48px;
+	border: 1px solid rgba(255, 255, 255, 0.13);
+	border-radius: 16px;
+	background: rgba(255, 255, 255, 0.10);
+	padding: 12px;
+	color: #ffffff;
+	font-size: 13px;
+	font-weight: 800;
 }
 
 .certificate-summary,
-.certificate-card {
-	border: 1px solid rgba(10, 35, 81, 0.08);
-	background: white;
-	box-shadow: 0 8px 24px rgba(10, 35, 81, 0.08);
+.certificate-card,
+.standard-summary {
+	border: 1px solid rgba(10, 35, 81, 0.09);
+	border-radius: 28px;
+	background: rgba(255, 255, 255, 0.94);
+	box-shadow: 0 22px 54px rgba(10, 35, 81, 0.12);
 }
 
 .certificate-summary {
-	padding: 24px;
+	padding: 26px;
+	align-self: stretch;
 }
 
-.certificate-empty {
+.summary-top {
 	display: flex;
-	min-height: 300px;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	border: 1px dashed rgba(10, 35, 81, 0.24);
-	border-radius: 8px;
-	background: #f8fafc;
-	padding: 24px;
+	align-items: flex-start;
+	gap: 14px;
 }
 
-.certificate-primary {
-	background: #0a2351 !important;
+.summary-icon,
+.card-icon {
+	width: 46px;
+	height: 46px;
+	flex: 0 0 auto;
+	display: grid;
+	place-items: center;
+	border-radius: 16px;
+	background: #eaf1fb;
+	color: #0a2351;
+}
+
+.summary-kicker {
+	color: #718198;
+	font-size: 11px;
+	font-weight: 950;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.summary-top h2 {
+	margin: 4px 0 0;
+	color: #172033;
+	font-size: 20px;
+	font-weight: 950;
+	line-height: 1.18;
+	letter-spacing: -0.02em;
+}
+
+.summary-total-card {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 16px;
+	margin-top: 24px;
+	border-radius: 22px;
+	background:
+		radial-gradient(circle at 90% 0%, rgba(216, 165, 56, 0.22), transparent 40%),
+		linear-gradient(135deg, #f8fbff 0%, #eef5ff 100%);
+	border: 1px solid #e4edf8;
+	padding: 18px;
+}
+
+.summary-total-card span,
+.price-row span {
+	display: block;
+	color: #718198;
+	font-size: 12px;
+	font-weight: 900;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.summary-total-card small {
+	display: block;
+	margin-top: 4px;
+	color: #718198;
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.summary-total-card strong {
+	color: #0a2351;
+	font-size: 34px;
+	font-weight: 950;
+	line-height: 1;
+	letter-spacing: -0.04em;
+	white-space: nowrap;
+}
+
+.currency-switch {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 6px;
+	margin-top: 18px;
+	border: 1px solid #dbe6f3;
+	border-radius: 18px;
+	background: #f3f7fc;
+	padding: 6px;
 }
 
 .currency-option {
-	min-height: 34px;
+	min-height: 40px;
 	border: 0;
-	border-radius: 6px;
+	border-radius: 13px;
 	background: transparent;
 	color: #64748b;
-	font-size: 12px;
-	font-weight: 800;
+	font-size: 13px;
+	font-weight: 900;
+	transition: 0.18s ease;
 }
 
 .currency-option-active {
 	background: #ffffff;
 	color: #0a2351;
-	box-shadow: 0 1px 4px rgba(10, 35, 81, 0.12);
+	box-shadow: 0 8px 18px rgba(10, 35, 81, 0.10);
 }
 
-:root[data-theme='dark'] .certificate-checkout {
+.plus-callout,
+.support-box,
+.name-note,
+.gateway-tip {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	border-radius: 20px;
+	padding: 15px;
+	font-size: 13px;
+	line-height: 1.55;
+}
+
+.plus-callout {
+	margin-top: 18px;
+	border: 1px solid rgba(216, 165, 56, 0.35);
+	background: #fff8e6;
+	color: #6d4a0d;
+}
+
+.plus-callout svg,
+.gateway-tip svg,
+.name-note svg,
+.support-box svg {
+	flex: 0 0 auto;
+	margin-top: 2px;
+}
+
+.plus-callout strong,
+.gateway-tip strong,
+.support-box strong {
+	font-weight: 950;
+}
+
+.checkout-grid {
+	display: grid;
+	grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.1fr);
+	gap: 26px;
+	width: min(1120px, calc(100% - 40px));
+	margin: -44px auto 0;
+	padding-bottom: 72px;
+	position: relative;
+	z-index: 2;
+}
+
+.certificate-card {
+	padding: 26px;
+}
+
+.card-heading {
+	display: flex;
+	align-items: flex-start;
+	gap: 14px;
+	margin-bottom: 24px;
+}
+
+.card-heading h2 {
+	margin: 0;
+	color: #172033;
+	font-size: 20px;
+	font-weight: 950;
+	letter-spacing: -0.02em;
+	line-height: 1.15;
+}
+
+.card-heading p {
+	margin: 7px 0 0;
+	color: #64748b;
+	font-size: 14px;
+	line-height: 1.55;
+}
+
+.form-stack,
+.field-column {
+	display: grid;
+	gap: 16px;
+}
+
+.field-pair,
+.standard-fields {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 16px;
+}
+
+.consent-control {
+	line-height: 1.6;
+}
+
+.consent-warning {
+	border: 1px solid #fecdd3;
+	border-radius: 14px;
+	background: #fff1f2;
+	padding: 10px 12px;
+	color: #be123c;
+	font-size: 12px;
+	font-weight: 800;
+}
+
+.certificate-primary {
+	width: 100%;
+	border-radius: 16px !important;
+	background: #0a2351 !important;
+	font-weight: 900 !important;
+	box-shadow: 0 14px 28px rgba(10, 35, 81, 0.20);
+}
+
+.gateway-heading {
+	align-items: center;
+}
+
+.gateway-icon {
+	background: #fff4d6;
+	color: #9a6a15;
+}
+
+.gateway-currency {
+	margin-left: auto;
+	border-radius: 999px;
+	background: #eaf1fb;
+	padding: 7px 10px;
+	color: #0a2351;
+	font-size: 12px;
+	font-weight: 950;
+}
+
+.gateway-tip {
+	margin-bottom: 18px;
+	border: 1px solid #cfe0f4;
+	background: #eef6ff;
+	color: #0a2351;
+}
+
+.gateway-tip p {
+	margin: 4px 0 0;
+	color: #39516f;
+}
+
+.certificate-empty {
+	display: flex;
+	min-height: 320px;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	border: 1.5px dashed rgba(10, 35, 81, 0.22);
+	border-radius: 24px;
+	background:
+		radial-gradient(circle at 50% 0%, rgba(216, 165, 56, 0.12), transparent 32%),
+		#f8fbff;
+	padding: 28px;
+	text-align: center;
+}
+
+.empty-icon {
+	width: 68px;
+	height: 68px;
+	display: grid;
+	place-items: center;
+	border-radius: 22px;
+	background: #eaf1fb;
+	color: #0a2351;
+}
+
+.certificate-empty h3 {
+	margin: 16px 0 6px;
+	color: #172033;
+	font-size: 17px;
+	font-weight: 950;
+}
+
+.certificate-empty p {
+	max-width: 380px;
+	margin: 0;
+	color: #64748b;
+	font-size: 14px;
+	line-height: 1.6;
+}
+
+.gateway-loading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 26px 0;
+	color: #64748b;
+	font-size: 14px;
+	font-weight: 800;
+}
+
+.payment-status {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 14px;
+	margin-top: 18px;
+	border-radius: 20px;
+	padding: 16px;
+	font-size: 14px;
+}
+
+.payment-status strong {
+	display: block;
+	font-weight: 950;
+}
+
+.payment-status p {
+	margin: 4px 0 0;
+	line-height: 1.55;
+}
+
+.payment-status-success {
+	border: 1px solid #bbf7d0;
+	background: #ecfdf5;
+	color: #047857;
+}
+
+.payment-status-warning {
+	border: 1px solid #fde68a;
+	background: #fffbeb;
+	color: #92400e;
+}
+
+.support-box {
+	margin-top: 18px;
+	border: 1px solid rgba(10, 35, 81, 0.12);
+	background: #fbfdff;
+	color: #41546e;
+}
+
+.support-box strong {
+	color: #0a2351;
+}
+
+.standard-checkout {
+	padding: 34px 20px 78px;
+}
+
+.standard-layout {
+	display: grid;
+	grid-template-columns: minmax(300px, 0.82fr) minmax(0, 1.18fr);
+	gap: 26px;
+	width: min(1120px, 100%);
+	margin: 0 auto;
+}
+
+.standard-summary {
+	position: sticky;
+	top: 82px;
+	align-self: start;
+	padding: 24px;
+}
+
+.price-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	border-bottom: 1px solid #e4edf8;
+	padding: 14px 0;
+	color: #172033;
+}
+
+.price-row strong {
+	font-weight: 900;
+}
+
+.discount-row strong {
+	color: #047857;
+}
+
+.compact-total {
+	margin-top: 16px;
+}
+
+.compact-total strong {
+	font-size: 26px;
+}
+
+.coupon-box {
+	margin-top: 18px;
+	border-radius: 20px;
+	background: #f8fbff;
+	border: 1px solid #e4edf8;
+	padding: 16px;
+}
+
+.coupon-box label {
+	display: block;
+	margin-bottom: 10px;
+	color: #718198;
+	font-size: 12px;
+	font-weight: 900;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.coupon-actions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.coupon-input {
+	flex: 1;
+}
+
+.name-note {
+	margin-top: 18px;
+	border: 1px solid rgba(216, 165, 56, 0.32);
+	background: #fff8e6;
+	color: #6d4a0d;
+}
+
+.standard-form {
+	padding: 28px;
+}
+
+.standard-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 18px;
+	margin-top: 26px;
+	border-top: 1px solid #e4edf8;
+	padding-top: 20px;
+}
+
+.standard-footer .certificate-primary {
+	width: auto;
+	min-width: 190px;
+}
+
+.paypal-standard-box {
+	margin-top: 22px;
+	border: 1px solid #e4edf8;
+	border-radius: 22px;
+	background: #f8fbff;
+	padding: 18px;
+}
+
+.standard-support {
+	margin-top: 22px;
+}
+
+.permission-shell {
+	width: min(900px, calc(100% - 40px));
+	margin: 0 auto;
+	padding: 42px 0;
+}
+
+:deep(input),
+:deep(textarea),
+:deep(select) {
+	border-radius: 14px !important;
+}
+
+:global(:root[data-theme='dark']) .billing-page {
 	background: #0f172a;
+	color: #f8fafc;
 }
 
-:root[data-theme='dark'] .certificate-summary,
-:root[data-theme='dark'] .certificate-card {
+:global(:root[data-theme='dark']) .billing-topbar,
+:global(:root[data-theme='dark']) .certificate-summary,
+:global(:root[data-theme='dark']) .certificate-card,
+:global(:root[data-theme='dark']) .standard-summary,
+:global(:root[data-theme='dark']) .support-chip {
 	border-color: rgba(255, 255, 255, 0.08);
 	background: #111827;
 	box-shadow: none;
 }
 
-:root[data-theme='dark'] .certificate-empty {
-	background: rgba(255, 255, 255, 0.03);
+:global(:root[data-theme='dark']) .summary-top h2,
+:global(:root[data-theme='dark']) .card-heading h2,
+:global(:root[data-theme='dark']) .certificate-empty h3 {
+	color: #f8fafc;
+}
+
+:global(:root[data-theme='dark']) .card-heading p,
+:global(:root[data-theme='dark']) .certificate-empty p,
+:global(:root[data-theme='dark']) .summary-kicker {
+	color: #94a3b8;
+}
+
+:global(:root[data-theme='dark']) .summary-total-card,
+:global(:root[data-theme='dark']) .certificate-empty,
+:global(:root[data-theme='dark']) .coupon-box,
+:global(:root[data-theme='dark']) .paypal-standard-box,
+:global(:root[data-theme='dark']) .support-box {
+	border-color: rgba(255, 255, 255, 0.08);
+	background: rgba(255, 255, 255, 0.04);
+}
+
+@media (max-width: 980px) {
+	.certificate-band-grid,
+	.checkout-grid,
+	.standard-layout {
+		grid-template-columns: 1fr;
+	}
+
+	.checkout-grid {
+		margin-top: -42px;
+	}
+
+	.standard-summary {
+		position: static;
+	}
+}
+
+@media (max-width: 720px) {
+	.billing-topbar {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.support-chip {
+		width: 100%;
+		justify-content: center;
+	}
+
+	.certificate-band-grid,
+	.checkout-grid {
+		width: min(100% - 28px, 1120px);
+	}
+
+	.certificate-band-grid {
+		padding: 26px 0 62px;
+	}
+
+	.certificate-hero-panel,
+	.certificate-summary,
+	.certificate-card,
+	.standard-summary {
+		border-radius: 24px;
+	}
+
+	.certificate-hero-panel,
+	.certificate-summary,
+	.certificate-card,
+	.standard-form,
+	.standard-summary {
+		padding: 20px;
+	}
+
+	.certificate-proof-grid,
+	.field-pair,
+	.standard-fields {
+		grid-template-columns: 1fr;
+	}
+
+	.summary-total-card {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.payment-status,
+	.standard-footer {
+		align-items: stretch;
+		flex-direction: column;
+	}
+
+	.standard-footer .certificate-primary {
+		width: 100%;
+	}
 }
 </style>
