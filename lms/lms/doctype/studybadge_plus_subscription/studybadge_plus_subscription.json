@@ -13,6 +13,10 @@
   "mp_preapproval_id",
   "paypal_subscription_id",
   "paypal_plan_id",
+  "paddle_customer_id",
+  "paddle_subscription_id",
+  "paddle_price_id",
+  "paddle_transaction_id",
   "external_reference",
   "billing_section",
   "amount",
@@ -54,7 +58,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "\npending\nauthorized\nactive\npaused\ncancelled\ncanceled\nexpired\nrejected\nunknown",
+  "options": "\npending\nauthorized\nactive\ntrialing\npast_due\npaused\ncancelled\ncanceled\nexpired\nrejected\nunknown",
    "reqd": 1
   },
   {
@@ -88,6 +92,32 @@
    "fieldname": "paypal_plan_id",
    "fieldtype": "Data",
    "label": "PayPal Plan ID"
+  },
+  {
+   "fieldname": "paddle_customer_id",
+   "fieldtype": "Data",
+   "label": "Paddle Customer ID",
+   "search_index": 1
+  },
+  {
+   "fieldname": "paddle_subscription_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Paddle Subscription ID",
+   "search_index": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "paddle_price_id",
+   "fieldtype": "Data",
+   "label": "Paddle Price ID",
+   "search_index": 1
+  },
+  {
+   "fieldname": "paddle_transaction_id",
+   "fieldtype": "Data",
+   "label": "Paddle Transaction ID",
+   "search_index": 1
   },
   {
    "fieldname": "external_reference",

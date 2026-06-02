@@ -34,6 +34,7 @@
   "external_reference",
   "payment_id",
   "order_id",
+  "paddle_transaction_id",
   "raw_response",
   "column_break_monu",
   "gstin",
@@ -49,6 +50,13 @@
    "fieldname": "payment_id",
    "fieldtype": "Data",
    "label": "Payment ID"
+  },
+  {
+   "fieldname": "paddle_transaction_id",
+   "fieldtype": "Data",
+   "label": "Paddle Transaction ID",
+   "search_index": 1,
+   "unique": 1
   },
   {
    "fieldname": "amount",

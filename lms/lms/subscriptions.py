@@ -13,11 +13,13 @@ from frappe.utils import cint, flt, format_datetime, now_datetime
 from lms.lms.utils import get_lms_path, get_preferred_payment_currency
 
 MERCADOPAGO_API_BASE = "https://api.mercadopago.com"
-PLUS_ACTIVE_STATUSES = {"authorized", "active"}
+PLUS_ACTIVE_STATUSES = {"authorized", "active", "trialing"}
 KNOWN_SUBSCRIPTION_STATUSES = {
 	"pending",
 	"authorized",
 	"active",
+	"trialing",
+	"past_due",
 	"paused",
 	"cancelled",
 	"canceled",
@@ -380,6 +382,13 @@ def get_plus_status() -> dict:
 	subscription = _get_latest_subscription(frappe.session.user)
 	if subscription and getattr(subscription, "mp_preapproval_id", None):
 		subscription = _refresh_subscription_from_mercadopago(subscription)
+	elif subscription and getattr(subscription, "paddle_subscription_id", None):
+		try:
+			from lms.lms.paddle import fetch_subscription, sync_paddle_subscription
+
+			subscription = sync_paddle_subscription(fetch_subscription(subscription.paddle_subscription_id)) or subscription
+		except Exception:
+			frappe.log_error(frappe.get_traceback(), "StudyBadge Plus Paddle Refresh Failed")
 	data = {
 		"active": has_active_plus(),
 		"plan": plan,
@@ -534,6 +543,12 @@ def _serialize_subscription(subscription) -> dict | None:
 			"subscription_id": getattr(subscription, "paypal_subscription_id", None),
 			"plan_id": getattr(subscription, "paypal_plan_id", None),
 		},
+		"paddle": {
+			"customer_id": getattr(subscription, "paddle_customer_id", None),
+			"subscription_id": getattr(subscription, "paddle_subscription_id", None),
+			"price_id": getattr(subscription, "paddle_price_id", None),
+			"transaction_id": getattr(subscription, "paddle_transaction_id", None),
+		},
 	}
 
 
@@ -561,6 +576,9 @@ def _serialize_receipts(subscription) -> list[dict]:
 			"mp_payment_id",
 			"paypal_capture_id",
 			"paypal_subscription_id",
+			"paddle_transaction_id",
+			"paddle_subscription_id",
+			"paddle_customer_id",
 			"amount",
 			"currency",
 			"paid_at",
@@ -712,6 +730,15 @@ def get_plus_billing() -> dict:
 		if getattr(subscription, "mp_preapproval_id", None):
 			subscription = _refresh_subscription_from_mercadopago(subscription, settings=settings)
 			_sync_subscription_receipts(subscription, settings=settings)
+		elif getattr(subscription, "paddle_subscription_id", None):
+			try:
+				from lms.lms.paddle import fetch_subscription, sync_paddle_subscription
+
+				subscription = sync_paddle_subscription(
+					fetch_subscription(subscription.paddle_subscription_id, settings=settings)
+				) or subscription
+			except Exception:
+				frappe.log_error(frappe.get_traceback(), "StudyBadge Plus Paddle Refresh Failed")
 
 	preferred_currency = get_preferred_payment_currency()
 	return {
@@ -729,6 +756,11 @@ def get_plus_billing() -> dict:
 			"client_id": getattr(settings, "paypal_client_id", None),
 			"plan_id_usd": getattr(settings, "paypal_plus_plan_id_usd", None),
 		},
+		"paddle": {
+			"enabled": bool(getattr(settings, "paddle_enabled", 0)),
+			"mode": getattr(settings, "paddle_mode", None) or "sandbox",
+			"price_id": getattr(settings, "paddle_plus_price_id", None),
+		},
 		"support_email": _get_support_email(),
 		"subscription": _serialize_subscription(subscription),
 		"receipts": _serialize_receipts(subscription),
@@ -741,8 +773,8 @@ def _get_manageable_subscription():
 		frappe.throw(_("You do not have a StudyBadge Plus subscription yet."))
 	if subscription.status not in PLUS_ACTIVE_STATUSES:
 		frappe.throw(_("Your StudyBadge Plus subscription is not active."))
-	if not subscription.mp_preapproval_id and not getattr(subscription, "paypal_subscription_id", None):
-		frappe.throw(_("This subscription is missing its Mercado Pago ID."))
+	if not subscription.mp_preapproval_id and not getattr(subscription, "paypal_subscription_id", None) and not getattr(subscription, "paddle_subscription_id", None):
+		frappe.throw(_("This subscription is missing its payment gateway ID."))
 	return subscription
 
 
@@ -763,6 +795,13 @@ def request_plus_cancellation() -> dict:
 		frappe.db.commit()
 		return get_plus_billing()
 
+	if getattr(subscription, "payment_gateway", None) == "Paddle":
+		from lms.lms.paddle import cancel_subscription
+
+		cancel_subscription(subscription.paddle_subscription_id)
+		frappe.db.commit()
+		return get_plus_billing()
+
 	if not subscription.next_payment_date:
 		frappe.throw(_("We could not find your next billing date. Please contact support."))
 
@@ -780,6 +819,8 @@ def reactivate_plus_subscription() -> dict:
 		frappe.throw(_("Please login to manage your Plus subscription."), frappe.AuthenticationError)
 
 	subscription = _get_manageable_subscription()
+	if getattr(subscription, "payment_gateway", None) == "Paddle":
+		frappe.throw(_("Use the Paddle customer portal to manage this subscription."))
 	subscription.cancel_at_period_end = 0
 	subscription.cancel_requested_at = None
 	subscription.cancel_scheduled_for = None
@@ -835,6 +876,8 @@ def process_plus_cancellations():
 	for row in due:
 		try:
 			subscription = frappe.get_doc("StudyBadge Plus Subscription", row.name)
+			if getattr(subscription, "payment_gateway", None) == "Paddle":
+				continue
 			_cancel_subscription_now(subscription, settings=settings)
 			frappe.db.commit()
 		except Exception:

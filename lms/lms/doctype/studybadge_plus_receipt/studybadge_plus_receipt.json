@@ -21,6 +21,10 @@
   "paypal_section",
   "paypal_capture_id",
   "paypal_subscription_id",
+  "paddle_section",
+  "paddle_transaction_id",
+  "paddle_subscription_id",
+  "paddle_customer_id",
   "amount_section",
   "amount",
   "currency",
@@ -120,6 +124,30 @@
    "fieldname": "paypal_subscription_id",
    "fieldtype": "Data",
    "label": "PayPal Subscription ID",
+   "search_index": 1
+  },
+  {
+   "fieldname": "paddle_section",
+   "fieldtype": "Section Break",
+   "label": "Paddle"
+  },
+  {
+   "fieldname": "paddle_transaction_id",
+   "fieldtype": "Data",
+   "label": "Paddle Transaction ID",
+   "search_index": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "paddle_subscription_id",
+   "fieldtype": "Data",
+   "label": "Paddle Subscription ID",
+   "search_index": 1
+  },
+  {
+   "fieldname": "paddle_customer_id",
+   "fieldtype": "Data",
+   "label": "Paddle Customer ID",
    "search_index": 1
   },
   {

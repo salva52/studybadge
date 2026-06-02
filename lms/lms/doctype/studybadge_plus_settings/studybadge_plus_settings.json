@@ -26,7 +26,14 @@
   "paypal_client_id",
   "paypal_client_secret",
   "paypal_webhook_id",
-  "paypal_plus_plan_id_usd"
+  "paypal_plus_plan_id_usd",
+  "paddle_section",
+  "paddle_enabled",
+  "paddle_mode",
+  "paddle_api_key",
+  "paddle_client_token",
+  "paddle_webhook_secret",
+  "paddle_plus_price_id"
  ],
  "fields": [
   {
@@ -161,6 +168,44 @@
    "fieldname": "paypal_plus_plan_id_usd",
    "fieldtype": "Data",
    "label": "PayPal Plus Plan ID USD"
+  },
+  {
+   "fieldname": "paddle_section",
+   "fieldtype": "Section Break",
+   "label": "Paddle"
+  },
+  {
+   "default": "0",
+   "fieldname": "paddle_enabled",
+   "fieldtype": "Check",
+   "label": "Paddle Enabled"
+  },
+  {
+   "default": "sandbox",
+   "fieldname": "paddle_mode",
+   "fieldtype": "Select",
+   "label": "Paddle Mode",
+   "options": "sandbox\nlive"
+  },
+  {
+   "fieldname": "paddle_api_key",
+   "fieldtype": "Password",
+   "label": "Paddle API Key"
+  },
+  {
+   "fieldname": "paddle_client_token",
+   "fieldtype": "Password",
+   "label": "Paddle Client-side Token"
+  },
+  {
+   "fieldname": "paddle_webhook_secret",
+   "fieldtype": "Password",
+   "label": "Paddle Webhook Secret"
+  },
+  {
+   "fieldname": "paddle_plus_price_id",
+   "fieldtype": "Data",
+   "label": "Paddle Plus Price ID"
   }
  ],
  "issingle": 1,

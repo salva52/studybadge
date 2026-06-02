@@ -24,7 +24,7 @@
 						</div>
 						<h1>{{ __('Desbloquea tu certificado verificable') }}</h1>
 						<p>
-							{{ selectedPaymentCurrency === 'PEN' ? __('Completa el pago seguro en soles, registra tus datos y continúa con tu certificación oficial de este curso.') : __('Completa el pago seguro en dólares con PayPal, registra tus datos y continúa con tu certificación oficial de este curso.') }}
+							{{ selectedPaymentCurrency === 'PEN' ? __('Completa el pago seguro en soles, registra tus datos y continúa con tu certificación oficial de este curso.') : __('Completa el pago internacional con tarjeta, Apple Pay, Google Pay o PayPal, según prefieras.') }}
 						</p>
 						<div class="certificate-proof-grid">
 							<div class="certificate-proof">
@@ -33,7 +33,7 @@
 							</div>
 							<div class="certificate-proof">
 								<CreditCard class="size-4" />
-								<span>{{ selectedPaymentCurrency === 'PEN' ? __('Tarjetas, Yape y más') : __('PayPal y tarjetas') }}</span>
+								<span>{{ selectedPaymentCurrency === 'PEN' ? __('Tarjetas, Yape y más') : __('Tarjetas, Apple Pay, Google Pay y PayPal') }}</span>
 							</div>
 							<div class="certificate-proof">
 								<Award class="size-4" />
@@ -167,7 +167,7 @@
 							variant="solid"
 							size="md"
 							class="certificate-primary"
-							:disabled="certificateCheckout.loading || brickLoading || paypalLoading"
+							:disabled="certificateCheckout.loading || paddleCheckout.loading || brickLoading || paypalLoading || paddleLoading"
 							@click="prepareSelectedCheckout"
 						>
 							<template #prefix>
@@ -184,12 +184,27 @@
 							<ShieldCheck class="size-5" />
 						</div>
 						<div>
-							<h2>{{ selectedPaymentCurrency === 'PEN' ? __('Pago con Mercado Pago') : __('Pago con PayPal') }}</h2>
+							<h2>{{ gatewayTitle }}</h2>
 							<p>
-								{{ selectedPaymentCurrency === 'PEN' ? __('Paga en soles con tarjeta, saldo de Mercado Pago, Yape u otros métodos disponibles para Perú.') : __('Paga en dólares con PayPal, tarjeta internacional o los métodos disponibles en tu cuenta.') }}
+								{{ gatewayDescription }}
 							</p>
 						</div>
 						<div class="gateway-currency">{{ selectedPaymentCurrency }}</div>
+					</div>
+
+					<div v-if="selectedPaymentCurrency === 'USD'" class="gateway-options">
+						<button
+							:class="{ 'gateway-option-active': selectedInternationalGateway === 'paddle' }"
+							@click="selectInternationalGateway('paddle')"
+						>
+							{{ __('Tarjeta / Apple Pay / Google Pay') }}
+						</button>
+						<button
+							:class="{ 'gateway-option-active': selectedInternationalGateway === 'paypal' }"
+							@click="selectInternationalGateway('paypal')"
+						>
+							{{ __('PayPal') }}
+						</button>
 					</div>
 
 					<div v-if="selectedPaymentCurrency === 'PEN'" class="gateway-tip">
@@ -206,16 +221,23 @@
 						</div>
 						<h3>{{ __('Confirma tus datos para cargar la pasarela') }}</h3>
 						<p>
-							{{ selectedPaymentCurrency === 'PEN' ? __('Mercado Pago se abrirá aquí mismo, sin salir de StudyBadge.') : __('PayPal se cargará aquí mismo para confirmar el pago en dólares.') }}
+							{{ gatewayEmptyText }}
 						</p>
 					</div>
 					<div v-else>
-						<div v-if="brickLoading || paypalLoading" class="gateway-loading">
+						<div v-if="brickLoading || paypalLoading || paddleLoading" class="gateway-loading">
 							<RefreshCcw class="size-4 animate-spin" />
 							{{ __('Cargando pasarela segura...') }}
 						</div>
 						<div v-show="selectedPaymentCurrency === 'PEN'" id="studybadge-mp-payment-brick"></div>
-						<div v-show="selectedPaymentCurrency === 'USD'" id="studybadge-paypal-buttons-certificate"></div>
+						<div v-if="isPaddleSelected && paddleCheckout.data" class="gateway-tip">
+							<CreditCard class="size-4" />
+							<div>
+								<strong>{{ __('Checkout Paddle abierto') }}</strong>
+								<p>{{ __('Si cerraste la ventana de pago, vuelve a confirmar tus datos para abrirla nuevamente.') }}</p>
+							</div>
+						</div>
+						<div v-show="isPayPalSelected" id="studybadge-paypal-buttons-certificate"></div>
 						<div
 							v-if="certificatePaymentStatus"
 							class="payment-status"
@@ -293,6 +315,21 @@
 							@click="selectPaymentCurrency(option.currency)"
 						>
 							{{ option.label }}
+						</button>
+					</div>
+
+					<div v-if="selectedPaymentCurrency === 'USD'" class="gateway-options standard-gateway-options">
+						<button
+							:class="{ 'gateway-option-active': selectedInternationalGateway === 'paddle' }"
+							@click="selectInternationalGateway('paddle')"
+						>
+							{{ __('Tarjeta / Apple Pay / Google Pay') }}
+						</button>
+						<button
+							:class="{ 'gateway-option-active': selectedInternationalGateway === 'paypal' }"
+							@click="selectInternationalGateway('paypal')"
+						>
+							{{ __('PayPal') }}
 						</button>
 					</div>
 
@@ -420,7 +457,7 @@
 							variant="solid"
 							size="md"
 							class="certificate-primary"
-							:disabled="paypalLoading || brickLoading"
+							:disabled="paypalLoading || brickLoading || paddleLoading || paddleCheckout.loading"
 							@click="prepareSelectedCheckout()"
 						>
 							{{ checkoutButtonLabel }}
@@ -428,11 +465,18 @@
 					</div>
 
 					<div v-if="hasCheckoutData" class="paypal-standard-box">
-						<div v-if="paypalLoading || brickLoading" class="gateway-loading">
+						<div v-if="paypalLoading || brickLoading || paddleLoading" class="gateway-loading">
 							<RefreshCcw class="size-4 animate-spin" />
 							{{ __('Cargando pasarela segura...') }}
 						</div>
-						<div v-show="selectedPaymentCurrency === 'USD'" id="studybadge-paypal-buttons-standard"></div>
+						<div v-if="isPaddleSelected && paddleCheckout.data" class="gateway-tip">
+							<CreditCard class="size-4" />
+							<div>
+								<strong>{{ __('Checkout Paddle abierto') }}</strong>
+								<p>{{ __('Paga con tarjeta, Apple Pay, Google Pay o la moneda local disponible en tu país.') }}</p>
+							</div>
+						</div>
+						<div v-show="isPayPalSelected" id="studybadge-paypal-buttons-standard"></div>
 						<div v-show="selectedPaymentCurrency === 'PEN'" id="studybadge-mp-payment-brick-standard"></div>
 					</div>
 
@@ -518,13 +562,16 @@ const SUPPORT_EMAIL = 'soporte@studybadge.com'
 const showConsentWarning = ref(false)
 const mercadoPagoLoader = ref(null)
 const paypalLoader = ref(null)
+const paddleLoader = ref(null)
 const paymentBrickController = ref(null)
 const paypalButtonsController = ref(null)
 const brickLoading = ref(false)
 const paypalLoading = ref(false)
+const paddleLoading = ref(false)
 const certificatePaymentStatus = ref('')
 const certificatePaymentMessage = ref('')
 const selectedPaymentCurrency = ref('PEN')
+const selectedInternationalGateway = ref('paddle')
 const { capture } = useTelemetry()
 
 onMounted(() => {
@@ -667,26 +714,84 @@ const paypalCapture = createResource({
 	url: 'lms.lms.payments.capture_paypal_checkout',
 })
 
+const paddleCheckout = createResource({
+	url: 'lms.lms.paddle.create_paddle_checkout',
+	makeParams() {
+		return {
+			doctype: props.type == 'batch' ? 'LMS Batch' : 'LMS Course',
+			docname: props.name,
+			address: billingDetails,
+			payment_for_certificate: props.type == 'certificate',
+			coupon_code: appliedCoupon.value,
+			country: billingDetails.country,
+		}
+	},
+})
+
+const paddlePaymentStatus = createResource({
+	url: 'lms.lms.paddle.get_paddle_payment_status',
+})
+
 const paymentCurrencyOptions = [
 	{ currency: 'PEN', label: 'S/ PEN' },
 	{ currency: 'USD', label: '$ USD' },
 ]
 
+const isPaddleSelected = computed(
+	() => selectedPaymentCurrency.value === 'USD' && selectedInternationalGateway.value === 'paddle'
+)
+const isPayPalSelected = computed(
+	() => selectedPaymentCurrency.value === 'USD' && selectedInternationalGateway.value === 'paypal'
+)
+
+const gatewayTitle = computed(() => {
+	if (selectedPaymentCurrency.value === 'PEN') return __('Pago con Mercado Pago')
+	return isPaddleSelected.value ? __('Pago con Paddle') : __('Pago con PayPal')
+})
+
+const gatewayDescription = computed(() => {
+	if (selectedPaymentCurrency.value === 'PEN') {
+		return __('Paga en soles con tarjeta, saldo de Mercado Pago, Yape u otros métodos disponibles para Perú.')
+	}
+	if (isPaddleSelected.value) {
+		return __('Paga con tarjeta de crédito o débito, Apple Pay, Google Pay y la moneda local que Paddle tenga disponible para tu país.')
+	}
+	return __('Paga en dólares con PayPal, tarjeta internacional o los métodos disponibles en tu cuenta.')
+})
+
+const gatewayEmptyText = computed(() => {
+	if (selectedPaymentCurrency.value === 'PEN') {
+		return __('Mercado Pago se abrirá aquí mismo, sin salir de StudyBadge.')
+	}
+	if (isPaddleSelected.value) {
+		return __('Paddle abrirá una ventana segura para pagar con tarjeta, Apple Pay o Google Pay.')
+	}
+	return __('PayPal se cargará aquí mismo para confirmar el pago en dólares.')
+})
+
 const checkoutButtonLabel = computed(() => {
-	if (selectedPaymentCurrency.value === 'USD') {
+	if (isPaddleSelected.value) {
+		return paddleCheckout.data ? __('Reabrir Paddle') : __('Continuar con Paddle')
+	}
+	if (isPayPalSelected.value) {
 		return paypalCheckout.data ? __('Reiniciar PayPal') : __('Continuar con PayPal')
 	}
 	return certificateCheckout.data ? __('Reiniciar pago seguro') : __('Continuar al pago seguro')
 })
 
 const hasCheckoutData = computed(() => {
-	return selectedPaymentCurrency.value === 'USD'
-		? !!paypalCheckout.data
-		: !!certificateCheckout.data
+	if (isPaddleSelected.value) return !!paddleCheckout.data
+	if (isPayPalSelected.value) return !!paypalCheckout.data
+	return !!certificateCheckout.data
 })
 
 const paymentStatusTitle = computed(() => {
-	if (certificatePaymentStatus.value === 'approved' || certificatePaymentStatus.value === 'COMPLETED') {
+	if (
+		certificatePaymentStatus.value === 'approved' ||
+		certificatePaymentStatus.value === 'COMPLETED' ||
+		certificatePaymentStatus.value === 'completed' ||
+		certificatePaymentStatus.value === 'paid'
+	) {
 		return __('Pago aprobado')
 	}
 	if (
@@ -699,7 +804,12 @@ const paymentStatusTitle = computed(() => {
 })
 
 const paymentStatusMessage = computed(() => {
-	if (certificatePaymentStatus.value === 'approved' || certificatePaymentStatus.value === 'COMPLETED') {
+	if (
+		certificatePaymentStatus.value === 'approved' ||
+		certificatePaymentStatus.value === 'COMPLETED' ||
+		certificatePaymentStatus.value === 'completed' ||
+		certificatePaymentStatus.value === 'paid'
+	) {
 		return __('Tu certificado ya está desbloqueado. Te llevaremos a la pantalla de certificación.')
 	}
 	if (
@@ -760,6 +870,7 @@ const prepareCertificateCheckout = () => {
 	destroyPaymentBrick()
 	destroyPayPalButtons()
 	paypalCheckout.data = null
+	paddleCheckout.data = null
 	certificatePaymentStatus.value = ''
 	certificatePaymentMessage.value = ''
 	certificateCheckout.submit(
@@ -781,7 +892,11 @@ const prepareCertificateCheckout = () => {
 }
 
 const prepareSelectedCheckout = () => {
-	if (selectedPaymentCurrency.value === 'USD') {
+	if (isPaddleSelected.value) {
+		preparePaddleCheckout()
+		return
+	}
+	if (isPayPalSelected.value) {
 		preparePayPalCheckout()
 		return
 	}
@@ -823,6 +938,28 @@ function loadPayPal(clientId) {
 		document.body.appendChild(script)
 	})
 	return paypalLoader.value
+}
+
+function loadPaddle(mode) {
+	if (window.Paddle) {
+		return Promise.resolve(window.Paddle)
+	}
+	if (paddleLoader.value) {
+		return paddleLoader.value
+	}
+	paddleLoader.value = new Promise((resolve, reject) => {
+		const script = document.createElement('script')
+		script.src = 'https://cdn.paddle.com/paddle/v2/paddle.js'
+		script.onload = () => {
+			if (mode === 'sandbox' && window.Paddle?.Environment?.set) {
+				window.Paddle.Environment.set('sandbox')
+			}
+			resolve(window.Paddle)
+		}
+		script.onerror = reject
+		document.body.appendChild(script)
+	})
+	return paddleLoader.value
 }
 
 async function initMercadoPagoPaymentBrick() {
@@ -936,6 +1073,106 @@ function handlePayPalPaymentResult(data) {
 	toast.error(__('PayPal no aprobó la operación. Intenta nuevamente o escribe a soporte@studybadge.com.'))
 }
 
+function handlePaddlePaymentResult(data) {
+	certificatePaymentStatus.value = data.status || 'completed'
+	certificatePaymentMessage.value = ''
+	if (data.payment_received || data.status === 'completed' || data.status === 'paid') {
+		toast.success(__('Pago recibido. Estamos desbloqueando tu acceso.'))
+		setTimeout(() => {
+			window.location.href = data.redirect_url
+		}, 1100)
+		return
+	}
+	toast.success(__('Paddle recibió el pago. Te llevaremos a tu contenido cuando se confirme.'))
+	setTimeout(() => {
+		window.location.href = data.redirect_url
+	}, 1500)
+}
+
+function preparePaddleCheckout() {
+	const validationError = validateBillingDetails()
+	if (validationError) {
+		toast.error(validationError)
+		return
+	}
+	destroyPaymentBrick()
+	destroyPayPalButtons()
+	certificateCheckout.data = null
+	paypalCheckout.data = null
+	certificatePaymentStatus.value = ''
+	certificatePaymentMessage.value = ''
+	paddleCheckout.submit(
+		{},
+		{
+			onSuccess(data) {
+				capture('checkout_initiated', { type: props.type, gateway: 'paddle' })
+				if (data.status === 'completed') {
+					window.location.href = data.redirect_url
+					return
+				}
+				nextTick(() => initPaddleCheckout())
+			},
+			onError(err) {
+				toast.error(err.messages?.[0] || err)
+			},
+		}
+	)
+}
+
+async function initPaddleCheckout() {
+	if (!paddleCheckout.data?.client_token || !paddleCheckout.data?.transaction_id) {
+		toast.error(__('Falta configurar Paddle para este pago. Puedes intentar con PayPal o escribir a soporte@studybadge.com.'))
+		return
+	}
+	paddleLoading.value = true
+	try {
+		const Paddle = await loadPaddle(paddleCheckout.data.mode)
+		if (paddleCheckout.data.mode === 'sandbox' && Paddle.Environment?.set) {
+			Paddle.Environment.set('sandbox')
+		}
+		Paddle.Initialize({
+			token: paddleCheckout.data.client_token,
+			eventCallback(event) {
+				if (event?.name !== 'checkout.completed') return
+				paddlePaymentStatus.submit(
+					{ payment: paddleCheckout.data.payment },
+					{
+						onSuccess(result) {
+							handlePaddlePaymentResult(result)
+						},
+						onError() {
+							setTimeout(() => {
+								window.location.href = paddleCheckout.data.redirect_url
+							}, 1200)
+						},
+					}
+				)
+			},
+		})
+		const checkoutOptions = {
+			transactionId: paddleCheckout.data.transaction_id,
+			customer: paddleCheckout.data.customer,
+			customData: paddleCheckout.data.custom_data,
+			settings: {
+				displayMode: 'overlay',
+				successUrl: paddleCheckout.data.success_url,
+				theme: 'light',
+			},
+		}
+		if (paddleCheckout.data.discount?.discountId) {
+			checkoutOptions.discountId = paddleCheckout.data.discount.discountId
+		}
+		if (paddleCheckout.data.discount?.discountCode) {
+			checkoutOptions.discountCode = paddleCheckout.data.discount.discountCode
+		}
+		Paddle.Checkout.open(checkoutOptions)
+	} catch (error) {
+		toast.error(error?.message || __('No se pudo cargar Paddle. Intenta nuevamente o usa PayPal.'))
+	} finally {
+		paddleLoading.value = false
+	}
+}
+
 function preparePayPalCheckout() {
 	const validationError = validateBillingDetails()
 	if (validationError) {
@@ -945,6 +1182,7 @@ function preparePayPalCheckout() {
 	destroyPaymentBrick()
 	destroyPayPalButtons()
 	certificateCheckout.data = null
+	paddleCheckout.data = null
 	certificatePaymentStatus.value = ''
 	certificatePaymentMessage.value = ''
 	paypalCheckout.submit(
@@ -1134,19 +1372,36 @@ const changeCurrency = (country) => {
 	billingDetails.country = country
 	if (country === 'Peru' || country === 'Perú') {
 		selectedPaymentCurrency.value = 'PEN'
+		selectedInternationalGateway.value = 'mercadopago'
 	} else if (country) {
 		selectedPaymentCurrency.value = 'USD'
+		selectedInternationalGateway.value = 'paddle'
 	}
 	orderSummary.reload()
 }
 
 const selectPaymentCurrency = (currency) => {
 	selectedPaymentCurrency.value = currency
+	selectedInternationalGateway.value = currency === 'USD' ? 'paddle' : 'mercadopago'
 	certificateCheckout.data = null
 	paypalCheckout.data = null
+	paddleCheckout.data = null
+	certificatePaymentStatus.value = ''
+	certificatePaymentMessage.value = ''
 	destroyPaymentBrick()
 	destroyPayPalButtons()
 	orderSummary.reload()
+}
+
+function selectInternationalGateway(gateway) {
+	selectedInternationalGateway.value = gateway
+	certificateCheckout.data = null
+	paypalCheckout.data = null
+	paddleCheckout.data = null
+	certificatePaymentStatus.value = ''
+	certificatePaymentMessage.value = ''
+	destroyPaymentBrick()
+	destroyPayPalButtons()
 }
 
 const isZeroAmount = computed(() => {
@@ -1441,6 +1696,39 @@ usePageMeta(() => {
 	background: #ffffff;
 	color: #0a2351;
 	box-shadow: 0 8px 18px rgba(10, 35, 81, 0.10);
+}
+
+.gateway-options {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 8px;
+	margin-bottom: 18px;
+	border-radius: 14px;
+	background: #eef4fb;
+	padding: 6px;
+}
+
+.gateway-options button {
+	min-height: 42px;
+	border: 0;
+	border-radius: 10px;
+	background: transparent;
+	color: #39516f;
+	font-size: 12px;
+	font-weight: 850;
+	line-height: 1.2;
+	cursor: pointer;
+}
+
+.gateway-options .gateway-option-active {
+	background: #ffffff;
+	color: #0a2351;
+	box-shadow: 0 8px 18px rgba(10, 35, 81, 0.12);
+}
+
+.standard-gateway-options {
+	margin-top: 12px;
+	margin-bottom: 0;
 }
 
 .plus-callout,

@@ -137,7 +137,7 @@
 									<Download class="size-8" />
 								</div>
 								<h3>{{ __('Todavía no hay recibos') }}</h3>
-								<p>{{ __('Cuando Mercado Pago confirme un cobro, aparecerá aquí tu comprobante.') }}</p>
+								<p>{{ __('Cuando la pasarela confirme un cobro, aparecerá aquí tu comprobante.') }}</p>
 							</div>
 						</section>
 					</div>
@@ -190,10 +190,10 @@
 								<button
 									v-if="!subscription?.cancel_at_period_end && subscription?.payment_gateway !== 'PayPal'"
 									class="sb-primary-btn"
-									@click="showPaymentMethodForm"
+									@click="manageSubscription"
 								>
 									<CreditCard class="size-4" />
-									{{ __('Gestionar suscripción') }}
+									{{ subscription?.payment_gateway === 'Paddle' ? __('Gestionar en Paddle') : __('Gestionar suscripción') }}
 								</button>
 
 								<button
@@ -206,7 +206,7 @@
 								</button>
 
 								<button
-									v-if="subscription?.cancel_at_period_end"
+									v-if="subscription?.cancel_at_period_end && subscription?.payment_gateway !== 'Paddle'"
 									class="sb-primary-btn"
 									:disabled="reactivateResource.loading"
 									@click="reactivateSubscription"
@@ -352,6 +352,21 @@
 										</button>
 									</div>
 
+									<div v-if="selectedPaymentCurrency === 'USD'" class="sb-gateway-switch">
+										<button
+											:class="{ 'sb-gateway-active': selectedInternationalGateway === 'paddle' }"
+											@click="selectInternationalGateway('paddle')"
+										>
+											{{ __('Tarjeta / Apple Pay / Google Pay') }}
+										</button>
+										<button
+											:class="{ 'sb-gateway-active': selectedInternationalGateway === 'paypal' }"
+											@click="selectInternationalGateway('paypal')"
+										>
+											{{ __('PayPal') }}
+										</button>
+									</div>
+
 									<ul class="sb-price-list">
 										<li>
 											<CheckCircle2 class="size-5" />
@@ -382,7 +397,7 @@
 									</button>
 
 									<div
-										v-if="selectedPaymentCurrency === 'USD' && paypalPlus.data && !paypalPlus.data.active"
+										v-if="isPayPalSelected && paypalPlus.data && !paypalPlus.data.active"
 										class="sb-paypal-shell"
 									>
 										<div v-if="paypalLoading" class="sb-card-loading">
@@ -391,9 +406,19 @@
 										<div id="studybadge-paypal-plus-buttons"></div>
 									</div>
 
+									<div
+										v-if="isPaddleSelected && paddlePlus.data && !paddlePlus.data.active"
+										class="sb-paypal-shell"
+									>
+										<div v-if="paddleLoading" class="sb-card-loading">
+											{{ __('Cargando Paddle...') }}
+										</div>
+										<p>{{ __('Checkout Paddle abierto. Si lo cerraste, vuelve a presionar el botón para reabrirlo.') }}</p>
+									</div>
+
 									<div class="sb-payment-note">
 										<ShieldCheck class="size-4" />
-										{{ selectedPaymentCurrency === 'PEN' ? __('Pago 100% seguro con Mercado Pago') : __('Pago 100% seguro con PayPal') }}
+										{{ paymentGatewayNote }}
 									</div>
 								</div>
 
@@ -635,9 +660,12 @@ const cardFormLoading = ref(false)
 const cardController = ref(null)
 const mercadoPagoLoader = ref(null)
 const paypalLoader = ref(null)
+const paddleLoader = ref(null)
 const paypalButtonsController = ref(null)
 const paypalLoading = ref(false)
+const paddleLoading = ref(false)
 const selectedPaymentCurrency = ref('PEN')
+const selectedInternationalGateway = ref('paddle')
 
 const paymentCurrencyOptions = [
 	{ currency: 'PEN', label: 'S/ PEN' },
@@ -766,6 +794,7 @@ const billing = createResource({
 	onSuccess(data) {
 		if (!data?.active) {
 			selectedPaymentCurrency.value = data?.preferred_payment_currency || 'PEN'
+			selectedInternationalGateway.value = selectedPaymentCurrency.value === 'USD' ? 'paddle' : 'mercadopago'
 		}
 		if (data?.active) {
 			user?.reload?.()
@@ -785,6 +814,14 @@ const paypalPlusSync = createResource({
 	url: 'lms.lms.subscriptions.sync_paypal_plus_subscription',
 })
 
+const paddlePlus = createResource({
+	url: 'lms.lms.paddle.create_paddle_plus_checkout',
+})
+
+const paddlePortalResource = createResource({
+	url: 'lms.lms.paddle.create_customer_portal_session',
+})
+
 const cancelResource = createResource({
 	url: 'lms.lms.subscriptions.request_plus_cancellation',
 })
@@ -799,6 +836,21 @@ const paymentMethodResource = createResource({
 
 const subscription = computed(() => billing.data?.subscription || null)
 const receipts = computed(() => billing.data?.receipts || [])
+const isPaddleSelected = computed(
+	() => selectedPaymentCurrency.value === 'USD' && selectedInternationalGateway.value === 'paddle'
+)
+const isPayPalSelected = computed(
+	() => selectedPaymentCurrency.value === 'USD' && selectedInternationalGateway.value === 'paypal'
+)
+
+const paymentGatewayNote = computed(() => {
+	if (selectedPaymentCurrency.value === 'PEN') {
+		return __('Pago 100% seguro con Mercado Pago')
+	}
+	return isPaddleSelected.value
+		? __('Pago seguro con Paddle: tarjetas, Apple Pay y Google Pay según disponibilidad')
+		: __('Pago 100% seguro con PayPal')
+})
 
 const formattedPrice = computed(() => {
 	const plan = billing.data?.plans?.[selectedPaymentCurrency.value] || billing.data?.plan
@@ -814,6 +866,9 @@ const formattedPrice = computed(() => {
 })
 
 const paymentMethodLabel = computed(() => {
+	if (subscription.value?.payment_gateway === 'Paddle') {
+		return __('Paddle')
+	}
 	if (subscription.value?.payment_gateway === 'PayPal') {
 		return __('PayPal')
 	}
@@ -885,7 +940,11 @@ function activatePlus() {
 }
 
 function startPlusCheckout() {
-	if (selectedPaymentCurrency.value === 'USD') {
+	if (isPaddleSelected.value) {
+		startPaddlePlusCheckout()
+		return
+	}
+	if (isPayPalSelected.value) {
 		startPayPalPlusCheckout()
 		return
 	}
@@ -894,7 +953,16 @@ function startPlusCheckout() {
 
 function selectPaymentCurrency(currency) {
 	selectedPaymentCurrency.value = currency
+	selectedInternationalGateway.value = currency === 'USD' ? 'paddle' : 'mercadopago'
 	paypalPlus.data = null
+	paddlePlus.data = null
+	destroyPayPalButtons()
+}
+
+function selectInternationalGateway(gateway) {
+	selectedInternationalGateway.value = gateway
+	paypalPlus.data = null
+	paddlePlus.data = null
 	destroyPayPalButtons()
 }
 
@@ -916,6 +984,89 @@ function loadPayPal(clientId) {
 		document.body.appendChild(script)
 	})
 	return paypalLoader.value
+}
+
+function loadPaddle(mode) {
+	if (window.Paddle) {
+		return Promise.resolve(window.Paddle)
+	}
+	if (paddleLoader.value) {
+		return paddleLoader.value
+	}
+	paddleLoader.value = new Promise((resolve, reject) => {
+		const script = document.createElement('script')
+		script.src = 'https://cdn.paddle.com/paddle/v2/paddle.js'
+		script.onload = () => {
+			if (mode === 'sandbox' && window.Paddle?.Environment?.set) {
+				window.Paddle.Environment.set('sandbox')
+			}
+			resolve(window.Paddle)
+		}
+		script.onerror = reject
+		document.body.appendChild(script)
+	})
+	return paddleLoader.value
+}
+
+function startPaddlePlusCheckout() {
+	if (activating.value) return
+	activating.value = true
+	destroyPayPalButtons()
+	scrollToPricing()
+	paddlePlus.submit(
+		{},
+		{
+			onSuccess(data) {
+				activating.value = false
+				if (data?.active && data?.redirect_url) {
+					window.location.href = data.redirect_url
+					return
+				}
+				nextTick(() => initPaddlePlusCheckout())
+			},
+			onError(err) {
+				activating.value = false
+				toast.error(getErrorMessage(err))
+			},
+		}
+	)
+}
+
+async function initPaddlePlusCheckout() {
+	if (!paddlePlus.data?.client_token || !paddlePlus.data?.price_id) {
+		toast.error(__('Falta configurar Paddle para StudyBadge Plus.'))
+		return
+	}
+	paddleLoading.value = true
+	try {
+		const Paddle = await loadPaddle(paddlePlus.data.mode)
+		if (paddlePlus.data.mode === 'sandbox' && Paddle.Environment?.set) {
+			Paddle.Environment.set('sandbox')
+		}
+		Paddle.Initialize({
+			token: paddlePlus.data.client_token,
+			eventCallback(event) {
+				if (event?.name !== 'checkout.completed') return
+				billing.reload()
+				user?.reload?.()
+				toast.success(__('Pago recibido. Tu Plus se activará cuando Paddle confirme el cobro.'))
+			},
+		})
+		Paddle.Checkout.open({
+			items: paddlePlus.data.items,
+			customer: paddlePlus.data.customer,
+			customData: paddlePlus.data.custom_data,
+			settings: {
+				displayMode: 'overlay',
+				successUrl: paddlePlus.data.success_url,
+				theme: 'light',
+			},
+		})
+	} catch (error) {
+		toast.error(error?.message || __('No se pudo cargar Paddle. Intenta nuevamente o usa PayPal.'))
+	} finally {
+		paddleLoading.value = false
+	}
 }
 
 function startPayPalPlusCheckout() {
@@ -1045,6 +1196,28 @@ async function showPaymentMethodForm() {
 	cardFormVisible.value = true
 	await nextTick()
 	initMercadoPagoCardForm()
+}
+
+function manageSubscription() {
+	if (subscription.value?.payment_gateway === 'Paddle') {
+		paddlePortalResource.submit(
+			{ action: 'payment_method' },
+			{
+				onSuccess(data) {
+					if (!data?.url) {
+						toast.error(__('Paddle no devolvió un enlace de gestión.'))
+						return
+					}
+					window.open(data.url, '_blank', 'noopener')
+				},
+				onError(err) {
+					toast.error(getErrorMessage(err))
+				},
+			}
+		)
+		return
+	}
+	showPaymentMethodForm()
 }
 
 function hidePaymentMethodForm() {
@@ -2215,6 +2388,34 @@ usePageMeta(() => ({
 }
 
 .sb-currency-switch .sb-currency-active {
+	background: #ffffff;
+	color: #08204e;
+	box-shadow: 0 8px 18px rgba(8, 32, 78, 0.08);
+}
+
+.sb-gateway-switch {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 6px;
+	margin-top: 10px;
+	background: #eef4fb;
+	padding: 6px;
+	border-radius: 14px;
+}
+
+.sb-gateway-switch button {
+	min-height: 40px;
+	border: 0;
+	border-radius: 10px;
+	background: transparent;
+	color: #475569;
+	font-size: 12px;
+	font-weight: 850;
+	line-height: 1.2;
+	cursor: pointer;
+}
+
+.sb-gateway-switch .sb-gateway-active {
 	background: #ffffff;
 	color: #08204e;
 	box-shadow: 0 8px 18px rgba(8, 32, 78, 0.08);
