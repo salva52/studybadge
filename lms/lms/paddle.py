@@ -270,18 +270,14 @@ def _custom_product_payload(title: str, description: str | None = None) -> dict:
 	return {
 		"name": (title or "StudyBadge").strip()[:200],
 		"description": (description or title or "StudyBadge digital product").strip()[:2048],
-		"type": "custom",
 		"tax_category": "digital-goods",
 	}
 
 
 def _custom_price_payload(title: str, amount: float, currency: str = "USD", description: str | None = None):
-	return {
+	payload = {
 		"description": f"StudyBadge checkout: {title}"[:500],
 		"name": (title or "StudyBadge")[:150],
-		"type": "custom",
-		"billing_cycle": None,
-		"trial_period": None,
 		"tax_mode": "account_setting",
 		"unit_price": {
 			"amount": _minor_units(amount, currency),
@@ -289,6 +285,7 @@ def _custom_price_payload(title: str, amount: float, currency: str = "USD", desc
 		},
 		"product": _custom_product_payload(title, description),
 	}
+	return payload
 
 
 def _create_checkout_transaction(details: dict, custom_data: dict, checkout_url: str, settings=None) -> dict:
