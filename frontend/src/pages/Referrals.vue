@@ -68,7 +68,7 @@
 
 					<div class="info-card">
 						<div class="info-icon">
-							MailCheck class="size-5" />
+							<MailCheck class="size-5" />
 						</div>
 						<h3>{{ __('3. Verifica su correo') }}</h3>
 						<p>{{ __('Cuando confirme su email, contará como referido válido para tus premios.') }}</p>
@@ -153,7 +153,11 @@
 							<LinkIcon class="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-ink-gray-4" />
 						</div>
 
-						<Button variant="solid" class="h-11 shrink-0" @click="copyLink">
+						<Button
+							variant="solid"
+							class="h-11 shrink-0 !bg-[#0a2251] hover:!bg-[#102f68]"
+							@click="copyLink"
+						>
 							<template #prefix>
 								<Copy class="size-4" />
 							</template>
@@ -203,7 +207,7 @@
 					<div class="relative">
 						<div class="h-3 overflow-hidden rounded-full bg-surface-gray-2">
 							<div
-								class="h-full rounded-full bg-ink-gray-8 transition-all duration-700"
+								class="h-full rounded-full bg-[#0a2251] transition-all duration-700"
 								:style="{ width: progressPercent + '%' }"
 							></div>
 						</div>
@@ -369,11 +373,18 @@ const copyLink = async () => {
 
 <style scoped>
 .info-card {
-	@apply rounded-2xl border border-outline-gray-2 bg-surface-white p-5 shadow-sm;
+	@apply rounded-2xl border bg-surface-white p-5 shadow-sm transition;
+	border-color: #dbe3f0;
+}
+
+.info-card:hover {
+	border-color: #0a2251;
+	box-shadow: 0 10px 30px rgba(10, 34, 81, 0.08);
 }
 
 .info-card h3 {
-	@apply mt-4 text-base font-semibold text-ink-gray-9;
+	@apply mt-4 text-base font-semibold;
+	color: #0a2251;
 }
 
 .info-card p {
@@ -381,27 +392,42 @@ const copyLink = async () => {
 }
 
 .info-icon {
-	@apply flex size-10 items-center justify-center rounded-xl border border-outline-gray-2 bg-surface-gray-1 text-ink-gray-8;
+	@apply flex size-10 items-center justify-center rounded-xl border;
+	background: #eef3fb;
+	border-color: #d8e2f1;
+	color: #0a2251;
 }
 
 .reward-card {
-	@apply rounded-2xl border border-outline-gray-2 bg-surface-gray-1 p-5 transition;
+	@apply rounded-2xl border p-5 transition;
+	background: #f8fafd;
+	border-color: #dbe3f0;
+}
+
+.reward-card:hover {
+	border-color: #0a2251;
+	box-shadow: 0 10px 30px rgba(10, 34, 81, 0.08);
 }
 
 .reward-card.is-unlocked {
-	@apply border-green-200 bg-green-50;
+	background: #eef7f1;
+	border-color: #b8e3c4;
 }
 
 .reward-badge {
-	@apply mb-4 inline-flex items-center gap-2 rounded-full border border-outline-gray-2 bg-surface-white px-3 py-1 text-xs font-semibold text-ink-gray-7;
+	@apply mb-4 inline-flex items-center gap-2 rounded-full border bg-surface-white px-3 py-1 text-xs font-semibold;
+	border-color: #dbe3f0;
+	color: #0a2251;
 }
 
 .reward-card.is-unlocked .reward-badge {
-	@apply border-green-200 bg-white text-green-700;
+	@apply bg-white text-green-700;
+	border-color: #b8e3c4;
 }
 
 .reward-card h3 {
-	@apply text-lg font-semibold text-ink-gray-9;
+	@apply text-lg font-semibold;
+	color: #0a2251;
 }
 
 .reward-card p {
@@ -409,7 +435,9 @@ const copyLink = async () => {
 }
 
 .reward-status {
-	@apply shrink-0 rounded-full border border-outline-gray-2 bg-surface-white px-3 py-1 text-xs font-semibold text-ink-gray-6;
+	@apply shrink-0 rounded-full border bg-surface-white px-3 py-1 text-xs font-semibold;
+	border-color: #dbe3f0;
+	color: #0a2251;
 }
 
 .reward-status.complete {
@@ -417,19 +445,32 @@ const copyLink = async () => {
 }
 
 .share-button {
-	@apply inline-flex items-center justify-center gap-2 rounded-xl border border-outline-gray-2 bg-surface-gray-1 px-4 py-2.5 text-sm font-semibold text-ink-gray-8 transition hover:bg-surface-gray-2;
+	@apply inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition;
+	background: #eef3fb;
+	border-color: #d8e2f1;
+	color: #0a2251;
+}
+
+.share-button:hover {
+	background: #e2ebf8;
+	border-color: #0a2251;
 }
 
 .empty-state {
-	@apply flex flex-col items-center justify-center rounded-2xl border border-dashed border-outline-gray-2 bg-surface-gray-1 px-6 py-12 text-center;
+	@apply flex flex-col items-center justify-center rounded-2xl border border-dashed px-6 py-12 text-center;
+	background: #f8fafd;
+	border-color: #cbd8ea;
 }
 
 .empty-icon {
-	@apply mb-4 flex size-14 items-center justify-center rounded-2xl border border-outline-gray-2 bg-surface-white text-ink-gray-5;
+	@apply mb-4 flex size-14 items-center justify-center rounded-2xl border bg-surface-white;
+	border-color: #dbe3f0;
+	color: #0a2251;
 }
 
 .empty-state h3 {
-	@apply text-base font-semibold text-ink-gray-9;
+	@apply text-base font-semibold;
+	color: #0a2251;
 }
 
 .empty-state p {
