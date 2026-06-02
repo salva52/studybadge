@@ -29,17 +29,6 @@
 
 				<div v-else class="cover-fallback h-full w-full">
 					<div class="cover-pattern"></div>
-
-					<div class="relative mx-auto flex h-full max-w-6xl items-end px-4 pb-8 sm:px-6">
-						<div class="max-w-2xl">
-							<p class="cover-label">
-								{{ __('StudyBadge Profile') }}
-							</p>
-							<h1 class="cover-title">
-								{{ __('Aprende, enseña y muestra tu progreso') }}
-							</h1>
-						</div>
-					</div>
 				</div>
 
 				<div
@@ -59,7 +48,7 @@
 				</div>
 			</section>
 
-			<section class="relative mx-auto -mt-20 max-w-6xl px-4 sm:px-6">
+			<section class="relative z-10 mx-auto -mt-14 max-w-6xl px-4 sm:px-6 md:-mt-16">
 				<div class="profile-card">
 					<div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
 						<div class="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-end">
@@ -547,30 +536,6 @@ usePageMeta(() => {
 	background-size: 28px 28px;
 }
 
-.cover-label {
-	display: inline-flex;
-	width: fit-content;
-	align-items: center;
-	border-radius: 999px;
-	border: 1px solid rgba(255, 255, 255, 0.22);
-	background: rgba(255, 255, 255, 0.1);
-	padding: 5px 12px;
-	font-size: 12px;
-	font-weight: 700;
-	letter-spacing: 0.04em;
-	text-transform: uppercase;
-	color: rgba(255, 255, 255, 0.9);
-}
-
-.cover-title {
-	margin-top: 12px;
-	max-width: 620px;
-	font-size: clamp(28px, 4vw, 44px);
-	font-weight: 800;
-	letter-spacing: -0.04em;
-	line-height: 1.05;
-	color: #ffffff;
-}
 
 .cover-edit-button {
 	display: inline-flex;
@@ -663,12 +628,11 @@ usePageMeta(() => {
 
 .profile-name {
 	max-width: 100%;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	font-size: clamp(28px, 4vw, 40px);
+	overflow-wrap: anywhere;
+	font-size: clamp(26px, 4vw, 40px);
 	font-weight: 800;
 	letter-spacing: -0.04em;
-	line-height: 1.05;
+	line-height: 1.08;
 	color: var(--sb-text);
 }
 
