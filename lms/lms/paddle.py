@@ -159,9 +159,9 @@ def _request(method: str, path: str, settings=None, **kwargs) -> dict:
 
 def _paddle_log(message: str, data: dict | None = None):
 	try:
-		frappe.logger("studybadge_paddle").info(
-			f"{message}: {json.dumps(data or {}, default=str, sort_keys=True)}"
-		)
+		safe_payload = json.dumps(data or {}, default=str, sort_keys=True, indent=2)
+		frappe.logger("studybadge_paddle").info(f"{message}: {safe_payload}")
+		frappe.log_error(safe_payload, f"StudyBadge Paddle Debug: {message}")
 	except Exception:
 		pass
 
@@ -494,6 +494,16 @@ def create_paddle_plus_checkout(country: str | None = None) -> dict:
 
 	plan = _get_plus_plan_for_currency("USD", settings)
 	external_reference = f"studybadge-plus-paddle::{frappe.session.user}::{uuid.uuid4().hex}"
+	_paddle_log(
+		"Creating Paddle Plus checkout",
+		{
+			"member": frappe.session.user,
+			"mode": getattr(settings, "paddle_mode", None) or "sandbox",
+			"price_id": price_id,
+			"country": country or _get_user_country(),
+			"success_url": f"{get_lms_path_url(settings)}/plus?checkout=return&gateway=paddle",
+		},
+	)
 	subscription = frappe.new_doc("StudyBadge Plus Subscription")
 	subscription.update(
 		{
@@ -516,7 +526,7 @@ def create_paddle_plus_checkout(country: str | None = None) -> dict:
 		"subscription": subscription.name,
 		"external_reference": external_reference,
 	}
-	return {
+	checkout = {
 		**_checkout_payload(
 			settings,
 			price_id,
@@ -528,6 +538,19 @@ def create_paddle_plus_checkout(country: str | None = None) -> dict:
 		"external_reference": external_reference,
 		"plan": plan,
 	}
+	_paddle_log(
+		"Returning Paddle Plus checkout",
+		{
+			"member": frappe.session.user,
+			"subscription": subscription.name,
+			"mode": checkout.get("mode"),
+			"price_id": checkout.get("price_id"),
+			"customer": checkout.get("customer"),
+			"success_url": checkout.get("success_url"),
+			"custom_data": checkout.get("custom_data"),
+		},
+	)
+	return checkout
 
 
 def _get_payment_from_transaction(transaction: dict):

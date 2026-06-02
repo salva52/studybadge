@@ -506,16 +506,16 @@ def get_lms_path_url(settings=None) -> str:
 
 
 def _get_support_email() -> str:
-	for doctype, fieldname in (
-		("Website Settings", "contact_email"),
-		("Website Settings", "email"),
-	):
-		try:
-			value = frappe.db.get_single_value(doctype, fieldname)
+	try:
+		meta = frappe.get_meta("Website Settings")
+		for fieldname in ("contact_email", "email"):
+			if not meta.has_field(fieldname):
+				continue
+			value = frappe.db.get_single_value("Website Settings", fieldname)
 			if value:
 				return value
-		except Exception:
-			continue
+	except Exception:
+		pass
 	return frappe.conf.get("admin_email") or "soporte@studybadge.com"
 
 
