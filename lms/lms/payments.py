@@ -173,12 +173,12 @@ def _create_mp_preference(payment_doc, details, settings=None) -> dict:
 
 @frappe.whitelist()
 def create_mp_brick_checkout(
-	doctype,
-	docname,
-	address,
-	payment_for_certificate=0,
-	coupon_code=None,
-	country=None,
+	doctype: str,
+	docname: str,
+	address: dict | str,
+	payment_for_certificate: int | str = 0,
+	coupon_code: str | None = None,
+	country: str | None = None,
 ):
 	payment_for_certificate = cint(payment_for_certificate)
 	_validate_paypal_payment_access(doctype, docname, payment_for_certificate)
@@ -409,7 +409,7 @@ def validate_currency(payment_gateway, currency):
 def get_payment_link(
 	doctype: str,
 	docname: str,
-	address: dict,
+	address: dict | str,
 	payment_for_certificate: int,
 	coupon_code: str | None = None,
 	country: str | None = None,
@@ -506,12 +506,12 @@ def _validate_paypal_payment_access(doctype: str, docname: str, payment_for_cert
 
 @frappe.whitelist()
 def create_paypal_checkout(
-	doctype,
-	docname,
-	address,
-	payment_for_certificate=0,
-	coupon_code=None,
-	country=None,
+	doctype: str,
+	docname: str,
+	address: dict | str,
+	payment_for_certificate: int | str = 0,
+	coupon_code: str | None = None,
+	country: str | None = None,
 ):
 	payment_for_certificate = cint(payment_for_certificate)
 	_validate_paypal_payment_access(doctype, docname, payment_for_certificate)
@@ -624,7 +624,7 @@ def get_amount_with_gst(amount: float, gst_amount: float) -> float:
 
 
 def record_payment(
-	address: dict,
+	address: dict | str,
 	doctype: str,
 	docname: str,
 	amount: float,
@@ -632,7 +632,7 @@ def record_payment(
 	currency: str,
 	amount_with_gst: float = 0,
 	discount_amount: float = 0,
-	payment_for_certificate: int = 0,
+	payment_for_certificate: int | str = 0,
 	coupon_code: str | None = None,
 	coupon: str | None = None,
 ):
@@ -729,3 +729,4 @@ def save_address(address: dict) -> str:
 	)
 	address_doc.save(ignore_permissions=True)
 	return address_doc.name
+
