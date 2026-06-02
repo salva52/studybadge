@@ -157,6 +157,15 @@ def _request(method: str, path: str, settings=None, **kwargs) -> dict:
 	return payload
 
 
+def _paddle_log(message: str, data: dict | None = None):
+	try:
+		frappe.logger("studybadge_paddle").info(
+			f"{message}: {json.dumps(data or {}, default=str, sort_keys=True)}"
+		)
+	except Exception:
+		pass
+
+
 def _parse_paddle_datetime(value: str | None):
 	if not value:
 		return None
@@ -286,8 +295,28 @@ def _create_checkout_transaction(details: dict, custom_data: dict, checkout_url:
 		"custom_data": custom_data,
 		"checkout": {"url": checkout_url},
 	}
+	_paddle_log(
+		"Creating Paddle transaction",
+		{
+			"title": title,
+			"currency": payload.get("currency_code"),
+			"amount_minor": payload["items"][0]["price"]["unit_price"]["amount"],
+			"checkout_url": checkout_url,
+			"custom_data": custom_data,
+		},
+	)
 	response = _request("POST", "/transactions", settings=settings, data=json.dumps(payload))
-	return response.get("data") or response
+	transaction = response.get("data") or response
+	_paddle_log(
+		"Created Paddle transaction",
+		{
+			"id": transaction.get("id"),
+			"status": transaction.get("status"),
+			"checkout_url": (transaction.get("checkout") or {}).get("url"),
+			"custom_data": transaction.get("custom_data"),
+		},
+	)
+	return transaction
 
 
 def _get_paddle_discount(coupon_code: str | None, doctype: str, docname: str):
@@ -395,6 +424,18 @@ def create_paddle_checkout(
 	payment.raw_response = _safe_json({"transaction": transaction})
 	payment.save(ignore_permissions=True)
 
+	_paddle_log(
+		"Returning Paddle checkout",
+		{
+			"payment": payment.name,
+			"transaction_id": transaction.get("id"),
+			"member": payment.member,
+			"doctype": doctype,
+			"docname": docname,
+			"payment_for_certificate": int(payment_for_certificate),
+			"success_url": f"{_get_public_base_url(settings)}{redirect_to}",
+		},
+	)
 	checkout = _checkout_payload_for_transaction(
 		settings,
 		transaction,

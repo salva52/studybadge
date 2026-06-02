@@ -1151,8 +1151,6 @@ async function initPaddleCheckout() {
 		})
 		const checkoutOptions = {
 			transactionId: paddleCheckout.data.transaction_id,
-			customer: paddleCheckout.data.customer,
-			customData: paddleCheckout.data.custom_data,
 			settings: {
 				displayMode: 'overlay',
 				successUrl: paddleCheckout.data.success_url,
