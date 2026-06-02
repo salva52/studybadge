@@ -623,7 +623,7 @@
 </template>
 
 <script setup>
-import { computed, inject, nextTick, onBeforeUnmount, ref } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { Badge, Breadcrumbs, createResource, toast, usePageMeta } from 'frappe-ui'
 import {
 	Award,
@@ -664,6 +664,7 @@ const paddleLoader = ref(null)
 const paypalButtonsController = ref(null)
 const paypalLoading = ref(false)
 const paddleLoading = ref(false)
+const paddleReturnTimers = ref([])
 const selectedPaymentCurrency = ref('PEN')
 const selectedInternationalGateway = ref('paddle')
 
@@ -816,6 +817,10 @@ const paypalPlusSync = createResource({
 
 const paddlePlus = createResource({
 	url: 'lms.lms.paddle.create_paddle_plus_checkout',
+})
+
+const paddlePlusSync = createResource({
+	url: 'lms.lms.paddle.sync_paddle_plus_checkout',
 })
 
 const paddlePortalResource = createResource({
@@ -1008,6 +1013,53 @@ function loadPaddle(mode) {
 	return paddleLoader.value
 }
 
+function schedulePaddleBillingRefresh() {
+	paddleReturnTimers.value.forEach((timer) => clearTimeout(timer))
+	paddleReturnTimers.value = [1500, 3500, 7000, 12000].map((delay) =>
+		setTimeout(() => {
+			if (billing.data?.active) return
+			billing.reload()
+			user?.reload?.()
+		}, delay)
+	)
+}
+
+function syncPaddlePlusCheckout(event) {
+	const transactionId =
+		event?.data?.transaction_id || event?.data?.transactionId || event?.data?.transaction?.id
+
+	if (!transactionId) {
+		billing.reload()
+		schedulePaddleBillingRefresh()
+		toast.success(__('Pago recibido. Tu Plus se activara cuando Paddle confirme el cobro.'))
+		return
+	}
+
+	paddlePlusSync.submit(
+		{
+			transaction_id: transactionId,
+			subscription: paddlePlus.data?.subscription,
+		},
+		{
+			onSuccess(data) {
+				billing.data = data
+				user?.reload?.()
+				if (data?.active) {
+					toast.success(__('Tu Plus esta activo.'))
+					return
+				}
+				schedulePaddleBillingRefresh()
+				toast.success(__('Pago recibido. Tu Plus se activara cuando Paddle confirme el cobro.'))
+			},
+			onError(err) {
+				billing.reload()
+				schedulePaddleBillingRefresh()
+				toast.error(getErrorMessage(err))
+			},
+		}
+	)
+}
+
 function startPaddlePlusCheckout() {
 	if (activating.value) return
 	activating.value = true
@@ -1047,9 +1099,7 @@ async function initPaddlePlusCheckout() {
 			token: paddlePlus.data.client_token,
 			eventCallback(event) {
 				if (event?.name !== 'checkout.completed') return
-				billing.reload()
-				user?.reload?.()
-				toast.success(__('Pago recibido. Tu Plus se activará cuando Paddle confirme el cobro.'))
+				syncPaddlePlusCheckout(event)
 			},
 		})
 		Paddle.Checkout.open({
@@ -1058,7 +1108,6 @@ async function initPaddlePlusCheckout() {
 			customData: paddlePlus.data.custom_data,
 			settings: {
 				displayMode: 'overlay',
-				successUrl: paddlePlus.data.success_url,
 				theme: 'light',
 			},
 		})
@@ -1360,8 +1409,17 @@ function formatMoney(amount, currency) {
 }
 
 onBeforeUnmount(() => {
+	paddleReturnTimers.value.forEach((timer) => clearTimeout(timer))
 	destroyCardForm()
 	destroyPayPalButtons()
+})
+
+onMounted(() => {
+	const params = new URLSearchParams(window.location.search)
+	if (params.get('checkout') === 'return' && params.get('gateway') === 'paddle') {
+		billing.reload()
+		schedulePaddleBillingRefresh()
+	}
 })
 
 usePageMeta(() => ({

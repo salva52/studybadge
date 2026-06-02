@@ -1,5 +1,6 @@
 import hmac
 import json
+import time
 import uuid
 from datetime import datetime, timezone
 from hashlib import sha256
@@ -671,6 +672,8 @@ def sync_paddle_subscription(subscription: dict):
 			"paddle_customer_id": subscription.get("customer_id") or doc.paddle_customer_id,
 			"paddle_subscription_id": subscription.get("id") or doc.paddle_subscription_id,
 			"paddle_price_id": price.get("id") or doc.paddle_price_id,
+			"paddle_transaction_id": subscription.get("first_billed_transaction_id")
+			or doc.paddle_transaction_id,
 			"external_reference": custom_data.get("external_reference") or doc.external_reference,
 			"amount": flt(totals.get("total") or 0) / 100 if totals.get("total") else doc.amount,
 			"currency": subscription.get("currency_code") or doc.currency or "USD",
@@ -760,6 +763,11 @@ def fetch_subscription(subscription_id: str, settings=None) -> dict:
 	return response.get("data") or response
 
 
+def fetch_transaction(transaction_id: str, settings=None) -> dict:
+	response = _request("GET", f"/transactions/{transaction_id}", settings=settings)
+	return response.get("data") or response
+
+
 def _maybe_sync_subscription_from_transaction(transaction: dict):
 	subscription_id = transaction.get("subscription_id")
 	if not subscription_id:
@@ -770,6 +778,129 @@ def _maybe_sync_subscription_from_transaction(transaction: dict):
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), "StudyBadge Paddle Subscription Fetch Failed")
 		return None
+
+
+def _get_checkout_local_subscription(subscription_name: str | None, transaction: dict | None = None):
+	transaction = transaction or {}
+	custom_data = transaction.get("custom_data") if isinstance(transaction.get("custom_data"), dict) else {}
+	candidates = [subscription_name, custom_data.get("subscription")]
+	for candidate in candidates:
+		if candidate and frappe.db.exists("StudyBadge Plus Subscription", candidate):
+			doc = frappe.get_doc("StudyBadge Plus Subscription", candidate)
+			if doc.member != frappe.session.user:
+				frappe.throw(_("You cannot activate this subscription."), frappe.PermissionError)
+			return doc
+
+	member = custom_data.get("member")
+	if member and member != frappe.session.user:
+		frappe.throw(_("You cannot activate this subscription."), frappe.PermissionError)
+	return None
+
+
+def _transaction_has_price(transaction: dict, price_id: str | None) -> bool:
+	if not price_id:
+		return True
+	for item in transaction.get("items") or []:
+		price = item.get("price") if isinstance(item, dict) else {}
+		item_price_id = item.get("price_id") or (price or {}).get("id")
+		if item_price_id == price_id:
+			return True
+	return False
+
+
+def _validate_plus_checkout_transaction(transaction: dict, local_subscription, settings):
+	custom_data = transaction.get("custom_data") if isinstance(transaction.get("custom_data"), dict) else {}
+	if not _transaction_has_price(transaction, getattr(settings, "paddle_plus_price_id", None)):
+		frappe.throw(_("This Paddle transaction does not match the StudyBadge Plus price."))
+	if custom_data.get("payment_for") and custom_data.get("payment_for") != "plus":
+		frappe.throw(_("This Paddle transaction is not for StudyBadge Plus."))
+	if custom_data.get("member") and custom_data.get("member") != frappe.session.user:
+		frappe.throw(_("You cannot activate this subscription."), frappe.PermissionError)
+	if (
+		local_subscription
+		and custom_data.get("subscription")
+		and custom_data.get("subscription") != local_subscription.name
+	):
+		frappe.throw(_("This Paddle transaction does not match your subscription."))
+	if not custom_data.get("member") and not custom_data.get("subscription"):
+		frappe.throw(_("This Paddle transaction is missing StudyBadge checkout data."))
+
+
+def _provision_plus_from_paid_transaction(transaction: dict, local_subscription=None):
+	status = _normalize_status(transaction.get("status"))
+	if status not in PADDLE_PAID_TRANSACTION_STATUSES:
+		return local_subscription
+
+	local_subscription = local_subscription or _find_subscription_for_transaction(transaction)
+	if not local_subscription:
+		return None
+
+	local_subscription.update(
+		{
+			"status": "active",
+			"payment_gateway": "Paddle",
+			"paddle_customer_id": transaction.get("customer_id") or local_subscription.paddle_customer_id,
+			"paddle_subscription_id": transaction.get("subscription_id")
+			or local_subscription.paddle_subscription_id,
+			"paddle_transaction_id": transaction.get("id") or local_subscription.paddle_transaction_id,
+			"last_synced_at": now_datetime(),
+			"raw_response": _safe_json(transaction),
+		}
+	)
+	amount, currency = _money_from_transaction(transaction)
+	if amount:
+		local_subscription.amount = amount
+	if currency:
+		local_subscription.currency = currency
+	local_subscription.save(ignore_permissions=True)
+	sync_paddle_receipt(transaction, local_subscription)
+	return local_subscription
+
+
+@frappe.whitelist()
+def sync_paddle_plus_checkout(transaction_id: str | None = None, subscription: str | None = None) -> dict:
+	if frappe.session.user == "Guest":
+		frappe.throw(_("Please login to activate StudyBadge Plus."), frappe.AuthenticationError)
+	if not transaction_id:
+		from lms.lms.subscriptions import get_plus_billing
+
+		return get_plus_billing()
+
+	settings = _ensure_enabled()
+	local_subscription = None
+	transaction = None
+	synced_subscription = None
+	for attempt in range(4):
+		transaction = fetch_transaction(transaction_id, settings=settings)
+		local_subscription = _get_checkout_local_subscription(subscription, transaction)
+		_validate_plus_checkout_transaction(transaction, local_subscription, settings)
+		_paddle_log(
+			"Syncing Paddle Plus checkout",
+			{
+				"attempt": attempt + 1,
+				"member": frappe.session.user,
+				"transaction_id": transaction.get("id"),
+				"transaction_status": transaction.get("status"),
+				"subscription_id": transaction.get("subscription_id"),
+				"local_subscription": local_subscription.name if local_subscription else None,
+			},
+		)
+		synced_subscription = _maybe_sync_subscription_from_transaction(transaction)
+		if synced_subscription:
+			sync_paddle_receipt(transaction, synced_subscription)
+			break
+		if transaction.get("subscription_id"):
+			break
+		if attempt < 3:
+			time.sleep(1)
+
+	if not synced_subscription and transaction:
+		synced_subscription = _provision_plus_from_paid_transaction(transaction, local_subscription)
+
+	frappe.db.commit()
+	from lms.lms.subscriptions import get_plus_billing
+
+	return get_plus_billing()
 
 
 def _parse_signature(header: str | None) -> dict:
