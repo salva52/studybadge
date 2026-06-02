@@ -206,7 +206,7 @@
 								</button>
 
 								<button
-									v-if="subscription?.cancel_at_period_end && subscription?.payment_gateway !== 'Paddle'"
+									v-if="subscription?.cancel_at_period_end"
 									class="sb-primary-btn"
 									:disabled="reactivateResource.loading"
 									@click="reactivateSubscription"

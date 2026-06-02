@@ -820,7 +820,13 @@ def reactivate_plus_subscription() -> dict:
 
 	subscription = _get_manageable_subscription()
 	if getattr(subscription, "payment_gateway", None) == "Paddle":
-		frappe.throw(_("Use the Paddle customer portal to manage this subscription."))
+		if not subscription.cancel_at_period_end:
+			frappe.throw(_("This Paddle subscription is not scheduled to cancel."))
+		from lms.lms.paddle import reactivate_subscription
+
+		reactivate_subscription(subscription.paddle_subscription_id)
+		frappe.db.commit()
+		return get_plus_billing()
 	subscription.cancel_at_period_end = 0
 	subscription.cancel_requested_at = None
 	subscription.cancel_scheduled_for = None

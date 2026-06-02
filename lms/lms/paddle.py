@@ -661,6 +661,7 @@ def sync_paddle_subscription(subscription: dict):
 	billing_period = subscription.get("current_billing_period") or {}
 	scheduled_change = subscription.get("scheduled_change") or {}
 	status = _normalize_status(subscription.get("status"))
+	is_cancel_scheduled = scheduled_change.get("action") == "cancel"
 
 	if doc.is_new() and custom_data.get("member"):
 		doc.member = custom_data.get("member")
@@ -681,8 +682,15 @@ def sync_paddle_subscription(subscription: dict):
 			"date_created": _parse_paddle_datetime(subscription.get("created_at")),
 			"last_modified": _parse_paddle_datetime(subscription.get("updated_at")),
 			"last_synced_at": now_datetime(),
-			"cancel_at_period_end": 1 if scheduled_change.get("action") == "cancel" else 0,
-			"cancel_scheduled_for": _parse_paddle_datetime(scheduled_change.get("effective_at")),
+			"cancel_at_period_end": 1 if is_cancel_scheduled else 0,
+			"cancel_requested_at": doc.cancel_requested_at
+			if is_cancel_scheduled and doc.cancel_requested_at
+			else now_datetime()
+			if is_cancel_scheduled
+			else None,
+			"cancel_scheduled_for": _parse_paddle_datetime(scheduled_change.get("effective_at"))
+			if is_cancel_scheduled
+			else None,
 			"raw_response": _safe_json(subscription),
 		}
 	)
@@ -940,6 +948,17 @@ def paddle_webhook():
 	payload = json.loads(raw_body or "{}")
 	event_type = payload.get("event_type") or payload.get("eventType")
 	data = payload.get("data") or {}
+	_paddle_log(
+		"Received Paddle webhook",
+		{
+			"event_type": event_type,
+			"id": data.get("id"),
+			"status": data.get("status"),
+			"scheduled_change": data.get("scheduled_change"),
+			"subscription_id": data.get("subscription_id"),
+			"transaction_id": data.get("id") if str(data.get("id") or "").startswith("txn_") else None,
+		},
+	)
 
 	if event_type in {"transaction.completed", "transaction.paid"}:
 		payment = process_paddle_transaction(data)
@@ -1006,4 +1025,13 @@ def create_customer_portal_session(action: str | None = None) -> dict:
 def cancel_subscription(subscription_id: str, immediately: bool = False):
 	payload = {"effective_from": "immediately" if immediately else "next_billing_period"}
 	response = _request("POST", f"/subscriptions/{subscription_id}/cancel", data=json.dumps(payload))
+	return sync_paddle_subscription(response.get("data") or response)
+
+
+def reactivate_subscription(subscription_id: str):
+	response = _request(
+		"PATCH",
+		f"/subscriptions/{subscription_id}",
+		data=json.dumps({"scheduled_change": None}),
+	)
 	return sync_paddle_subscription(response.get("data") or response)
