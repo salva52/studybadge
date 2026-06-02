@@ -34,7 +34,7 @@ import frappe
 import requests
 from frappe.utils.file_manager import save_file
 
-INSTRUCTOR_NAME = "studybadge"
+INSTRUCTOR_NAME = "Administrator"
 COURSE_DATA = {
     "category": "Inteligencia Artificial",
     "title": "Búsqueda de empleo y marca personal con IA",
