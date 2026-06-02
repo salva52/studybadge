@@ -102,7 +102,7 @@
 								</span>
 							</h2>
 							<p class="text-base font-medium pr-text-muted mt-1.5 max-w-2xl">
-								{{ profile.data.headline || __('Estudiante en StudyBadge') }}
+								{{ profile.data.headline || (user.data?.is_instructor ? __('Instructor en StudyBadge') : __('Estudiante en StudyBadge')) }}
 							</p>
 							
 							<div
