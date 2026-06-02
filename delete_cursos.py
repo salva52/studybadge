@@ -15,7 +15,6 @@ import frappe
 courses_to_delete = [
     "aplicaci-n-de-ia-en-educaci-n-y-docencia",
     "b-squeda-de-empleo-y-marca-personal-con-ia",
-    "ia-para-educadores-menos-preparaci-n-m-s-inspiraci-n",
     "an-lisis-de-datos-empresariales-con-ia-y-herramientas-no-code"
 ]
 
