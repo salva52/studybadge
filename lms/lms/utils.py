@@ -2092,6 +2092,96 @@ def complete_enrollment(payment_name: str, doctype: str, docname: str):
 	else:
 		enroll_in_batch(docname, payment_name)
 
+	send_payment_receipt_email(payment_name)
+
+def send_payment_receipt_email(payment_name: str):
+	payment_doc = frappe.get_doc("LMS Payment", payment_name)
+	
+	if not payment_doc.payment_received:
+		return
+		
+	amount = payment_doc.amount_with_gst or payment_doc.amount
+	if flt(amount) <= 0:
+		return
+		
+	member_name = frappe.db.get_value("User", payment_doc.member, "full_name") or payment_doc.member
+	
+	if payment_doc.payment_for_certificate:
+		item_type = _("Certificate")
+		title = frappe.db.get_value("LMS Course", payment_doc.payment_for_document, "title")
+		link = get_lms_route(f"certification/{payment_doc.payment_for_document}")
+	elif payment_doc.payment_for_document_type == "LMS Course":
+		item_type = _("Course")
+		title = frappe.db.get_value("LMS Course", payment_doc.payment_for_document, "title")
+		link = get_lms_route(f"course/{payment_doc.payment_for_document}")
+	else:
+		item_type = _("Batch")
+		title = frappe.db.get_value("LMS Batch", payment_doc.payment_for_document, "title")
+		link = get_lms_route(f"batch/{payment_doc.payment_for_document}")
+
+	gateway = payment_doc.payment_gateway or "Secure Gateway"
+	payment_id = payment_doc.payment_id or payment_doc.name
+	currency = payment_doc.currency or "PEN"
+	currency_symbol = "S/" if currency == "PEN" else "$"
+	amount_str = f"{currency_symbol} {flt(amount):.2f}"
+	
+	base_url = frappe.utils.get_url()
+	full_link = f"{base_url}{link}"
+
+	message = f"""
+	<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+		<div style="background-color: #0a2351; padding: 20px; text-align: center;">
+			<h2 style="color: #ffffff; margin: 0;">StudyBadge</h2>
+		</div>
+		<div style="padding: 30px;">
+			<h3 style="margin-top: 0; color: #111827;">¡Hola {member_name}!</h3>
+			<p style="color: #4b5563; line-height: 1.6;">
+				¡Gracias por tu compra! Hemos recibido tu pago exitosamente. Aquí tienes los detalles de tu recibo:
+			</p>
+			
+			<table style="width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 30px;">
+				<tr>
+					<td style="padding: 12px; border-bottom: 1px solid #e5e7eb; color: #6b7280; width: 40%;">Artículo</td>
+					<td style="padding: 12px; border-bottom: 1px solid #e5e7eb; color: #111827;"><strong>{title}</strong> ({item_type})</td>
+				</tr>
+				<tr>
+					<td style="padding: 12px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Método de Pago</td>
+					<td style="padding: 12px; border-bottom: 1px solid #e5e7eb; color: #111827;">{gateway}</td>
+				</tr>
+				<tr>
+					<td style="padding: 12px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">ID de Transacción</td>
+					<td style="padding: 12px; border-bottom: 1px solid #e5e7eb; color: #111827;">{payment_id}</td>
+				</tr>
+				<tr>
+					<td style="padding: 12px; border-bottom: 1px solid #e5e7eb; color: #6b7280;">Total Pagado</td>
+					<td style="padding: 12px; border-bottom: 1px solid #e5e7eb; color: #111827; font-size: 16px;"><strong>{amount_str}</strong></td>
+				</tr>
+			</table>
+			
+			<div style="text-align: center; margin-top: 30px; margin-bottom: 20px;">
+				<a href="{full_link}" style="background-color: #0a2351; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+					Comenzar a aprender
+				</a>
+			</div>
+			
+			<p style="color: #6b7280; font-size: 13px; text-align: center; margin-top: 30px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+				Si tienes alguna duda o problema, por favor escríbenos a soporte@studybadge.com.<br>
+				¡Gracias por aprender con nosotros!
+			</p>
+		</div>
+	</div>
+	"""
+
+	try:
+		frappe.sendmail(
+			recipients=[payment_doc.member],
+			subject=_("Recibo de pago StudyBadge: {0}").format(title),
+			message=message,
+			now=True
+		)
+	except Exception:
+		frappe.log_error(frappe.get_traceback(), f"StudyBadge Receipt Email Failed: {payment_name}")
+
 
 def get_integration_requests(doctype: str, docname: str):
 	return frappe.get_all(

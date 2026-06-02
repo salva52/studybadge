@@ -289,50 +289,6 @@ def _update_lms_payment_from_mp(payment_doc, mp_payment: dict):
 	return payment_doc
 
 
-def _send_certificate_receipt_email(payment_doc, mp_payment: dict):
-	course_title = frappe.db.get_value("LMS Course", payment_doc.payment_for_document, "title")
-	member_name = frappe.db.get_value("User", payment_doc.member, "full_name") or payment_doc.member
-	amount = payment_doc.amount_with_gst or payment_doc.amount
-	payment_id = mp_payment.get("id") or payment_doc.payment_id or payment_doc.name
-	try:
-		frappe.sendmail(
-			recipients=[payment_doc.member],
-			subject=_("Recibo de pago de certificado StudyBadge"),
-			message=frappe.render_template(
-				"""
-				<p>Hola {{ member_name }},</p>
-				<p>Hemos confirmado tu pago del certificado del curso <strong>{{ course_title }}</strong>.</p>
-				<table style="border-collapse:collapse;margin:16px 0;width:100%;max-width:560px">
-					<tr>
-						<td style="padding:10px;border:1px solid #e5e7eb;color:#6b7280">Recibo</td>
-						<td style="padding:10px;border:1px solid #e5e7eb"><strong>{{ payment_name }}</strong></td>
-					</tr>
-					<tr>
-						<td style="padding:10px;border:1px solid #e5e7eb;color:#6b7280">Pago Mercado Pago</td>
-						<td style="padding:10px;border:1px solid #e5e7eb">{{ payment_id }}</td>
-					</tr>
-					<tr>
-						<td style="padding:10px;border:1px solid #e5e7eb;color:#6b7280">Total pagado</td>
-						<td style="padding:10px;border:1px solid #e5e7eb"><strong>S/ {{ amount }}</strong></td>
-					</tr>
-				</table>
-				<p>Tu certificado ya esta desbloqueado. Puedes continuar desde StudyBadge para agendar o completar tu certificacion.</p>
-				<p>Gracias por aprender con StudyBadge.</p>
-				""",
-				{
-					"member_name": member_name,
-					"course_title": course_title,
-					"payment_name": payment_doc.name,
-					"payment_id": payment_id,
-					"amount": f"{flt(amount):.2f}",
-				},
-			),
-			now=True,
-		)
-	except Exception:
-		frappe.log_error(frappe.get_traceback(), f"StudyBadge Certificate Receipt Email Failed: {payment_doc.name}")
-
-
 def process_mercadopago_payment(mp_payment: dict):
 	payment_doc = _get_payment_from_mp_payload(mp_payment)
 	if not payment_doc:
@@ -350,7 +306,6 @@ def process_mercadopago_payment(mp_payment: dict):
 		if payment_doc.payment_for_certificate:
 			from lms.lms.doctype.lms_certificate.lms_certificate import auto_issue_course_certificate
 			auto_issue_course_certificate(payment_doc.payment_for_document, payment_doc.member)
-			_send_certificate_receipt_email(payment_doc, mp_payment)
 	return payment_doc
 
 
