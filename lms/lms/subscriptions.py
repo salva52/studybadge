@@ -275,12 +275,41 @@ def _send_plus_welcome_email(subscription, settings=None):
 			subject=_("Welcome to StudyBadge Plus"),
 			message=frappe.render_template(
 				"""
-				<p>Hola {{ member_name }},</p>
-				<p>Tu suscripcion a <strong>{{ plan_name }}</strong> ya esta activa.</p>
-				<p>Desde ahora tienes certificados desbloqueados, TutorIA ilimitado e insignia Plus/PRO en tu perfil.</p>
-				<p>Proximo cobro: <strong>{{ next_payment }}</strong></p>
-				<p>Puedes gestionar tu plan desde <a href="{{ billing_url }}">StudyBadge Plus</a>.</p>
-				<p>Gracias por ser parte de StudyBadge.</p>
+				<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8fafc; padding: 20px; border-radius: 8px;">
+					<div style="background-color: #ffffff; padding: 40px 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); border-top: 5px solid #2563eb;">
+						<h2 style="color: #1e293b; margin-top: 0; font-size: 24px; font-weight: 700;">¡Hola {{ member_name }}! 👋</h2>
+						
+						<p style="color: #475569; font-size: 16px; line-height: 1.6; margin-bottom: 24px;">
+							¡Excelente noticia! Tu suscripción a <strong style="color: #2563eb;">{{ plan_name }}</strong> ya está 100% activa.
+						</p>
+
+						<div style="background-color: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 16px; border-radius: 4px; margin-bottom: 24px;">
+							<p style="margin: 0; color: #0369a1; font-size: 15px; font-weight: 600;">
+								✨ Nuevos beneficios desbloqueados:
+							</p>
+							<ul style="margin: 12px 0 0 0; color: #0c4a6e; font-size: 15px; line-height: 1.6; padding-left: 20px;">
+								<li><strong>Certificados verificables</strong> para tus cursos.</li>
+								<li>Acceso a <strong>TutorIA</strong> sin restricciones.</li>
+								<li><strong>Insignia exclusiva</strong> Plus/PRO en tu perfil público.</li>
+							</ul>
+						</div>
+
+						<div style="border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 16px 0; margin-bottom: 24px;">
+							<p style="margin: 0; color: #64748b; font-size: 14px;">Próximo cobro programado:</p>
+							<p style="margin: 4px 0 0 0; color: #0f172a; font-size: 18px; font-weight: 600;">{{ next_payment }}</p>
+						</div>
+						
+						<div style="text-align: center; margin: 32px 0;">
+							<a href="{{ billing_url }}" style="background-color: #2563eb; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px; display: inline-block;">Gestionar mi plan</a>
+						</div>
+
+						<p style="color: #64748b; font-size: 15px; line-height: 1.6; margin-bottom: 0;">
+							Gracias por seguir aprendiendo con nosotros y ser parte fundamental de nuestra comunidad.<br><br>
+							Saludos,<br>
+							<strong>El equipo de StudyBadge</strong>
+						</p>
+					</div>
+				</div>
 				""",
 				{
 					"member_name": member_name,
