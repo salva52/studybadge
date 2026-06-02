@@ -270,7 +270,7 @@ def _custom_product_payload(title: str, description: str | None = None) -> dict:
 	return {
 		"name": (title or "StudyBadge").strip()[:200],
 		"description": (description or title or "StudyBadge digital product").strip()[:2048],
-		"tax_category": "digital-goods",
+		"tax_category": "standard",
 	}
 
 
