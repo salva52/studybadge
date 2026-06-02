@@ -360,15 +360,18 @@ def get_checkout_config(country: str | None = None) -> dict:
 
 @frappe.whitelist()
 def create_paddle_checkout(
-	doctype: str,
-	docname: str,
-	address: dict,
-	payment_for_certificate: int = 0,
-	coupon_code: str | None = None,
-	country: str | None = None,
+	doctype,
+	docname,
+	address,
+	payment_for_certificate=0,
+	coupon_code=None,
+	country=None,
 ):
+	payment_for_certificate = cint(payment_for_certificate)
 	_validate_paypal_payment_access(doctype, docname, payment_for_certificate)
 	settings = _ensure_enabled()
+	if isinstance(address, str):
+		address = json.loads(address)
 	address = frappe._dict(address)
 	coupon, paddle_discount = _get_paddle_discount(coupon_code, doctype, docname)
 	details = frappe._dict(

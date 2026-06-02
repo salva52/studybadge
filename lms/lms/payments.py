@@ -5,7 +5,7 @@ import uuid
 import frappe
 import requests
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import cint, flt
 
 from lms.lms.utils import (
 	adjust_amount_for_coupon,
@@ -173,18 +173,21 @@ def _create_mp_preference(payment_doc, details, settings=None) -> dict:
 
 @frappe.whitelist()
 def create_mp_brick_checkout(
-	doctype: str,
-	docname: str,
-	address: dict,
-	payment_for_certificate: int = 0,
-	coupon_code: str | None = None,
-	country: str | None = None,
+	doctype,
+	docname,
+	address,
+	payment_for_certificate=0,
+	coupon_code=None,
+	country=None,
 ):
+	payment_for_certificate = cint(payment_for_certificate)
 	_validate_paypal_payment_access(doctype, docname, payment_for_certificate)
 	settings = _get_settings()
 	if not settings.public_key:
 		frappe.throw(_("Mercado Pago public key is missing in StudyBadge Plus Settings."))
 
+	if isinstance(address, str):
+		address = json.loads(address)
 	address = frappe._dict(address)
 	
 	if int(payment_for_certificate):
@@ -503,14 +506,17 @@ def _validate_paypal_payment_access(doctype: str, docname: str, payment_for_cert
 
 @frappe.whitelist()
 def create_paypal_checkout(
-	doctype: str,
-	docname: str,
-	address: dict,
-	payment_for_certificate: int = 0,
-	coupon_code: str | None = None,
-	country: str | None = None,
+	doctype,
+	docname,
+	address,
+	payment_for_certificate=0,
+	coupon_code=None,
+	country=None,
 ):
+	payment_for_certificate = cint(payment_for_certificate)
 	_validate_paypal_payment_access(doctype, docname, payment_for_certificate)
+	if isinstance(address, str):
+		address = json.loads(address)
 	address = frappe._dict(address)
 	redirect_to = get_redirect_url(doctype, docname, payment_for_certificate)
 	cancel_to = get_lms_route(f"billing/{'certificate' if int(payment_for_certificate) else doctype.split(' ')[-1].lower()}/{docname}")
