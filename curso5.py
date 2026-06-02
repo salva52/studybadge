@@ -75,7 +75,7 @@ COURSE_DATA = {
                                 "explanation": "El objetivo es conectar directamente el análisis de datos con una acción estratégica concreta."
                             },
                             {
-                                "question": "¿Cuál es una idea importante de la lección 1?",
+                                "question": "Pregunta de repaso 1?",
                                 "options": [
                                     "Aplicar el concepto en un caso concreto",
                                     "Ignorar el objetivo de la lección",
@@ -86,7 +86,7 @@ COURSE_DATA = {
                                 "explanation": "La lección busca que el estudiante aplique el contenido de forma práctica."
                             },
                             {
-                                "question": "¿Cuál es una idea importante de la lección 1?",
+                                "question": "Pregunta de repaso 2?",
                                 "options": [
                                     "Aplicar el concepto en un caso concreto",
                                     "Ignorar el objetivo de la lección",
@@ -146,7 +146,7 @@ COURSE_DATA = {
                                 "explanation": "El valor del análisis surge de la conversación y el refinamiento de las preguntas iniciales."
                             },
                             {
-                                "question": "¿Cuál es una idea importante de la lección 1?",
+                                "question": "Pregunta de repaso 3?",
                                 "options": [
                                     "Aplicar el concepto en un caso concreto",
                                     "Ignorar el objetivo de la lección",
@@ -157,7 +157,7 @@ COURSE_DATA = {
                                 "explanation": "La lección busca que el estudiante aplique el contenido de forma práctica."
                             },
                             {
-                                "question": "¿Cuál es una idea importante de la lección 1?",
+                                "question": "Pregunta de repaso 4?",
                                 "options": [
                                     "Aplicar el concepto en un caso concreto",
                                     "Ignorar el objetivo de la lección",
@@ -217,7 +217,7 @@ COURSE_DATA = {
                                 "explanation": "El dashboard debe ser una herramienta de diagnóstico, no un reporte de datos crudos."
                             },
                             {
-                                "question": "¿Cuál es una idea importante de la lección 1?",
+                                "question": "Pregunta de repaso 5?",
                                 "options": [
                                     "Aplicar el concepto en un caso concreto",
                                     "Ignorar el objetivo de la lección",
@@ -228,7 +228,7 @@ COURSE_DATA = {
                                 "explanation": "La lección busca que el estudiante aplique el contenido de forma práctica."
                             },
                             {
-                                "question": "¿Cuál es una idea importante de la lección 1?",
+                                "question": "Pregunta de repaso 6?",
                                 "options": [
                                     "Aplicar el concepto en un caso concreto",
                                     "Ignorar el objetivo de la lección",
@@ -288,7 +288,7 @@ COURSE_DATA = {
                                 "explanation": "La lógica decide si la alerta debe ser enviada o no según los criterios configurados."
                             },
                             {
-                                "question": "¿Cuál es una idea importante de la lección 1?",
+                                "question": "Pregunta de repaso 7?",
                                 "options": [
                                     "Aplicar el concepto en un caso concreto",
                                     "Ignorar el objetivo de la lección",
@@ -299,7 +299,7 @@ COURSE_DATA = {
                                 "explanation": "La lección busca que el estudiante aplique el contenido de forma práctica."
                             },
                             {
-                                "question": "¿Cuál es una idea importante de la lección 1?",
+                                "question": "Pregunta de repaso 8?",
                                 "options": [
                                     "Aplicar el concepto en un caso concreto",
                                     "Ignorar el objetivo de la lección",
@@ -359,7 +359,7 @@ COURSE_DATA = {
                                 "explanation": "Estas 'victorias rápidas' permiten ver resultados pronto y mantener el foco en las acciones que realmente mueven la aguja."
                             },
                             {
-                                "question": "¿Cuál es una idea importante de la lección 1?",
+                                "question": "Pregunta de repaso 9?",
                                 "options": [
                                     "Aplicar el concepto en un caso concreto",
                                     "Ignorar el objetivo de la lección",
@@ -370,7 +370,7 @@ COURSE_DATA = {
                                 "explanation": "La lección busca que el estudiante aplique el contenido de forma práctica."
                             },
                             {
-                                "question": "¿Cuál es una idea importante de la lección 1?",
+                                "question": "Pregunta de repaso 10?",
                                 "options": [
                                     "Aplicar el concepto en un caso concreto",
                                     "Ignorar el objetivo de la lección",
@@ -1066,3 +1066,4 @@ if __name__ == "__main__":
             frappe.destroy()
         except Exception:
             pass
+
