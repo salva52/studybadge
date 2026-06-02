@@ -155,7 +155,8 @@
 							<Headphones class="size-5" />
 							<div>
 								<strong>{{ __('¿Tienes dudas?') }}</strong>
-								<span>{{ __('Si el formulario falla, intenta nuevamente o contacta a soporte.') }}</span>
+								<span>{{ __('Si el formulario falla, intenta nuevamente o escríbenos a soporte.') }}</span>
+								<a href="mailto:soporte@studybadge.com">soporte@studybadge.com</a>
 							</div>
 						</div>
 					</div>
@@ -462,7 +463,7 @@ const submit = async () => {
 	openModal(
 		'sending',
 		__('Postulación enviada'),
-		__('Estamos registrando tu información. Puedes cerrar esta ventana; si ocurre un error, te avisaremos para reintentar o contactar a soporte.')
+		__('Estamos registrando tu información. Puedes cerrar esta ventana; si ocurre un error, te avisaremos para reintentar o escribir a soporte@studybadge.com.')
 	)
 
 	try {
@@ -483,7 +484,7 @@ const submit = async () => {
 		const message =
 			error?.messages?.[0] ||
 			error?.message ||
-			__('No pudimos enviar la postulación. Intenta nuevamente o contacta a soporte.')
+			__('No pudimos enviar la postulación. Intenta nuevamente o escríbenos a soporte@studybadge.com.')
 
 		openModal(
 			'error',
@@ -930,14 +931,6 @@ usePageMeta(() => ({
 	transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
 }
 
-.program-card::before {
-	content: '';
-	position: absolute;
-	inset: 0 auto 0 0;
-	width: 4px;
-	background: linear-gradient(180deg, var(--sb-gold), var(--sb-blue));
-	opacity: 0.95;
-}
 
 .program-card:hover {
 	transform: translateY(-4px);
@@ -1130,6 +1123,21 @@ usePageMeta(() => ({
 	color: var(--sb-muted);
 	font-size: 13px;
 	line-height: 1.45;
+}
+
+.support-card a {
+	display: inline-flex;
+	width: fit-content;
+	margin-top: 8px;
+	color: var(--sb-blue);
+	font-size: 13px;
+	font-weight: 850;
+	text-decoration: none;
+}
+
+.support-card a:hover {
+	color: var(--sb-blue-soft);
+	text-decoration: underline;
 }
 
 .application-card {
