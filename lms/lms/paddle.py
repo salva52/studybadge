@@ -484,6 +484,15 @@ def get_paddle_payment_status(payment: str):
 	if payment_doc.member != frappe.session.user:
 		frappe.throw(_("You cannot view this payment."), frappe.PermissionError)
 
+	if not payment_doc.payment_received and payment_doc.paddle_transaction_id:
+		try:
+			txn = fetch_transaction(payment_doc.paddle_transaction_id)
+			if txn and txn.get("status") in ("completed", "paid"):
+				process_paddle_transaction(txn)
+				payment_doc.reload()
+		except Exception:
+			pass
+
 	return {
 		"payment": payment_doc.name,
 		"status": payment_doc.payment_status or ("completed" if payment_doc.payment_received else "pending"),
