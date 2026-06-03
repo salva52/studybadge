@@ -29,15 +29,15 @@ def on_user_creation(doc, method):
             "referrer": referrer,
             "referred_email": doc.email,
             "referred_user": doc.name,
-            "status": "Pending" if not doc.email_verified else "Verified"
+            "status": "Pending" if not doc.get("email_verified") else "Verified"
         }).insert(ignore_permissions=True)
     except frappe.DuplicateEntryError:
         pass # Already referred
 
 def on_user_update(doc, method):
     """Triggered on User on_update. Used to mark referrals as verified."""
-    # Check if email just got verified (doc.email_verified == 1)
-    if not doc.email_verified:
+    # Check if email just got verified (doc.get("email_verified") == 1)
+    if not doc.get("email_verified"):
         return
     
     # Check if there's a pending referral for this user
