@@ -1,64 +1,90 @@
 <template>
-	<div class="home-page w-full px-4 sm:px-6 pt-6 pb-12 min-h-screen">
-
-		<!-- Hero Section -->
-		<div class="home-hero relative overflow-hidden mb-8">
-			<div class="relative z-10 p-8 sm:p-10">
-				<div class="flex flex-col md:flex-row justify-between items-center gap-8">
-					<div class="space-y-4 max-w-2xl">
-						<h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
-							{{ __('Hola') }}, {{ user.data?.full_name?.split(' ')[0] || user.data?.full_name }} 👋
-						</h1>
-						<p class="text-base sm:text-lg text-blue-100/80 font-medium leading-relaxed">
-							{{ subtitle }}
-						</p>
-						<div class="flex flex-wrap gap-3 pt-2" v-if="!isAdmin">
-							<router-link
-								:to="{ name: 'Courses' }"
-								class="home-btn-primary"
-							>
-								{{ __('Continuar aprendiendo') }}
-							</router-link>
-							<router-link
-								:to="{ name: 'Courses' }"
-								class="home-btn-ghost"
-							>
-								{{ __('Explorar cursos') }}
-							</router-link>
-						</div>
+	<div class="home-page w-full px-4 pb-12 pt-6 sm:px-6">
+		<section v-if="isAdmin" class="home-admin-hero">
+			<div class="home-admin-hero-content">
+				<div class="home-admin-copy">
+					<div class="home-admin-eyebrow">
+						<Sparkles class="size-4" />
+						{{ __('Panel de gestión') }}
 					</div>
 
-					<!-- Mini Stats in Hero -->
-					<div class="hidden md:flex gap-5 items-center" v-if="!isAdmin">
-						<div class="home-hero-stat cursor-pointer hover:scale-105 transition-transform" @click="showStreakModal = true">
-							<div class="text-3xl font-black text-amber-400 drop-shadow-md">{{ streakInfo.data?.current_streak || 0 }}</div>
-							<div class="flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-widest text-blue-200/70 font-bold mt-1">
-								<Flame class="size-3 text-amber-400" /> {{ __('Racha') }}
-							</div>
-						</div>
-						<div class="w-px h-10 bg-white/10"></div>
-						<div class="home-hero-stat">
-							<div class="text-3xl font-black text-white drop-shadow-md">{{ evalCount || 0 }}</div>
-							<div class="flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-widest text-blue-200/70 font-bold mt-1">
-								<ClipboardCheck class="size-3 text-blue-300" /> {{ __('Evaluaciones') }}
-							</div>
-						</div>
+					<h1 class="home-admin-title">
+						{{ __('Hola') }},
+						{{ firstName }} 👋
+					</h1>
+
+					<p class="home-admin-subtitle">
+						{{ adminSubtitle }}
+					</p>
+
+					<div class="home-admin-actions">
+						<router-link :to="{ name: 'Courses' }" class="home-btn-light">
+							<BookOpen class="size-4" />
+							{{ __('Gestionar cursos') }}
+						</router-link>
+
+						<router-link :to="{ name: 'Courses' }" class="home-btn-ghost">
+							<ArrowUpRight class="size-4" />
+							{{ __('Ver catálogo') }}
+						</router-link>
 					</div>
 				</div>
+
+				<div class="home-admin-panel">
+					<div class="home-admin-panel-title">
+						{{ __('Resumen rápido') }}
+					</div>
+
+					<div class="home-admin-stats">
+						<div class="home-admin-stat">
+							<div class="home-admin-stat-icon">
+								<Video class="size-5" />
+							</div>
+
+							<div>
+								<div class="home-admin-stat-value">
+									{{ adminLiveClasses.data?.length || 0 }}
+								</div>
+								<div class="home-admin-stat-label">
+									{{ __('Clases en vivo') }}
+								</div>
+							</div>
+						</div>
+
+						<div class="home-admin-stat">
+							<div class="home-admin-stat-icon gold">
+								<ClipboardCheck class="size-5" />
+							</div>
+
+							<div>
+								<div class="home-admin-stat-value">
+									{{ adminEvals.data?.length || 0 }}
+								</div>
+								<div class="home-admin-stat-label">
+									{{ __('Evaluaciones') }}
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<p class="home-admin-panel-note">
+						{{ __('Revisa tus cursos, clases y evaluaciones desde un solo lugar.') }}
+					</p>
+				</div>
 			</div>
-		</div>
+		</section>
 
 		<AdminHome
 			v-if="isAdmin && currentTab === 'instructor'"
 			:liveClasses="adminLiveClasses"
 			:evals="adminEvals"
 		/>
+
 		<StudentHome
 			v-else-if="currentTab === 'student'"
 			:myLiveClasses="myLiveClasses"
 		/>
 	</div>
-	<Streak v-model="showStreakModal" :streakInfo="streakInfo" />
 </template>
 
 <script setup lang="ts">
@@ -66,142 +92,134 @@ import { computed, inject, onMounted, ref } from 'vue'
 import { call, createResource, usePageMeta } from 'frappe-ui'
 import { sessionStore } from '@/stores/session'
 import { useRouter } from 'vue-router'
-import { Flame, ClipboardCheck } from 'lucide-vue-next'
+import {
+	ArrowUpRight,
+	BookOpen,
+	ClipboardCheck,
+	Sparkles,
+	Video,
+} from 'lucide-vue-next'
 import StudentHome from '@/pages/Home/StudentHome.vue'
 import AdminHome from '@/pages/Home/AdminHome.vue'
-import Streak from '@/pages/Home/Streak.vue'
 
 const user = inject<any>('$user')
 const { brand } = sessionStore()
 const router = useRouter()
-const evalCount = ref(0)
-const currentTab = ref<'student' | 'instructor'>('student')
-const showStreakModal = ref(false)
 
-const fetchEvalCount = () => {
-	call('frappe.client.get_count', {
-		doctype: 'LMS Certificate Request',
-		filters: {
-			member: user?.data?.name,
-			status: 'Upcoming',
-			date: ['>=', inject<any>('$dayjs')().format('YYYY-MM-DD')],
-		},
-	}).then((data: any) => {
-		evalCount.value = data
-	})
-}
+const currentTab = ref<'student' | 'instructor'>('student')
+
+const firstName = computed(() => {
+	const name =
+		user?.data?.first_name ||
+		user?.data?.full_name ||
+		user?.data?.name ||
+		'StudyBadger'
+
+	return String(name).split(' ')[0]
+})
 
 const isAdmin = computed(() => {
 	return (
-		user.data?.is_moderator ||
-		user.data?.is_instructor ||
-		user.data?.is_evaluator
+		user?.data?.is_moderator ||
+		user?.data?.is_instructor ||
+		user?.data?.is_evaluator
 	)
 })
 
+const myLiveClasses = createResource({
+	url: 'lms.lms.api.get_my_live_classes',
+	auto: false,
+})
+
+const adminLiveClasses = createResource({
+	url: 'lms.lms.api.get_admin_live_classes',
+	auto: false,
+})
+
+const adminEvals = createResource({
+	url: 'lms.lms.api.get_admin_evals',
+	auto: false,
+})
+
 const isPersonaCaptured = async () => {
-	let persona = await call('frappe.client.get_single_value', {
+	const persona = await call('frappe.client.get_single_value', {
 		doctype: 'LMS Settings',
 		field: 'persona_captured',
 	})
+
 	return persona
 }
 
 const identifyUserPersona = async () => {
-	if (user.data?.is_system_manager && !user.data?.developer_mode) {
-		let personaCaptured = await isPersonaCaptured()
+	if (user?.data?.is_system_manager && !user?.data?.developer_mode) {
+		const personaCaptured = await isPersonaCaptured()
+
 		if (personaCaptured) return
-		let courseCount = await call('frappe.client.get_count', {
+
+		const courseCount = await call('frappe.client.get_count', {
 			doctype: 'LMS Course',
 			filters: {
 				title: ['not like', '%A guide to Frappe Learning%'],
 			},
 		})
+
 		if (!courseCount) {
 			router.push({ name: 'PersonaForm' })
 		}
 	}
 }
 
-onMounted(() => {
-	identifyUserPersona()
+const loadHomeData = () => {
 	if (isAdmin.value) {
 		currentTab.value = 'instructor'
-	} else {
-		currentTab.value = 'student'
-		fetchEvalCount()
+		adminLiveClasses.reload()
+		adminEvals.reload()
+		return
 	}
+
+	currentTab.value = 'student'
+	myLiveClasses.reload()
+}
+
+onMounted(() => {
+	identifyUserPersona()
+	loadHomeData()
 })
 
-const myLiveClasses = createResource({
-	url: 'lms.lms.api.get_my_live_classes',
-	auto: !isAdmin.value ? true : false,
-})
+const adminSubtitle = computed(() => {
+	const liveCount = adminLiveClasses.data?.length || 0
+	const evalCount = adminEvals.data?.length || 0
 
-const adminLiveClasses = createResource({
-	url: 'lms.lms.api.get_admin_live_classes',
-	auto: isAdmin.value ? true : false,
-})
+	const liveClassSuffix =
+		liveCount === 1 ? __('clase en vivo') : __('clases en vivo')
 
-const adminEvals = createResource({
-	url: 'lms.lms.api.get_admin_evals',
-	auto: isAdmin.value ? true : false,
-})
+	const evalSuffix =
+		evalCount === 1 ? __('evaluación') : __('evaluaciones')
 
-const streakInfo = createResource({
-	url: 'lms.lms.api.get_streak_info',
-	auto: true,
-})
-
-const subtitle = computed(() => {
-	if (isAdmin.value) {
-		let liveClassSuffix =
-			adminLiveClasses.data?.length > 1 ? __('clases en vivo') : __('clase en vivo')
-		let evalSuffix =
-			adminEvals.data?.length > 1 ? __('evaluaciones') : __('evaluación')
-		if (adminLiveClasses.data?.length > 0 && adminEvals.data?.length > 0) {
-			return __('Tienes {0} {1} próximas y {2} {3} programadas.').format(
-				adminLiveClasses.data.length,
-				liveClassSuffix,
-				adminEvals.data.length,
-				evalSuffix
-			)
-		} else if (adminLiveClasses.data?.length > 0) {
-			return __('Tienes {0} {1} próximas.').format(
-				adminLiveClasses.data.length,
-				liveClassSuffix
-			)
-		} else if (adminEvals.data?.length > 0) {
-			return __('Tienes {0} {1} programadas.').format(
-				adminEvals.data.length,
-				evalSuffix
-			)
-		}
-		return __('Gestiona tus cursos y grupos de un vistazo')
-	} else {
-		let liveClassSuffix =
-			myLiveClasses.data?.length > 1 ? __('clases en vivo') : __('clase en vivo')
-		let evalSuffix = evalCount.value > 1 ? __('evaluaciones') : __('evaluación')
-		if (myLiveClasses.data?.length > 0 && evalCount.value > 0) {
-			return __('Tienes {0} {1} próximas y {2} {3} programadas.').format(
-				myLiveClasses.data.length,
-				liveClassSuffix,
-				evalCount.value,
-				evalSuffix
-			)
-		} else if (myLiveClasses.data?.length > 0) {
-			return __('Tienes {0} {1} próximas.').format(
-				myLiveClasses.data.length,
-				liveClassSuffix
-			)
-		} else if (evalCount.value > 0) {
-			return __('Tienes {0} {1} programadas.').format(
-				evalCount.value,
-				evalSuffix
-			)
-		}
-		return __('Sigue aprendiendo y completa tu próximo curso')
+	if (liveCount > 0 && evalCount > 0) {
+		return __('Tienes {0} {1} próximas y {2} {3} programadas.').format(
+			liveCount,
+			liveClassSuffix,
+			evalCount,
+			evalSuffix
+		)
 	}
+
+	if (liveCount > 0) {
+		return __('Tienes {0} {1} próximas.').format(
+			liveCount,
+			liveClassSuffix
+		)
+	}
+
+	if (evalCount > 0) {
+		return __('Tienes {0} {1} programadas.').format(
+			evalCount,
+			evalSuffix
+		)
+	}
+
+	return __('Gestiona tus cursos, clases y evaluaciones desde tu panel de StudyBadge.')
 })
 
 usePageMeta(() => {
@@ -214,73 +232,218 @@ usePageMeta(() => {
 
 <style scoped>
 .home-page {
-	background: var(--sb-bg);
+	min-height: 100vh;
+	background: var(--sb-bg, #f5f8fc);
 }
 
-/* ═══════════════════════════════════════
-   HERO
-   ═══════════════════════════════════════ */
+/* ADMIN HERO */
 
-.home-hero {
-	background: linear-gradient(145deg, #061B49 0%, #0b2f73 40%, #0a2259 100%);
-	border-radius: 24px;
-	box-shadow: 0 4px 24px rgba(6, 27, 73, 0.15), 0 1px 3px rgba(6, 27, 73, 0.08);
+.home-admin-hero {
+	margin-bottom: 2rem;
+	overflow: hidden;
+	border-radius: 28px;
+	background: #0a2251;
+	color: #ffffff;
+	box-shadow: 0 24px 60px rgba(10, 34, 81, 0.16);
 }
 
-:root[data-theme="dark"] .home-hero {
-	box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2);
+.home-admin-hero-content {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 360px;
+	gap: 2rem;
+	align-items: center;
+	padding: 2rem;
 }
 
-.home-hero-stat {
-	text-align: center;
-	padding: 8px 16px;
+.home-admin-copy {
+	min-width: 0;
 }
 
-/* ═══════════════════════════════════════
-   BUTTONS
-   ═══════════════════════════════════════ */
-
-.home-btn-primary {
+.home-admin-eyebrow {
 	display: inline-flex;
 	align-items: center;
+	gap: 0.5rem;
+	width: fit-content;
+	margin-bottom: 1rem;
+	border-radius: 999px;
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	background: rgba(255, 255, 255, 0.1);
+	padding: 0.45rem 0.75rem;
+	color: rgba(255, 255, 255, 0.88);
+	font-size: 0.75rem;
+	font-weight: 900;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.home-admin-title {
+	margin: 0;
+	max-width: 720px;
+	color: #ffffff;
+	font-size: clamp(2rem, 5vw, 3.75rem);
+	font-weight: 950;
+	letter-spacing: -0.055em;
+	line-height: 1.02;
+}
+
+.home-admin-subtitle {
+	margin: 1rem 0 0;
+	max-width: 680px;
+	color: rgba(255, 255, 255, 0.78);
+	font-size: 1rem;
+	line-height: 1.75;
+}
+
+.home-admin-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	margin-top: 1.5rem;
+}
+
+.home-admin-panel {
+	border: 1px solid rgba(255, 255, 255, 0.16);
+	border-radius: 24px;
+	background: rgba(255, 255, 255, 0.08);
+	padding: 1.25rem;
+}
+
+.home-admin-panel-title {
+	color: rgba(255, 255, 255, 0.82);
+	font-size: 0.78rem;
+	font-weight: 900;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.home-admin-stats {
+	display: grid;
+	gap: 0.85rem;
+	margin-top: 1rem;
+}
+
+.home-admin-stat {
+	display: flex;
+	align-items: center;
+	gap: 0.85rem;
+	border-radius: 18px;
+	background: rgba(255, 255, 255, 0.1);
+	padding: 0.9rem;
+}
+
+.home-admin-stat-icon {
+	display: flex;
+	align-items: center;
 	justify-content: center;
-	gap: 8px;
-	padding: 12px 24px;
-	border-radius: 14px;
-	font-size: 14px;
-	font-weight: 700;
-	color: #fff;
-	background: linear-gradient(135deg, #0d6efd, #0b5ed7);
-	box-shadow: 0 2px 12px rgba(13, 110, 253, 0.3);
-	transition: all 0.2s ease;
-	text-decoration: none;
+	width: 44px;
+	height: 44px;
+	border-radius: 16px;
+	background: #ffffff;
+	color: #0a2251;
+	flex: 0 0 auto;
 }
 
-.home-btn-primary:hover {
-	transform: translateY(-1px);
-	box-shadow: 0 4px 20px rgba(13, 110, 253, 0.4);
-	background: linear-gradient(135deg, #0b5ed7, #084298);
+.home-admin-stat-icon.gold {
+	background: #f5b301;
+	color: #3b2a00;
 }
 
+.home-admin-stat-value {
+	color: #ffffff;
+	font-size: 1.6rem;
+	font-weight: 950;
+	letter-spacing: -0.04em;
+	line-height: 1;
+}
+
+.home-admin-stat-label {
+	margin-top: 0.2rem;
+	color: rgba(255, 255, 255, 0.7);
+	font-size: 0.78rem;
+	font-weight: 800;
+}
+
+.home-admin-panel-note {
+	margin: 1rem 0 0;
+	color: rgba(255, 255, 255, 0.72);
+	font-size: 0.85rem;
+	line-height: 1.6;
+}
+
+/* BUTTONS */
+
+.home-btn-light,
 .home-btn-ghost {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 8px;
-	padding: 12px 24px;
-	border-radius: 14px;
-	font-size: 14px;
-	font-weight: 700;
-	color: #fff;
-	background: rgba(255, 255, 255, 0.08);
-	border: 1px solid rgba(255, 255, 255, 0.1);
-	backdrop-filter: blur(8px);
-	transition: all 0.2s ease;
+	gap: 0.5rem;
+	border-radius: 999px;
+	padding: 0.8rem 1.1rem;
+	font-size: 0.9rem;
+	font-weight: 900;
 	text-decoration: none;
+	transition: 0.18s ease;
+}
+
+.home-btn-light {
+	background: #ffffff;
+	color: #0a2251;
+	box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+}
+
+.home-btn-light:hover {
+	transform: translateY(-1px);
+	background: #f8fbff;
+}
+
+.home-btn-ghost {
+	border: 1px solid rgba(255, 255, 255, 0.28);
+	background: rgba(255, 255, 255, 0.08);
+	color: #ffffff;
 }
 
 .home-btn-ghost:hover {
+	transform: translateY(-1px);
 	background: rgba(255, 255, 255, 0.14);
-	border-color: rgba(255, 255, 255, 0.18);
+}
+
+:global(:root[data-theme='dark']) .home-page {
+	background: #07111f;
+}
+
+:global(:root[data-theme='dark']) .home-admin-hero {
+	box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1100px) {
+	.home-admin-hero-content {
+		grid-template-columns: 1fr;
+	}
+
+	.home-admin-panel {
+		max-width: 560px;
+	}
+}
+
+@media (max-width: 640px) {
+	.home-page {
+		padding-inline: 1rem;
+	}
+
+	.home-admin-hero-content {
+		padding: 1.25rem;
+	}
+
+	.home-admin-actions {
+		flex-direction: column;
+	}
+
+	.home-btn-light,
+	.home-btn-ghost {
+		width: 100%;
+	}
 }
 </style>
