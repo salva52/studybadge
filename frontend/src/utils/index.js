@@ -479,6 +479,15 @@ const getSidebarItems = (forMobile = false) => {
 					],
 				},
 				{
+					label: 'Sesiones IA',
+					icon: 'MessagesSquare',
+					to: 'AISessions',
+					activeFor: ['AISessions', 'AISessionRoom', 'AISessionChat'],
+					condition: () => {
+						return userResource?.data
+					},
+				},
+				{
 					label: 'Estudio IA',
 					icon: 'Brain',
 					to: 'Study',
@@ -492,15 +501,6 @@ const getSidebarItems = (forMobile = false) => {
 						'StudyExplanations',
 						'StudyWhiteboard',
 					],
-					condition: () => {
-						return userResource?.data
-					},
-				},
-				{
-					label: 'Sesiones IA',
-					icon: 'MessagesSquare',
-					to: 'AISessions',
-					activeFor: ['AISessions', 'AISessionRoom', 'AISessionChat'],
 					condition: () => {
 						return userResource?.data
 					},
