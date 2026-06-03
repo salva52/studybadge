@@ -3,9 +3,6 @@
 
 		<!-- Hero Section -->
 		<div class="home-hero relative overflow-hidden mb-8">
-			<div class="home-hero-glow-1"></div>
-			<div class="home-hero-glow-2"></div>
-			<div class="home-hero-grid"></div>
 			<div class="relative z-10 p-8 sm:p-10">
 				<div class="flex flex-col md:flex-row justify-between items-center gap-8">
 					<div class="space-y-4 max-w-2xl">
@@ -232,38 +229,6 @@ usePageMeta(() => {
 
 :root[data-theme="dark"] .home-hero {
 	box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-.home-hero-glow-1 {
-	position: absolute;
-	top: -100px;
-	right: -60px;
-	width: 360px;
-	height: 360px;
-	background: radial-gradient(circle, rgba(59, 130, 246, 0.2), transparent 70%);
-	border-radius: 50%;
-	filter: blur(50px);
-}
-
-.home-hero-glow-2 {
-	position: absolute;
-	bottom: -80px;
-	left: -40px;
-	width: 260px;
-	height: 260px;
-	background: radial-gradient(circle, rgba(245, 179, 1, 0.1), transparent 70%);
-	border-radius: 50%;
-	filter: blur(40px);
-}
-
-.home-hero-grid {
-	position: absolute;
-	inset: 0;
-	background-image:
-		linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-	background-size: 40px 40px;
-	border-radius: 24px;
 }
 
 .home-hero-stat {
