@@ -23,6 +23,19 @@
                 </svg>
             </div>
         </div>
+        <div class="form-group">
+            <label class="sb-login-label" for="signup_ref_code"> {{ _("Código de referido (Opcional)") }} </label>
+            <div class="name-field">
+                <input type="text" id="signup_ref_code" class="form-control sb-login-input" placeholder="{{ _('Ej: salvador') }}">
+                <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 12 20 22 4 22 4 12"></polyline>
+                    <rect x="2" y="7" width="20" height="5"></rect>
+                    <line x1="12" y1="22" x2="12" y2="7"></line>
+                    <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+                    <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+                </svg>
+            </div>
+        </div>
 
         {% if frappe.db.get_single_value("LMS Settings", "user_category") %}
         <div class="form-group">
@@ -74,6 +87,22 @@
 
 <script>
     frappe.ready(function () {
+        // Autofill referral code if present
+        const urlParams = new URLSearchParams(window.location.search);
+        let refCode = urlParams.get('ref');
+        
+        if (!refCode) {
+            // Try to get from cookie
+            const match = document.cookie.match(new RegExp('(^| )studybadge_ref=([^;]+)'));
+            if (match) {
+                refCode = match[2];
+            }
+        }
+        
+        if (refCode) {
+            $("#signup_ref_code").val(refCode);
+        }
+
         $("#user_category").on("change", (e) => {
             style_category(e);
         });
@@ -92,6 +121,11 @@
         e.preventDefault();
         const email = ($("#signup_email").val() || "").trim();
         const full_name = frappe.utils.xss_sanitise(($("#signup_fullname").val() || "").trim());
+        const ref_code = frappe.utils.xss_sanitise(($("#signup_ref_code").val() || "").trim());
+
+        if (ref_code) {
+            document.cookie = "studybadge_ref=" + ref_code + "; path=/; max-age=" + (30*24*60*60);
+        }
 
         if (!email || !validate_email(email) || !full_name) {
             login.set_status('{{ _("Valid email and name required") }}', 'red');
