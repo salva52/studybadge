@@ -20,7 +20,7 @@
 				leave-to-class="transform translate-y-8 opacity-0 scale-95"
 			>
 				<div
-					class="fixed bottom-[4.5rem] right-4 w-64 rounded-2xl bg-white/95 p-2 backdrop-blur-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] ring-1 ring-black/5"
+					class="fixed bottom-[4.5rem] right-4 w-64 max-h-[75vh] overflow-y-auto scrollbar-hide rounded-2xl bg-white/95 p-2 backdrop-blur-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] ring-1 ring-black/5"
 					v-if="showMenu"
 					ref="menu"
 				>
@@ -28,7 +28,7 @@
 						v-for="(link, index) in otherLinks"
 						:key="link.label"
 					>
-						<div v-if="link.label === 'Notificaciones' && index !== 0" class="my-1.5 border-t border-gray-100"></div>
+						<div v-if="link.label === 'Referidos' && index !== 0" class="my-1.5 border-t border-gray-100"></div>
 						<div v-if="link.label === 'Cerrar sesión' || link.label === 'Iniciar sesión'" class="my-1.5 border-t border-gray-100"></div>
 						
 						<div
@@ -142,6 +142,7 @@ const filterLinksToShow = (data) => {
 
 const addOtherLinks = () => {
 	if (user) {
+		addLink('Referidos', 'Gift', 'Referrals')
 		addLink('Notificaciones', 'Bell', 'Notifications')
 		addLink('Perfil', 'UserRound')
 		addLink('Cerrar sesión', 'LogOut')

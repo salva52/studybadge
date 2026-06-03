@@ -458,7 +458,7 @@ const getSidebarItems = (forMobile = false) => {
 					to: 'Referrals',
 					activeFor: ['Referrals'],
 					condition: () => {
-						return userResource?.data
+						return !forMobile && userResource?.data
 					},
 				},
 			],
