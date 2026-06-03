@@ -132,7 +132,7 @@ def get_referral_dashboard():
     verified = len([r for r in referrals if r.status == "Verified"])
     
     return {
-        "referral_link": f"{get_url()}/signup?ref={username}",
+        "referral_link": f"{get_url()}/login?ref={username}#signup",
         "referrals": referrals,
         "verified_count": verified,
         "total_count": len(referrals)
