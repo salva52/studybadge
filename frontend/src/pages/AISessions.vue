@@ -1,5 +1,5 @@
 <template>
-	<div class="chat-page" :class="{ 'right-collapsed': rightPanelCollapsed }" @paste="handlePaste">
+	<div class="chat-page" :class="{ 'right-collapsed': rightPanelCollapsed || !activeSession }" @paste="handlePaste">
 		<FileUploader
 			ref="fileUploader"
 			class="hidden"
@@ -240,7 +240,7 @@
 			</footer>
 		</main>
 
-		<aside v-if="activeSession" class="source-panel" :class="{ open: showTools }">
+		<aside class="source-panel" :class="{ open: showTools }">
 			<div class="panel-head">
 				<div>
 					<h2>{{ __('Panel de estudio') }}</h2>
