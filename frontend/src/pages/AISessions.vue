@@ -64,13 +64,12 @@
 				<button
 					v-for="session in filteredSessions"
 					:key="session.name"
-					class="session-item"
+					class="session-item session-card"
 					:class="{ active: activeSession?.name === session.name }"
 					@click="openSession(session.name)"
 				>
-					<MessagesSquare class="size-4" />
 					<span>
-						<strong>{{ session.title || session.name }}</strong>
+						<strong class="session-title-text">{{ session.title || session.name }}</strong>
 						<small>{{ session.model_label || modelLabel(session.model_tier) }} · {{ formatDate(session.modified) }}</small>
 						<div class="session-badges mt-1" style="display: flex; gap: 0.25rem;">
 							<span v-if="session.materials?.length || session.has_materials || session.status === 'Draft'" class="badge-mini doc-badge" style="font-size: 0.65rem; background: #e0f2fe; color: #0284c7; padding: 0.1rem 0.3rem; border-radius: 4px; font-weight: bold;">{{ __('Con documentos') }}</span>
@@ -1408,6 +1407,31 @@ function formatDate(value) {
 	box-shadow: 0 14px 30px rgba(10, 34, 81, 0.08);
 }
 
+.session-card {
+	background: #ffffff;
+	border: 1px solid rgba(10, 34, 81, 0.08);
+	box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+	padding: 1.15rem;
+	border-radius: 20px;
+}
+
+.session-card:hover {
+	background: #ffffff;
+	border-color: rgba(10, 34, 81, 0.15);
+	box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
+	transform: translateY(-2px);
+}
+
+.session-card.active {
+	background: #ffffff;
+	border: 1px solid var(--sb-primary);
+	box-shadow: 0 12px 24px rgba(10, 34, 81, 0.12);
+}
+
+.session-card.active::before {
+	content: none;
+}
+
 .session-item.active::before {
 	content: '';
 	position: absolute;
@@ -1443,6 +1467,13 @@ function formatDate(value) {
 	line-height: 1.25;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+.session-title-text {
+	font-size: 1.05rem !important;
+	letter-spacing: -0.01em;
+	color: var(--sb-primary) !important;
+	margin-bottom: 0.15rem;
 }
 
 .source-item {
