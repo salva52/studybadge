@@ -12,17 +12,17 @@
 		<aside class="session-rail" :class="{ open: showSessions }">
 			<div class="rail-head">
 				<div>
-					<div class="rail-brand"><Sparkles class="size-4" /> {{ __('Sesiones IA') }}</div>
-					<p>{{ access?.is_plus ? __('Plus ilimitado') : accessText }}</p>
+					<div class="rail-brand"><Sparkles class="size-4" /> {{ __('TutorIA Study') }}</div>
+					<p>{{ access?.is_plus ? __('Plus: sesiones avanzadas') : accessText }}</p>
 				</div>
 				<button class="icon-btn mobile-only" @click="showSessions = false"><X class="size-4" /></button>
 			</div>
 			<button class="primary-btn full" :disabled="!canCreate" @click="startNewSession">
-				<Plus class="size-4" /> {{ __('Nueva sesion') }}
+				<Plus class="size-4" /> {{ __('Nueva sesión') }}
 			</button>
 			<label class="search-box">
 				<Search class="size-4" />
-				<input v-model="sessionSearch" :placeholder="__('Buscar sesiones')" />
+				<input v-model="sessionSearch" :placeholder="__('Buscar por curso, tema o examen…')" />
 			</label>
 			<div class="session-list">
 				<button
@@ -36,6 +36,10 @@
 					<span>
 						<strong>{{ session.title || session.name }}</strong>
 						<small>{{ session.model_label || modelLabel(session.model_tier) }} · {{ formatDate(session.modified) }}</small>
+						<div class="session-badges mt-1" style="display: flex; gap: 0.25rem;">
+							<span v-if="session.materials?.length || session.has_materials || session.status === 'Draft'" class="badge-mini doc-badge" style="font-size: 0.65rem; background: #e0f2fe; color: #0284c7; padding: 0.1rem 0.3rem; border-radius: 4px; font-weight: bold;">{{ __('Con documentos') }}</span>
+							<span v-if="session.status === 'Completed'" class="badge-mini status-badge" style="font-size: 0.65rem; background: #dcfce7; color: #166534; padding: 0.1rem 0.3rem; border-radius: 4px; font-weight: bold;">{{ __('Listo') }}</span>
+						</div>
 					</span>
 				</button>
 				<div v-if="!filteredSessions.length" class="soft-empty">
@@ -149,9 +153,11 @@
 						</div>
 					</div>
 					<div v-if="message.role !== 'user' && index === chatMessages.length - 1 && !chatLoading && !toolLoading" class="follow-up-actions">
-						<button @click="sendFollowUp('Explícalo más simple')">{{ __('Explícalo más simple') }}</button>
+						<button @click="sendFollowUp('Explícalo más simple')">{{ __('Explícalo fácil') }}</button>
 						<button @click="sendFollowUp('Dame un ejemplo')">{{ __('Dame un ejemplo') }}</button>
 						<button @click="sendFollowUp('Hazme practicar')">{{ __('Hazme practicar') }}</button>
+						<button @click="sendFollowUp('Qué podría venir en examen?')">{{ __('Preguntas de examen') }}</button>
+						<button @click="sendFollowUp('Hazme un resumen en 5 puntos')">{{ __('Resumen en 5 puntos') }}</button>
 					</div>
 				</div>
 				<div v-if="chatLoading || toolLoading" class="message-row assistant">
@@ -186,7 +192,7 @@
 						ref="chatTextarea"
 						v-model="chatInput"
 						rows="1"
-						:placeholder="__('Pregunta sobre tus documentos o proyecto')"
+						:placeholder="__('Pregunta sobre tu lectura, pide ejemplos o escribe \'hazme practicar\'…')"
 						@input="autoResizeTextarea"
 						@keydown.enter.exact.prevent="sendChat"
 						@keydown.shift.enter.stop
@@ -201,7 +207,7 @@
 		<aside class="source-panel" :class="{ open: showTools }">
 			<div class="panel-head">
 				<div>
-					<h2>{{ __('Panel de Sesión') }}</h2>
+					<h2>{{ __('Panel de estudio') }}</h2>
 				</div>
 				<button class="icon-btn mobile-only" @click="showTools = false"><X class="size-4" /></button>
 			</div>
@@ -224,7 +230,7 @@
 			</div>
 
 			<div class="tools-head mt-0">
-				<h2>{{ __('Fuentes') }}</h2>
+				<h2>{{ __('Fuentes de estudio') }}</h2>
 				<p>{{ materialCountText }}</p>
 			</div>
 			<button class="secondary-btn full" :disabled="!activeSession" @click="openUploader">
@@ -235,7 +241,7 @@
 					<FileText class="size-4" />
 					<span>
 						<strong>{{ material.file_name }}</strong>
-						<small>{{ material.file_type }} · {{ material.analysis_status || __('Pendiente') }}</small>
+						<small>{{ material.file_type }} · {{ material.analysis_status === 'Completed' ? __('Listo') : (material.analysis_status === 'Error' ? __('Error al leer') : __('Analizando…')) }}</small>
 					</span>
 				</div>
 				<div v-if="!activeSession?.materials?.length" class="soft-empty">
@@ -245,11 +251,37 @@
 			</div>
 
 			<div class="tools-head">
-				<h2>{{ __('Herramientas academicas') }}</h2>
+				<h2>{{ __('Herramientas académicas') }}</h2>
 				<p>{{ __('Responden dentro del chat') }}</p>
 			</div>
-			<div class="tool-list">
-				<button v-for="tool in tools" :key="tool.id" class="tool-card" :class="{ locked: tool.pro && !access?.is_plus }" :disabled="!activeSession || toolLoading" @click="runTool(tool)">
+			
+			<div class="tool-group-title mt-2 mb-1" style="font-size:0.8rem; font-weight:800; color:#64748b; text-transform:uppercase;">{{ __('Estudiar') }}</div>
+			<div class="tool-list mb-3">
+				<button v-for="tool in tools.filter(t => t.group === 'study')" :key="tool.id" class="tool-card" :class="{ locked: tool.pro && !access?.is_plus }" :disabled="!activeSession || toolLoading" @click="runTool(tool)">
+					<component :is="tool.icon" class="size-5" />
+					<span>
+						<strong>{{ tool.label }}</strong>
+						<small>{{ tool.description }}</small>
+					</span>
+					<Crown v-if="tool.pro && !access?.is_plus" class="size-4 lock-icon" />
+				</button>
+			</div>
+
+			<div class="tool-group-title mt-2 mb-1" style="font-size:0.8rem; font-weight:800; color:#64748b; text-transform:uppercase;">{{ __('Practicar') }}</div>
+			<div class="tool-list mb-3">
+				<button v-for="tool in tools.filter(t => t.group === 'practice')" :key="tool.id" class="tool-card" :class="{ locked: tool.pro && !access?.is_plus }" :disabled="!activeSession || toolLoading" @click="runTool(tool)">
+					<component :is="tool.icon" class="size-5" />
+					<span>
+						<strong>{{ tool.label }}</strong>
+						<small>{{ tool.description }}</small>
+					</span>
+					<Crown v-if="tool.pro && !access?.is_plus" class="size-4 lock-icon" />
+				</button>
+			</div>
+
+			<div class="tool-group-title mt-2 mb-1" style="font-size:0.8rem; font-weight:800; color:#64748b; text-transform:uppercase;">{{ __('Crear') }}</div>
+			<div class="tool-list mb-3">
+				<button v-for="tool in tools.filter(t => t.group === 'create')" :key="tool.id" class="tool-card" :class="{ locked: tool.pro && !access?.is_plus }" :disabled="!activeSession || toolLoading" @click="runTool(tool)">
 					<component :is="tool.icon" class="size-5" />
 					<span>
 						<strong>{{ tool.label }}</strong>
@@ -390,13 +422,17 @@ const draft = ref({
 })
 
 const tools = [
-	{ id: 'summary', label: __('Resumen'), description: __('Ideas clave y prioridades'), icon: BookOpenCheck, prompt: __('Resume mis fuentes y dime que estudiar primero.') },
-	{ id: 'organize', label: __('Ordenar info'), description: __('Temas, tareas y pendientes'), icon: ListTree, prompt: __('Ordena esta sesion en temas, tareas y pendientes claros.') },
-	{ id: 'quiz', label: __('Cuestionario'), description: __('Preguntas con explicacion'), icon: FileQuestion, prompt: __('Crea un cuestionario con respuestas explicadas sobre mis fuentes.') },
-	{ id: 'flashcards', label: __('Flashcards'), description: __('Tarjetas y checklist'), icon: Layers, prompt: __('Crea flashcards y una checklist de dominio para esta sesion.') },
-	{ id: 'reader_question', label: __('Lectura guiada'), description: __('Pregunta corta por avance'), icon: MessageCircle, prompt: __('Hazme una pregunta corta de comprension sobre lo que estoy leyendo.') },
-	{ id: 'math', label: __('Matematica paso a paso'), description: __('Resuelve y practica'), icon: Sigma, prompt: __('Ayudame con matematica: resuelve paso a paso y luego dame un ejercicio mas facil.') },
-	{ id: 'infographic', label: __('Infografia'), description: __('Mapa visual de estudio'), icon: ImageIcon, pro: true, prompt: __('Genera una infografia academica sobre esta sesion.') },
+	{ id: 'summary', group: 'study', label: __('Resumen'), description: __('Ideas clave y prioridades'), icon: BookOpenCheck, prompt: __('Resume mis fuentes y dime que estudiar primero.') },
+	{ id: 'key_ideas', group: 'study', label: __('Ideas clave'), description: __('Conceptos importantes'), icon: BookOpenCheck, prompt: __('Extrae las ideas clave de estas fuentes.') },
+	{ id: 'flashcards', group: 'study', label: __('Flashcards'), description: __('Tarjetas de estudio'), icon: Layers, prompt: __('Crea flashcards para esta sesion.') },
+	{ id: 'reader_question', group: 'study', label: __('Lectura guiada'), description: __('Pregunta corta por avance'), icon: MessageCircle, prompt: __('Hazme una pregunta corta de comprension sobre lo que estoy leyendo.') },
+	
+	{ id: 'quiz', group: 'practice', label: __('Cuestionario'), description: __('Preguntas con explicacion'), icon: FileQuestion, prompt: __('Crea un cuestionario con respuestas explicadas sobre mis fuentes.') },
+	{ id: 'math', group: 'practice', label: __('Matemática paso a paso'), description: __('Resuelve y practica'), icon: Sigma, prompt: __('Ayudame con matematica: resuelve paso a paso y luego dame un ejercicio mas facil.') },
+	{ id: 'mock_exam', group: 'practice', label: __('Simulacro'), description: __('Simulacro de examen'), icon: FileQuestion, prompt: __('Genera un simulacro de examen completo.') },
+	
+	{ id: 'infographic', group: 'create', label: __('Infografía'), description: __('Mapa visual de estudio'), icon: ImageIcon, pro: true, prompt: __('Genera una infografia academica sobre esta sesion.') },
+	{ id: 'organize', group: 'create', label: __('Ordenar info'), description: __('Temas, tareas y pendientes'), icon: ListTree, prompt: __('Ordena esta sesion en temas, tareas y pendientes claros.') },
 ]
 
 const starterPrompts = computed(() => {
@@ -441,7 +477,7 @@ const remainingText = computed(() => {
 const materialCountText = computed(() => {
 	const count = activeSession.value?.materials?.length || 0
 	const max = access.value?.max_files_per_session || 15
-	return `${count}/${max} ${__('fuentes')}`
+	return `${count} de ${max} archivos`
 })
 
 usePageMeta(() => ({ title: __('Sesiones IA'), icon: brand.favicon }))
@@ -632,40 +668,41 @@ async function sendChat() {
 	const text = chatInput.value.trim()
 	if (!text && !pendingFiles.value.length) return
 	chatLoading.value = true
-	try {
-		const files = pendingFiles.value.map((file) => file.file_url)
-		const optimistic = { role: 'user', content: text || __('Analiza las fuentes adjuntas.'), created_at: String(Date.now()) }
-		const assistantOptimistic = { role: 'assistant', content: '', created_at: String(Date.now() + 1), model_label: modelLabel(activeSession.value.model_tier), is_streaming: true }
-		chatMessages.value = [...chatMessages.value, optimistic]
-		chatInput.value = ''
-		pendingFiles.value = []
-		await nextTick()
-		resetTextareaHeight()
-		scrollChat()
+	
+	const files = pendingFiles.value.map((file) => file.file_url)
+	const optimistic = { role: 'user', content: text || __('Analiza las fuentes adjuntas.'), created_at: String(Date.now()) }
+	const assistantOptimistic = { role: 'assistant', content: '', created_at: String(Date.now() + 1), model_label: modelLabel(activeSession.value.model_tier), is_streaming: true }
+	chatMessages.value = [...chatMessages.value, optimistic]
+	chatInput.value = ''
+	pendingFiles.value = []
+	await nextTick()
+	resetTextareaHeight()
+	scrollChat()
 
-		const streamEvent = `ai_stream_${activeSession.value.name}`
-		let streamingContent = ''
-		let isStreamingStarted = false
-		const streamHandler = (data) => {
-			if (data && data.chunk) {
-				if (!isStreamingStarted) {
-					isStreamingStarted = true
-					chatLoading.value = false
-					chatMessages.value = [...chatMessages.value, assistantOptimistic]
-				}
-				streamingContent += data.chunk
-				const lastMsg = chatMessages.value[chatMessages.value.length - 1]
-				if (lastMsg && lastMsg.is_streaming) {
-					lastMsg.content = streamingContent
-					scrollChat()
-				}
+	const streamEvent = `ai_stream_${activeSession.value.name}`
+	let streamingContent = ''
+	let isStreamingStarted = false
+	const streamHandler = (data) => {
+		if (data && data.chunk) {
+			if (!isStreamingStarted) {
+				isStreamingStarted = true
+				chatLoading.value = false
+				chatMessages.value = [...chatMessages.value, assistantOptimistic]
+			}
+			streamingContent += data.chunk
+			const lastMsg = chatMessages.value[chatMessages.value.length - 1]
+			if (lastMsg && lastMsg.is_streaming) {
+				lastMsg.content = streamingContent
+				scrollChat()
 			}
 		}
-		
-		if (window.frappe && window.frappe.realtime) {
-			window.frappe.realtime.on(streamEvent, streamHandler)
-		}
+	}
+	
+	if (window.frappe && window.frappe.realtime) {
+		window.frappe.realtime.on(streamEvent, streamHandler)
+	}
 
+	try {
 		let result
 		try {
 			result = await api('chat_ai_session', {
@@ -683,16 +720,36 @@ async function sendChat() {
 			}
 		}
 		
-		if (result.trigger_modal) {
-			const toolId = result.trigger_modal
+		const isNewThread = !currentThread.value
+		currentThread.value = result.thread
+		
+		let messages = result.thread?.messages || []
+		if (messages.length > 0) {
+			const lastMsg = messages[messages.length - 1]
+			if (lastMsg.role === 'assistant' || lastMsg.role === 'model') {
+				const contentStr = (lastMsg.content || '').trim()
+				if (contentStr.startsWith('{') || contentStr.startsWith('[')) {
+					lastMsg.content = __('Listo. Preparé la acción solicitada.')
+				}
+			}
+		}
+		chatMessages.value = messages
+
+		if (isNewThread) {
+			activeSession.value.threads = [result.thread, ...(activeSession.value.threads || [])]
+		}
+		access.value = result.access || access.value
+		await nextTick(scrollChat)
+
+		if (result.action && result.action.type === 'open_tool') {
+			const toolId = result.action.tool
 			if (toolId === 'quiz') showQuiz.value = true
 			if (toolId === 'flashcards') showFlashcards.value = true
-			if (toolId === 'reader_question') showGuidedReading.value = true
+			if (toolId === 'guided_reading' || toolId === 'reader_question') showGuidedReading.value = true
 			if (toolId === 'math') showMath.value = true
 			
 			modalLoading.value = true
 			modalData.value = null
-			chatMessages.value = chatMessages.value.filter(m => m !== optimistic && m !== assistantOptimistic)
 			
 			try {
 				const toolResult = await api('generate_ai_tool', {
@@ -708,17 +765,10 @@ async function sendChat() {
 			} finally {
 				modalLoading.value = false
 			}
-			return
 		}
-
-		const isNewThread = !currentThread.value
-		currentThread.value = result.thread
-		chatMessages.value = result.thread.messages || []
-		if (isNewThread) {
-			activeSession.value.threads = [result.thread, ...(activeSession.value.threads || [])]
-		}
-		access.value = result.access || access.value
-		await nextTick(scrollChat)
+	} catch (e) {
+		chatMessages.value = chatMessages.value.filter(m => m !== optimistic && m !== assistantOptimistic)
+		toast.error(__('No pude responder en este momento. Intenta de nuevo en unos segundos.'))
 	} finally {
 		chatLoading.value = false
 	}
