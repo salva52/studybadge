@@ -51,9 +51,10 @@
 
 				<!-- Message Input -->
 				<div class="p-3 border-t border-outline-gray-2 bg-white flex gap-2 items-end">
-					<Textarea
+					<FormControl
 						v-model="newMessage"
 						placeholder="Escribe un mensaje..."
+						type="textarea"
 						class="flex-1"
 						:rows="1"
 						autoresize
@@ -99,7 +100,7 @@
 		<Dialog v-model="showInviteModal" :options="{ title: 'Invitar Miembro' }">
 			<template #body-content>
 				<div class="space-y-4">
-					<Input
+					<FormControl
 						type="email"
 						label="Correo Electrónico"
 						v-model="inviteEmail"
@@ -132,7 +133,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { Button, Input, Textarea, Dialog, createResource, Spinner, toast } from 'frappe-ui'
+import { Button, FormControl, Dialog, createResource, Spinner, toast } from 'frappe-ui'
 import { ArrowLeft, Send, UserPlus } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { sessionStore } from '@/stores/session'

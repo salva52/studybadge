@@ -71,13 +71,14 @@
 		<Dialog v-model="showCreateModal" :options="{ title: 'Crear Grupo Privado' }">
 			<template #body-content>
 				<div class="space-y-4">
-					<Input
+					<FormControl
 						type="text"
 						label="Nombre del Grupo"
 						v-model="newGroup.title"
 						placeholder="Ej. Grupo de Estudio Python"
 					/>
-					<Textarea
+					<FormControl
+						type="textarea"
 						label="Descripción"
 						v-model="newGroup.description"
 						placeholder="¿De qué trata este grupo?"
@@ -104,7 +105,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { Button, Input, Textarea, Dialog, Badge, createResource, Spinner, toast } from 'frappe-ui'
+import { Button, FormControl, Dialog, Badge, createResource, Spinner, toast } from 'frappe-ui'
 import { Plus, Users, MessageCircle } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 
