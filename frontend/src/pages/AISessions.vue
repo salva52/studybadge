@@ -48,8 +48,8 @@
 			<aside class="session-rail" :class="{ open: showSessions }">
 			<div class="rail-head">
 				<div>
-					<div class="rail-brand"><Sparkles class="size-4" /> {{ __('StudyBadge TutorIA') }}</div>
-					<p>{{ access?.is_plus ? __('Plan actual: Plus') : __('Plan actual: Light • Actualiza para sesiones avanzadas') }}</p>
+					<div class="rail-brand"><Sparkles class="size-4" /> {{ __('TutorIA Study') }}</div>
+					<p>{{ access?.is_plus ? __('Plus: sesiones avanzadas') : accessText }}</p>
 				</div>
 				<button class="icon-btn mobile-only" @click="showSessions = false"><X class="size-4" /></button>
 			</div>
@@ -93,7 +93,7 @@
 					</button>
 					<div class="session-title">
 						<span>{{ activeSession ? activeSession.title : __('Nuevo chat de estudio') }}</span>
-						<small>{{ activeSession ? (activeSession.academic_context || activeSession.goal || __('Con tus fuentes y herramientas')) : __('Crea una sesión y empieza a estudiar con IA') }}</small>
+						<small>{{ activeSession ? (activeSession.academic_context || activeSession.goal || __('Con tus fuentes y herramientas')) : __('Crea una sesion y empieza a conversar') }}</small>
 					</div>
 				</div>
 				<div class="header-actions">
@@ -117,12 +117,12 @@
 			<section v-if="!activeSession" class="new-chat">
 				<div class="new-chat-inner">
 					<div class="new-badge"><Bot class="size-5" /> {{ __('Study chat') }}</div>
-					<h1 style="font-size: clamp(1.8rem, 5vw, 3.2rem);">{{ __('¿Qué vas a estudiar hoy?') }}</h1>
-					<p>{{ __('Sube tus apuntes, PDFs o trabajos y estudia con IA.') }}</p>
+					<h1>{{ __('¿Qué vas a estudiar hoy?') }}</h1>
+					<p>{{ __('Crea una sesion, sube tus lecturas o trabajos, y conversa con la IA usando esos documentos como contexto.') }}</p>
 						<div class="new-form">
 						<div class="form-group main-group">
 							<label>{{ __('¿Qué vas a estudiar?') }}</label>
-							<input v-model="draft.title" class="title-input" :placeholder="__('Ej: Parcial de Microeconomía, lectura de Filosofía, matrices...')" />
+							<input v-model="draft.title" class="title-input" :placeholder="__('Ej: Parcial de Cálculo, Tesis, Lectura de Filosofía...')" />
 						</div>
 
 						<button class="toggle-advanced-btn" @click="showAdvanced = !showAdvanced">
@@ -157,10 +157,10 @@
 						</div>
 						<div class="new-actions">
 							<button class="secondary-btn" @click="openUploader">
-								<Upload class="size-4" /> {{ __('Subir documentos') }}
+								<Upload class="size-4" /> {{ __('Subir fuentes') }}
 							</button>
 							<button class="primary-btn" :disabled="creating || !canCreate" @click="createSession">
-								<SendHorizontal class="size-4" /> {{ creating ? __('Creando...') : __('Crear sesión con IA') }}
+								<SendHorizontal class="size-4" /> {{ creating ? __('Creando...') : __('Crear y chatear') }}
 							</button>
 						</div>
 					</div>
@@ -183,19 +183,17 @@
 							<Bot v-else class="size-5" />
 						</div>
 						<div class="message-bubble">
-							<div v-if="message.model_label" class="message-model">{{ message.model_label }} <span v-if="activeSession" style="font-weight: 500; text-transform: none; color: #64748B; margin-left: 6px;">Respuesta generada para: {{ activeSession.title }}</span></div>
+							<div v-if="message.model_label" class="message-model">{{ message.model_label }}</div>
 							<div v-if="message.content" v-html="renderMarkdown(message.content)" />
 							<img v-if="message.image_base64" class="chat-image" :src="`data:${message.mime_type || 'image/png'};base64,${message.image_base64}`" :alt="__('Infografia')" />
 						</div>
 					</div>
 					<div v-if="message.role !== 'user' && index === chatMessages.length - 1 && !chatLoading && !toolLoading" class="follow-up-actions">
-						<button @click="sendFollowUp('Copiar')">📋 {{ __('Copiar') }}</button>
-						<button @click="sendFollowUp('Explícalo más simple')">🧠 {{ __('Explícalo fácil') }}</button>
-						<button @click="sendFollowUp('Convertir en flashcards')">🎴 {{ __('Convertir en flashcards') }}</button>
-						<button @click="sendFollowUp('Hacer quiz')">🎯 {{ __('Hacer quiz') }}</button>
-						<button @click="sendFollowUp('Dame un ejemplo')">💡 {{ __('Dame un ejemplo') }}</button>
-						<button @click="sendFollowUp('Hazme practicar')">✍️ {{ __('Hazme practicar') }}</button>
-						<button @click="sendFollowUp('Hazme un resumen en 5 puntos')">📌 {{ __('Resumen en 5 puntos') }}</button>
+						<button @click="sendFollowUp('Explícalo más simple')">{{ __('Explícalo fácil') }}</button>
+						<button @click="sendFollowUp('Dame un ejemplo')">{{ __('Dame un ejemplo') }}</button>
+						<button @click="sendFollowUp('Hazme practicar')">{{ __('Hazme practicar') }}</button>
+						<button @click="sendFollowUp('Qué podría venir en examen?')">{{ __('Preguntas de examen') }}</button>
+						<button @click="sendFollowUp('Hazme un resumen en 5 puntos')">{{ __('Resumen en 5 puntos') }}</button>
 					</div>
 				</div>
 				<div v-if="chatLoading || toolLoading" class="message-row assistant">
@@ -209,14 +207,14 @@
 					<span v-for="file in pendingFiles" :key="file.file_url">{{ file.file_name || file.file_url }}</span>
 				</div>
 				<div class="composer">
-					<button class="icon-btn" :title="__('Adjuntar archivo')" @click="openUploader">
+					<button class="icon-btn" :title="__('Subir fuentes')" @click="openUploader">
 						<Paperclip class="size-5" />
 					</button>
-					<button class="icon-btn" :class="{ 'active-search': useSearch }" :title="__('Buscar en internet')" @click="useSearch = !useSearch">
+					<button class="icon-btn" :class="{ 'active-search': useSearch }" :title="__('Activar búsqueda en Google')" @click="useSearch = !useSearch">
 						<Globe class="size-5" />
 					</button>
 					<div class="relative mode-dropdown-wrapper">
-						<button class="icon-btn" :class="{ 'active-mode': showModesDropdown || chatMode !== 'chat' }" :title="__('Más opciones')" @click="showModesDropdown = !showModesDropdown">
+						<button class="icon-btn" :class="{ 'active-mode': showModesDropdown || chatMode !== 'chat' }" :title="__('Modos de IA')" @click="showModesDropdown = !showModesDropdown">
 							<Plus class="size-5" />
 						</button>
 						<div v-if="showModesDropdown" class="modes-dropdown-menu">
@@ -310,13 +308,13 @@
 				</div>
 				<div v-if="!activeSession?.materials?.length" class="soft-empty">
 					<Upload class="size-5" />
-					{{ __('Sube PDFs, apuntes, trabajos o imágenes.') }}
+					{{ __('Sube PDFs, trabajos, lecturas o imagenes.') }}
 				</div>
 			</div>
 
 			<div class="tools-head">
-				<h2>{{ __('Herramientas de estudio') }}</h2>
-				<p>{{ __('Úsalas con tus documentos') }}</p>
+				<h2>{{ __('Herramientas académicas') }}</h2>
+				<p>{{ __('Responden dentro del chat') }}</p>
 			</div>
 			
 			<div class="tool-group-title mt-2 mb-1" style="font-size:0.8rem; font-weight:800; color:#64748b; text-transform:uppercase;">{{ __('Estudiar') }}</div>
@@ -1121,12 +1119,12 @@ function formatDate(value) {
 }
 
 .session-rail {
-	border-width: 0;
+	border-width: 0 1px 0 0;
 	box-shadow: 12px 0 40px rgba(15, 23, 42, 0.035);
 }
 
 .source-panel {
-	border-width: 0;
+	border-width: 0 0 0 1px;
 	padding: 1.05rem;
 	box-shadow: -12px 0 40px rgba(15, 23, 42, 0.035);
 }
@@ -1299,9 +1297,9 @@ function formatDate(value) {
 	width: 46px;
 	height: 46px;
 	flex: 0 0 auto;
-	background: #082b63;
+	background: var(--sb-primary);
 	color: #ffffff;
-	box-shadow: 0 10px 25px rgba(8, 43, 99, 0.25);
+	box-shadow: 0 16px 34px rgba(10, 34, 81, 0.25);
 }
 
 .send-btn:hover:not(:disabled) {
@@ -1318,7 +1316,7 @@ function formatDate(value) {
 	align-items: center;
 	gap: 0.55rem;
 	margin: 0.9rem 0;
-	border: 0;
+	border: 1px solid rgba(10, 34, 81, 0.12);
 	border-radius: 18px;
 	background: rgba(248, 250, 252, 0.92);
 	padding: 0.68rem 0.8rem;
@@ -1404,10 +1402,10 @@ function formatDate(value) {
 }
 
 .session-item.active {
-	background: #eef5ff;
-	border-color: #c9d8f0;
+	background: linear-gradient(135deg, rgba(10, 34, 81, 0.1), rgba(10, 34, 81, 0.045));
+	border-color: rgba(10, 34, 81, 0.18);
 	color: var(--sb-primary);
-	box-shadow: 0 12px 30px rgba(12, 43, 91, 0.08);
+	box-shadow: 0 14px 30px rgba(10, 34, 81, 0.08);
 }
 
 .session-item.active::before {
@@ -1459,11 +1457,8 @@ function formatDate(value) {
 }
 
 .tool-card {
-	background: #ffffff;
-	border: 1px solid #e2e8f0;
-	border-radius: 18px;
-	padding: 14px;
-	box-shadow: 0 8px 24px rgba(15, 35, 75, 0.05);
+	border-color: rgba(226, 232, 240, 0.92);
+	background: rgba(255, 255, 255, 0.9);
 	cursor: pointer;
 }
 
@@ -1684,12 +1679,12 @@ function formatDate(value) {
 	position: relative;
 	margin-top: 2rem;
 	overflow: hidden;
-	border: 1px solid rgba(210, 220, 235, 0.9);
+	border: 1px solid rgba(10, 34, 81, 0.12);
 	border-radius: 28px;
-	background: rgba(255, 255, 255, 0.82);
+	background: rgba(255, 255, 255, 0.9);
 	padding: 1.35rem;
 	text-align: left;
-	box-shadow: 0 24px 70px rgba(8, 43, 99, 0.15);
+	box-shadow: var(--sb-shadow-strong);
 	backdrop-filter: blur(18px);
 }
 
@@ -1930,7 +1925,8 @@ function formatDate(value) {
 }
 
 .message-row.user .avatar {
-	display: none;
+	background: rgba(10, 34, 81, 0.08);
+	color: var(--sb-primary);
 }
 
 .message-row.assistant .avatar {
@@ -2181,16 +2177,11 @@ function formatDate(value) {
 
 .follow-up-actions {
 	display: flex;
-	flex-wrap: nowrap;
-	overflow-x: auto;
+	flex-wrap: wrap;
 	gap: 0.5rem;
 	max-width: 100%;
 	margin: 0.1rem 0 0.8rem 50px;
-	padding-bottom: 4px;
-	scrollbar-width: none;
-}
-.follow-up-actions::-webkit-scrollbar {
-	display: none;
+	overflow: hidden;
 }
 
 .follow-up-actions button {
@@ -2237,7 +2228,7 @@ function formatDate(value) {
 	gap: 0.55rem;
 	width: min(980px, 100%);
 	margin: 0 auto;
-	border: 0;
+	border: 1px solid rgba(10, 34, 81, 0.13);
 	border-radius: 26px;
 	background: rgba(255, 255, 255, 0.94);
 	padding: 0.55rem;
