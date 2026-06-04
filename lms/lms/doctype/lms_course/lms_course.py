@@ -122,8 +122,8 @@ class LMSCourse(Document):
 			
 		# Automatically manage Course Group
 		if getattr(self, "enable_group", 0):
-			group_exists = frappe.db.exists("StudyBadge Group", {"course": self.name, "type": "Course"})
-			if not group_exists:
+			group_name = frappe.db.get_value("StudyBadge Group", {"course": self.name, "type": "Course"})
+			if not group_name:
 				group = frappe.new_doc("StudyBadge Group")
 				group.title = f"Grupo del Curso: {self.title}"
 				group.description = f"Grupo oficial de charla para el curso {self.title}"
@@ -131,16 +131,29 @@ class LMSCourse(Document):
 				group.course = self.name
 				group.status = "Active"
 				group.insert(ignore_permissions=True)
+				group_name = group.name
 				
-				# Add instructors as Admins
-				if getattr(self, "instructors", None):
-					for inst in self.instructors:
+			# Sync Instructors as Admins
+			if getattr(self, "instructors", None):
+				for inst in self.instructors:
+					if not frappe.db.exists("StudyBadge Group Member", {"group": group_name, "user": inst.instructor}):
 						member = frappe.new_doc("StudyBadge Group Member")
-						member.group = group.name
+						member.group = group_name
 						member.user = inst.instructor
 						member.role = "Admin"
 						member.status = "Accepted"
 						member.insert(ignore_permissions=True)
+						
+			# Sync Enrolled Students
+			enrolled_students = frappe.get_all("LMS Enrollment", filters={"course": self.name}, fields=["member"])
+			for student in enrolled_students:
+				if not frappe.db.exists("StudyBadge Group Member", {"group": group_name, "user": student.member}):
+					member = frappe.new_doc("StudyBadge Group Member")
+					member.group = group_name
+					member.user = student.member
+					member.role = "Member"
+					member.status = "Accepted"
+					member.insert(ignore_permissions=True)
 
 	def on_payment_authorized(self, payment_status):
 		if payment_status in ["Authorized", "Completed"]:
