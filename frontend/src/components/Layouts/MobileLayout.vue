@@ -242,6 +242,7 @@ const filterLinksToShow = (data) => {
 
 const addOtherLinks = () => {
 	if (user) {
+		addLink('Certificados', 'Award', 'ProfileCertificates')
 		addLink('Referidos', 'Gift', 'Referrals')
 		addLink('Notificaciones', 'Bell', 'Notifications')
 		addLink('Perfil', 'UserRound')
@@ -310,8 +311,6 @@ const pickBottomTabs = (links) => {
 		'Practicar',
 		'Prompt Library',
 		'Prompts',
-		'Certificates',
-		'Certificados',
 	]
 
 	const selected = []
@@ -400,6 +399,16 @@ const handleClick = (tab) => {
 	if (tab.label === 'Cerrar sesión') {
 		logout.submit().then(() => {
 			isLoggedIn = false
+		})
+		return
+	}
+
+	if (tab.label === 'Certificados' && profileUsername.value) {
+		router.push({
+			name: 'ProfileCertificates',
+			params: {
+				username: profileUsername.value,
+			},
 		})
 		return
 	}
