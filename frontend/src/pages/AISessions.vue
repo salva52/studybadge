@@ -98,10 +98,10 @@
 				<div class="header-actions">
 					<div class="model-switch">
 						<button :class="{ active: selectedModel === 'light' }" @click="selectModel('light')">
-							<Zap class="size-4" /> <span>Study Model Light</span>
+							<Zap class="size-4" /> <span>Light</span>
 						</button>
 						<button :class="{ active: selectedModel === 'pro', locked: !access?.pro_available }" @click="selectModel('pro')">
-							<Crown class="size-4" /> <span>Study Model Pro</span>
+							<Crown class="size-4" /> <span>Pro</span>
 						</button>
 					</div>
 					<button class="icon-btn hide-on-mobile" :class="{ 'active': rightPanelCollapsed }" @click="rightPanelCollapsed = !rightPanelCollapsed" :title="__('Alternar panel derecho')">
