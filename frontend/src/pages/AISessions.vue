@@ -228,7 +228,7 @@
 						ref="chatTextarea"
 						v-model="chatInput"
 						rows="1"
-						:placeholder="__('Pregunta sobre tu lectura, pide ejemplos o escribe \'hazme practicar\'…')"
+						:placeholder="__('Escríbeme…')"
 						@input="autoResizeTextarea"
 						@keydown.enter.exact.prevent="sendChat"
 						@keydown.shift.enter.stop
