@@ -741,12 +741,13 @@ async function sendChat() {
 		access.value = result.access || access.value
 		await nextTick(scrollChat)
 
-		if (result.action && result.action.type === 'open_tool') {
-			const toolId = result.action.tool
-			if (toolId === 'quiz') showQuiz.value = true
-			if (toolId === 'flashcards') showFlashcards.value = true
-			if (toolId === 'guided_reading' || toolId === 'reader_question') showGuidedReading.value = true
-			if (toolId === 'math') showMath.value = true
+		const actionTool = (result.action && result.action.type === 'open_tool') ? result.action.tool : result.trigger_modal;
+
+		if (actionTool) {
+			if (actionTool === 'quiz') showQuiz.value = true
+			if (actionTool === 'flashcards') showFlashcards.value = true
+			if (actionTool === 'guided_reading' || actionTool === 'reader_question') showGuidedReading.value = true
+			if (actionTool === 'math') showMath.value = true
 			
 			modalLoading.value = true
 			modalData.value = null
@@ -755,7 +756,7 @@ async function sendChat() {
 				const toolResult = await api('generate_ai_tool', {
 					session: activeSession.value.name,
 					thread: currentThread.value?.name,
-					tool: toolId,
+					tool: actionTool,
 					payload: { prompt: text || '' },
 				})
 				modalData.value = toolResult.result
