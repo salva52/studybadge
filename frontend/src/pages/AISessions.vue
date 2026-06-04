@@ -294,6 +294,10 @@
 				<h2>{{ __('Fuentes de estudio') }}</h2>
 				<p>{{ materialCountText }}</p>
 			</div>
+			
+			<TranscriptionCard v-if="activeSession" :session-name="activeSession.name" @transcription-completed="onTranscriptionCompleted" />
+			<TranscriptionHistory v-if="activeSession" :session-name="activeSession.name" :refresh-trigger="refreshTranscriptionHistoryTrigger" @deleted="refreshSession" />
+
 			<button class="secondary-btn full" @click="openUploader">
 				<Upload class="size-4" /> {{ __('Agregar documentos') }}
 			</button>
@@ -405,6 +409,8 @@ import QuizModal from '@/components/QuizModal.vue'
 import FlashcardsModal from '@/components/FlashcardsModal.vue'
 import GuidedReadingModal from '@/components/GuidedReadingModal.vue'
 import MathModal from '@/components/MathModal.vue'
+import TranscriptionCard from '@/components/TranscriptionCard.vue'
+import TranscriptionHistory from '@/components/TranscriptionHistory.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -425,6 +431,19 @@ const creating = ref(false)
 const chatLoading = ref(false)
 const toolLoading = ref(false)
 const isPageLoading = ref(true)
+
+const refreshTranscriptionHistoryTrigger = ref(0)
+
+function onTranscriptionCompleted(res) {
+	refreshTranscriptionHistoryTrigger.value++
+	refreshSession()
+}
+
+async function refreshSession() {
+	if (activeSession.value) {
+		activeSession.value = await api('get_ai_session', { name: activeSession.value.name })
+	}
+}
 
 const showAdvanced = ref(false)
 
