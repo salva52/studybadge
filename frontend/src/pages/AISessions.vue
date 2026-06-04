@@ -318,7 +318,7 @@
 				</footer>
 			</main>
 
-			<aside class="source-panel" :class="{ open: showTools }">
+			<aside v-if="activeSession" class="source-panel" :class="{ open: showTools }">
 				<div class="panel-head">
 					<div>
 						<h2>{{ __('Panel de estudio') }}</h2>
@@ -328,21 +328,22 @@
 					</button>
 				</div>
 
-				<div v-if="activeSession" class="tools-head mt-0">
+				<div class="tools-head mt-0">
 					<h2>{{ __('Chats') }}</h2>
 					<p>{{ __('Historial de esta sesión') }}</p>
 				</div>
 
-				<button v-if="activeSession" class="secondary-btn full" @click="startNewThread">
+				<button class="secondary-btn full" @click="startNewThread">
 					<Plus class="size-4" />
 					{{ __('Nuevo chat') }}
 				</button>
 
-				<div v-if="activeSession" class="sources-list scrollable-list">
+				<div class="sources-list scrollable-list">
+					<div v-if="pinnedThreads.length > 0" class="thread-group-title">{{ __('Chats fijados') }}</div>
 					<button
-						v-for="thread in activeSession?.threads || []"
+						v-for="thread in pinnedThreads"
 						:key="thread.name"
-						class="session-item"
+						class="session-item group relative"
 						:class="{ active: currentThread?.name === thread.name }"
 						@click="switchThread(thread)"
 					>
@@ -351,6 +352,37 @@
 							<strong>{{ thread.title || __('Chat') }}</strong>
 							<small>{{ formatDate(thread.modified) }}</small>
 						</span>
+						<div class="thread-actions" @click.stop>
+							<button class="thread-action-btn" title="Desfijar chat" @click.stop="togglePinThread(thread)">
+								<PinOff class="size-3.5" />
+							</button>
+							<button class="thread-action-btn delete-btn" title="Eliminar chat" @click.stop="deleteThread(thread)">
+								<Trash2 class="size-3.5" />
+							</button>
+						</div>
+					</button>
+
+					<div v-if="pinnedThreads.length > 0 && recentThreads.length > 0" class="thread-group-title mt-3">{{ __('Recientes') }}</div>
+					<button
+						v-for="thread in recentThreads"
+						:key="thread.name"
+						class="session-item group relative"
+						:class="{ active: currentThread?.name === thread.name }"
+						@click="switchThread(thread)"
+					>
+						<MessageCircle class="size-4 mt-1" />
+						<span>
+							<strong>{{ thread.title || __('Chat') }}</strong>
+							<small>{{ formatDate(thread.modified) }}</small>
+						</span>
+						<div class="thread-actions" @click.stop>
+							<button class="thread-action-btn" title="Fijar chat" @click.stop="togglePinThread(thread)">
+								<Pin class="size-3.5" />
+							</button>
+							<button class="thread-action-btn delete-btn" title="Eliminar chat" @click.stop="deleteThread(thread)">
+								<Trash2 class="size-3.5" />
+							</button>
+						</div>
 					</button>
 				</div>
 
@@ -359,7 +391,7 @@
 					<p>{{ materialCountText }}</p>
 				</div>
 
-				<button class="secondary-btn full" :disabled="!activeSession" @click="openUploader">
+				<button class="secondary-btn full" @click="openUploader">
 					<Upload class="size-4" />
 					{{ __('Agregar documentos') }}
 				</button>
@@ -377,7 +409,7 @@
 
 					<div v-if="!activeSession?.materials?.length" class="soft-empty">
 						<Upload class="size-5" />
-						{{ activeSession ? __('Sube PDFs, trabajos, lecturas o imagenes.') : __('Crea una sesión para agregar fuentes.') }}
+						{{ __('Sube PDFs, trabajos, lecturas o imagenes.') }}
 					</div>
 				</div>
 
@@ -393,7 +425,7 @@
 						:key="tool.id"
 						class="tool-card"
 						:class="{ locked: tool.pro && !access?.is_plus }"
-						:disabled="!activeSession || toolLoading"
+						:disabled="toolLoading"
 						@click="runTool(tool)"
 					>
 						<component :is="tool.icon" class="size-5" />
@@ -412,7 +444,7 @@
 						:key="tool.id"
 						class="tool-card"
 						:class="{ locked: tool.pro && !access?.is_plus }"
-						:disabled="!activeSession || toolLoading"
+						:disabled="toolLoading"
 						@click="runTool(tool)"
 					>
 						<component :is="tool.icon" class="size-5" />
@@ -431,7 +463,7 @@
 						:key="tool.id"
 						class="tool-card"
 						:class="{ locked: tool.pro && !access?.is_plus }"
-						:disabled="!activeSession || toolLoading"
+						:disabled="toolLoading"
 						@click="runTool(tool)"
 					>
 						<component :is="tool.icon" class="size-5" />
@@ -484,6 +516,9 @@ import {
 	MessagesSquare,
 	Paperclip,
 	PanelRight,
+	Pin,
+	PinOff,
+	Trash2,
 	Plus,
 	Search,
 	SendHorizontal,
@@ -629,6 +664,14 @@ const filteredSessions = computed(() => {
 const selectedModel = computed(() => activeSession.value?.model_tier || draft.value.model_tier || 'light')
 const canCreate = computed(() => access.value?.can_create_session !== false)
 
+const pinnedThreads = computed(() => {
+	return (activeSession.value?.threads || []).filter((t) => t.is_pinned)
+})
+
+const recentThreads = computed(() => {
+	return (activeSession.value?.threads || []).filter((t) => !t.is_pinned)
+})
+
 const accessText = computed(() => {
 	if (!access.value) return ''
 	if (access.value.is_plus) return __('Plus ilimitado')
@@ -660,6 +703,46 @@ async function api(method, params = {}) {
 	} catch (error) {
 		toast.error(error.messages?.[0] || error.message || __('No se pudo completar la accion.'))
 		throw error
+	}
+}
+
+const togglePinThread = async (thread) => {
+	try {
+		const newIsPinned = thread.is_pinned ? 0 : 1
+		thread.is_pinned = newIsPinned
+		const res = await api('pin_ai_thread', {
+			session: activeSession.value.name,
+			thread: thread.name,
+			is_pinned: newIsPinned
+		})
+		activeSession.value = res
+	} catch (error) {
+		console.error(error)
+		thread.is_pinned = thread.is_pinned ? 0 : 1
+	}
+}
+
+const deleteThread = async (thread) => {
+	if (!confirm(__('¿Seguro que deseas eliminar este chat?'))) return
+
+	try {
+		const isCurrent = currentThread.value?.name === thread.name
+		const res = await api('delete_ai_thread', {
+			session: activeSession.value.name,
+			thread: thread.name
+		})
+		activeSession.value = res
+		
+		if (isCurrent) {
+			currentThread.value = activeSession.value.threads?.[0] || null
+			if (currentThread.value) {
+				router.push(`/lms/ai-sessions/${activeSession.value.name}/${currentThread.value.name}`)
+			} else {
+				router.push(`/lms/ai-sessions/${activeSession.value.name}`)
+			}
+		}
+	} catch (error) {
+		console.error(error)
 	}
 }
 
@@ -3075,4 +3158,50 @@ function formatDate(value) {
 		opacity: 0.6;
 	}
 }
+	.thread-group-title {
+		font-size: 0.75rem;
+		font-weight: 800;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--sb-soft, #94a3b8);
+		padding: 0 0.5rem 0.25rem;
+	}
+
+	.thread-actions {
+		position: absolute;
+		right: 0.5rem;
+		top: 50%;
+		transform: translateY(-50%);
+		display: flex;
+		gap: 0.25rem;
+		opacity: 0;
+		transition: opacity 0.2s;
+	}
+
+	.session-item:hover .thread-actions {
+		opacity: 1;
+	}
+
+	.thread-action-btn {
+		padding: 0.35rem;
+		border-radius: 6px;
+		color: var(--sb-muted, #64748b);
+		background: var(--sb-bg, #f1f5f9);
+		border: none;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s;
+	}
+
+	.thread-action-btn:hover {
+		background: #e2e8f0;
+		color: var(--sb-text, #0f172a);
+	}
+
+	.thread-action-btn.delete-btn:hover {
+		background: #fee2e2;
+		color: #ef4444;
+	}
 </style>
