@@ -1727,6 +1727,7 @@ const ExerciseList = defineComponent({
 .flow-card {
 	position: relative;
 	display: flex;
+	flex-direction: column;
 	align-items: flex-start;
 	gap: 0.85rem;
 	min-height: 150px;
@@ -1734,7 +1735,7 @@ const ExerciseList = defineComponent({
 	border-radius: 22px;
 	background:
 		linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.86));
-	padding: 1rem;
+	padding: 1.15rem;
 	text-align: left;
 	cursor: pointer;
 	transition:
@@ -1821,11 +1822,13 @@ const ExerciseList = defineComponent({
 }
 
 .flow-arrow {
+	position: absolute;
+	top: 1.3rem;
+	right: 1.15rem;
 	width: 18px;
 	height: 18px;
 	flex-shrink: 0;
 	color: #cbd5e1;
-	margin-top: 0.15rem;
 	transition: transform 0.18s ease, color 0.18s ease;
 }
 
