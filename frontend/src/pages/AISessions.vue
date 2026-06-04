@@ -201,7 +201,7 @@
 				</div>
 			</section>
 
-			<footer v-if="activeSession" class="composer-wrap" :class="{ 'panel-open': showSessions || showTools }">
+			<footer v-if="activeSession" class="composer-wrap">
 				<div v-if="pendingFiles.length" class="pending-row">
 					<span v-for="file in pendingFiles" :key="file.file_url">{{ file.file_name || file.file_url }}</span>
 				</div>
@@ -2848,11 +2848,6 @@ function formatDate(value) {
 		backdrop-filter: blur(16px);
 	}
 
-	.composer-wrap.panel-open {
-		opacity: 0;
-		pointer-events: none;
-	}
-
 	.composer {
 		gap: 0.42rem;
 		border-radius: 22px;
@@ -3061,7 +3056,7 @@ function formatDate(value) {
    ========================================== */
 .chat-skeleton-wrapper {
 	display: flex;
-	height: 100vh;
+	height: 100dvh;
 	width: 100%;
 	background: var(--bg-color);
 }
