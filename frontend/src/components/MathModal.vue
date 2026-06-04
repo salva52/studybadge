@@ -6,10 +6,7 @@
 				<button class="icon-btn" @click="close"><X class="size-5" /></button>
 			</div>
 			
-			<div v-if="loading" class="loading-state">
-				<div class="spinner"></div>
-				<p>{{ __('Resolviendo el problema...') }}</p>
-			</div>
+			<LoadingFunFacts v-if="loading" :active="loading" :title="__('Resolviendo el problema...')" />
 			
 			<div v-else-if="mathData && mathData.steps" class="math-body">
 				<div class="math-steps">
@@ -42,6 +39,7 @@
 <script setup>
 import { computed } from 'vue'
 import { Sigma, X } from 'lucide-vue-next'
+import LoadingFunFacts from './LoadingFunFacts.vue'
 import MarkdownIt from 'markdown-it'
 import mk from 'markdown-it-katex'
 import DOMPurify from 'dompurify'
@@ -107,8 +105,6 @@ function renderMarkdown(text) {
 .practice-content { font-size: 1.05rem; color: #713f12; overflow-x: auto; }
 
 .loading-state, .error-state { padding: 4rem 2rem; text-align: center; color: #64748b; }
-.spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
-@keyframes spin { to { transform: rotate(360deg); } }
 
 :root[data-theme="dark"] .modal-content { background: #1e293b; color: #f8fafc; }
 :root[data-theme="dark"] .modal-header { border-color: #334155; }

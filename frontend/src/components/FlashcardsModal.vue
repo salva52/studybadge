@@ -6,10 +6,7 @@
 				<button class="icon-btn" @click="close"><X class="size-5" /></button>
 			</div>
 			
-			<div v-if="loading" class="loading-state">
-				<div class="spinner"></div>
-				<p>{{ __('Creando tarjetas...') }}</p>
-			</div>
+			<LoadingFunFacts v-if="loading" :active="loading" :title="__('Creando tus tarjetas...')" />
 			
 			<div v-else-if="flashcardsData && flashcardsData.flashcards && flashcardsData.flashcards.length > 0" class="flashcards-body">
 				<div class="progress-bar">
@@ -55,6 +52,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { Layers, X, ChevronLeft, ChevronRight, RotateCw } from 'lucide-vue-next'
+import LoadingFunFacts from './LoadingFunFacts.vue'
 
 const props = defineProps({
 	show: Boolean,
@@ -149,8 +147,6 @@ function prevCard() {
 .know-btn.right { background: #dcfce3; color: #166534; }
 
 .loading-state, .error-state { padding: 4rem 2rem; text-align: center; color: #64748b; }
-.spinner { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
-@keyframes spin { to { transform: rotate(360deg); } }
 
 @keyframes slideUpSheet { from { transform: translateY(100%); } to { transform: translateY(0); } }
 

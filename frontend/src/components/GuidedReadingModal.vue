@@ -58,10 +58,7 @@
 							</div>
 						</div>
 						
-						<div v-if="loading" class="loading-state">
-							<div class="typing-indicator"><span></span><span></span><span></span></div>
-							<p>{{ __('Analizando tu avance...') }}</p>
-						</div>
+						<LoadingFunFacts v-if="loading" :active="loading" :title="__('Analizando tu avance...')" />
 						
 						<div v-else-if="readingData && readingData.question" class="question-card">
 
@@ -98,6 +95,7 @@
 <script setup>
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { MessageCircle, X, FileText, Bot, Lightbulb } from 'lucide-vue-next'
+import LoadingFunFacts from './LoadingFunFacts.vue'
 
 const props = defineProps({
 	show: Boolean,
