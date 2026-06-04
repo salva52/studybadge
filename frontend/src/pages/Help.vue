@@ -344,7 +344,7 @@ const sendMessage = async () => {
 	await scrollToBottom()
 	
 	try {
-		const response = await call('studybadge_ai.studybadge_ai.ai_support.chat_with_support', {
+		const response = await call('studybadge_ai.ai_support.chat_with_support', {
 			message: msgText,
 			images_base64: imgBase64 ? JSON.stringify([imgBase64]) : '[]',
 			history: JSON.stringify(chatHistory.value.slice(0, -1)) // send previous history
