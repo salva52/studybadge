@@ -1,68 +1,112 @@
 <template>
-	<div class="group-detail-page px-6 py-4">
-		<header>
-			<div class="flex items-center gap-4 pb-4">
-				<Button variant="ghost" @click="router.push({ name: 'Groups' })">
-					<template #icon><ArrowLeft class="size-4" /></template>
-				</Button>
-				<div class="flex-1">
-					<h1 class="text-2xl font-bold text-ink-gray-9">{{ groupDetails.data?.title || 'Cargando...' }}</h1>
-					<p class="text-sm text-ink-gray-5">{{ groupDetails.data?.member_count || 0 }} miembros • {{ groupDetails.data?.type === 'Course' ? 'Grupo de Curso' : 'Grupo Privado' }}</p>
-				</div>
-				<Button
-					v-if="isAdmin"
-					variant="solid"
-					@click="showInviteModal = true"
-				>
-					<template #icon><UserPlus class="size-4" /></template>
-					Invitar Miembros
-				</Button>
+	<div class="group-detail-page min-h-screen bg-[#f7f9fc] px-4 py-5 md:px-6">
+		<header class="detail-header">
+			<Button
+				variant="ghost"
+				class="back-button"
+				@click="router.push({ name: 'Groups' })"
+			>
+				<template #icon><ArrowLeft class="size-4" /></template>
+			</Button>
+
+			<div class="header-copy">
+				<p class="eyebrow">
+					{{ groupDetails.data?.type === 'Course' ? 'Grupo de curso' : 'Grupo privado' }}
+				</p>
+				<h1>{{ groupDetails.data?.title || 'Cargando...' }}</h1>
+				<p>
+					{{ groupDetails.data?.member_count || 0 }} miembros activos en este espacio de estudio
+				</p>
 			</div>
+
+			<Button
+				v-if="isAdmin"
+				variant="solid"
+				class="primary-button"
+				@click="showInviteModal = true"
+			>
+				<template #icon><UserPlus class="size-4" /></template>
+				Invitar
+			</Button>
 		</header>
 
-		<div class="flex h-[calc(100vh-140px)] gap-6 mt-4 pb-4">
+		<div class="detail-layout">
 			<!-- Chat Area -->
-			<div class="flex-1 flex flex-col bg-surface-white border border-outline-gray-2 rounded-xl shadow-sm overflow-hidden">
-				
+			<section class="chat-shell">
+				<div class="chat-topbar">
+					<div>
+						<p class="chat-kicker">Chat del grupo</p>
+						<h2>Conversación principal</h2>
+					</div>
+					<div class="live-pill">
+						<span></span>
+						Activo
+					</div>
+				</div>
+
 				<!-- Messages Container -->
-				<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-4 bg-surface-gray-1" ref="messagesContainer">
-					<div v-if="messages.loading" class="flex justify-center p-4">
-						<Spinner class="size-6 text-ink-gray-4" />
+				<div class="messages-area" ref="messagesContainer">
+					<div v-if="messages.loading" class="messages-loading">
+						<Spinner class="size-7 text-[#0d1e3e]" />
+						<p>Cargando mensajes...</p>
 					</div>
-					
-					<div
-						v-for="msg in messages.data"
-						:key="msg.name"
-						class="flex gap-3 max-w-[85%]"
-						:class="msg.user === currentUser ? 'self-end flex-row-reverse' : 'self-start'"
-					>
-						<UserAvatar :user="msg" class="size-8 shrink-0 mt-1" />
-						<div :class="msg.user === currentUser ? 'bg-blue-600 text-white rounded-l-2xl rounded-tr-2xl' : 'bg-white border border-outline-gray-2 text-ink-gray-9 rounded-r-2xl rounded-tl-2xl'" class="p-3 shadow-sm">
-							<p v-if="msg.user !== currentUser" class="text-xs font-semibold mb-1" :class="msg.user === currentUser ? 'text-blue-100' : 'text-blue-600'">
-								{{ msg.full_name || msg.user }}
-							</p>
-							<p class="whitespace-pre-wrap break-words text-sm">{{ msg.content }}</p>
-							<p class="text-[10px] mt-1 text-right" :class="msg.user === currentUser ? 'text-blue-200' : 'text-ink-gray-4'">
-								{{ formatTime(msg.creation) }}
-							</p>
+
+					<div v-else-if="!messages.data || messages.data.length === 0" class="empty-chat">
+						<div class="empty-chat-icon">
+							<Send class="size-7" />
 						</div>
+						<h3>Empieza la conversación</h3>
+						<p>Escribe el primer mensaje para coordinar, estudiar o compartir ideas con tu grupo.</p>
 					</div>
+
+					<template v-else>
+						<div
+							v-for="msg in messages.data"
+							:key="msg.name"
+							class="message-row"
+							:class="msg.user === currentUser ? 'is-current' : 'is-other'"
+						>
+							<UserAvatar :user="msg" class="message-avatar" />
+
+							<div
+								class="message-bubble"
+								:class="msg.user === currentUser ? 'current-bubble' : 'other-bubble'"
+							>
+								<p
+									v-if="msg.user !== currentUser"
+									class="message-author"
+								>
+									{{ msg.full_name || msg.user }}
+								</p>
+
+								<p class="message-content">{{ msg.content }}</p>
+
+								<p
+									class="message-time"
+									:class="msg.user === currentUser ? 'current-time' : 'other-time'"
+								>
+									{{ formatTime(msg.creation) }}
+								</p>
+							</div>
+						</div>
+					</template>
 				</div>
 
 				<!-- Message Input -->
-				<div class="p-3 border-t border-outline-gray-2 bg-white flex gap-2 items-end">
+				<div class="composer">
 					<FormControl
 						v-model="newMessage"
-						placeholder="Escribe un mensaje..."
+						placeholder="Escribe un mensaje para tu grupo..."
 						type="textarea"
-						class="flex-1"
+						class="composer-input"
 						:rows="1"
 						autoresize
 						@keydown.enter.prevent="sendMessage"
 					/>
+
 					<Button
 						variant="solid"
-						class="mb-1"
+						class="send-button"
 						:disabled="!newMessage.trim()"
 						:loading="sending"
 						@click="sendMessage"
@@ -70,34 +114,67 @@
 						<Send class="size-4" />
 					</Button>
 				</div>
-			</div>
+			</section>
 
 			<!-- Sidebar Info -->
-			<div class="w-80 hidden lg:flex flex-col gap-4">
-				<div class="bg-surface-white border border-outline-gray-2 rounded-xl p-4 shadow-sm relative group/edit">
-					<h3 class="font-semibold text-ink-gray-9 mb-2 flex items-center justify-between">
-						Acerca del Grupo
-						<button v-if="isAdmin" @click="openEditModal" class="text-ink-gray-4 hover:text-ink-gray-7 opacity-0 group-hover/edit:opacity-100 transition-opacity" title="Editar Grupo">
+			<aside class="side-panel">
+				<div class="info-card group/edit">
+					<div class="card-heading">
+						<div>
+							<p class="side-kicker">Información</p>
+							<h3>Acerca del grupo</h3>
+						</div>
+
+						<button
+							v-if="isAdmin"
+							@click="openEditModal"
+							class="icon-button opacity-0 group-hover/edit:opacity-100"
+							title="Editar Grupo"
+						>
 							<Settings class="size-4" />
 						</button>
-					</h3>
-					<p class="text-sm text-ink-gray-6 whitespace-pre-wrap">{{ groupDetails.data?.description || 'Sin descripción.' }}</p>
+					</div>
+
+					<p class="description-text">
+						{{ groupDetails.data?.description || 'Sin descripción por ahora.' }}
+					</p>
 				</div>
 
-				<div class="bg-surface-white border border-outline-gray-2 rounded-xl p-4 shadow-sm flex-1 overflow-y-auto">
-					<h3 class="font-semibold text-ink-gray-9 mb-3 flex items-center justify-between">
-						Miembros ({{ groupDetails.data?.members?.length || 0 }})
-					</h3>
-					<div class="flex flex-col gap-3">
-						<div v-for="member in groupDetails.data?.members" :key="member.user" class="flex items-center gap-2 group/member">
-							<UserAvatar :user="member" class="size-8" />
-							<div class="flex-1 min-w-0">
-								<p class="text-sm font-medium text-ink-gray-9 truncate">{{ member.full_name || member.user }}</p>
-								<p class="text-xs text-ink-gray-5">{{ member.role }}</p>
+				<div class="info-card members-card">
+					<div class="card-heading">
+						<div>
+							<p class="side-kicker">Comunidad</p>
+							<h3>Miembros</h3>
+						</div>
+
+						<span class="count-pill">
+							{{ groupDetails.data?.members?.length || 0 }}
+						</span>
+					</div>
+
+					<div
+						v-if="!groupDetails.data?.members || groupDetails.data.members.length === 0"
+						class="empty-members"
+					>
+						Aún no hay miembros visibles.
+					</div>
+
+					<div v-else class="members-list">
+						<div
+							v-for="member in groupDetails.data?.members"
+							:key="member.user"
+							class="member-row group/member"
+						>
+							<UserAvatar :user="member" class="member-avatar" />
+
+							<div class="member-info">
+								<p>{{ member.full_name || member.user }}</p>
+								<span>{{ member.role }}</span>
 							</div>
+
 							<button
 								v-if="isAdmin && member.user !== currentUser"
-								class="text-red-400 hover:text-red-600 p-1 opacity-0 group-hover/member:opacity-100 transition-opacity"
+								class="remove-button opacity-0 group-hover/member:opacity-100"
 								title="Eliminar miembro"
 								@click="removeMember(member.user)"
 							>
@@ -106,37 +183,39 @@
 						</div>
 					</div>
 				</div>
-			</div>
+			</aside>
 		</div>
 
 		<!-- Invite Modal -->
 		<Dialog v-model="showInviteModal" :options="{ title: 'Invitar Miembro' }">
 			<template #body-content>
-				<div class="space-y-4">
+				<div class="modal-form">
 					<FormControl
 						type="email"
 						label="Correo Electrónico"
 						v-model="inviteEmail"
 						placeholder="usuario@ejemplo.com"
 					/>
-					<div class="flex flex-col gap-1">
-						<label class="text-xs text-ink-gray-5">Rol</label>
-						<select v-model="inviteRole" class="form-input text-sm rounded-md border-outline-gray-2">
+
+					<div class="select-field">
+						<label>Rol</label>
+						<select v-model="inviteRole">
 							<option value="Member">Miembro</option>
 							<option value="Admin">Administrador</option>
 						</select>
 					</div>
 				</div>
 			</template>
+
 			<template #actions>
 				<Button
 					variant="solid"
-					class="w-full"
+					class="primary-button w-full"
 					:loading="inviting"
 					@click="sendInvite"
 					:disabled="!inviteEmail"
 				>
-					Enviar Invitación
+					Enviar invitación
 				</Button>
 			</template>
 		</Dialog>
@@ -144,12 +223,13 @@
 		<!-- Edit Group Modal -->
 		<Dialog v-model="showEditModal" :options="{ title: 'Editar Grupo' }">
 			<template #body-content>
-				<div class="space-y-4">
+				<div class="modal-form">
 					<FormControl
 						type="text"
 						label="Nombre del Grupo"
 						v-model="editGroup.title"
 					/>
+
 					<FormControl
 						type="textarea"
 						label="Descripción"
@@ -158,29 +238,30 @@
 					/>
 				</div>
 			</template>
+
 			<template #actions>
-				<div class="flex gap-2">
+				<div class="modal-actions">
 					<Button
 						variant="outline"
-						class="flex-1 text-red-600 border-red-200 hover:bg-red-50"
+						class="danger-button"
 						:loading="deleting"
 						@click="deleteGroup"
 					>
-						Eliminar Grupo
+						Eliminar
 					</Button>
+
 					<Button
 						variant="solid"
-						class="flex-1"
+						class="primary-button flex-1"
 						:loading="saving"
 						@click="saveGroup"
 						:disabled="!editGroup.title"
 					>
-						Guardar
+						Guardar cambios
 					</Button>
 				</div>
 			</template>
 		</Dialog>
-
 	</div>
 </template>
 
@@ -222,7 +303,7 @@ const groupDetails = createResource({
 	params: { group: props.groupName },
 	auto: true,
 	onSuccess(data) {
-		data.member_count = data.members?.length || 0;
+		data.member_count = data.members?.length || 0
 	}
 })
 
@@ -254,17 +335,17 @@ const scrollToBottom = async () => {
 
 const sendMessage = async () => {
 	if (!newMessage.value.trim() || sending.value) return
-	
+
 	try {
 		sending.value = true
 		const content = newMessage.value
 		newMessage.value = ''
-		
+
 		const res = await call('lms.lms.groups.send_message', {
 			group: props.groupName,
 			content: content
 		})
-		
+
 		if (res) {
 			if (!messages.data) messages.data = []
 			messages.data.push(res)
@@ -285,7 +366,7 @@ const sendInvite = async () => {
 			email: inviteEmail.value,
 			role: inviteRole.value
 		})
-		
+
 		toast.success('Invitación enviada')
 		showInviteModal.value = false
 		inviteEmail.value = ''
@@ -299,7 +380,7 @@ const sendInvite = async () => {
 
 const removeMember = async (email) => {
 	if (!confirm('¿Estás seguro de eliminar a este miembro del grupo?')) return
-	
+
 	try {
 		await call('lms.lms.groups.remove_member', {
 			group: props.groupName,
@@ -358,6 +439,7 @@ const deleteGroup = async () => {
 
 // Polling for new messages (Simple MVP approach)
 let pollInterval
+
 onMounted(() => {
 	pollInterval = setInterval(() => {
 		messages.reload()
@@ -368,3 +450,575 @@ onUnmounted(() => {
 	clearInterval(pollInterval)
 })
 </script>
+
+<style scoped>
+.group-detail-page {
+	color: #0d1e3e;
+}
+
+.detail-header {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	background: #ffffff;
+	border: 1px solid #dbe4f0;
+	border-radius: 28px;
+	padding: 18px;
+	box-shadow: 0 18px 45px rgba(13, 30, 62, 0.07);
+}
+
+.header-copy {
+	flex: 1;
+	min-width: 0;
+}
+
+.eyebrow,
+.chat-kicker,
+.side-kicker {
+	margin-bottom: 4px;
+	font-size: 12px;
+	font-weight: 800;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #64748b;
+}
+
+.detail-header h1 {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 28px;
+	font-weight: 900;
+	line-height: 1.1;
+	letter-spacing: -0.04em;
+	color: #0d1e3e;
+}
+
+.detail-header p:not(.eyebrow) {
+	margin-top: 5px;
+	font-size: 14px;
+	color: #64748b;
+}
+
+.detail-layout {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 340px;
+	gap: 22px;
+	height: calc(100vh - 132px);
+	margin-top: 22px;
+	padding-bottom: 4px;
+}
+
+.chat-shell {
+	display: flex;
+	min-height: 0;
+	flex-direction: column;
+	overflow: hidden;
+	background: #ffffff;
+	border: 1px solid #dbe4f0;
+	border-radius: 30px;
+	box-shadow: 0 18px 45px rgba(13, 30, 62, 0.07);
+}
+
+.chat-topbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 18px 20px;
+	border-bottom: 1px solid #e5edf6;
+	background: #ffffff;
+}
+
+.chat-topbar h2 {
+	font-size: 18px;
+	font-weight: 900;
+	letter-spacing: -0.03em;
+	color: #0d1e3e;
+}
+
+.live-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	border-radius: 999px;
+	border: 1px solid #dbe4f0;
+	background: #f8fafc;
+	padding: 8px 12px;
+	font-size: 12px;
+	font-weight: 800;
+	color: #64748b;
+}
+
+.live-pill span {
+	width: 8px;
+	height: 8px;
+	border-radius: 999px;
+	background: #16a34a;
+}
+
+.messages-area {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	overflow-y: auto;
+	padding: 22px;
+	background: #f7f9fc;
+}
+
+.messages-loading,
+.empty-chat {
+	margin: auto;
+	text-align: center;
+	color: #64748b;
+}
+
+.messages-loading {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+}
+
+.empty-chat {
+	max-width: 420px;
+}
+
+.empty-chat-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 64px;
+	height: 64px;
+	margin-bottom: 14px;
+	border-radius: 22px;
+	border: 1px solid #dbe4f0;
+	background: #ffffff;
+	color: #0d1e3e;
+	box-shadow: 0 12px 30px rgba(13, 30, 62, 0.06);
+}
+
+.empty-chat h3 {
+	font-size: 20px;
+	font-weight: 900;
+	letter-spacing: -0.03em;
+	color: #0d1e3e;
+}
+
+.empty-chat p {
+	margin-top: 7px;
+	font-size: 14px;
+	line-height: 1.6;
+	color: #64748b;
+}
+
+.message-row {
+	display: flex;
+	gap: 10px;
+	max-width: min(760px, 86%);
+}
+
+.message-row.is-current {
+	align-self: flex-end;
+	flex-direction: row-reverse;
+}
+
+.message-row.is-other {
+	align-self: flex-start;
+}
+
+.message-avatar {
+	width: 34px;
+	height: 34px;
+	flex-shrink: 0;
+	margin-top: 2px;
+}
+
+.message-bubble {
+	padding: 13px 15px;
+	border-radius: 22px;
+	box-shadow: 0 10px 24px rgba(13, 30, 62, 0.06);
+}
+
+.current-bubble {
+	border-top-right-radius: 8px;
+	background: #0d1e3e;
+	border: 1px solid #0d1e3e;
+	color: #ffffff;
+}
+
+.other-bubble {
+	border-top-left-radius: 8px;
+	background: #ffffff;
+	border: 1px solid #dbe4f0;
+	color: #0d1e3e;
+}
+
+.message-author {
+	margin-bottom: 5px;
+	font-size: 12px;
+	font-weight: 900;
+	color: #0d1e3e;
+}
+
+.message-content {
+	white-space: pre-wrap;
+	word-break: break-word;
+	font-size: 14.5px;
+	line-height: 1.6;
+}
+
+.message-time {
+	margin-top: 6px;
+	text-align: right;
+	font-size: 11px;
+	font-weight: 700;
+}
+
+.current-time {
+	color: rgba(255, 255, 255, 0.65);
+}
+
+.other-time {
+	color: #94a3b8;
+}
+
+.composer {
+	display: flex;
+	align-items: flex-end;
+	gap: 12px;
+	padding: 14px;
+	border-top: 1px solid #e5edf6;
+	background: #ffffff;
+}
+
+.composer-input {
+	flex: 1;
+	border-radius: 20px;
+	background: #f8fafc;
+	border: 1px solid #dbe4f0;
+	padding: 4px 14px;
+}
+
+.composer-input :deep(textarea) {
+	min-height: 44px !important;
+	border: 0 !important;
+	background: transparent !important;
+	box-shadow: none !important;
+	resize: none !important;
+	color: #0d1e3e !important;
+	font-size: 15px !important;
+	line-height: 1.5 !important;
+}
+
+.composer-input:focus-within {
+	border-color: #0d1e3e;
+	box-shadow: 0 0 0 3px rgba(13, 30, 62, 0.08);
+}
+
+.side-panel {
+	display: flex;
+	min-height: 0;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.info-card {
+	background: #ffffff;
+	border: 1px solid #dbe4f0;
+	border-radius: 26px;
+	padding: 18px;
+	box-shadow: 0 18px 45px rgba(13, 30, 62, 0.06);
+}
+
+.members-card {
+	flex: 1;
+	min-height: 0;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+.card-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 14px;
+	margin-bottom: 14px;
+}
+
+.card-heading h3 {
+	font-size: 17px;
+	font-weight: 900;
+	letter-spacing: -0.03em;
+	color: #0d1e3e;
+}
+
+.description-text {
+	white-space: pre-wrap;
+	font-size: 14px;
+	line-height: 1.65;
+	color: #64748b;
+}
+
+.count-pill {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 34px;
+	height: 34px;
+	padding: 0 10px;
+	border-radius: 999px;
+	border: 1px solid #dbe4f0;
+	background: #f8fafc;
+	font-size: 12px;
+	font-weight: 900;
+	color: #0d1e3e;
+}
+
+.members-list {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	overflow-y: auto;
+	padding-right: 3px;
+}
+
+.member-row {
+	display: flex;
+	align-items: center;
+	gap: 11px;
+	padding: 10px;
+	border: 1px solid transparent;
+	border-radius: 18px;
+	transition: background 160ms ease, border-color 160ms ease;
+}
+
+.member-row:hover {
+	background: #f8fafc;
+	border-color: #e5edf6;
+}
+
+.member-avatar {
+	width: 36px;
+	height: 36px;
+	flex-shrink: 0;
+}
+
+.member-info {
+	min-width: 0;
+	flex: 1;
+}
+
+.member-info p {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 14px;
+	font-weight: 850;
+	color: #0d1e3e;
+}
+
+.member-info span {
+	font-size: 12px;
+	font-weight: 700;
+	color: #64748b;
+}
+
+.empty-members {
+	border: 1px dashed #cbd5e1;
+	border-radius: 18px;
+	background: #f8fafc;
+	padding: 18px;
+	font-size: 14px;
+	text-align: center;
+	color: #64748b;
+}
+
+.back-button,
+.icon-button,
+.remove-button {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	border-radius: 16px !important;
+	border: 1px solid #dbe4f0 !important;
+	background: #ffffff !important;
+	color: #0d1e3e !important;
+	transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.back-button {
+	width: 44px;
+	height: 44px;
+	flex-shrink: 0;
+}
+
+.icon-button,
+.remove-button {
+	width: 34px;
+	height: 34px;
+}
+
+.back-button:hover,
+.icon-button:hover {
+	background: #f8fafc !important;
+	border-color: #b8c7dc !important;
+}
+
+.remove-button {
+	color: #b42318 !important;
+	border-color: #f3c7c3 !important;
+}
+
+.remove-button:hover {
+	background: #fff5f5 !important;
+}
+
+.primary-button,
+.send-button {
+	border-radius: 16px !important;
+	background: #0d1e3e !important;
+	border: 1px solid #0d1e3e !important;
+	color: #ffffff !important;
+	font-weight: 850 !important;
+	box-shadow: 0 10px 24px rgba(13, 30, 62, 0.16);
+}
+
+.primary-button:hover,
+.send-button:hover {
+	background: #142b57 !important;
+	border-color: #142b57 !important;
+}
+
+.send-button {
+	width: 48px !important;
+	height: 48px !important;
+	padding: 0 !important;
+	flex-shrink: 0;
+	border-radius: 18px !important;
+}
+
+.send-button:disabled {
+	opacity: 0.45;
+	box-shadow: none;
+}
+
+.modal-form {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.modal-form :deep(input),
+.modal-form :deep(textarea),
+.select-field select {
+	width: 100%;
+	border-radius: 16px !important;
+	border: 1px solid #dbe4f0 !important;
+	background: #f8fafc !important;
+	color: #0d1e3e !important;
+}
+
+.modal-form :deep(input:focus),
+.modal-form :deep(textarea:focus),
+.select-field select:focus {
+	outline: none !important;
+	border-color: #0d1e3e !important;
+	box-shadow: 0 0 0 3px rgba(13, 30, 62, 0.08) !important;
+}
+
+.select-field {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.select-field label {
+	font-size: 12px;
+	font-weight: 800;
+	color: #64748b;
+}
+
+.select-field select {
+	height: 42px;
+	padding: 0 12px;
+	font-size: 14px;
+}
+
+.modal-actions {
+	display: flex;
+	gap: 10px;
+	width: 100%;
+}
+
+.danger-button {
+	flex: 1;
+	border-radius: 16px !important;
+	background: #ffffff !important;
+	color: #b42318 !important;
+	border: 1px solid #f3c7c3 !important;
+	font-weight: 850 !important;
+}
+
+.danger-button:hover {
+	background: #fff5f5 !important;
+}
+
+@media (max-width: 1024px) {
+	.detail-layout {
+		grid-template-columns: 1fr;
+		height: auto;
+		min-height: calc(100vh - 132px);
+	}
+
+	.chat-shell {
+		min-height: calc(100vh - 160px);
+	}
+
+	.side-panel {
+		display: none;
+	}
+}
+
+@media (max-width: 720px) {
+	.detail-header {
+		align-items: flex-start;
+		border-radius: 24px;
+		padding: 16px;
+	}
+
+	.detail-header h1 {
+		font-size: 22px;
+	}
+
+	.detail-header p:not(.eyebrow) {
+		font-size: 13px;
+	}
+
+	.primary-button {
+		padding-inline: 12px !important;
+	}
+
+	.chat-topbar {
+		padding: 16px;
+	}
+
+	.messages-area {
+		padding: 16px;
+	}
+
+	.message-row {
+		max-width: 94%;
+	}
+
+	.composer {
+		padding: 12px;
+	}
+
+	.modal-actions {
+		flex-direction: column;
+	}
+}
+</style>

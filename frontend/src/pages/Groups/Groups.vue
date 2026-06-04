@@ -1,111 +1,172 @@
 <template>
-	<div class="groups-page">
-		<header>
-			<div class="flex items-center justify-between py-4 px-6">
-				<h1 class="text-3xl font-bold text-ink-gray-9">Mis Grupos</h1>
-				<Button
-					variant="solid"
-					@click="showCreateModal = true"
-				>
-					<template #icon><Plus class="size-4" /></template>
-					Crear Grupo Privado
-				</Button>
+	<div class="groups-page min-h-screen bg-[#f7f9fc] px-4 py-5 md:px-6">
+		<header class="groups-header">
+			<div>
+				<p class="eyebrow">StudyBadge Groups</p>
+				<h1>Mis grupos</h1>
+				<p class="header-subtitle">
+					Organiza tus grupos de estudio, clases y conversaciones con alumnos.
+				</p>
 			</div>
-		</header>
-		<div class="px-6">
 
-		<div class="mt-6 flex flex-col gap-8">
+			<Button
+				variant="solid"
+				class="primary-button"
+				@click="showCreateModal = true"
+			>
+				<template #icon><Plus class="size-4" /></template>
+				Crear grupo
+			</Button>
+		</header>
+
+		<main class="groups-content">
 			<!-- Pending Invitations -->
-			<section v-if="invitations.data && invitations.data.length > 0">
-				<h2 class="text-xl font-semibold text-ink-gray-8 mb-4">Invitaciones Pendientes</h2>
-				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+			<section v-if="invitations.data && invitations.data.length > 0" class="section-card">
+				<div class="section-heading">
+					<div>
+						<p class="section-kicker">Pendiente</p>
+						<h2>Invitaciones</h2>
+					</div>
+					<span class="count-pill">{{ invitations.data.length }}</span>
+				</div>
+
+				<div class="invitation-grid">
 					<div
 						v-for="inv in invitations.data"
 						:key="inv.name"
-						class="bg-surface-white border border-outline-gray-2 rounded-xl p-5 shadow-sm"
+						class="invitation-card"
 					>
-						<h3 class="text-lg font-medium text-ink-gray-9">{{ inv.title }}</h3>
-						<p class="text-ink-gray-5 text-sm mt-1 mb-4">{{ inv.description }}</p>
-						<div class="flex gap-2">
-							<Button variant="solid" @click="respondInv(inv.group, 'Accepted')" class="flex-1 bg-green-600 hover:bg-green-700">Aceptar</Button>
-							<Button variant="outline" @click="respondInv(inv.group, 'Rejected')" class="flex-1 text-red-600 border-red-200 hover:bg-red-50">Rechazar</Button>
+						<div class="card-icon">
+							<MessageCircle class="size-5" />
+						</div>
+
+						<h3>{{ inv.title }}</h3>
+						<p>{{ inv.description || 'Te invitaron a unirte a este grupo de estudio.' }}</p>
+
+						<div class="invitation-actions">
+							<Button
+								variant="solid"
+								class="accept-button"
+								@click="respondInv(inv.group, 'Accepted')"
+							>
+								Aceptar
+							</Button>
+							<Button
+								variant="outline"
+								class="reject-button"
+								@click="respondInv(inv.group, 'Rejected')"
+							>
+								Rechazar
+							</Button>
 						</div>
 					</div>
 				</div>
 			</section>
 
 			<!-- Active Groups -->
-			<section>
-				<h2 class="text-xl font-semibold text-ink-gray-8 mb-4">Tus Grupos</h2>
-				<div v-if="groups.loading" class="flex justify-center p-8">
-					<Spinner class="size-8 text-ink-gray-4" />
+			<section class="section-card">
+				<div class="section-heading">
+					<div>
+						<p class="section-kicker">Tus espacios</p>
+						<h2>Grupos activos</h2>
+					</div>
 				</div>
-				<div v-else-if="!groups.data || groups.data.length === 0" class="text-center p-12 bg-surface-gray-2 rounded-xl">
-					<MessageCircle class="size-12 text-ink-gray-4 mx-auto mb-3" />
-					<h3 class="text-lg font-medium text-ink-gray-8">Aún no estás en ningún grupo</h3>
-					<p class="text-ink-gray-5 mt-1">Crea un grupo privado o únete a un curso para empezar a conversar.</p>
+
+				<div v-if="groups.loading" class="loading-state">
+					<Spinner class="size-8 text-[#0d1e3e]" />
+					<p>Cargando tus grupos...</p>
 				</div>
-				<div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+				<div v-else-if="!groups.data || groups.data.length === 0" class="empty-state">
+					<div class="empty-icon">
+						<MessageCircle class="size-8" />
+					</div>
+					<h3>Aún no estás en ningún grupo</h3>
+					<p>
+						Crea un grupo privado o únete a un curso para empezar a conversar y estudiar en comunidad.
+					</p>
+					<Button
+						variant="solid"
+						class="primary-button mt-5"
+						@click="showCreateModal = true"
+					>
+						<template #icon><Plus class="size-4" /></template>
+						Crear mi primer grupo
+					</Button>
+				</div>
+
+				<div v-else class="groups-grid">
 					<router-link
 						v-for="group in groups.data"
 						:key="group.name"
 						:to="{ name: 'GroupDetail', params: { groupName: group.name } }"
-						class="group bg-surface-white border border-outline-gray-2 hover:border-blue-300 rounded-xl p-5 shadow-sm transition-all hover:shadow-md block relative overflow-hidden"
+						class="group-card"
 					>
-						<div class="absolute top-0 left-0 w-1 h-full" :class="group.type === 'Course' ? 'bg-blue-500' : 'bg-purple-500'"></div>
-						<div class="flex justify-between items-start mb-2 pl-2">
-							<h3 class="text-lg font-bold text-ink-gray-9 group-hover:text-blue-600 transition-colors">{{ group.title }}</h3>
-							<Badge :theme="group.type === 'Course' ? 'blue' : 'purple'">{{ group.type === 'Course' ? 'Curso' : 'Privado' }}</Badge>
+						<div class="group-card-top">
+							<div class="group-icon">
+								<MessageCircle class="size-5" />
+							</div>
+
+							<span class="type-pill">
+								{{ group.type === 'Course' ? 'Curso' : 'Privado' }}
+							</span>
 						</div>
-						<p class="text-ink-gray-5 text-sm line-clamp-2 pl-2">{{ group.description }}</p>
-						<div class="mt-4 pt-4 border-t border-outline-gray-2 flex items-center justify-between text-sm pl-2">
-							<span class="text-ink-gray-5 flex items-center gap-1"><Users class="size-4"/> {{ group.member_count }} miembros</span>
-							<span class="text-ink-gray-4">{{ group.role }}</span>
+
+						<div class="group-card-body">
+							<h3>{{ group.title }}</h3>
+							<p>{{ group.description || 'Grupo de estudio en StudyBadge.' }}</p>
+						</div>
+
+						<div class="group-card-footer">
+							<span>
+								<Users class="size-4" />
+								{{ group.member_count }} miembros
+							</span>
+							<span class="role-pill">{{ group.role }}</span>
 						</div>
 					</router-link>
 				</div>
 			</section>
-		</div>
 
-		<!-- Create Group Modal -->
-		<Dialog v-model="showCreateModal" :options="{ title: 'Crear Grupo Privado' }">
-			<template #body-content>
-				<div class="space-y-4">
-					<FormControl
-						type="text"
-						label="Nombre del Grupo"
-						v-model="newGroup.title"
-						placeholder="Ej. Grupo de Estudio Python"
-					/>
-					<FormControl
-						type="textarea"
-						label="Descripción"
-						v-model="newGroup.description"
-						placeholder="¿De qué trata este grupo?"
-						rows="3"
-					/>
-				</div>
-			</template>
-			<template #actions>
-				<Button
-					variant="solid"
-					class="w-full"
-					:loading="creating"
-					@click="createGroup"
-					:disabled="!newGroup.title"
-				>
-					Crear Grupo
-				</Button>
-			</template>
-		</Dialog>
+			<!-- Create Group Modal -->
+			<Dialog v-model="showCreateModal" :options="{ title: 'Crear Grupo Privado' }">
+				<template #body-content>
+					<div class="modal-form">
+						<FormControl
+							type="text"
+							label="Nombre del Grupo"
+							v-model="newGroup.title"
+							placeholder="Ej. Grupo de estudio de Economía"
+						/>
+						<FormControl
+							type="textarea"
+							label="Descripción"
+							v-model="newGroup.description"
+							placeholder="¿De qué trata este grupo?"
+							rows="3"
+						/>
+					</div>
+				</template>
 
-		</div>
+				<template #actions>
+					<Button
+						variant="solid"
+						class="primary-button w-full"
+						:loading="creating"
+						@click="createGroup"
+						:disabled="!newGroup.title"
+					>
+						Crear grupo
+					</Button>
+				</template>
+			</Dialog>
+		</main>
 	</div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { Button, FormControl, Dialog, Badge, createResource, Spinner, toast, call } from 'frappe-ui'
+import { ref, reactive } from 'vue'
+import { Button, FormControl, Dialog, createResource, Spinner, toast, call } from 'frappe-ui'
 import { Plus, Users, MessageCircle } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 
@@ -113,6 +174,7 @@ const router = useRouter()
 
 const showCreateModal = ref(false)
 const creating = ref(false)
+
 const newGroup = reactive({
 	title: '',
 	description: ''
@@ -147,13 +209,13 @@ const createGroup = async () => {
 			description: newGroup.description,
 			group_type: 'Private'
 		})
-		
+
 		toast.success('Grupo creado exitosamente')
 		showCreateModal.value = false
 		groups.reload()
 		newGroup.title = ''
 		newGroup.description = ''
-		
+
 		if (res) {
 			router.push({ name: 'GroupDetail', params: { groupName: res } })
 		}
@@ -164,3 +226,340 @@ const createGroup = async () => {
 	}
 }
 </script>
+
+<style scoped>
+.groups-page {
+	color: #0d1e3e;
+}
+
+.groups-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 24px;
+	background: #ffffff;
+	border: 1px solid #dbe4f0;
+	border-radius: 28px;
+	padding: 24px;
+	box-shadow: 0 18px 45px rgba(13, 30, 62, 0.07);
+}
+
+.eyebrow {
+	margin-bottom: 6px;
+	font-size: 12px;
+	font-weight: 800;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #64748b;
+}
+
+.groups-header h1 {
+	font-size: 34px;
+	line-height: 1.05;
+	font-weight: 900;
+	letter-spacing: -0.04em;
+	color: #0d1e3e;
+}
+
+.header-subtitle {
+	margin-top: 8px;
+	max-width: 580px;
+	font-size: 15px;
+	line-height: 1.6;
+	color: #64748b;
+}
+
+.groups-content {
+	display: flex;
+	flex-direction: column;
+	gap: 22px;
+	margin-top: 22px;
+}
+
+.section-card {
+	background: #ffffff;
+	border: 1px solid #dbe4f0;
+	border-radius: 28px;
+	padding: 24px;
+	box-shadow: 0 18px 45px rgba(13, 30, 62, 0.06);
+}
+
+.section-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 20px;
+}
+
+.section-kicker {
+	margin-bottom: 4px;
+	font-size: 12px;
+	font-weight: 800;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #64748b;
+}
+
+.section-heading h2 {
+	font-size: 22px;
+	font-weight: 900;
+	letter-spacing: -0.03em;
+	color: #0d1e3e;
+}
+
+.count-pill,
+.type-pill,
+.role-pill {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 999px;
+	border: 1px solid #dbe4f0;
+	background: #f7f9fc;
+	color: #0d1e3e;
+	font-size: 12px;
+	font-weight: 800;
+}
+
+.count-pill {
+	width: 34px;
+	height: 34px;
+}
+
+.type-pill {
+	padding: 7px 11px;
+}
+
+.role-pill {
+	padding: 6px 10px;
+	color: #64748b;
+}
+
+.invitation-grid,
+.groups-grid {
+	display: grid;
+	grid-template-columns: repeat(1, minmax(0, 1fr));
+	gap: 16px;
+}
+
+@media (min-width: 768px) {
+	.invitation-grid,
+	.groups-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (min-width: 1200px) {
+	.invitation-grid,
+	.groups-grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+.invitation-card,
+.group-card {
+	position: relative;
+	display: block;
+	border: 1px solid #dbe4f0;
+	border-radius: 24px;
+	background: #ffffff;
+	padding: 20px;
+	text-decoration: none;
+	box-shadow: 0 12px 30px rgba(13, 30, 62, 0.05);
+	transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.invitation-card:hover,
+.group-card:hover {
+	transform: translateY(-3px);
+	border-color: #b8c7dc;
+	box-shadow: 0 22px 45px rgba(13, 30, 62, 0.09);
+}
+
+.card-icon,
+.group-icon,
+.empty-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: #f1f5f9;
+	color: #0d1e3e;
+	border: 1px solid #dbe4f0;
+}
+
+.card-icon,
+.group-icon {
+	width: 44px;
+	height: 44px;
+	border-radius: 16px;
+}
+
+.empty-icon {
+	width: 64px;
+	height: 64px;
+	border-radius: 22px;
+	margin: 0 auto 16px;
+}
+
+.invitation-card h3,
+.group-card h3 {
+	margin-top: 16px;
+	font-size: 18px;
+	font-weight: 900;
+	letter-spacing: -0.03em;
+	color: #0d1e3e;
+}
+
+.invitation-card p,
+.group-card p {
+	margin-top: 7px;
+	font-size: 14px;
+	line-height: 1.6;
+	color: #64748b;
+}
+
+.invitation-actions {
+	display: flex;
+	gap: 10px;
+	margin-top: 18px;
+}
+
+.group-card-top {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 14px;
+}
+
+.group-card-body {
+	min-height: 104px;
+}
+
+.group-card-body p {
+	display: -webkit-box;
+	overflow: hidden;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+}
+
+.group-card-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-top: 18px;
+	padding-top: 16px;
+	border-top: 1px solid #e5edf6;
+	font-size: 13px;
+	color: #64748b;
+}
+
+.group-card-footer span {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.loading-state,
+.empty-state {
+	border: 1px dashed #cbd5e1;
+	border-radius: 24px;
+	background: #f8fafc;
+	padding: 42px 24px;
+	text-align: center;
+}
+
+.loading-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+	color: #64748b;
+}
+
+.empty-state h3 {
+	font-size: 20px;
+	font-weight: 900;
+	letter-spacing: -0.03em;
+	color: #0d1e3e;
+}
+
+.empty-state p {
+	max-width: 520px;
+	margin: 8px auto 0;
+	font-size: 15px;
+	line-height: 1.6;
+	color: #64748b;
+}
+
+.primary-button,
+.accept-button {
+	border-radius: 16px !important;
+	background: #0d1e3e !important;
+	color: #ffffff !important;
+	border: 1px solid #0d1e3e !important;
+	font-weight: 800 !important;
+	box-shadow: 0 10px 24px rgba(13, 30, 62, 0.16);
+}
+
+.primary-button:hover,
+.accept-button:hover {
+	background: #142b57 !important;
+	border-color: #142b57 !important;
+}
+
+.reject-button {
+	border-radius: 16px !important;
+	background: #ffffff !important;
+	color: #b42318 !important;
+	border: 1px solid #f3c7c3 !important;
+	font-weight: 800 !important;
+}
+
+.reject-button:hover {
+	background: #fff5f5 !important;
+}
+
+.modal-form {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.modal-form :deep(input),
+.modal-form :deep(textarea) {
+	border-radius: 16px !important;
+	border-color: #dbe4f0 !important;
+	background: #f8fafc !important;
+	color: #0d1e3e !important;
+}
+
+.modal-form :deep(input:focus),
+.modal-form :deep(textarea:focus) {
+	border-color: #0d1e3e !important;
+	box-shadow: 0 0 0 3px rgba(13, 30, 62, 0.08) !important;
+}
+
+@media (max-width: 720px) {
+	.groups-header {
+		flex-direction: column;
+		align-items: stretch;
+		border-radius: 24px;
+		padding: 20px;
+	}
+
+	.groups-header h1 {
+		font-size: 30px;
+	}
+
+	.section-card {
+		padding: 18px;
+		border-radius: 24px;
+	}
+
+	.invitation-actions {
+		flex-direction: column;
+	}
+}
+</style>
