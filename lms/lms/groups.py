@@ -182,3 +182,36 @@ def remove_member(group: str, email: str):
 		
 	frappe.delete_doc("StudyBadge Group Member", member_doc, ignore_permissions=True)
 	return True
+
+@frappe.whitelist()
+def update_group(group: str, title: str, description: str):
+	if not frappe.db.exists("StudyBadge Group Member", {"group": group, "user": frappe.session.user, "role": "Admin", "status": "Accepted"}):
+		frappe.throw(_("Only Admins can edit group details"))
+		
+	group_doc = frappe.get_doc("StudyBadge Group", group)
+	group_doc.title = title
+	group_doc.description = description
+	group_doc.save(ignore_permissions=True)
+	
+	# Since title is the ID, changing title renames the document in Frappe.
+	# Wait, `StudyBadge Group` has autoname `field:title`.
+	# If we change title, does `save` rename it?
+	# In Frappe, changing a field used for autoname doesn't automatically rename the document unless handled specifically or if `allow_rename` is checked.
+	# To be safe, if title changes, we might need to use `frappe.rename_doc`.
+	# Actually, since renaming affects all linked messages and members, it's complex. Let's let them edit the description and title, but renaming the ID might fail or succeed depending on `allow_rename` and cascade.
+	# Yes, allow_rename is 1. `frappe.rename_doc("StudyBadge Group", group, title, ignore_permissions=True)`
+	
+	if group_doc.name != title:
+		frappe.rename_doc("StudyBadge Group", group, title, ignore_permissions=True)
+		
+	return title
+
+@frappe.whitelist()
+def delete_group(group: str):
+	if not frappe.db.exists("StudyBadge Group Member", {"group": group, "user": frappe.session.user, "role": "Admin", "status": "Accepted"}):
+		frappe.throw(_("Only Admins can delete the group"))
+		
+	frappe.db.delete("StudyBadge Group Member", {"group": group})
+	frappe.db.delete("StudyBadge Group Message", {"group": group})
+	frappe.delete_doc("StudyBadge Group", group, ignore_permissions=True)
+	return True

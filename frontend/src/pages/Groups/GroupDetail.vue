@@ -74,9 +74,14 @@
 
 			<!-- Sidebar Info -->
 			<div class="w-80 hidden lg:flex flex-col gap-4">
-				<div class="bg-surface-white border border-outline-gray-2 rounded-xl p-4 shadow-sm">
-					<h3 class="font-semibold text-ink-gray-9 mb-2">Acerca del Grupo</h3>
-					<p class="text-sm text-ink-gray-6">{{ groupDetails.data?.description || 'Sin descripción.' }}</p>
+				<div class="bg-surface-white border border-outline-gray-2 rounded-xl p-4 shadow-sm relative group/edit">
+					<h3 class="font-semibold text-ink-gray-9 mb-2 flex items-center justify-between">
+						Acerca del Grupo
+						<button v-if="isAdmin" @click="openEditModal" class="text-ink-gray-4 hover:text-ink-gray-7 opacity-0 group-hover/edit:opacity-100 transition-opacity" title="Editar Grupo">
+							<Settings class="size-4" />
+						</button>
+					</h3>
+					<p class="text-sm text-ink-gray-6 whitespace-pre-wrap">{{ groupDetails.data?.description || 'Sin descripción.' }}</p>
 				</div>
 
 				<div class="bg-surface-white border border-outline-gray-2 rounded-xl p-4 shadow-sm flex-1 overflow-y-auto">
@@ -136,13 +141,53 @@
 			</template>
 		</Dialog>
 
+		<!-- Edit Group Modal -->
+		<Dialog v-model="showEditModal" :options="{ title: 'Editar Grupo' }">
+			<template #body-content>
+				<div class="space-y-4">
+					<FormControl
+						type="text"
+						label="Nombre del Grupo"
+						v-model="editGroup.title"
+					/>
+					<FormControl
+						type="textarea"
+						label="Descripción"
+						v-model="editGroup.description"
+						rows="3"
+					/>
+				</div>
+			</template>
+			<template #actions>
+				<div class="flex gap-2">
+					<Button
+						variant="outline"
+						class="flex-1 text-red-600 border-red-200 hover:bg-red-50"
+						:loading="deleting"
+						@click="deleteGroup"
+					>
+						Eliminar Grupo
+					</Button>
+					<Button
+						variant="solid"
+						class="flex-1"
+						:loading="saving"
+						@click="saveGroup"
+						:disabled="!editGroup.title"
+					>
+						Guardar
+					</Button>
+				</div>
+			</template>
+		</Dialog>
+
 	</div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { Button, FormControl, Dialog, createResource, Spinner, toast, call } from 'frappe-ui'
-import { ArrowLeft, Send, UserPlus, X } from 'lucide-vue-next'
+import { ArrowLeft, Send, UserPlus, X, Settings } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { sessionStore } from '@/stores/session'
 import UserAvatar from '@/components/UserAvatar.vue'
@@ -166,6 +211,11 @@ const showInviteModal = ref(false)
 const inviteEmail = ref('')
 const inviteRole = ref('Member')
 const inviting = ref(false)
+
+const showEditModal = ref(false)
+const editGroup = ref({ title: '', description: '' })
+const saving = ref(false)
+const deleting = ref(false)
 
 const groupDetails = createResource({
 	url: 'lms.lms.groups.get_group_details',
@@ -259,6 +309,50 @@ const removeMember = async (email) => {
 		groupDetails.reload()
 	} catch (e) {
 		toast.error('Error al eliminar miembro')
+	}
+}
+
+const openEditModal = () => {
+	editGroup.value = {
+		title: groupDetails.data?.title || '',
+		description: groupDetails.data?.description || ''
+	}
+	showEditModal.value = true
+}
+
+const saveGroup = async () => {
+	try {
+		saving.value = true
+		const res = await call('lms.lms.groups.update_group', {
+			group: props.groupName,
+			title: editGroup.value.title,
+			description: editGroup.value.description
+		})
+		toast.success('Grupo actualizado')
+		showEditModal.value = false
+		if (res !== props.groupName) {
+			router.push({ name: 'GroupDetail', params: { groupName: res } })
+		} else {
+			groupDetails.reload()
+		}
+	} catch (e) {
+		toast.error('Error al actualizar grupo')
+	} finally {
+		saving.value = false
+	}
+}
+
+const deleteGroup = async () => {
+	if (!confirm('¿Estás seguro de eliminar este grupo? Esta acción borrará todos los mensajes y no se puede deshacer.')) return
+	try {
+		deleting.value = true
+		await call('lms.lms.groups.delete_group', { group: props.groupName })
+		toast.success('Grupo eliminado')
+		router.push({ name: 'Groups' })
+	} catch (e) {
+		toast.error('Error al eliminar grupo')
+	} finally {
+		deleting.value = false
 	}
 }
 
