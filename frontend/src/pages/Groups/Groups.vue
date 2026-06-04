@@ -105,7 +105,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { Button, FormControl, Dialog, Badge, createResource, Spinner, toast } from 'frappe-ui'
+import { Button, FormControl, Dialog, Badge, createResource, Spinner, toast, call } from 'frappe-ui'
 import { Plus, Users, MessageCircle } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 
@@ -130,11 +130,7 @@ const invitations = createResource({
 
 const respondInv = async (groupName, response) => {
 	try {
-		await fetch('/api/method/lms.lms.groups.respond_invitation', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ group: groupName, response })
-		}).then(r => r.json())
+		await call('lms.lms.groups.respond_invitation', { group: groupName, response })
 		toast.success(response === 'Accepted' ? 'Te has unido al grupo' : 'Invitación rechazada')
 		invitations.reload()
 		groups.reload()
@@ -146,15 +142,11 @@ const respondInv = async (groupName, response) => {
 const createGroup = async () => {
 	try {
 		creating.value = true
-		const res = await fetch('/api/method/lms.lms.groups.create_group', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				title: newGroup.title,
-				description: newGroup.description,
-				type: 'Private'
-			})
-		}).then(r => r.json())
+		const res = await call('lms.lms.groups.create_group', {
+			title: newGroup.title,
+			description: newGroup.description,
+			group_type: 'Private'
+		})
 		
 		toast.success('Grupo creado exitosamente')
 		showCreateModal.value = false
@@ -162,8 +154,8 @@ const createGroup = async () => {
 		newGroup.title = ''
 		newGroup.description = ''
 		
-		if (res.message) {
-			router.push({ name: 'GroupDetail', params: { groupName: res.message } })
+		if (res) {
+			router.push({ name: 'GroupDetail', params: { groupName: res } })
 		}
 	} catch (e) {
 		toast.error('Error al crear grupo')

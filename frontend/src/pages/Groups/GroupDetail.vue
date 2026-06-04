@@ -133,7 +133,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { Button, FormControl, Dialog, createResource, Spinner, toast } from 'frappe-ui'
+import { Button, FormControl, Dialog, createResource, Spinner, toast, call } from 'frappe-ui'
 import { ArrowLeft, Send, UserPlus } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { sessionStore } from '@/stores/session'
@@ -202,18 +202,14 @@ const sendMessage = async () => {
 		const content = newMessage.value
 		newMessage.value = ''
 		
-		const res = await fetch('/api/method/lms.lms.groups.send_message', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				group: props.groupName,
-				content: content
-			})
-		}).then(r => r.json())
+		const res = await call('lms.lms.groups.send_message', {
+			group: props.groupName,
+			content: content
+		})
 		
-		if (res.message) {
+		if (res) {
 			if (!messages.data) messages.data = []
-			messages.data.push(res.message)
+			messages.data.push(res)
 			scrollToBottom()
 		}
 	} catch (e) {
@@ -226,18 +222,10 @@ const sendMessage = async () => {
 const sendInvite = async () => {
 	try {
 		inviting.value = true
-		await fetch('/api/method/lms.lms.groups.invite_user', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				group: props.groupName,
-				email: inviteEmail.value,
-				role: inviteRole.value
-			})
-		}).then(async r => {
-			const data = await r.json()
-			if(data.exc) throw new Error(data._server_messages)
-			return data
+		await call('lms.lms.groups.invite_user', {
+			group: props.groupName,
+			email: inviteEmail.value,
+			role: inviteRole.value
 		})
 		
 		toast.success('Invitación enviada')

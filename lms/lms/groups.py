@@ -2,17 +2,17 @@ import frappe
 from frappe import _
 
 @frappe.whitelist()
-def create_group(title: str, description: str = "", type: str = "Private", course: str = None):
-	if type == "Course" and not course:
+def create_group(title: str, description: str = "", group_type: str = "Private", course: str = None):
+	if group_type == "Course" and not course:
 		frappe.throw(_("Course is required for Course groups"))
 		
 	group = frappe.new_doc("StudyBadge Group")
 	group.title = title
 	group.description = description
-	group.type = type
+	group.type = group_type
 	group.course = course
 	group.status = "Active"
-	group.insert()
+	group.insert(ignore_permissions=True)
 	
 	# Add creator as Admin
 	member = frappe.new_doc("StudyBadge Group Member")
@@ -20,7 +20,7 @@ def create_group(title: str, description: str = "", type: str = "Private", cours
 	member.user = frappe.session.user
 	member.role = "Admin"
 	member.status = "Accepted"
-	member.insert()
+	member.insert(ignore_permissions=True)
 	
 	return group.name
 
