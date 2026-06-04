@@ -309,6 +309,8 @@ const pickBottomTabs = (links) => {
 		'Cursos',
 		'Practice',
 		'Practicar',
+		'Grupos',
+		'Groups',
 		'Prompt Library',
 		'Prompts',
 	]
@@ -457,6 +459,8 @@ const getShortLabel = (tab) => {
 		Practicar: __('IA'),
 		'Prompt Library': __('Prompts'),
 		Prompts: __('Prompts'),
+		Groups: __('Grupos'),
+		Grupos: __('Grupos'),
 		Certificates: __('Cert.'),
 		Certificados: __('Cert.'),
 		Programs: __('Rutas'),
@@ -482,6 +486,8 @@ const getLinkDescription = (link) => {
 		Programs: __('Rutas y programas de aprendizaje.'),
 		Courses: __('Explora cursos disponibles.'),
 		Cursos: __('Explora cursos disponibles.'),
+		Groups: __('Participa en grupos de estudio.'),
+		Grupos: __('Participa en grupos de estudio.'),
 	}
 
 	return map[link.label] || __('Abrir sección')
