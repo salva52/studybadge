@@ -41,33 +41,22 @@
 					
 					<div class="grid gap-6 md:grid-cols-2">
 						<!-- IA Bubble Info -->
-						<div class="help-card p-6 sm:p-8 relative overflow-hidden group">
+						<div class="help-card p-6 sm:p-8 relative overflow-hidden group cursor-pointer" @click="showSupportChat = true">
 							<div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
 								<Bot class="size-32 text-blue-600" />
 							</div>
 							<div class="rounded-2xl bg-blue-50 dark:bg-blue-900/20 w-fit p-3.5 mb-5 ring-1 ring-blue-100 dark:ring-blue-800/50">
 								<Bot class="size-7 text-blue-600 dark:text-blue-400 stroke-1.5" />
 							</div>
-							<h3 class="text-xl sm:text-2xl font-bold help-text-primary mb-3">{{ __('Asistente de IA 24/7') }}</h3>
+							<h3 class="text-xl sm:text-2xl font-bold help-text-primary mb-3">{{ __('Asistente de IA de Soporte') }}</h3>
 							<p class="help-text-muted mb-6 text-sm sm:text-base leading-relaxed flex-grow">
-								{{ __('Nuestro asistente inteligente está disponible 24/7 para consultas generales o problemas con la plataforma en ') }}
-								<strong>studybadge.com</strong>.
+								{{ __('Habla con nuestro asistente de IA con contexto de tus cursos, facturación y problemas técnicos. Exclusivo para soporte.') }}
 							</p>
-							<div class="mt-auto pt-5 flex flex-col gap-4 border-t help-border">
-								<div class="flex items-start gap-3 text-xs sm:text-sm text-amber-800 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 p-4 rounded-xl border border-amber-100 dark:border-amber-500/20">
-									<Info class="size-5 shrink-0 mt-0.5" />
-									<span class="leading-relaxed">
-										<strong>Nota importante:</strong> La burbuja de IA que ves en esta academia es <em>exclusiva del Tutor IA</em> para resolver dudas de tus cursos, no para soporte técnico.
-									</span>
-								</div>
-								<a
-									href="https://studybadge.com"
-									target="_blank"
-									class="help-btn-outline w-full sm:w-auto mt-2"
-								>
-									<ExternalLink class="size-4" />
-									{{ __('Ir a studybadge.com') }}
-								</a>
+							<div class="mt-auto pt-5 border-t help-border flex flex-col items-start">
+								<button class="help-btn-primary w-full sm:w-auto" @click.stop="showSupportChat = true">
+									<Bot class="size-4" />
+									{{ __('Abrir Chat de Soporte') }}
+								</button>
 							</div>
 						</div>
 
@@ -153,12 +142,120 @@
 				
 			</div>
 		</div>
+
+		<!-- Dialog Support Chat -->
+		<Dialog
+			v-model="showSupportChat"
+			:options="{
+				title: __('Asistente de Soporte IA'),
+				size: '3xl',
+			}"
+		>
+			<template #body-content>
+				<div class="flex flex-col h-[600px] bg-gray-50 dark:bg-gray-900 rounded-xl overflow-hidden border help-border -m-4">
+					<!-- Chat Messages -->
+					<div class="flex-1 overflow-y-auto p-5 space-y-5" ref="chatContainer">
+						<div v-if="chatHistory.length === 0" class="text-center text-gray-500 mt-16">
+							<div class="size-20 mx-auto mb-4 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+								<Bot class="size-10 text-blue-600 dark:text-blue-400" />
+							</div>
+							<h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">{{ __('¡Hola! Soy el bot de soporte') }}</h3>
+							<p class="max-w-md mx-auto text-sm text-gray-500 dark:text-gray-400">
+								{{ __('¿Tienes dudas sobre tu facturación, certificados o cómo usar la plataforma? Escríbeme y estaré encantado de ayudarte. También puedes subir capturas de pantalla.') }}
+							</p>
+						</div>
+						
+						<div
+							v-for="(msg, index) in chatHistory"
+							:key="index"
+							class="flex w-full"
+							:class="msg.role === 'user' ? 'justify-end' : 'justify-start'"
+						>
+							<div
+								class="max-w-[85%] sm:max-w-[75%] rounded-2xl px-5 py-3.5 shadow-sm"
+								:class="
+									msg.role === 'user'
+										? 'bg-blue-600 text-white rounded-br-none'
+										: 'bg-white dark:bg-gray-800 border help-border text-gray-800 dark:text-gray-200 rounded-bl-none'
+								"
+							>
+								<!-- If image -->
+								<div v-if="msg.images_base64 && msg.images_base64.length" class="mb-3 flex flex-wrap gap-2">
+									<img
+										v-for="(img, idx) in msg.images_base64"
+										:key="idx"
+										:src="'data:image/jpeg;base64,' + img"
+										class="rounded-xl max-h-48 object-cover cursor-pointer border shadow-sm"
+									/>
+								</div>
+								
+								<div class="prose prose-sm dark:prose-invert max-w-none" v-html="renderMarkdown(msg.content)"></div>
+							</div>
+						</div>
+						
+						<div v-if="isTyping" class="flex justify-start w-full">
+							<div class="bg-white dark:bg-gray-800 border help-border rounded-2xl rounded-bl-none px-5 py-3.5 flex items-center gap-3 shadow-sm">
+								<Loader2 class="size-5 animate-spin text-blue-500" />
+								<span class="text-sm font-medium text-gray-500">{{ __('Analizando tu consulta...') }}</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- Chat Input -->
+					<div class="bg-white dark:bg-gray-800 p-4 border-t help-border">
+						<div v-if="previewImage" class="relative inline-block mb-3 ml-2">
+							<img :src="previewImage" class="h-20 rounded-xl border object-cover shadow-sm" />
+							<button @click="clearImage" class="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow-md transition-colors">
+								<X class="size-3.5" />
+							</button>
+						</div>
+						
+						<div class="flex items-center gap-2">
+							<button 
+								class="p-2.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl transition-colors shrink-0"
+								@click="triggerImageUpload"
+								title="Adjuntar imagen"
+							>
+								<ImagePlus class="size-5" />
+							</button>
+							<input
+								type="file"
+								ref="fileInput"
+								accept="image/*"
+								class="hidden"
+								@change="handleImageSelect"
+							/>
+							
+							<input
+								v-model="currentMessage"
+								type="text"
+								class="flex-1 bg-gray-100 dark:bg-gray-900 border border-transparent focus:border-blue-300 dark:focus:border-blue-700 rounded-xl px-4 py-3 focus:ring-4 focus:ring-blue-500/10 focus:outline-none text-sm transition-all text-gray-800 dark:text-gray-100"
+								:placeholder="__('Escribe tu mensaje aquí...')"
+								@keyup.enter="sendMessage"
+								:disabled="isTyping"
+							/>
+							
+							<button
+								class="p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5 transition-all shrink-0 shadow-md"
+								:class="{'opacity-50 cursor-not-allowed transform-none shadow-none hover:shadow-none': (!currentMessage.trim() && !previewImageBase64) || isTyping}"
+								@click="sendMessage"
+								:disabled="(!currentMessage.trim() && !previewImageBase64) || isTyping"
+							>
+								<Send class="size-5" />
+							</button>
+						</div>
+					</div>
+				</div>
+			</template>
+		</Dialog>
+
 	</div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { Breadcrumbs, usePageMeta } from 'frappe-ui'
+import { computed, ref, nextTick } from 'vue'
+import { Breadcrumbs, usePageMeta, Dialog, call } from 'frappe-ui'
+import { marked } from 'marked'
 import {
 	LifeBuoy,
 	Headset,
@@ -170,11 +267,105 @@ import {
 	GraduationCap,
 	Award,
 	User,
-	Clock
+	Clock,
+	Send,
+	ImagePlus,
+	X,
+	Loader2
 } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
 
 const { brand } = sessionStore()
+
+const showSupportChat = ref(false)
+const currentMessage = ref('')
+const chatHistory = ref([])
+const isTyping = ref(false)
+const chatContainer = ref(null)
+const fileInput = ref(null)
+const previewImage = ref(null)
+const previewImageBase64 = ref(null)
+
+const renderMarkdown = (content) => {
+	if (!content) return ''
+	return marked(content)
+}
+
+const triggerImageUpload = () => {
+	fileInput.value?.click()
+}
+
+const handleImageSelect = (event) => {
+	const file = event.target.files[0]
+	if (file) {
+		const reader = new FileReader()
+		reader.onload = (e) => {
+			previewImage.value = e.target.result
+			previewImageBase64.value = e.target.result.split(',')[1]
+		}
+		reader.readAsDataURL(file)
+	}
+}
+
+const clearImage = () => {
+	previewImage.value = null
+	previewImageBase64.value = null
+	if (fileInput.value) fileInput.value.value = ''
+}
+
+const scrollToBottom = async () => {
+	await nextTick()
+	if (chatContainer.value) {
+		chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+	}
+}
+
+const sendMessage = async () => {
+	const msgText = currentMessage.value.trim()
+	const imgBase64 = previewImageBase64.value
+	
+	if (!msgText && !imgBase64) return
+	if (isTyping.value) return
+
+	// Add user message to UI
+	const newMsg = {
+		role: 'user',
+		content: msgText,
+	}
+	if (imgBase64) {
+		newMsg.images_base64 = [imgBase64]
+	}
+	
+	chatHistory.value.push(newMsg)
+	
+	currentMessage.value = ''
+	clearImage()
+	isTyping.value = true
+	await scrollToBottom()
+	
+	try {
+		const response = await call('studybadge_ai.studybadge_ai.ai_support.chat_with_support', {
+			message: msgText,
+			images_base64: imgBase64 ? JSON.stringify([imgBase64]) : '[]',
+			history: JSON.stringify(chatHistory.value.slice(0, -1)) // send previous history
+		})
+		
+		if (response.reply) {
+			chatHistory.value.push({
+				role: 'assistant',
+				content: response.reply
+			})
+		}
+	} catch (error) {
+		chatHistory.value.push({
+			role: 'assistant',
+			content: 'Hubo un error al procesar tu solicitud. Por favor, intenta de nuevo.'
+		})
+	} finally {
+		isTyping.value = false
+		await scrollToBottom()
+	}
+}
 
 const breadcrumbs = computed(() => [
 	{
