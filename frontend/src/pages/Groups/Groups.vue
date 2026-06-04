@@ -1,7 +1,7 @@
 <template>
 	<div class="groups-page">
-		<template #header>
-			<div class="flex items-center justify-between py-4">
+		<header>
+			<div class="flex items-center justify-between py-4 px-6">
 				<h1 class="text-3xl font-bold text-ink-gray-9">Mis Grupos</h1>
 				<Button
 					variant="solid"
@@ -11,7 +11,8 @@
 					Crear Grupo Privado
 				</Button>
 			</div>
-		</template>
+		</header>
+		<div class="px-6">
 
 		<div class="mt-6 flex flex-col gap-8">
 			<!-- Pending Invitations -->
@@ -97,6 +98,7 @@
 			</template>
 		</Dialog>
 
+		</div>
 	</div>
 </template>
 
