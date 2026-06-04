@@ -62,7 +62,7 @@
 </template>
 
 <script setup>
-import { computed, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { FileQuestion, X, ChevronRight } from 'lucide-vue-next'
 import LoadingFunFacts from './LoadingFunFacts.vue'
 
@@ -106,7 +106,8 @@ watch(() => props.show, (newVal) => {
 		selectedOption.value = null
 		hasAnswered.value = false
 		score.value = 0
-
+	}
+})
 
 function close() {
 	emit('update:show', false)
