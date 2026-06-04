@@ -635,21 +635,47 @@ async function sendChat() {
 	try {
 		const files = pendingFiles.value.map((file) => file.file_url)
 		const optimistic = { role: 'user', content: text || __('Analiza las fuentes adjuntas.'), created_at: String(Date.now()) }
-		chatMessages.value = [...chatMessages.value, optimistic]
+		const assistantOptimistic = { role: 'assistant', content: '', created_at: String(Date.now() + 1), model_label: modelLabel(activeSession.value.model_tier), is_streaming: true }
+		chatMessages.value = [...chatMessages.value, optimistic, assistantOptimistic]
 		chatInput.value = ''
 		pendingFiles.value = []
 		await nextTick()
 		resetTextareaHeight()
 		scrollChat()
-		const result = await api('chat_ai_session', {
-			session: activeSession.value.name,
-			thread: currentThread.value?.name,
-			message: text || __('Analiza las fuentes adjuntas.'),
-			files,
-			model_tier: activeSession.value.model_tier,
-			use_search: useSearch.value ? 1 : 0,
-			mode: chatMode.value,
-		})
+
+		const streamEvent = `ai_stream_${activeSession.value.name}`
+		let streamingContent = ''
+		const streamHandler = (data) => {
+			if (data && data.chunk) {
+				streamingContent += data.chunk
+				const lastMsg = chatMessages.value[chatMessages.value.length - 1]
+				if (lastMsg && lastMsg.is_streaming) {
+					lastMsg.content = streamingContent
+					scrollChat()
+				}
+			}
+		}
+		
+		if (window.frappe && window.frappe.realtime) {
+			window.frappe.realtime.on(streamEvent, streamHandler)
+		}
+
+		let result
+		try {
+			result = await api('chat_ai_session', {
+				session: activeSession.value.name,
+				thread: currentThread.value?.name,
+				message: text || __('Analiza las fuentes adjuntas.'),
+				files,
+				model_tier: activeSession.value.model_tier,
+				use_search: useSearch.value ? 1 : 0,
+				mode: chatMode.value,
+			})
+		} finally {
+			if (window.frappe && window.frappe.realtime) {
+				window.frappe.realtime.off(streamEvent, streamHandler)
+			}
+		}
 		
 		if (result.trigger_modal) {
 			const toolId = result.trigger_modal
@@ -660,7 +686,7 @@ async function sendChat() {
 			
 			modalLoading.value = true
 			modalData.value = null
-			chatMessages.value = chatMessages.value.filter(m => m !== optimistic)
+			chatMessages.value = chatMessages.value.filter(m => m !== optimistic && m !== assistantOptimistic)
 			
 			try {
 				const toolResult = await api('generate_ai_tool', {
