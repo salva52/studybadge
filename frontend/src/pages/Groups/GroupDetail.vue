@@ -79,7 +79,15 @@
 									{{ msg.full_name || msg.user }}
 								</p>
 
-								<p class="message-content">{{ msg.content }}</p>
+								<div v-if="msg.attachment" class="mb-2 max-w-full">
+									<img v-if="isImage(msg.attachment)" :src="msg.attachment" class="rounded-lg max-h-60 object-contain cursor-pointer" @click="openAttachment(msg.attachment)"/>
+									<a v-else :href="msg.attachment" target="_blank" class="flex items-center gap-2 text-blue-500 hover:underline bg-white/10 p-2 rounded-lg">
+										<FileText class="size-4"/>
+										<span class="text-xs truncate">Ver Documento</span>
+									</a>
+								</div>
+
+								<p v-if="msg.content" class="message-content">{{ msg.content }}</p>
 
 								<p
 									class="message-time"
@@ -94,6 +102,23 @@
 
 				<!-- Message Input -->
 				<div class="composer">
+					<FileUploader
+						:fileTypes="['image/*', 'application/pdf']"
+						:validateFile="validateFile"
+						@success="(file) => handleFileUploadSuccess(file)"
+					>
+						<template v-slot="{ file, progress, uploading, openFileSelector }">
+							<Button
+								variant="ghost"
+								class="attach-button shrink-0"
+								@click="openFileSelector"
+								:loading="uploading"
+							>
+								<Paperclip class="size-5 text-ink-gray-5" />
+							</Button>
+						</template>
+					</FileUploader>
+
 					<FormControl
 						v-model="newMessage"
 						placeholder="Escribe un mensaje para tu grupo..."
@@ -267,8 +292,8 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { Button, FormControl, Dialog, createResource, Spinner, toast, call } from 'frappe-ui'
-import { ArrowLeft, Send, UserPlus, X, Settings } from 'lucide-vue-next'
+import { Button, FormControl, Dialog, createResource, Spinner, toast, call, FileUploader } from 'frappe-ui'
+import { ArrowLeft, Send, UserPlus, X, Settings, Paperclip, FileText } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { sessionStore } from '@/stores/session'
 import UserAvatar from '@/components/UserAvatar.vue'
@@ -355,6 +380,41 @@ const sendMessage = async () => {
 		toast.error('Error al enviar mensaje')
 	} finally {
 		sending.value = false
+	}
+}
+
+const isImage = (url) => {
+	if (!url) return false
+	return url.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i) != null
+}
+
+const openAttachment = (url) => {
+	window.open(url, '_blank')
+}
+
+const validateFile = (file) => {
+	if (file.size > 2 * 1024 * 1024) { // 2MB
+		toast.error('El archivo no puede pesar más de 2MB')
+		return 'El archivo no puede pesar más de 2MB'
+	}
+	return null
+}
+
+const handleFileUploadSuccess = async (file) => {
+	try {
+		const res = await call('lms.lms.groups.send_message', {
+			group: props.groupName,
+			content: '',
+			attachment: file.file_url
+		})
+		
+		if (res) {
+			if (!messages.data) messages.data = []
+			messages.data.push(res)
+			scrollToBottom()
+		}
+	} catch (e) {
+		toast.error('Error al enviar archivo')
 	}
 }
 

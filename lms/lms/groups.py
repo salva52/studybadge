@@ -124,7 +124,7 @@ def respond_invitation(group: str, response: str):
 	return True
 
 @frappe.whitelist()
-def send_message(group: str, content: str):
+def send_message(group: str, content: str = "", attachment: str = None):
 	if not frappe.db.exists("StudyBadge Group Member", {"group": group, "user": frappe.session.user, "status": "Accepted"}):
 		frappe.throw(_("You are not a member of this group"))
 		
@@ -132,6 +132,8 @@ def send_message(group: str, content: str):
 	msg.group = group
 	msg.user = frappe.session.user
 	msg.content = content
+	if attachment:
+		msg.attachment = attachment
 	msg.insert()
 	
 	# Fetch full details to return
@@ -149,7 +151,7 @@ def get_messages(group: str, limit_start: int = 0, limit_page_length: int = 50):
 	messages = frappe.get_all(
 		"StudyBadge Group Message",
 		filters={"group": group},
-		fields=["name", "user", "content", "creation"],
+		fields=["name", "user", "content", "attachment", "creation"],
 		order_by="creation desc",
 		limit_start=limit_start,
 		limit_page_length=limit_page_length
