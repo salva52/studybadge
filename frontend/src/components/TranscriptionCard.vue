@@ -159,6 +159,7 @@ async function sendAudioChunk() {
   
   const formData = new FormData()
   formData.append('file', blob, 'chunk.webm')
+  formData.append('transcription_id', transcriptionId.value)
   
   try {
     const res = await fetch('/api/method/studybadge_ai.ai_sessions.process_transcription_chunk', {
