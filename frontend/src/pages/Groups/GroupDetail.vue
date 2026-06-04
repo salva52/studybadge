@@ -160,7 +160,7 @@ const inviteRole = ref('Member')
 const inviting = ref(false)
 
 const groupDetails = createResource({
-	url: 'studybadge.lms.lms.groups.get_group_details',
+	url: 'lms.lms.groups.get_group_details',
 	params: { group: props.groupName },
 	auto: true,
 	onSuccess(data) {
@@ -169,7 +169,7 @@ const groupDetails = createResource({
 })
 
 const messages = createResource({
-	url: 'studybadge.lms.lms.groups.get_messages',
+	url: 'lms.lms.groups.get_messages',
 	params: { group: props.groupName, limit_start: 0, limit_page_length: 50 },
 	auto: true,
 	onSuccess() {
@@ -202,7 +202,7 @@ const sendMessage = async () => {
 		const content = newMessage.value
 		newMessage.value = ''
 		
-		const res = await fetch('/api/method/studybadge.lms.lms.groups.send_message', {
+		const res = await fetch('/api/method/lms.lms.groups.send_message', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
@@ -226,7 +226,7 @@ const sendMessage = async () => {
 const sendInvite = async () => {
 	try {
 		inviting.value = true
-		await fetch('/api/method/studybadge.lms.lms.groups.invite_user', {
+		await fetch('/api/method/lms.lms.groups.invite_user', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({

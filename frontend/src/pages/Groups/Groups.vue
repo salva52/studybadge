@@ -119,18 +119,18 @@ const newGroup = reactive({
 })
 
 const groups = createResource({
-	url: 'studybadge.lms.lms.groups.get_groups',
+	url: 'lms.lms.groups.get_groups',
 	auto: true
 })
 
 const invitations = createResource({
-	url: 'studybadge.lms.lms.groups.get_pending_invitations',
+	url: 'lms.lms.groups.get_pending_invitations',
 	auto: true
 })
 
 const respondInv = async (groupName, response) => {
 	try {
-		await fetch('/api/method/studybadge.lms.lms.groups.respond_invitation', {
+		await fetch('/api/method/lms.lms.groups.respond_invitation', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ group: groupName, response })
@@ -146,7 +146,7 @@ const respondInv = async (groupName, response) => {
 const createGroup = async () => {
 	try {
 		creating.value = true
-		const res = await fetch('/api/method/studybadge.lms.lms.groups.create_group', {
+		const res = await fetch('/api/method/lms.lms.groups.create_group', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
