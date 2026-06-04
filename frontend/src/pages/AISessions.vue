@@ -636,7 +636,7 @@ async function sendChat() {
 		const files = pendingFiles.value.map((file) => file.file_url)
 		const optimistic = { role: 'user', content: text || __('Analiza las fuentes adjuntas.'), created_at: String(Date.now()) }
 		const assistantOptimistic = { role: 'assistant', content: '', created_at: String(Date.now() + 1), model_label: modelLabel(activeSession.value.model_tier), is_streaming: true }
-		chatMessages.value = [...chatMessages.value, optimistic, assistantOptimistic]
+		chatMessages.value = [...chatMessages.value, optimistic]
 		chatInput.value = ''
 		pendingFiles.value = []
 		await nextTick()
@@ -645,8 +645,14 @@ async function sendChat() {
 
 		const streamEvent = `ai_stream_${activeSession.value.name}`
 		let streamingContent = ''
+		let isStreamingStarted = false
 		const streamHandler = (data) => {
 			if (data && data.chunk) {
+				if (!isStreamingStarted) {
+					isStreamingStarted = true
+					chatLoading.value = false
+					chatMessages.value = [...chatMessages.value, assistantOptimistic]
+				}
 				streamingContent += data.chunk
 				const lastMsg = chatMessages.value[chatMessages.value.length - 1]
 				if (lastMsg && lastMsg.is_streaming) {
