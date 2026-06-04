@@ -14,6 +14,26 @@ def on_user_creation(doc, method):
     if not ref_code:
         return
 
+    if ref_code.strip().lower() == "studybadge":
+        # Create a 1 month Plus Subscription
+        try:
+            frappe.get_doc({
+                "doctype": "Studybadge Plus Subscription",
+                "member": doc.name,
+                "status": "Active",
+                "amount": 0.0,
+                "payment_gateway": "Launch Promo",
+                "next_payment_date": frappe.utils.add_months(frappe.utils.today(), 1),
+                "date_created": frappe.utils.now_datetime()
+            }).insert(ignore_permissions=True)
+            
+            # Set cookie for frontend fireworks
+            frappe.local.cookie_manager.set_cookie("show_launch_fireworks", "1", expires_in_days=1)
+        except Exception as e:
+            frappe.log_error(f"Error granting Launch Promo: {e}")
+            
+        return # Skip normal referral logic
+
     # Assuming ref_code is the username of the referrer
     referrer = frappe.db.get_value("User", {"username": ref_code}, "name")
     if not referrer:

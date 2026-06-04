@@ -12,8 +12,8 @@
 import TutorIABubble from '@/components/TutorIA/TutorIABubble.vue'
 import { sessionStore } from '@/stores/session'
 import { FrappeUIProvider } from 'frappe-ui'
-import { Dialogs } from '@/utils/dialogs'
-import { computed, onUnmounted, ref } from 'vue'
+import { Dialogs, createDialog } from '@/utils/dialogs'
+import { computed, onUnmounted, onMounted, ref } from 'vue'
 import { useScreenSize } from './utils/composables'
 import { useSettings } from '@/stores/settings'
 import { useRouter, useRoute } from 'vue-router'
@@ -78,5 +78,60 @@ const Layout = computed(() => {
 
 onUnmounted(() => {
 	noSidebar.value = false
+})
+
+onMounted(() => {
+	const match = document.cookie.match(new RegExp("(^| )show_launch_fireworks=([^;]+)"))
+	if (match && match[2] === "1") {
+		// Clear cookie
+		document.cookie = "show_launch_fireworks=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+		
+		// Load confetti script dynamically
+		const script = document.createElement('script')
+		script.src = "https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"
+		script.onload = () => {
+			const duration = 5 * 1000
+			const end = Date.now() + duration
+			
+			;(function frame() {
+				window.confetti({
+					particleCount: 5,
+					angle: 60,
+					spread: 55,
+					origin: { x: 0 },
+					colors: ['#0a2251', '#f5b301', '#ffffff']
+				})
+				window.confetti({
+					particleCount: 5,
+					angle: 120,
+					spread: 55,
+					origin: { x: 1 },
+					colors: ['#0a2251', '#f5b301', '#ffffff']
+				})
+
+				if (Date.now() < end) {
+					requestAnimationFrame(frame)
+				}
+			}())
+		}
+		document.head.appendChild(script)
+
+		// Show congratulatory dialog
+		setTimeout(() => {
+			createDialog({
+				title: '¡Felicidades!',
+				message: '¡Reclamaste tu mes Plus por lanzamiento! Disfrútalo.',
+				actions: [
+					{
+						label: 'Genial',
+						theme: 'blue',
+						onClick: (dialog) => {
+							dialog.show = false
+						}
+					}
+				]
+			})
+		}, 800)
+	}
 })
 </script>
