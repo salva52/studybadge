@@ -100,44 +100,61 @@
 					</template>
 				</div>
 
-				<!-- Message Input -->
-				<div class="composer">
-					<FileUploader
-						:fileTypes="['image/*', 'application/pdf']"
-						:validateFile="validateFile"
-						@success="(file) => handleFileUploadSuccess(file)"
-					>
-						<template v-slot="{ file, progress, uploading, openFileSelector }">
-							<Button
-								variant="ghost"
-								class="attach-button shrink-0"
-								@click="openFileSelector"
-								:loading="uploading"
-							>
-								<Paperclip class="size-5 text-ink-gray-5" />
-							</Button>
-						</template>
-					</FileUploader>
+				<!-- Message Input Wrapper -->
+				<div class="composer-wrapper flex flex-col border-t border-outline-gray-2 bg-white rounded-b-3xl">
+					<!-- Preview Section -->
+					<div v-if="attachmentPreview" class="p-3 pb-0">
+						<div class="relative inline-block border border-outline-gray-2 rounded-lg p-2 bg-surface-gray-1">
+							<button class="absolute -top-2 -right-2 bg-white border border-outline-gray-2 text-ink-gray-5 hover:text-red-500 rounded-full p-0.5 shadow-sm" @click="attachmentPreview = null; attachmentName = ''">
+								<X class="size-3" />
+							</button>
+							<img v-if="isImage(attachmentPreview)" :src="attachmentPreview" class="h-16 w-auto object-contain rounded" />
+							<div v-else class="flex flex-col items-center justify-center w-20 h-16">
+								<FileText class="size-6 text-blue-500 mb-1"/>
+								<span class="text-[10px] text-ink-gray-7 truncate w-full text-center">{{ attachmentName || 'Documento' }}</span>
+							</div>
+						</div>
+					</div>
 
-					<FormControl
-						v-model="newMessage"
-						placeholder="Escribe un mensaje para tu grupo..."
-						type="textarea"
-						class="composer-input"
-						:rows="1"
-						autoresize
-						@keydown.enter.prevent="sendMessage"
-					/>
+					<!-- Message Input -->
+					<div class="composer">
+						<FileUploader
+							:fileTypes="['image/*', 'application/pdf']"
+							:validateFile="validateFile"
+							@success="(file) => handleFileUploadSuccess(file)"
+						>
+							<template v-slot="{ file, progress, uploading, openFileSelector }">
+								<Button
+									variant="ghost"
+									class="attach-button shrink-0"
+									@click="openFileSelector"
+									:loading="uploading"
+								>
+									<Paperclip class="size-5 text-ink-gray-5" />
+								</Button>
+							</template>
+						</FileUploader>
 
-					<Button
-						variant="solid"
-						class="send-button"
-						:disabled="!newMessage.trim()"
-						:loading="sending"
-						@click="sendMessage"
-					>
-						<Send class="size-4" />
-					</Button>
+						<FormControl
+							v-model="newMessage"
+							placeholder="Escribe un mensaje para tu grupo..."
+							type="textarea"
+							class="composer-input"
+							:rows="1"
+							autoresize
+							@keydown.enter.prevent="sendMessage"
+						/>
+
+						<Button
+							variant="solid"
+							class="send-button"
+							:disabled="!newMessage.trim() && !attachmentPreview"
+							:loading="sending"
+							@click="sendMessage"
+						>
+							<Send class="size-4" />
+						</Button>
+					</div>
 				</div>
 			</section>
 
@@ -312,6 +329,8 @@ const currentUser = computed(() => user)
 
 const messagesContainer = ref(null)
 const newMessage = ref('')
+const attachmentPreview = ref(null)
+const attachmentName = ref('')
 const sending = ref(false)
 const showInviteModal = ref(false)
 const inviteEmail = ref('')
@@ -358,17 +377,27 @@ const scrollToBottom = async () => {
 	}
 }
 
+const handleFileUploadSuccess = async (file) => {
+	attachmentPreview.value = file.file_url
+	attachmentName.value = file.file_name
+}
+
 const sendMessage = async () => {
-	if (!newMessage.value.trim() || sending.value) return
+	if ((!newMessage.value.trim() && !attachmentPreview.value) || sending.value) return
 
 	try {
 		sending.value = true
 		const content = newMessage.value
+		const attachmentUrl = attachmentPreview.value
+		
 		newMessage.value = ''
+		attachmentPreview.value = null
+		attachmentName.value = ''
 
 		const res = await call('lms.lms.groups.send_message', {
 			group: props.groupName,
-			content: content
+			content: content,
+			attachment: attachmentUrl
 		})
 
 		if (res) {
@@ -398,24 +427,6 @@ const validateFile = (file) => {
 		return 'El archivo no puede pesar más de 2MB'
 	}
 	return null
-}
-
-const handleFileUploadSuccess = async (file) => {
-	try {
-		const res = await call('lms.lms.groups.send_message', {
-			group: props.groupName,
-			content: '',
-			attachment: file.file_url
-		})
-		
-		if (res) {
-			if (!messages.data) messages.data = []
-			messages.data.push(res)
-			scrollToBottom()
-		}
-	} catch (e) {
-		toast.error('Error al enviar archivo')
-	}
 }
 
 const sendInvite = async () => {
