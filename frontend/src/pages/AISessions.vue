@@ -2842,7 +2842,7 @@ function formatDate(value) {
 		bottom: 0;
 		left: 0;
 		z-index: 50;
-		padding: 0.55rem 0.75rem 0.7rem;
+		padding: 0.55rem 0.75rem calc(0.7rem + env(safe-area-inset-bottom, 0px));
 		background: rgba(245, 248, 252, 0.94);
 		border-top: 1px solid rgba(226, 232, 240, 0.82);
 		backdrop-filter: blur(16px);
