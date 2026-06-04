@@ -406,6 +406,17 @@ const routes = [
 		props: true,
 	},
 	{
+		path: '/groups',
+		name: 'Groups',
+		component: () => import('@/pages/Groups/Groups.vue'),
+	},
+	{
+		path: '/groups/:groupName',
+		name: 'GroupDetail',
+		component: () => import('@/pages/Groups/GroupDetail.vue'),
+		props: true,
+	},
+	{
 		path: '/referrals',
 		name: 'Referrals',
 		component: () => import('@/pages/Referrals.vue'),

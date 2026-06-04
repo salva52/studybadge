@@ -24,6 +24,7 @@
   "upcoming",
   "featured",
   "disable_self_learning",
+  "enable_group",
   "section_break_18",
   "short_introduction",
   "column_break_viqw",
@@ -94,6 +95,12 @@
    "fieldname": "disable_self_learning",
    "fieldtype": "Check",
    "label": "Disable Self Learning"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_group",
+   "fieldtype": "Check",
+   "label": "Habilitar Grupo de Curso"
   },
   {
    "fieldname": "image",

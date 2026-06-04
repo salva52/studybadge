@@ -506,6 +506,15 @@ const getSidebarItems = (forMobile = false) => {
 					},
 				},
 				{
+					label: 'Grupos',
+					icon: 'MessageCircle',
+					to: 'Groups',
+					activeFor: ['Groups', 'GroupDetail'],
+					condition: () => {
+						return userResource?.data
+					},
+				},
+				{
 					label: 'Simulaciones IA',
 					icon: 'Video',
 					to: 'Practice',

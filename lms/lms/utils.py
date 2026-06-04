@@ -2252,10 +2252,23 @@ def enroll_in_course(course: str, payment_name: str):
 			{
 				"member": frappe.session.user,
 				"course": course,
-				"payment": payment.name,
+				"payment": payment.name if payment else None,
 			}
 		)
 		enrollment.save(ignore_permissions=True)
+		
+		# Automatically add to Course Group if enabled
+		if frappe.db.get_value("LMS Course", course, "enable_group"):
+			group_name = frappe.db.get_value("StudyBadge Group", {"course": course, "type": "Course", "status": "Active"})
+			if group_name and not frappe.db.exists("StudyBadge Group Member", {"group": group_name, "user": frappe.session.user}):
+				member_doc = frappe.new_doc("StudyBadge Group Member")
+				member_doc.update({
+					"group": group_name,
+					"user": frappe.session.user,
+					"role": "Member",
+					"status": "Accepted"
+				})
+				member_doc.save(ignore_permissions=True)
 
 
 @frappe.whitelist()

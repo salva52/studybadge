@@ -119,6 +119,28 @@ class LMSCourse(Document):
 	def on_update(self):
 		if not self.upcoming and self.has_value_changed("upcoming"):
 			self.send_email_to_interested_users()
+			
+		# Automatically manage Course Group
+		if getattr(self, "enable_group", 0):
+			group_exists = frappe.db.exists("StudyBadge Group", {"course": self.name, "type": "Course"})
+			if not group_exists:
+				group = frappe.new_doc("StudyBadge Group")
+				group.title = f"Grupo del Curso: {self.title}"
+				group.description = f"Grupo oficial de charla para el curso {self.title}"
+				group.type = "Course"
+				group.course = self.name
+				group.status = "Active"
+				group.insert(ignore_permissions=True)
+				
+				# Add instructors as Admins
+				if getattr(self, "instructors", None):
+					for inst in self.instructors:
+						member = frappe.new_doc("StudyBadge Group Member")
+						member.group = group.name
+						member.user = inst.instructor
+						member.role = "Admin"
+						member.status = "Accepted"
+						member.insert(ignore_permissions=True)
 
 	def on_payment_authorized(self, payment_status):
 		if payment_status in ["Authorized", "Completed"]:
