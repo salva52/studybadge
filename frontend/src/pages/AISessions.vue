@@ -305,7 +305,7 @@
 							ref="chatTextarea"
 							v-model="chatInput"
 							rows="1"
-							:placeholder="__('Pregunta sobre tu lectura, pide ejemplos o escribe \'hazme practicar\'…')"
+							:placeholder="__('Escribe un mensaje...')"
 							@input="autoResizeTextarea"
 							@keydown.enter.exact.prevent="sendChat"
 							@keydown.shift.enter.stop
@@ -526,7 +526,7 @@ const showAdvanced = ref(false)
 const readerHistory = ref([])
 const showSessions = ref(false)
 const showTools = ref(false)
-const rightPanelCollapsed = ref(false)
+const rightPanelCollapsed = ref(true)
 const sessionSearch = ref('')
 const useSearch = ref(false)
 const chatMode = ref('chat')
@@ -590,7 +590,7 @@ const tools = [
 	{ id: 'flashcards', group: 'study', label: __('Flashcards'), description: __('Tarjetas de estudio'), icon: Layers, prompt: __('Crea flashcards para esta sesion.') },
 	{ id: 'reader_question', group: 'study', label: __('Lectura guiada'), description: __('Pregunta corta por avance'), icon: MessageCircle, prompt: __('Hazme una pregunta corta de comprension sobre lo que estoy leyendo.') },
 	{ id: 'quiz', group: 'practice', label: __('Cuestionario'), description: __('Preguntas con explicacion'), icon: FileQuestion, prompt: __('Crea un cuestionario con respuestas explicadas sobre mis fuentes.') },
-	{ id: 'math', group: 'practice', label: __('Matemática paso a paso'), description: __('Resuelve y practica'), icon: Sigma, prompt: __('Ayudame con matematica: resuelve paso a paso y luego dame un ejercicio mas facil.') },
+	{ id: 'math', group: 'practice', label: __('Matemática'), description: __('Resuelve y practica'), icon: Sigma, prompt: __('Ayudame con matematica: resuelve paso a paso y luego dame un ejercicio mas facil.') },
 	{ id: 'mock_exam', group: 'practice', label: __('Simulacro'), description: __('Simulacro de examen'), icon: FileQuestion, prompt: __('Genera un simulacro de examen completo.') },
 	{ id: 'infographic', group: 'create', label: __('Infografía'), description: __('Mapa visual de estudio'), icon: ImageIcon, pro: true, prompt: __('Genera una infografia academica sobre esta sesion.') },
 	{ id: 'organize', group: 'create', label: __('Ordenar info'), description: __('Temas, tareas y pendientes'), icon: ListTree, prompt: __('Ordena esta sesion en temas, tareas y pendientes claros.') },
