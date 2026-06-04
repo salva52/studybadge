@@ -232,6 +232,25 @@
 
 					<section class="course-section">
 						<SectionHeader
+							:title="__('Comunidad del Curso')"
+							:description="__('Configura espacios interactivos para tus estudiantes.')"
+						/>
+
+						<div class="grid grid-cols-1 gap-4 md:grid-cols-1">
+							<div class="settings-card">
+								<Switch
+									size="sm"
+									v-model="courseResource.doc.enable_group"
+									:label="__('Habilitar Grupo de Charla')"
+									:description="__('Crea automáticamente un grupo de chat privado donde tú y los estudiantes de este curso podrán comunicarse, compartir enlaces de clases y resolver dudas.')"
+									@change="makeFormDirty()"
+								/>
+							</div>
+						</div>
+					</section>
+
+					<section class="course-section">
+						<SectionHeader
 							:title="__('About the Course')"
 							:description="__('Explica el valor del curso de forma clara, atractiva y fácil de entender.')"
 						/>
@@ -596,6 +615,7 @@ const updateCourseData = () => {
 		'featured',
 		'enable_certification',
 		'paid_certificate',
+		'enable_group',
 	]
 
 	for (let idx in checkboxes) {
