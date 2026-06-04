@@ -1,8 +1,10 @@
 <template>
-	<Layout>
-		<template #header>
-			<div class="flex items-center gap-4 py-4">
-				<Button variant="ghost" icon="ArrowLeft" @click="router.push({ name: 'Groups' })" />
+	<div class="group-detail-page px-6 py-4">
+		<header>
+			<div class="flex items-center gap-4 pb-4">
+				<Button variant="ghost" @click="router.push({ name: 'Groups' })">
+					<template #icon><ArrowLeft class="size-4" /></template>
+				</Button>
 				<div class="flex-1">
 					<h1 class="text-2xl font-bold text-ink-gray-9">{{ groupDetails.data?.title || 'Cargando...' }}</h1>
 					<p class="text-sm text-ink-gray-5">{{ groupDetails.data?.member_count || 0 }} miembros • {{ groupDetails.data?.type === 'Course' ? 'Grupo de Curso' : 'Grupo Privado' }}</p>
@@ -16,7 +18,7 @@
 					Invitar Miembros
 				</Button>
 			</div>
-		</template>
+		</header>
 
 		<div class="flex h-[calc(100vh-140px)] gap-6 mt-4 pb-4">
 			<!-- Chat Area -->
@@ -125,12 +127,11 @@
 			</template>
 		</Dialog>
 
-	</Layout>
+	</div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import Layout from '@/components/Layouts/MainLayout.vue'
 import { Button, Input, Textarea, Dialog, createResource, Spinner, toast } from 'frappe-ui'
 import { ArrowLeft, Send, UserPlus } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'

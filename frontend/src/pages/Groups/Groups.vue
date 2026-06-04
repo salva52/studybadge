@@ -1,5 +1,5 @@
 <template>
-	<Layout>
+	<div class="groups-page">
 		<template #header>
 			<div class="flex items-center justify-between py-4">
 				<h1 class="text-3xl font-bold text-ink-gray-9">Mis Grupos</h1>
@@ -97,12 +97,11 @@
 			</template>
 		</Dialog>
 
-	</Layout>
+	</div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import Layout from '@/components/Layouts/MainLayout.vue'
 import { Button, Input, Textarea, Dialog, Badge, createResource, Spinner, toast } from 'frappe-ui'
 import { Plus, Users, MessageCircle } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
