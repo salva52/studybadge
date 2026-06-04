@@ -169,13 +169,7 @@ const userDropdownOptions = computed(() => {
 						return isLoggedIn
 					},
 				},
-				{
-					icon: theme.value === 'light' ? Moon : Sun,
-					label: 'Cambiar Tema',
-					onClick: () => {
-						toggleTheme()
-					},
-				},
+
 				{
 					component: markRaw(Apps),
 					condition: () => {
