@@ -167,3 +167,18 @@ def get_messages(group: str, limit_start: int = 0, limit_page_length: int = 50):
 			msg.update(users_cache[msg.user])
 			
 	return messages
+
+@frappe.whitelist()
+def remove_member(group: str, email: str):
+	if not frappe.db.exists("StudyBadge Group Member", {"group": group, "user": frappe.session.user, "role": "Admin", "status": "Accepted"}):
+		frappe.throw(_("Only Admins can remove users"))
+		
+	if email == frappe.session.user:
+		frappe.throw(_("You cannot remove yourself"))
+		
+	member_doc = frappe.db.exists("StudyBadge Group Member", {"group": group, "user": email})
+	if not member_doc:
+		frappe.throw(_("User is not in this group"))
+		
+	frappe.delete_doc("StudyBadge Group Member", member_doc, ignore_permissions=True)
+	return True

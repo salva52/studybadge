@@ -84,12 +84,20 @@
 						Miembros ({{ groupDetails.data?.members?.length || 0 }})
 					</h3>
 					<div class="flex flex-col gap-3">
-						<div v-for="member in groupDetails.data?.members" :key="member.user" class="flex items-center gap-2">
+						<div v-for="member in groupDetails.data?.members" :key="member.user" class="flex items-center gap-2 group/member">
 							<UserAvatar :user="member" class="size-8" />
 							<div class="flex-1 min-w-0">
 								<p class="text-sm font-medium text-ink-gray-9 truncate">{{ member.full_name || member.user }}</p>
 								<p class="text-xs text-ink-gray-5">{{ member.role }}</p>
 							</div>
+							<button
+								v-if="isAdmin && member.user !== currentUser"
+								class="text-red-400 hover:text-red-600 p-1 opacity-0 group-hover/member:opacity-100 transition-opacity"
+								title="Eliminar miembro"
+								@click="removeMember(member.user)"
+							>
+								<X class="size-4" />
+							</button>
 						</div>
 					</div>
 				</div>
@@ -134,7 +142,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { Button, FormControl, Dialog, createResource, Spinner, toast, call } from 'frappe-ui'
-import { ArrowLeft, Send, UserPlus } from 'lucide-vue-next'
+import { ArrowLeft, Send, UserPlus, X } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { sessionStore } from '@/stores/session'
 import UserAvatar from '@/components/UserAvatar.vue'
@@ -236,6 +244,21 @@ const sendInvite = async () => {
 		toast.error('Error al invitar (Asegúrate de que el usuario exista)')
 	} finally {
 		inviting.value = false
+	}
+}
+
+const removeMember = async (email) => {
+	if (!confirm('¿Estás seguro de eliminar a este miembro del grupo?')) return
+	
+	try {
+		await call('lms.lms.groups.remove_member', {
+			group: props.groupName,
+			email: email
+		})
+		toast.success('Miembro eliminado')
+		groupDetails.reload()
+	} catch (e) {
+		toast.error('Error al eliminar miembro')
 	}
 }
 
