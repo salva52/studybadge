@@ -720,23 +720,33 @@ async function sendChat() {
 			}
 		}
 		
-		const isNewThread = !currentThread.value
-		currentThread.value = result.thread
-		
-		let messages = result.thread?.messages || []
-		if (messages.length > 0) {
-			const lastMsg = messages[messages.length - 1]
-			if (lastMsg.role === 'assistant' || lastMsg.role === 'model') {
-				const contentStr = (lastMsg.content || '').trim()
-				if (contentStr.startsWith('{') || contentStr.startsWith('[')) {
-					lastMsg.content = __('Listo. Preparé la acción solicitada.')
+		if (result.thread) {
+			const isNewThread = !currentThread.value
+			currentThread.value = result.thread
+			
+			let messages = result.thread?.messages || []
+			if (messages.length > 0) {
+				const lastMsg = messages[messages.length - 1]
+				if (lastMsg.role === 'assistant' || lastMsg.role === 'model') {
+					const contentStr = (lastMsg.content || '').trim()
+					if (contentStr.startsWith('{') || contentStr.startsWith('[')) {
+						lastMsg.content = __('Listo. Preparé la acción solicitada.')
+					}
 				}
 			}
-		}
-		chatMessages.value = messages
+			chatMessages.value = messages
 
-		if (isNewThread) {
-			activeSession.value.threads = [result.thread, ...(activeSession.value.threads || [])]
+			if (isNewThread) {
+				activeSession.value.threads = [result.thread, ...(activeSession.value.threads || [])]
+			}
+		} else {
+			// Backend didn't return a thread (meaning a tool was triggered immediately)
+			chatMessages.value = chatMessages.value.map(msg => {
+				if (msg === assistantOptimistic) {
+					return { role: 'assistant', content: __('Listo. Preparé la acción solicitada.'), created_at: msg.created_at }
+				}
+				return msg
+			})
 		}
 		access.value = result.access || access.value
 		await nextTick(scrollChat)
