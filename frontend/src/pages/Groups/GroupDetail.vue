@@ -128,7 +128,7 @@
 									variant="ghost"
 									class="attach-button shrink-0"
 									@click="openFileSelector"
-									:loading="uploading"
+									:loading="uploading || isUploadingPaste"
 								>
 									<Paperclip class="size-5 text-ink-gray-5" />
 								</Button>
@@ -143,6 +143,7 @@
 							:rows="1"
 							autoresize
 							@keydown.enter.prevent="sendMessage"
+							@paste="handlePaste"
 						/>
 
 						<Button
@@ -332,6 +333,7 @@ const newMessage = ref('')
 const attachmentPreview = ref(null)
 const attachmentName = ref('')
 const sending = ref(false)
+const isUploadingPaste = ref(false)
 const showInviteModal = ref(false)
 const inviteEmail = ref('')
 const inviteRole = ref('Member')
@@ -427,6 +429,55 @@ const validateFile = (file) => {
 		return 'El archivo no puede pesar más de 2MB'
 	}
 	return null
+}
+
+const handlePaste = (e) => {
+	const items = e.clipboardData?.items
+	if (!items) return
+	
+	for (let i = 0; i < items.length; i++) {
+		if (items[i].type.indexOf('image') !== -1) {
+			const file = items[i].getAsFile()
+			if (file) {
+				const error = validateFile(file)
+				if (!error) {
+					uploadPastedFile(file)
+				}
+				e.preventDefault()
+				break
+			}
+		}
+	}
+}
+
+const uploadPastedFile = async (file) => {
+	isUploadingPaste.value = true
+	try {
+		const formData = new FormData()
+		formData.append('file', file, file.name || 'pasted-image.png')
+		formData.append('is_private', 0)
+		
+		const response = await fetch('/api/method/upload_file', {
+			method: 'POST',
+			headers: {
+				'Accept': 'application/json',
+				'X-Frappe-CSRF-Token': window.csrf_token || ''
+			},
+			body: formData
+		})
+		
+		const data = await response.json()
+		if (data.message && data.message.file_url) {
+			attachmentPreview.value = data.message.file_url
+			attachmentName.value = file.name || 'Imagen pegada'
+		} else {
+			throw new Error('Upload failed')
+		}
+	} catch (e) {
+		toast.error('Error al subir imagen pegada')
+	} finally {
+		isUploadingPaste.value = false
+	}
 }
 
 const sendInvite = async () => {
@@ -909,7 +960,8 @@ onUnmounted(() => {
 
 .back-button,
 .icon-button,
-.remove-button {
+.remove-button,
+.attach-button {
 	display: inline-flex !important;
 	align-items: center !important;
 	justify-content: center !important;
@@ -927,13 +979,16 @@ onUnmounted(() => {
 }
 
 .icon-button,
-.remove-button {
-	width: 34px;
-	height: 34px;
+.remove-button,
+.attach-button {
+	width: 44px;
+	height: 44px;
+	flex-shrink: 0;
 }
 
 .back-button:hover,
-.icon-button:hover {
+.icon-button:hover,
+.attach-button:hover {
 	background: #f8fafc !important;
 	border-color: #b8c7dc !important;
 }
@@ -955,6 +1010,12 @@ onUnmounted(() => {
 	color: #ffffff !important;
 	font-weight: 850 !important;
 	box-shadow: 0 10px 24px rgba(13, 30, 62, 0.16);
+}
+
+.send-button {
+	width: 44px !important;
+	height: 44px !important;
+	flex-shrink: 0 !important;
 }
 
 .primary-button:hover,
