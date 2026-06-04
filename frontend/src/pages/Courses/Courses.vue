@@ -181,6 +181,17 @@
 					<p>{{ __('Prueba con otra búsqueda o selecciona otra categoría.') }}</p>
 				</div>
 
+				<div v-else-if="courses.list.loading" class="courses-grid skeleton-grid">
+					<div v-for="i in 6" :key="i" class="courses-card-skeleton">
+						<div class="skeleton-img"></div>
+						<div class="skeleton-content">
+							<div class="skeleton-line title"></div>
+							<div class="skeleton-line subtitle"></div>
+							<div class="skeleton-line short"></div>
+						</div>
+					</div>
+				</div>
+
 				<div
 					v-if="!courses.list.loading && courses.hasNextPage"
 					class="courses-load-more"
@@ -372,6 +383,17 @@
 					>
 						{{ __('Limpiar filtros') }}
 					</button>
+				</div>
+
+				<div v-else-if="courses.list.loading" class="courses-grid auth skeleton-grid">
+					<div v-for="i in 6" :key="i" class="courses-card-skeleton">
+						<div class="skeleton-img"></div>
+						<div class="skeleton-content">
+							<div class="skeleton-line title"></div>
+							<div class="skeleton-line subtitle"></div>
+							<div class="skeleton-line short"></div>
+						</div>
+					</div>
 				</div>
 
 				<div
@@ -1674,5 +1696,52 @@ usePageMeta(() => {
 		justify-content: flex-start;
 		padding: 0.75rem 0.9rem;
 	}
+}
+
+/* Skeletons para Cursos */
+.courses-card-skeleton {
+	background: var(--courses-card);
+	border-radius: 16px;
+	overflow: hidden;
+	box-shadow: var(--courses-shadow-sm);
+}
+
+.courses-card-skeleton .skeleton-img {
+	width: 100%;
+	height: 180px;
+	background: var(--courses-border);
+	animation: pulse 1.5s infinite;
+}
+
+.courses-card-skeleton .skeleton-content {
+	padding: 1.5rem;
+}
+
+.courses-card-skeleton .skeleton-line {
+	height: 12px;
+	border-radius: 4px;
+	background: var(--courses-border);
+	animation: pulse 1.5s infinite;
+	margin-bottom: 8px;
+}
+
+.courses-card-skeleton .skeleton-line.title {
+	width: 80%;
+	height: 18px;
+	margin-bottom: 12px;
+}
+
+.courses-card-skeleton .skeleton-line.subtitle {
+	width: 100%;
+}
+
+.courses-card-skeleton .skeleton-line.short {
+	width: 40%;
+}
+
+@keyframes pulse {
+	0% { opacity: 0.6; }
+	50% { opacity: 0.3; }
+	100% { opacity: 0.6; }
 }
 </style>

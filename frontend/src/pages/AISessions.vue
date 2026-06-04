@@ -9,7 +9,43 @@
 			@success="handleFileUploaded"
 		/>
 
-		<aside class="session-rail" :class="{ open: showSessions }">
+		<!-- Skeleton Loader de Página -->
+		<div v-if="isPageLoading" class="chat-skeleton-wrapper">
+			<aside class="session-rail open">
+				<div class="rail-head skeleton-head"></div>
+				<div class="skeleton-btn"></div>
+				<div class="skeleton-search"></div>
+				<div class="session-list">
+					<div v-for="i in 5" :key="i" class="skeleton-session-item">
+						<div class="skeleton-icon"></div>
+						<div class="skeleton-text-group">
+							<div class="skeleton-line title"></div>
+							<div class="skeleton-line subtitle"></div>
+						</div>
+					</div>
+				</div>
+			</aside>
+			<main class="chat-main skeleton-main">
+				<header class="chat-header">
+					<div class="skeleton-header-title"></div>
+					<div class="skeleton-header-actions"></div>
+				</header>
+				<section class="chat-thread">
+					<div v-for="i in 3" :key="i" class="message-row-wrapper">
+						<div class="message-row" :class="i % 2 === 0 ? 'user' : 'assistant'">
+							<div class="avatar skeleton-avatar"></div>
+							<div class="message-bubble skeleton-bubble" :style="{ width: i % 2 === 0 ? '40%' : '70%' }"></div>
+						</div>
+					</div>
+				</section>
+				<footer class="composer-wrap">
+					<div class="composer skeleton-composer"></div>
+				</footer>
+			</main>
+		</div>
+
+		<template v-else>
+			<aside class="session-rail" :class="{ open: showSessions }">
 			<div class="rail-head">
 				<div>
 					<div class="rail-brand"><Sparkles class="size-4" /> {{ __('TutorIA Study') }}</div>
@@ -293,6 +329,7 @@
 		</aside>
 
 		<div v-if="showSessions || showTools" class="mobile-backdrop" @click="showSessions = false; showTools = false"></div>
+		</template>
 
 		<QuizModal v-model:show="showQuiz" :loading="modalLoading" :data="modalData" />
 		<FlashcardsModal v-model:show="showFlashcards" :loading="modalLoading" :data="modalData" />
@@ -359,6 +396,7 @@ const chatBox = ref(null)
 const creating = ref(false)
 const chatLoading = ref(false)
 const toolLoading = ref(false)
+const isPageLoading = ref(true)
 
 const showAdvanced = ref(false)
 
@@ -495,9 +533,14 @@ async function api(method, params = {}) {
 }
 
 async function loadAll() {
-	access.value = await api('get_ai_session_access')
-	sessions.value = await api('list_ai_sessions')
-	await loadRouteSession()
+	isPageLoading.value = true
+	try {
+		access.value = await api('get_ai_session_access')
+		sessions.value = await api('list_ai_sessions')
+		await loadRouteSession()
+	} finally {
+		isPageLoading.value = false
+	}
 }
 
 async function loadRouteSession() {
@@ -2883,5 +2926,37 @@ function formatDate(value) {
 :global(:root[data-theme='dark']) .composer-wrap,
 :global(.dark) .composer-wrap {
 	background: #07111f !important;
+}
+
+/* ==========================================
+   Skeleton Loaders
+   ========================================== */
+.chat-skeleton-wrapper {
+	display: flex;
+	height: 100vh;
+	width: 100%;
+	background: var(--bg-color);
+}
+
+.skeleton-head { height: 40px; margin-bottom: 1rem; border-radius: 8px; background: var(--border-color); animation: pulse 1.5s infinite; }
+.skeleton-btn { height: 40px; margin-bottom: 1rem; border-radius: 8px; background: var(--border-color); animation: pulse 1.5s infinite; }
+.skeleton-search { height: 40px; margin-bottom: 1.5rem; border-radius: 8px; background: var(--border-color); animation: pulse 1.5s infinite; }
+.skeleton-session-item { display: flex; gap: 10px; margin-bottom: 1rem; padding: 0.5rem; border-radius: 8px; }
+.skeleton-icon { width: 24px; height: 24px; border-radius: 4px; background: var(--border-color); animation: pulse 1.5s infinite; }
+.skeleton-text-group { flex: 1; }
+.skeleton-line { height: 12px; border-radius: 4px; background: var(--border-color); animation: pulse 1.5s infinite; margin-bottom: 6px; }
+.skeleton-line.title { width: 80%; }
+.skeleton-line.subtitle { width: 50%; height: 10px; }
+
+.skeleton-main { padding: 0; background: var(--bg-color); }
+.skeleton-header-title { width: 150px; height: 24px; border-radius: 6px; background: var(--border-color); animation: pulse 1.5s infinite; margin: 16px; }
+.skeleton-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--border-color); animation: pulse 1.5s infinite; }
+.skeleton-bubble { height: 60px; border-radius: 12px; background: var(--border-color); animation: pulse 1.5s infinite; margin-top: 4px; }
+.skeleton-composer { width: 100%; height: 50px; border-radius: 12px; background: var(--border-color); animation: pulse 1.5s infinite; margin: 16px auto; max-width: 800px; }
+
+@keyframes pulse {
+	0% { opacity: 0.6; }
+	50% { opacity: 0.3; }
+	100% { opacity: 0.6; }
 }
 </style>

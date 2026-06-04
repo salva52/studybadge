@@ -11,7 +11,15 @@
 			</div>
 		</header>
 
-		<main class="practice-shell">
+		<main v-if="access.loading" class="practice-shell skeleton-wrapper">
+			<section class="practice-hero skeleton-hero"></section>
+			<section class="practice-benefits skeleton-benefits">
+				<div v-for="i in 3" :key="i" class="skeleton-benefit-card"></div>
+			</section>
+			<section class="practice-panel skeleton-panel"></section>
+		</main>
+
+		<main v-else class="practice-shell">
 			<section class="practice-hero">
 				<div class="practice-hero-copy">
 					<div class="practice-eyebrow light">
@@ -1181,5 +1189,45 @@ async function createPractice() {
 		padding: 0.6rem 0.75rem;
 		font-size: 0.82rem;
 	}
+}
+
+/* Skeleton Loaders para Practice */
+.skeleton-wrapper {
+	animation: pulse 1.5s infinite;
+}
+
+.skeleton-hero {
+	height: 380px;
+	background: var(--practice-card);
+	border-radius: 30px;
+	box-shadow: var(--practice-shadow-lg);
+	border: 1px solid var(--practice-border);
+}
+
+.skeleton-benefits {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 1rem;
+}
+
+.skeleton-benefit-card {
+	height: 80px;
+	background: var(--practice-card);
+	border-radius: 22px;
+	border: 1px solid var(--practice-border);
+}
+
+.skeleton-panel {
+	height: 600px;
+	background: var(--practice-card);
+	border-radius: 30px;
+	border: 1px solid var(--practice-border);
+	box-shadow: var(--practice-shadow-md);
+}
+
+@keyframes pulse {
+	0% { opacity: 0.6; }
+	50% { opacity: 0.3; }
+	100% { opacity: 0.6; }
 }
 </style>

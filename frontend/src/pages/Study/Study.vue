@@ -37,8 +37,22 @@
 				</div>
 			</header>
 
+			<!-- ═══════════ SKELETON ═══════════ -->
+			<div v-if="isPageLoading" class="study-skeleton-wrapper">
+				<section class="grid gap-6 xl:grid-cols-[1fr_360px]">
+					<div class="flex flex-col gap-6">
+						<div class="s-panel skeleton-panel" style="height: 180px;"></div>
+						<div class="s-panel skeleton-panel" style="height: 400px;"></div>
+					</div>
+					<aside class="flex flex-col gap-6">
+						<div class="s-panel skeleton-panel" style="height: 200px;"></div>
+						<div class="s-panel skeleton-panel" style="height: 300px;"></div>
+					</aside>
+				</section>
+			</div>
+
 			<!-- ═══════════ DASHBOARD ═══════════ -->
-			<section v-if="isDashboard" class="grid gap-6 xl:grid-cols-[1fr_360px]">
+			<section v-else-if="isDashboard" class="grid gap-6 xl:grid-cols-[1fr_360px]">
 				<div class="flex flex-col gap-6">
 					<!-- FLOW CARDS -->
 					<div class="s-panel s-panel--flush">
@@ -889,6 +903,7 @@ const chatBox = ref(null)
 const isTutorExpanded = ref(false)
 const whiteboardText = ref(localStorage.getItem('studybadge_whiteboard') || '')
 const whiteboardResponse = ref('')
+const isPageLoading = ref(true)
 
 const draft = ref({
 	title: '',
@@ -986,8 +1001,13 @@ const headerSubtitle = computed(() => {
 const pageTitle = computed(() => (isDashboard.value ? '' : headerTitle.value))
 
 onMounted(async () => {
-	await loadDashboard()
-	await loadRouteSession()
+	isPageLoading.value = true
+	try {
+		await loadDashboard()
+		await loadRouteSession()
+	} finally {
+		isPageLoading.value = false
+	}
 })
 
 watch(() => route.fullPath, loadRouteSession)
@@ -3866,5 +3886,22 @@ const ExerciseList = defineComponent({
 	border: 1px solid #c7d2fe;
 	font-size: 0.9rem;
 	color: #4338ca;
+}
+
+/* Skeleton Study */
+.study-skeleton-wrapper {
+	animation: pulse 1.5s infinite;
+}
+
+.skeleton-panel {
+	background: var(--surface);
+	border-radius: 1.5rem;
+	width: 100%;
+}
+
+@keyframes pulse {
+	0% { opacity: 0.6; }
+	50% { opacity: 0.3; }
+	100% { opacity: 0.6; }
 }
 </style>
