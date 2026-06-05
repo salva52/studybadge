@@ -64,6 +64,18 @@ export default defineConfig(async ({ mode }) => {
 			],
 			exclude: mode === 'production' ? [] : ['frappe-ui'],
 		},
+		build: {
+			rollupOptions: {
+				output: {
+					manualChunks: {
+						'vue-vendor': ['vue', 'vue-router', 'pinia'],
+						'editor-vendor': ['@editorjs/editorjs', 'codemirror', 'vue-codemirror'],
+						'chart-vendor': ['vue-chartjs', 'vue3-apexcharts'],
+						'plyr': ['plyr'],
+					},
+				},
+			},
+		},
 	}
 	return config
 })
