@@ -61,7 +61,11 @@ def sign_up(email: str, full_name: str, verify_terms: bool, user_category: str):
 	)
 	user.flags.ignore_permissions = True
 	user.flags.ignore_password_policy = True
-	user.insert()
+	try:
+		user.insert()
+	except Exception as e:
+		frappe.log_error(title="Signup Error", message=frappe.get_traceback())
+		frappe.throw(f"Error during sign up: {str(e)}")
 
 	# set default signup role as per Portal Settings
 	default_role = frappe.db.get_single_value("Portal Settings", "default_role")

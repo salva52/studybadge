@@ -231,6 +231,8 @@
 			return false;
 		}
 
+		console.log("Signup started with email:", email, "name:", full_name);
+
 		frappe.call({
 			method: "lms.lms.user.sign_up",
 			args: {
@@ -241,10 +243,17 @@
 			},
 			statusCode: login.login_handlers,
 			callback: function(r) {
+				console.log("Signup server response:", r);
 				if (r.message && r.message[0] === 0) {
 					login.set_status(r.message[1], "red");
 				} else if (r.message) {
 					login.set_status(r.message[1], "green");
+				} else if (r.exc) {
+					console.error("Exception during signup:", r.exc);
+					if (r._server_messages) {
+						console.error("Server messages:", JSON.parse(r._server_messages));
+					}
+					login.set_status("Error en el servidor al registrarse. Revisa la consola.", "red");
 				}
 			}
 		});
