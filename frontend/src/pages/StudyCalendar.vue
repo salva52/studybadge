@@ -1061,10 +1061,17 @@ function toServerDatetime(value) {
 .event-form,
 .plan-status,
 .upcoming-panel {
-	border: 1px solid #d9dee7;
-	border-radius: 14px;
+	border: 1px solid rgba(226, 232, 240, 0.8);
+	border-radius: 16px;
 	background: #ffffff;
-	box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+	box-shadow: 0 6px 20px -4px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
+	transition: box-shadow 0.2s ease;
+}
+
+.day-agenda:hover,
+.event-form:hover,
+.upcoming-panel:hover {
+	box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.04);
 }
 
 .day-agenda {
@@ -1182,7 +1189,14 @@ function toServerDatetime(value) {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 0.65rem 0.75rem;
+	padding: 0.85rem 1rem;
+	background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+	border-left: 4px solid #cbd5e1;
+}
+
+.plan-status:has(.gold) {
+	border-left-color: #f59e0b;
+	background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
 }
 
 .gold {
@@ -1225,29 +1239,32 @@ function toServerDatetime(value) {
 
 .event-form label > span,
 .check-row span {
-	color: #475467;
-	font-size: 0.7rem;
-	font-weight: 800;
+	color: #64748b;
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.01em;
 }
 
 .event-form input,
 .event-form select {
 	width: 100%;
-	min-height: 34px;
-	border: 1px solid #d0d5dd;
-	border-radius: 9px;
-	background: #ffffff;
-	color: #101828;
-	padding: 0 0.6rem;
+	min-height: 38px;
+	border: 1px solid #e2e8f0;
+	border-radius: 10px;
+	background: #f8fafc;
+	color: #1e293b;
+	padding: 0 0.75rem;
 	font: inherit;
-	font-size: 0.82rem;
+	font-size: 0.85rem;
 	outline: none;
+	transition: all 0.2s ease;
 }
 
 .event-form input:focus,
 .event-form select:focus {
-	border-color: #111827;
-	box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
+	border-color: #3b82f6;
+	background: #ffffff;
+	box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
 .two-cols {
