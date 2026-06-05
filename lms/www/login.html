@@ -781,6 +781,21 @@
 		display: none !important;
 	}
 
+	.hide-on-desktop {
+		display: none;
+	}
+	.mobile-back-link {
+		display: inline-flex;
+		align-items: center;
+		color: var(--sb-muted);
+		font-size: 0.8rem;
+		font-weight: 700;
+		text-decoration: none;
+	}
+	.mobile-back-link:hover {
+		color: var(--sb-primary);
+	}
+
 	@media (max-width: 1180px) {
 		.sb-login-wrapper {
 			grid-template-columns: minmax(0, 0.95fr) minmax(390px, 0.9fr);
@@ -837,6 +852,10 @@
 
 		.sb-login-footer {
 			display: none;
+		}
+
+		.hide-on-desktop {
+			display: inline-flex;
 		}
 	}
 
@@ -1175,7 +1194,14 @@
 
 				<section class='for-signup {{ "signup-disabled" if disable_signup else "" }}'>
 					<div class="sb-login-form-header">
-						<div class="sb-form-eyebrow">Registro gratis</div>
+						<a href="#login" class="mobile-back-link hide-on-desktop">
+							<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
+								<line x1="19" y1="12" x2="5" y2="12"></line>
+								<polyline points="12 19 5 12 12 5"></polyline>
+							</svg>
+							Volver al inicio
+						</a>
+						<div class="sb-form-eyebrow" style="margin-top: 10px;">Registro gratis</div>
 						<h3>Crea tu cuenta</h3>
 						<p>Empieza a aprender con cursos, TutorIA y certificados verificables.</p>
 					</div>
