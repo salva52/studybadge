@@ -1183,7 +1183,7 @@
 					<div class="login-content page-card">
 						{%- if not disable_signup -%}
 
-						<form class="form-signin form-signup" role="form">
+						<form class="form-signin sb-form-signup" role="form">
 							<div class="page-card-body">
 								<div class="form-group">
 									<label class="sb-login-label" for="signup_fullname">{{ _("Nombre") }}</label>
@@ -1271,7 +1271,7 @@
 
 						<script>
 							frappe.ready(function () {
-								$(".form-signup").on("submit", (e) => {
+								$(".sb-form-signup").on("submit", (e) => {
 									e.preventDefault();
 									const email = ($("#signup_email").val() || "").trim();
 									const full_name = frappe.utils.xss_sanitise(($("#signup_fullname").val() || "").trim());
