@@ -245,11 +245,11 @@ async function finishTranscription() {
   
   try {
     const res = await call('studybadge_ai.ai_sessions.finish_transcription', { transcription_id: transcriptionId.value })
-    if (res && res.status === 'Completed') {
-      toast.success(__('Resumen inteligente generado con éxito.'))
+    if (res && (res.status === 'Completed' || res.status === 'Processing')) {
+      toast.success(__('El resumen inteligente se está generando...'))
       emit('transcription-completed', res)
     } else {
-      toast.error(__('Hubo un error al generar el resumen.'))
+      toast.error(__('Hubo un error al finalizar la transcripción.'))
     }
   } catch (e) {
     toast.error(__('Error al finalizar la transcripción.'))
