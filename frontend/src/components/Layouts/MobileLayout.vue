@@ -74,14 +74,14 @@
 						</div>
 					</div>
 
-					<div v-if="otherLinks.length" class="mobile-sheet-section">
+					<div v-if="filteredOtherLinks.length" class="mobile-sheet-section">
 						<div class="mobile-section-title">
 							{{ __('Más opciones') }}
 						</div>
 
 						<div class="mobile-link-list">
 							<button
-								v-for="link in otherLinks"
+								v-for="link in filteredOtherLinks"
 								:key="link.label"
 								class="mobile-sheet-link"
 								:class="{
@@ -242,9 +242,6 @@ const filterLinksToShow = (data) => {
 
 const addOtherLinks = () => {
 	if (user) {
-		addLink('Certificados', 'Award', 'ProfileCertificates')
-		addLink('Referidos', 'Gift', 'Referrals')
-		addLink('Notificaciones', 'Bell', 'Notifications')
 		addLink('Perfil', 'UserRound')
 		addLink('Cerrar sesión', 'LogOut')
 	} else {
@@ -305,14 +302,12 @@ const pickBottomTabs = (links) => {
 	const priority = [
 		'Home',
 		'Inicio',
+		'Search',
+		'Buscar',
 		'Courses',
 		'Cursos',
-		'Practice',
-		'Practicar',
-		'Grupos',
-		'Groups',
-		'Prompt Library',
-		'Prompts',
+		'Sesiones IA',
+		'AISessions'
 	]
 
 	const selected = []
@@ -442,7 +437,32 @@ const visibleBottomTabs = computed(() => {
 })
 
 const quickSheetLinks = computed(() => {
-	return sidebarLinks.value.filter((tab) => isVisible(tab)).slice(0, 4)
+	const priority = [
+		'Study',
+		'Estudio IA',
+		'Groups',
+		'Grupos',
+		'Practice',
+		'Simulaciones IA',
+		'Prompt Library',
+		'Biblioteca de prompts'
+	]
+
+	const selected = []
+
+	priority.forEach((label) => {
+		const found = otherLinks.value.find((link) => link.label === label)
+		if (found && !selected.some((item) => item.label === found.label)) {
+			selected.push(found)
+		}
+	})
+
+	return selected.slice(0, 4)
+})
+
+const filteredOtherLinks = computed(() => {
+	const quickLabels = quickSheetLinks.value.map(link => link.label)
+	return otherLinks.value.filter(link => !quickLabels.includes(link.label) && isVisible(link))
 })
 
 const toggleMenu = () => {
@@ -468,6 +488,8 @@ const getShortLabel = (tab) => {
 		Assignments: __('Tareas'),
 		Notifications: __('Notif.'),
 		Notificaciones: __('Notif.'),
+		Search: __('Buscar'),
+		Buscar: __('Buscar'),
 	}
 
 	return map[tab.label] || __(tab.label)

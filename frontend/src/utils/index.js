@@ -441,7 +441,7 @@ const getSidebarItems = (forMobile = false) => {
 					icon: 'Search',
 					to: 'Search',
 					condition: () => {
-						return !forMobile && userResource?.data
+						return userResource?.data
 					},
 				},
 				{
@@ -449,7 +449,7 @@ const getSidebarItems = (forMobile = false) => {
 					icon: 'Bell',
 					to: 'Notifications',
 					condition: () => {
-						return !forMobile && userResource?.data
+						return userResource?.data
 					},
 				},
 				{
@@ -458,7 +458,7 @@ const getSidebarItems = (forMobile = false) => {
 					to: 'Referrals',
 					activeFor: ['Referrals'],
 					condition: () => {
-						return !forMobile && userResource?.data
+						return userResource?.data
 					},
 				},
 			],
@@ -574,15 +574,7 @@ const getSidebarItems = (forMobile = false) => {
 					to: 'Batches',
 					activeFor: ['Batches', 'BatchDetail', 'Batch', 'BatchForm'],
 				},
-				{
-					label: 'Certificados',
-					icon: 'GraduationCap',
-					to: 'CertifiedParticipants',
-					activeFor: ['CertifiedParticipants'],
-					condition: () => {
-						return userResource?.data
-					},
-				},
+
 				{
 					label: 'Rankings',
 					icon: 'Trophy',
