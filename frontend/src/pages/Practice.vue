@@ -13,9 +13,6 @@
 
 		<main v-if="access.loading" class="practice-shell skeleton-wrapper">
 			<section class="practice-hero skeleton-hero"></section>
-			<section class="practice-benefits skeleton-benefits">
-				<div v-for="i in 3" :key="i" class="skeleton-benefit-card"></div>
-			</section>
 			<section class="practice-panel skeleton-panel"></section>
 		</main>
 
@@ -28,11 +25,11 @@
 					</div>
 
 					<h1>
-						{{ __('Practica entrevistas, ventas e inglés con IA') }}
+						{{ __('Entrena con IA antes del momento real') }}
 					</h1>
 
 					<p>
-						{{ __('Crea una simulación personalizada, sube tu CV o contexto y entrena como si estuvieras frente a un entrevistador, cliente o conversación real.') }}
+						{{ __('Practica entrevistas, ventas, inglés o casos de marketing con una simulación guiada por IA. Describe tu situación, sube contexto opcional y entra a practicar.') }}
 					</p>
 
 					<div class="practice-hero-actions">
@@ -53,6 +50,21 @@
 							<Crown class="size-4" />
 							{{ __('Desbloquear Plus') }}
 						</router-link>
+					</div>
+
+					<div class="practice-hero-points">
+						<span>
+							<CheckCircle2 class="size-4" />
+							{{ __('Presión real') }}
+						</span>
+						<span>
+							<CheckCircle2 class="size-4" />
+							{{ __('CV opcional') }}
+						</span>
+						<span>
+							<CheckCircle2 class="size-4" />
+							{{ __('Feedback con IA') }}
+						</span>
 					</div>
 				</div>
 
@@ -79,7 +91,7 @@
 					</p>
 
 					<p v-else>
-						{{ __('Tienes 1 práctica gratis. Después, esta herramienta será exclusiva para usuarios Plus.') }}
+						{{ __('Tienes 1 práctica gratis disponible. Luego será exclusivo para Plus.') }}
 					</p>
 
 					<div class="practice-meter">
@@ -99,41 +111,6 @@
 				</aside>
 			</section>
 
-			<section class="practice-benefits">
-				<div class="practice-benefit">
-					<div class="practice-benefit-icon">
-						<Bot class="size-5" />
-					</div>
-
-					<div>
-						<strong>{{ __('IA como entrevistador') }}</strong>
-						<span>{{ __('Responde preguntas, recibe escenarios y practica presión real.') }}</span>
-					</div>
-				</div>
-
-				<div class="practice-benefit">
-					<div class="practice-benefit-icon gold">
-						<FileText class="size-5" />
-					</div>
-
-					<div>
-						<strong>{{ __('CV y contexto') }}</strong>
-						<span>{{ __('Sube un archivo para que la simulación sea más personalizada.') }}</span>
-					</div>
-				</div>
-
-				<div class="practice-benefit">
-					<div class="practice-benefit-icon green">
-						<ShieldCheck class="size-5" />
-					</div>
-
-					<div>
-						<strong>{{ __('Entrena antes de fallar') }}</strong>
-						<span>{{ __('Practica entrevistas, ventas, inglés o casos antes del momento real.') }}</span>
-					</div>
-				</div>
-			</section>
-
 			<section ref="formSection" class="practice-panel">
 				<div class="practice-panel-head">
 					<div>
@@ -142,10 +119,10 @@
 							{{ __('Configura tu práctica') }}
 						</div>
 
-						<h2>{{ __('Personaliza la simulación') }}</h2>
+						<h2>{{ __('Crea tu simulación en 1 minuto') }}</h2>
 
 						<p>
-							{{ __('Elige el tipo de práctica, idioma, nivel y contexto. Mientras más específico seas, mejor será la simulación.') }}
+							{{ __('Elige el tipo de práctica y describe tu situación. El idioma, nivel y detalles extra quedan como opciones avanzadas.') }}
 						</p>
 					</div>
 
@@ -156,7 +133,7 @@
 
 				<div class="practice-form">
 					<div class="practice-field full">
-						<span>{{ __('Tipo de práctica') }}</span>
+						<span>{{ __('1. ¿Qué quieres practicar?') }}</span>
 
 						<div class="practice-type-grid">
 							<button
@@ -165,7 +142,7 @@
 								type="button"
 								class="practice-type-card"
 								:class="{ active: draft.practice_type === option.value }"
-								@click="draft.practice_type = option.value"
+								@click="selectPracticeType(option.value)"
 							>
 								<div class="practice-type-icon">
 									<component :is="option.icon" class="size-5" />
@@ -179,48 +156,30 @@
 						</div>
 					</div>
 
-					<label class="practice-field">
-						<span>{{ __('Idioma') }}</span>
-
-						<select v-model="draft.language">
-							<option value="es">{{ __('Español') }}</option>
-							<option value="en">{{ __('Inglés') }}</option>
-						</select>
-					</label>
-
-					<label class="practice-field">
-						<span>{{ __('Nivel') }}</span>
-
-						<select v-model="draft.level">
-							<option value="basico">{{ __('Básico') }}</option>
-							<option value="intermedio">{{ __('Intermedio') }}</option>
-							<option value="avanzado">{{ __('Avanzado') }}</option>
-						</select>
-					</label>
-
-					<FormControl
-						v-model="draft.role_title"
-						class="practice-control"
-						:label="__('Entrevista, rol o caso')"
-						:placeholder="__('Ej: SDR SaaS, marketing assistant, cliente molesto')"
-					/>
-
-					<FormControl
-						v-model="draft.company_context"
-						class="practice-control full"
-						:label="__('Contexto')"
-						:placeholder="__('Empresa, industria, producto, situación o cliente')"
-					/>
-
 					<label class="practice-field full">
-						<span>{{ __('Objetivo') }}</span>
+						<span>{{ __('2. Cuéntale a la IA tu situación') }}</span>
 
 						<textarea
 							v-model="draft.goal"
-							rows="4"
-							:placeholder="__('Ej: practicar respuestas STAR, vender una consultoría, mejorar fluidez en inglés')"
+							rows="6"
+							:placeholder="selectedPracticeOption.placeholder"
 						/>
 					</label>
+
+					<div class="practice-examples full">
+						<span>{{ __('Ejemplos rápidos') }}</span>
+
+						<div>
+							<button
+								v-for="example in selectedPracticeOption.examples"
+								:key="example"
+								type="button"
+								@click="applyExample(example)"
+							>
+								{{ example }}
+							</button>
+						</div>
+					</div>
 
 					<div class="practice-upload full">
 						<FileUploader
@@ -240,15 +199,53 @@
 							<div>
 								<strong>{{ __('CV o contexto opcional') }}</strong>
 								<span>
-									{{ cvName || __('PDF, Word o texto. Se usará para personalizar la simulación.') }}
+									{{ cvName || __('PDF, Word o texto. Ayuda a que la simulación sea más personalizada.') }}
 								</span>
 							</div>
 						</div>
 
 						<button class="practice-btn-outline" type="button" @click="openUploader">
 							<Upload class="size-4" />
-							{{ cvName ? __('Cambiar archivo') : __('Subir CV') }}
+							{{ cvName ? __('Cambiar archivo') : __('Subir contexto') }}
 						</button>
+					</div>
+
+					<div class="practice-advanced full">
+						<button class="practice-advanced-toggle" type="button" @click="showAdvanced = !showAdvanced">
+							<span>
+								<SlidersHorizontal class="size-4" />
+								{{ __('Opciones avanzadas') }}
+							</span>
+							<component :is="showAdvanced ? ChevronUp : ChevronDown" class="size-4" />
+						</button>
+
+						<div v-if="showAdvanced" class="practice-advanced-grid">
+							<label class="practice-field">
+								<span>{{ __('Idioma') }}</span>
+
+								<select v-model="draft.language">
+									<option value="es">{{ __('Español') }}</option>
+									<option value="en">{{ __('Inglés') }}</option>
+								</select>
+							</label>
+
+							<label class="practice-field">
+								<span>{{ __('Nivel') }}</span>
+
+								<select v-model="draft.level">
+									<option value="basico">{{ __('Básico') }}</option>
+									<option value="intermedio">{{ __('Intermedio') }}</option>
+									<option value="avanzado">{{ __('Avanzado') }}</option>
+								</select>
+							</label>
+
+							<FormControl
+								v-model="draft.role_title"
+								class="practice-control"
+								:label="__('Rol, puesto o caso específico')"
+								:placeholder="__('Ej: SDR SaaS, marketing assistant, cliente molesto')"
+							/>
+						</div>
 					</div>
 				</div>
 
@@ -286,15 +283,14 @@ import {
 } from 'frappe-ui'
 import {
 	ArrowRight,
-	Bot,
 	Briefcase,
 	CheckCircle2,
+	ChevronDown,
+	ChevronUp,
 	Crown,
-	FileText,
 	Languages,
 	Megaphone,
 	MessageCircle,
-	ShieldCheck,
 	ShoppingBag,
 	SlidersHorizontal,
 	Sparkles,
@@ -311,9 +307,10 @@ const formSection = ref(null)
 const fileUploader = ref(null)
 const creating = ref(false)
 const cvName = ref('')
+const showAdvanced = ref(false)
 
 const draft = ref({
-	practice_type: 'interview',
+	practice_type: 'sales',
 	language: 'es',
 	level: 'intermedio',
 	role_title: '',
@@ -332,33 +329,67 @@ const practiceOptions = [
 		value: 'interview',
 		label: __('Entrevista laboral'),
 		description: __('Practica respuestas como en una entrevista real.'),
+		placeholder: __('Ej: Quiero practicar una entrevista para asistente de marketing en una empresa de tecnología. Quiero mejorar mis respuestas, sonar más seguro y responder con el método STAR.'),
+		examples: [
+			__('Entrevista para asistente de marketing'),
+			__('Práctica con preguntas difíciles'),
+			__('Prepararme para mi primera entrevista'),
+		],
 		icon: markRaw(Briefcase),
 	},
 	{
 		value: 'sales',
 		label: __('Práctica de ventas'),
 		description: __('Simula clientes, objeciones y cierre de venta.'),
+		placeholder: __('Ej: Vendo cursos de IA para emprendedores en StudyBadge. Quiero practicar con un cliente que dice “está caro”, duda del valor y necesita entender por qué le conviene pagar Plus.'),
+		examples: [
+			__('Vender StudyBadge Plus'),
+			__('Cliente dice que está caro'),
+			__('Cerrar una venta por WhatsApp'),
+		],
 		icon: markRaw(ShoppingBag),
 	},
 	{
 		value: 'english',
 		label: __('Inglés conversacional'),
 		description: __('Mejora fluidez, respuestas y confianza al hablar.'),
+		placeholder: __('Ej: Quiero practicar una conversación en inglés para presentarme, hablar de mis estudios, explicar mi negocio y responder preguntas simples sin quedarme en blanco.'),
+		examples: [
+			__('Presentarme en inglés'),
+			__('Conversación para viaje'),
+			__('Entrevista básica en inglés'),
+		],
 		icon: markRaw(Languages),
 	},
 	{
 		value: 'marketing',
 		label: __('Caso de marketing'),
 		description: __('Resuelve escenarios de campañas, contenido o estrategia.'),
+		placeholder: __('Ej: Quiero practicar un caso de marketing para lanzar una campaña de StudyBadge en TikTok e Instagram con poco presupuesto, buscando usuarios gratis y conversiones a Plus.'),
+		examples: [
+			__('Campaña para TikTok'),
+			__('Mejorar conversión de una landing'),
+			__('Lanzar un producto digital'),
+		],
 		icon: markRaw(Megaphone),
 	},
 	{
 		value: 'custom',
 		label: __('Personalizada'),
 		description: __('Crea una práctica libre con tus propias reglas.'),
+		placeholder: __('Ej: Quiero una simulación donde la IA actúe como un inversionista exigente. Yo presentaré mi idea y la IA debe hacerme preguntas difíciles y darme feedback al final.'),
+		examples: [
+			__('Simular pitch con inversionista'),
+			__('Practicar una negociación'),
+			__('Roleplay personalizado'),
+		],
 		icon: markRaw(MessageCircle),
 	},
 ]
+
+const selectedPracticeOption = computed(() => {
+	return practiceOptions.find((option) => option.value === draft.value.practice_type) || practiceOptions[0]
+})
 
 const breadcrumbs = computed(() => [
 	{
@@ -377,6 +408,14 @@ function focusForm() {
 		behavior: 'smooth',
 		block: 'start',
 	})
+}
+
+function selectPracticeType(value) {
+	draft.value.practice_type = value
+}
+
+function applyExample(example) {
+	draft.value.goal = example
 }
 
 function validateFile(file) {
@@ -399,15 +438,26 @@ function openUploader() {
 function handleFileUploaded(file) {
 	draft.value.cv_file = file.file_url
 	cvName.value = file.file_name || file.file_url
-	toast.success(__('CV agregado.'))
+	toast.success(__('Contexto agregado.'))
 }
 
 async function createPractice() {
+	if (!draft.value.goal?.trim() && !draft.value.cv_file) {
+		toast.error(__('Describe qué quieres practicar o sube un archivo de contexto.'))
+		return
+	}
+
 	creating.value = true
 
 	try {
+		const payload = {
+			...draft.value,
+			role_title: draft.value.role_title || selectedPracticeOption.value.label,
+			company_context: draft.value.company_context || draft.value.goal,
+		}
+
 		const session = await call('studybadge_ai.ai_practice.create_practice_session', {
-			data: JSON.stringify(draft.value),
+			data: JSON.stringify(payload),
 		})
 
 		router.push({
@@ -483,7 +533,7 @@ async function createPractice() {
 	align-items: center;
 	justify-content: space-between;
 	gap: 1rem;
-	width: min(1180px, calc(100% - 32px));
+	width: min(1120px, calc(100% - 32px));
 	min-height: 72px;
 	margin: 0 auto;
 }
@@ -495,19 +545,21 @@ async function createPractice() {
 .practice-shell {
 	display: grid;
 	gap: 1.25rem;
-	width: min(1180px, calc(100% - 32px));
+	width: min(1120px, calc(100% - 32px));
 	margin: 0 auto;
 	padding-top: 1.5rem;
 }
 
 .practice-hero {
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) 360px;
-	gap: 1.5rem;
+	grid-template-columns: minmax(0, 1fr) 340px;
+	gap: 1rem;
 	align-items: stretch;
 	overflow: hidden;
 	border-radius: 30px;
-	background: var(--practice-primary);
+	background:
+		radial-gradient(circle at top right, rgba(245, 179, 1, 0.22), transparent 32%),
+		linear-gradient(135deg, #0a2251 0%, #102f66 100%);
 	color: #ffffff;
 	box-shadow: var(--practice-shadow-lg);
 }
@@ -516,7 +568,7 @@ async function createPractice() {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
-	padding: clamp(1.35rem, 4vw, 2.5rem);
+	padding: clamp(1.35rem, 4vw, 2.35rem);
 }
 
 .practice-eyebrow {
@@ -542,9 +594,9 @@ async function createPractice() {
 
 .practice-hero h1 {
 	margin: 0;
-	max-width: 780px;
+	max-width: 720px;
 	color: #ffffff;
-	font-size: clamp(2.1rem, 5.5vw, 4.3rem);
+	font-size: clamp(2.15rem, 5vw, 4rem);
 	font-weight: 950;
 	letter-spacing: -0.06em;
 	line-height: 1.02;
@@ -552,26 +604,50 @@ async function createPractice() {
 
 .practice-hero p {
 	margin: 1rem 0 0;
-	max-width: 680px;
+	max-width: 650px;
 	color: rgba(255, 255, 255, 0.78);
 	font-size: 1rem;
 	line-height: 1.75;
 }
 
-.practice-hero-actions {
+.practice-hero-actions,
+.practice-hero-points {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.75rem;
+}
+
+.practice-hero-actions {
 	margin-top: 1.5rem;
 }
 
+.practice-hero-points {
+	margin-top: 1.15rem;
+}
+
+.practice-hero-points span {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	border: 1px solid rgba(255, 255, 255, 0.16);
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.08);
+	padding: 0.45rem 0.7rem;
+	color: rgba(255, 255, 255, 0.84);
+	font-size: 0.82rem;
+	font-weight: 850;
+}
+
 .practice-access-card {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
 	margin: 1rem;
 	border: 1px solid rgba(255, 255, 255, 0.18);
 	border-radius: 26px;
 	background: #ffffff;
 	color: var(--practice-text);
-	padding: 1.25rem;
+	padding: 1.2rem;
 	box-shadow: 0 24px 50px rgba(0, 0, 0, 0.22);
 }
 
@@ -581,16 +657,23 @@ async function createPractice() {
 	gap: 0.85rem;
 }
 
-.practice-access-icon {
+.practice-access-icon,
+.practice-upload-icon,
+.practice-type-icon {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 48px;
-	height: 48px;
+	width: 46px;
+	height: 46px;
 	border-radius: 16px;
+	background: var(--practice-primary);
+	color: #ffffff;
+	flex: 0 0 auto;
+}
+
+.practice-access-icon {
 	background: var(--practice-primary-soft);
 	color: var(--practice-primary);
-	flex: 0 0 auto;
 }
 
 .practice-access-icon.active {
@@ -610,7 +693,7 @@ async function createPractice() {
 .practice-access-top h2 {
 	margin: 0.15rem 0 0;
 	color: var(--practice-primary);
-	font-size: 1.25rem;
+	font-size: 1.2rem;
 	font-weight: 950;
 	letter-spacing: -0.035em;
 }
@@ -626,7 +709,7 @@ async function createPractice() {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
 	gap: 0.4rem;
-	margin-top: 1.25rem;
+	margin-top: 1.15rem;
 }
 
 .practice-meter span {
@@ -643,7 +726,7 @@ async function createPractice() {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.4rem;
-	margin-top: 1.1rem;
+	margin-top: 1rem;
 	color: var(--practice-primary);
 	font-size: 0.9rem;
 	font-weight: 900;
@@ -652,63 +735,6 @@ async function createPractice() {
 
 .practice-access-link:hover {
 	color: var(--practice-primary-hover);
-}
-
-.practice-benefits {
-	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
-	gap: 1rem;
-}
-
-.practice-benefit {
-	display: flex;
-	align-items: center;
-	gap: 0.9rem;
-	border: 1px solid var(--practice-border);
-	border-radius: 22px;
-	background: var(--practice-card);
-	padding: 1rem;
-	box-shadow: var(--practice-shadow-sm);
-}
-
-.practice-benefit-icon,
-.practice-upload-icon,
-.practice-type-icon {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 46px;
-	height: 46px;
-	border-radius: 16px;
-	background: var(--practice-primary);
-	color: #ffffff;
-	flex: 0 0 auto;
-}
-
-.practice-benefit-icon.gold {
-	background: var(--practice-gold);
-	color: #3b2a00;
-}
-
-.practice-benefit-icon.green {
-	background: var(--practice-green);
-	color: #ffffff;
-}
-
-.practice-benefit strong {
-	display: block;
-	color: var(--practice-text);
-	font-size: 0.92rem;
-	font-weight: 950;
-	line-height: 1.25;
-}
-
-.practice-benefit span {
-	display: block;
-	margin-top: 0.18rem;
-	color: var(--practice-muted);
-	font-size: 0.8rem;
-	line-height: 1.45;
 }
 
 .practice-panel {
@@ -766,7 +792,7 @@ async function createPractice() {
 
 .practice-form {
 	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
+	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 1rem;
 	padding-top: 1.25rem;
 }
@@ -786,8 +812,9 @@ async function createPractice() {
 }
 
 .practice-field.full,
-.practice-control.full,
-.practice-upload.full {
+.practice-upload.full,
+.practice-advanced.full,
+.practice-examples.full {
 	grid-column: 1 / -1;
 }
 
@@ -795,11 +822,11 @@ async function createPractice() {
 .practice-field textarea {
 	width: 100%;
 	border: 1px solid var(--practice-border);
-	border-radius: 16px;
+	border-radius: 18px;
 	background: var(--practice-card);
-	padding: 0.82rem 0.9rem;
+	padding: 0.9rem 1rem;
 	color: var(--practice-text);
-	font-size: 0.92rem;
+	font-size: 0.94rem;
 	outline: none;
 	transition: 0.18s ease;
 }
@@ -812,9 +839,9 @@ async function createPractice() {
 }
 
 .practice-field textarea {
-	min-height: 118px;
+	min-height: 150px;
 	resize: vertical;
-	line-height: 1.55;
+	line-height: 1.6;
 }
 
 .practice-page :deep(label) {
@@ -842,19 +869,18 @@ async function createPractice() {
 .practice-type-grid {
 	display: grid;
 	grid-template-columns: repeat(5, minmax(0, 1fr));
-	gap: 0.8rem;
+	gap: 0.75rem;
 }
 
 .practice-type-card {
 	display: flex;
-	flex-direction: column;
 	align-items: flex-start;
 	gap: 0.75rem;
-	min-height: 152px;
+	min-height: 112px;
 	border: 1px solid var(--practice-border);
-	border-radius: 22px;
+	border-radius: 20px;
 	background: var(--practice-primary-soft-2);
-	padding: 1rem;
+	padding: 0.9rem;
 	text-align: left;
 	cursor: pointer;
 	transition: 0.18s ease;
@@ -878,25 +904,68 @@ async function createPractice() {
 	color: var(--practice-primary);
 }
 
+.practice-type-icon {
+	width: 40px;
+	height: 40px;
+	border-radius: 14px;
+}
+
 .practice-type-card strong {
 	display: block;
 	color: var(--practice-text);
-	font-size: 0.92rem;
+	font-size: 0.88rem;
 	font-weight: 950;
 	line-height: 1.2;
 }
 
 .practice-type-card small {
 	display: block;
-	margin-top: 0.35rem;
+	margin-top: 0.3rem;
 	color: var(--practice-muted);
-	font-size: 0.78rem;
-	line-height: 1.4;
+	font-size: 0.76rem;
+	line-height: 1.35;
 }
 
 .practice-type-card.active strong,
 .practice-type-card.active small {
 	color: #ffffff;
+}
+
+.practice-examples {
+	display: flex;
+	align-items: center;
+	gap: 0.7rem;
+	flex-wrap: wrap;
+	margin-top: -0.25rem;
+}
+
+.practice-examples > span {
+	color: var(--practice-muted);
+	font-size: 0.82rem;
+	font-weight: 850;
+}
+
+.practice-examples > div {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.practice-examples button {
+	border: 1px solid var(--practice-border);
+	border-radius: 999px;
+	background: var(--practice-card);
+	color: var(--practice-primary);
+	padding: 0.5rem 0.7rem;
+	font-size: 0.8rem;
+	font-weight: 850;
+	cursor: pointer;
+	transition: 0.18s ease;
+}
+
+.practice-examples button:hover {
+	border-color: var(--practice-primary);
+	background: var(--practice-primary-soft);
 }
 
 .practice-upload {
@@ -935,6 +1004,39 @@ async function createPractice() {
 	font-size: 0.84rem;
 	line-height: 1.45;
 	word-break: break-word;
+}
+
+.practice-advanced {
+	border: 1px solid var(--practice-border);
+	border-radius: 20px;
+	overflow: hidden;
+}
+
+.practice-advanced-toggle {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	width: 100%;
+	border: 0;
+	background: var(--practice-primary-soft-2);
+	color: var(--practice-text);
+	padding: 0.9rem 1rem;
+	font-weight: 950;
+	cursor: pointer;
+}
+
+.practice-advanced-toggle span {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.practice-advanced-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 1rem;
+	padding: 1rem;
 }
 
 .practice-submit {
@@ -993,6 +1095,7 @@ async function createPractice() {
 	color: #ffffff;
 	padding: 0.85rem 1.15rem;
 	box-shadow: 0 12px 24px rgba(10, 34, 81, 0.18);
+	cursor: pointer;
 }
 
 .practice-btn-primary:hover:not(:disabled) {
@@ -1012,6 +1115,7 @@ async function createPractice() {
 	color: var(--practice-primary);
 	padding: 0.85rem 1.15rem;
 	box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+	cursor: pointer;
 }
 
 .practice-btn-light:hover:not(:disabled) {
@@ -1053,7 +1157,8 @@ async function createPractice() {
 :global(:root[data-theme='dark']) .practice-access-top h2,
 :global(:root[data-theme='dark']) .practice-access-link,
 :global(:root[data-theme='dark']) .practice-link,
-:global(:root[data-theme='dark']) .practice-btn-outline {
+:global(:root[data-theme='dark']) .practice-btn-outline,
+:global(:root[data-theme='dark']) .practice-examples button {
 	color: #ffffff;
 }
 
@@ -1072,15 +1177,11 @@ async function createPractice() {
 		max-width: 560px;
 	}
 
-	.practice-benefits {
-		grid-template-columns: 1fr;
-	}
-
 	.practice-type-grid {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 
-	.practice-form {
+	.practice-advanced-grid {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 }
@@ -1088,7 +1189,7 @@ async function createPractice() {
 @media (max-width: 720px) {
 	.practice-header-inner,
 	.practice-shell {
-		width: min(100% - 24px, 1180px);
+		width: min(100% - 24px, 1120px);
 	}
 
 	.practice-header-inner {
@@ -1102,10 +1203,10 @@ async function createPractice() {
 
 	.practice-hero,
 	.practice-panel,
-	.practice-benefit,
 	.practice-access-card,
 	.practice-upload,
-	.practice-type-card {
+	.practice-type-card,
+	.practice-advanced {
 		border-radius: 22px;
 	}
 
@@ -1136,10 +1237,6 @@ async function createPractice() {
 		margin: 0 1.25rem 1.25rem;
 	}
 
-	.practice-benefit {
-		align-items: flex-start;
-	}
-
 	.practice-panel {
 		padding: 1rem;
 		scroll-margin-top: 76px;
@@ -1153,7 +1250,8 @@ async function createPractice() {
 		width: fit-content;
 	}
 
-	.practice-form {
+	.practice-form,
+	.practice-advanced-grid {
 		grid-template-columns: 1fr;
 		gap: 0.85rem;
 	}
@@ -1164,7 +1262,11 @@ async function createPractice() {
 
 	.practice-type-card {
 		min-height: auto;
-		flex-direction: row;
+	}
+
+	.practice-examples {
+		align-items: flex-start;
+		flex-direction: column;
 	}
 
 	.practice-upload {
@@ -1191,43 +1293,35 @@ async function createPractice() {
 	}
 }
 
-/* Skeleton Loaders para Practice */
 .skeleton-wrapper {
 	animation: pulse 1.5s infinite;
 }
 
 .skeleton-hero {
-	height: 380px;
-	background: var(--practice-card);
+	height: 360px;
+	border: 1px solid var(--practice-border);
 	border-radius: 30px;
-	box-shadow: var(--practice-shadow-lg);
-	border: 1px solid var(--practice-border);
-}
-
-.skeleton-benefits {
-	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
-	gap: 1rem;
-}
-
-.skeleton-benefit-card {
-	height: 80px;
 	background: var(--practice-card);
-	border-radius: 22px;
-	border: 1px solid var(--practice-border);
+	box-shadow: var(--practice-shadow-lg);
 }
 
 .skeleton-panel {
-	height: 600px;
-	background: var(--practice-card);
-	border-radius: 30px;
+	height: 560px;
 	border: 1px solid var(--practice-border);
+	border-radius: 30px;
+	background: var(--practice-card);
 	box-shadow: var(--practice-shadow-md);
 }
 
 @keyframes pulse {
-	0% { opacity: 0.6; }
-	50% { opacity: 0.3; }
-	100% { opacity: 0.6; }
+	0% {
+		opacity: 0.6;
+	}
+	50% {
+		opacity: 0.3;
+	}
+	100% {
+		opacity: 0.6;
+	}
 }
 </style>
