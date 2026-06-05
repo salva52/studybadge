@@ -196,46 +196,54 @@
 							</label>
 						</div>
 
-						<div class="two-cols">
-							<label>
-								<span>{{ __('Dificultad') }}</span>
-								<select v-model="draft.difficulty">
-									<option value="low">{{ __('Baja') }}</option>
-									<option value="medium">{{ __('Media') }}</option>
-									<option value="high">{{ __('Alta') }}</option>
+						<button type="button" class="advanced-toggle" @click="showAdvanced = !showAdvanced">
+							<Settings2 class="size-3.5" />
+							<span>{{ showAdvanced ? __('Ocultar opciones') : __('Opciones opcionales') }}</span>
+							<ChevronDown class="size-3.5" :style="{ marginLeft: 'auto', transition: 'transform 0.2s', transform: showAdvanced ? 'rotate(180deg)' : 'none' }" />
+						</button>
+
+						<div v-show="showAdvanced" class="advanced-fields">
+							<div class="two-cols">
+								<label>
+									<span>{{ __('Dificultad') }}</span>
+									<select v-model="draft.difficulty">
+										<option value="low">{{ __('Baja') }}</option>
+										<option value="medium">{{ __('Media') }}</option>
+										<option value="high">{{ __('Alta') }}</option>
+									</select>
+								</label>
+								<label>
+									<span>{{ __('Importancia') }}</span>
+									<select v-model="draft.importance">
+										<option value="low">{{ __('Baja') }}</option>
+										<option value="medium">{{ __('Media') }}</option>
+										<option value="high">{{ __('Alta') }}</option>
+									</select>
+								</label>
+							</div>
+
+							<label class="field-wide">
+								<span>{{ __('Sesion IA') }}</span>
+								<select v-model="draft.linked_ai_session">
+									<option value="">{{ __('Sin vincular') }}</option>
+									<option v-for="session in sessions" :key="session.name" :value="session.name">
+										{{ session.title || session.name }}
+									</option>
 								</select>
 							</label>
-							<label>
-								<span>{{ __('Importancia') }}</span>
-								<select v-model="draft.importance">
-									<option value="low">{{ __('Baja') }}</option>
-									<option value="medium">{{ __('Media') }}</option>
-									<option value="high">{{ __('Alta') }}</option>
+
+							<div class="reminder-row">
+								<label class="check-row">
+									<input v-model="draft.reminder_enabled" type="checkbox" />
+									<span>{{ __('Recordatorio') }}</span>
+								</label>
+								<select v-model="draft.reminder_time" :disabled="!draft.reminder_enabled">
+									<option value="same_day">{{ __('Mismo dia') }}</option>
+									<option value="night_before">{{ __('Noche anterior') }}</option>
+									<option value="1_day_before">{{ __('1 dia antes') }}</option>
+									<option value="2_days_before">{{ __('2 dias antes') }}</option>
 								</select>
-							</label>
-						</div>
-
-						<label class="field-wide">
-							<span>{{ __('Sesion IA') }}</span>
-							<select v-model="draft.linked_ai_session">
-								<option value="">{{ __('Sin vincular') }}</option>
-								<option v-for="session in sessions" :key="session.name" :value="session.name">
-									{{ session.title || session.name }}
-								</option>
-							</select>
-						</label>
-
-						<div class="reminder-row">
-							<label class="check-row">
-								<input v-model="draft.reminder_enabled" type="checkbox" />
-								<span>{{ __('Recordatorio') }}</span>
-							</label>
-							<select v-model="draft.reminder_time" :disabled="!draft.reminder_enabled">
-								<option value="same_day">{{ __('Mismo dia') }}</option>
-								<option value="night_before">{{ __('Noche anterior') }}</option>
-								<option value="1_day_before">{{ __('1 dia antes') }}</option>
-								<option value="2_days_before">{{ __('2 dias antes') }}</option>
-							</select>
+							</div>
 						</div>
 
 						<button class="primary-button full" :disabled="saving || (!access?.can_create_event && !editingEvent)">
@@ -273,6 +281,7 @@ import {
 	CalendarDays,
 	ChevronLeft,
 	ChevronRight,
+	ChevronDown,
 	Clock3,
 	Crown,
 	Flag,
@@ -283,6 +292,7 @@ import {
 	Plus,
 	RefreshCw,
 	Save,
+	Settings2,
 	Sparkles,
 	Trash2,
 	Wand2,
@@ -302,6 +312,7 @@ const events = ref([])
 const coachMessage = ref(null)
 const generatedMessage = ref('')
 const editingEvent = ref(null)
+const showAdvanced = ref(false)
 const selectedDate = ref(dateKey(new Date()))
 const monthCursor = ref(startOfMonth(new Date()))
 
@@ -612,6 +623,40 @@ function toServerDatetime(value) {
 </script>
 
 <style scoped>
+.advanced-toggle {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	width: 100%;
+	background: #f8fafc;
+	border: 1px dashed #cbd5e1;
+	border-radius: 8px;
+	padding: 8px 12px;
+	color: #64748b;
+	font-size: 0.8rem;
+	font-weight: 600;
+	cursor: pointer;
+	margin-top: 4px;
+	transition: all 0.2s;
+}
+
+.advanced-toggle:hover {
+	background: #f1f5f9;
+	color: #475569;
+	border-color: #94a3b8;
+}
+
+.advanced-fields {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	padding: 12px;
+	background: #f8fafc;
+	border: 1px solid #e2e8f0;
+	border-radius: 8px;
+	margin-top: -4px;
+}
+
 .study-calendar-page {
 	height: 100vh;
 	min-height: 720px;
