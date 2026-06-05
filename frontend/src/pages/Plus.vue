@@ -413,7 +413,7 @@
 										<div v-if="paddleLoading" class="sb-card-loading">
 											{{ __('Cargando Paddle...') }}
 										</div>
-										<p>{{ __('Checkout Paddle abierto. Si lo cerraste, vuelve a presionar el botón para reabrirlo.') }}</p>
+										<p class="text-blue-500">{{ __('Checkout Paddle abierto. Si lo cerraste, vuelve a presionar el botón para reabrirlo.') }}</p>
 									</div>
 
 									<div class="sb-payment-note">
