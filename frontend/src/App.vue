@@ -6,10 +6,12 @@
 		<InstallPrompt v-if="isMobile && !settings.data?.disable_pwa" />
 		<Dialogs />
 		<TutorIABubble v-if="showGlobalTutor" />
+		<WelcomeTutorialModal />
 	</FrappeUIProvider>
 </template>
 <script setup>
 import TutorIABubble from '@/components/TutorIA/TutorIABubble.vue'
+import WelcomeTutorialModal from '@/components/Modals/WelcomeTutorialModal.vue'
 import { sessionStore } from '@/stores/session'
 import { FrappeUIProvider } from 'frappe-ui'
 import { Dialogs, createDialog } from '@/utils/dialogs'
