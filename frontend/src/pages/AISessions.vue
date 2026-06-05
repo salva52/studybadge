@@ -308,11 +308,16 @@
 			</div>
 			
 			<TranscriptionCard v-if="activeSession" :session-name="activeSession.name" @transcription-completed="onTranscriptionCompleted" />
-			<TranscriptionHistory v-if="activeSession" :session-name="activeSession.name" :refresh-trigger="refreshTranscriptionHistoryTrigger" @deleted="refreshSession" />
+			<TranscriptionHistory v-if="activeSession" :session-name="activeSession.name" :refresh-trigger="refreshTranscriptionHistoryTrigger" @deleted="refreshSession" @completed="refreshSession" />
 
-			<button class="secondary-btn full" @click="openUploader">
-				<Upload class="size-4" /> {{ __('Agregar documentos') }}
-			</button>
+			<div class="flex gap-2">
+				<button class="secondary-btn full flex-1" @click="openUploader">
+					<Upload class="size-4" /> {{ __('Archivo') }}
+				</button>
+				<button class="secondary-btn full flex-1" @click="showTextModal = true">
+					<Type class="size-4" /> {{ __('Texto') }}
+				</button>
+			</div>
 			<div class="sources-list">
 				<div v-for="material in activeSession?.materials || []" :key="material.idx" class="source-item">
 					<FileText class="size-4" />
@@ -370,6 +375,32 @@
 		</aside>
 
 		<div v-if="showSessions || showTools" class="mobile-backdrop" @click="showSessions = false; showTools = false"></div>
+		
+		<div v-if="showTextModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]" @click="showTextModal = false">
+			<div class="bg-white rounded-xl p-5 w-[90%] max-w-lg shadow-2xl flex flex-col" @click.stop>
+				<div class="flex justify-between items-center mb-4 border-b pb-3">
+					<h3 class="text-[1.05rem] font-bold text-ink-gray-9 m-0">{{ __('Agregar texto como fuente') }}</h3>
+					<button class="icon-btn" @click="showTextModal = false"><X class="size-4" /></button>
+				</div>
+				<div class="flex flex-col gap-4 overflow-y-auto max-h-[60vh] p-1">
+					<label class="flex flex-col gap-1.5">
+						<span class="text-[0.8rem] font-bold text-ink-gray-5 uppercase tracking-wider">{{ __('Título (opcional)') }}</span>
+						<input v-model="textTitle" class="border border-ink-gray-3 rounded-lg px-3 py-2.5 text-[0.9rem] focus:outline-none focus:ring-2 focus:ring-ink-blue-3" :placeholder="__('Ej: Apuntes de clase')" />
+					</label>
+					<label class="flex flex-col gap-1.5">
+						<span class="text-[0.8rem] font-bold text-ink-gray-5 uppercase tracking-wider">{{ __('Contenido del texto') }}</span>
+						<textarea v-model="textContent" rows="8" class="border border-ink-gray-3 rounded-lg px-3 py-2.5 text-[0.9rem] resize-y focus:outline-none focus:ring-2 focus:ring-ink-blue-3" :placeholder="__('Pega aquí el texto que quieres que la IA lea...')" />
+					</label>
+				</div>
+				<div class="flex justify-end gap-3 mt-5 pt-3 border-t">
+					<button class="secondary-btn" @click="showTextModal = false">{{ __('Cancelar') }}</button>
+					<button class="primary-btn" :disabled="!textContent.trim() || isTextUploading" @click="uploadManualText">
+						<Loader2 v-if="isTextUploading" class="size-4 animate-spin" />
+						{{ isTextUploading ? __('Guardando...') : __('Agregar texto') }}
+					</button>
+				</div>
+			</div>
+		</div>
 		</template>
 
 		<QuizModal v-model:show="showQuiz" :loading="modalLoading" :data="modalData" />
@@ -418,6 +449,8 @@ import {
 	X,
 	Zap,
 	Globe,
+	Type,
+	Loader2,
 } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
 import QuizModal from '@/components/QuizModal.vue'
@@ -461,6 +494,32 @@ async function refreshSession() {
 }
 
 const showAdvanced = ref(false)
+
+const showTextModal = ref(false)
+const textTitle = ref('')
+const textContent = ref('')
+const isTextUploading = ref(false)
+
+async function uploadManualText() {
+	if (!textContent.value.trim() || !activeSession.value) return
+	isTextUploading.value = true
+	try {
+		const res = await api('upload_ai_session_text', {
+			session: activeSession.value.name,
+			title: textTitle.value,
+			text: textContent.value
+		})
+		activeSession.value = res
+		showTextModal.value = false
+		textTitle.value = ''
+		textContent.value = ''
+		toast.success(__('Texto agregado a tus fuentes.'))
+	} catch (e) {
+		console.error(e)
+	} finally {
+		isTextUploading.value = false
+	}
+}
 
 const readerHistory = ref([])
 const showSessions = ref(false)

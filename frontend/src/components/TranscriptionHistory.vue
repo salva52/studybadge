@@ -51,7 +51,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['deleted'])
+const emit = defineEmits(['deleted', 'completed'])
 
 const transcriptions = ref([])
 const showModal = ref(false)
@@ -67,7 +67,18 @@ onMounted(fetchTranscriptions)
 async function fetchTranscriptions() {
   if (!props.sessionName) return
   try {
+    const oldProcessing = transcriptions.value.some(t => t.status === 'Processing')
     transcriptions.value = await call('studybadge_ai.ai_sessions.list_transcriptions', { session: props.sessionName })
+    const newProcessing = transcriptions.value.some(t => t.status === 'Processing')
+    
+    if (oldProcessing && !newProcessing) {
+      toast.success(__('Resumen inteligente listo. Se agregó a tus fuentes.'))
+      emit('completed')
+    }
+    
+    if (newProcessing) {
+      setTimeout(fetchTranscriptions, 5000)
+    }
   } catch (e) {
     console.error(e)
   }
