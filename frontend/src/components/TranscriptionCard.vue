@@ -184,30 +184,28 @@ async function sendAudioChunk() {
   const blob = new Blob(audioChunks, { type: 'audio/webm' })
   audioChunks = [] // Clear for next chunk
   
-  // Convert blob to base64
-  return new Promise((resolve) => {
-    const reader = new FileReader()
-    reader.readAsDataURL(blob)
-    reader.onloadend = async () => {
-      const base64data = reader.result
-      
-      try {
-        const data = await call('studybadge_ai.ai_sessions.process_transcription_chunk', {
-          transcription_id: transcriptionId.value,
-          chunk_data: base64data
-        })
-        
-        if (typeof data === 'string') {
-          rawTranscript.value = data
-        }
-      } catch (e) {
-        console.error('Error sending chunk', e)
-      } finally {
-        isUploading.value = false
-        resolve()
-      }
+  const formData = new FormData()
+  formData.append('file', blob, 'chunk.webm')
+  formData.append('transcription_id', transcriptionId.value)
+  
+  try {
+    const res = await fetch('/api/method/studybadge_ai.ai_sessions.process_transcription_chunk', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'X-Frappe-CSRF-Token': window.csrf_token || ''
+      },
+      body: formData
+    })
+    const data = await res.json()
+    if (data.message && typeof data.message === 'string') {
+      rawTranscript.value = data.message
     }
-  })
+  } catch (e) {
+    console.error('Error sending chunk', e)
+  } finally {
+    isUploading.value = false
+  }
 }
 
 async function pauseTranscription() {
