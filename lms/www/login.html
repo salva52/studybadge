@@ -1262,13 +1262,52 @@
 								</script>
 
 								<div class="page-card-actions" style="margin-top: 1.2rem; margin-bottom: 0.5rem;">
-									<button class="btn btn-sm btn-primary btn-block btn-signup sb-btn-login" type="button">
+									<button class="btn btn-sm btn-primary btn-block btn-signup sb-btn-login" type="submit">
 										{{ _("Registrarse") }}
 									</button>
 								</div>
 							</div>
+						</form>
 
-							{%- if social_login -%}
+						<script>
+							frappe.ready(function () {
+								$(".form-signup").on("submit", (e) => {
+									e.preventDefault();
+									const email = ($("#signup_email").val() || "").trim();
+									const full_name = frappe.utils.xss_sanitise(($("#signup_fullname").val() || "").trim());
+									const ref_code = frappe.utils.xss_sanitise(($("#login_ref_code").val() || "").trim());
+
+									if (!email || !(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) || !full_name) {
+										login.set_status('{{ _("Ingresa un correo válido y tu nombre completo") }}', "red");
+										return false;
+									}
+
+									console.log("Signup started (login.html) with email:", email, "name:", full_name);
+									frappe.call({
+										method: "lms.lms.user.sign_up",
+										args: {
+											email: email,
+											full_name: full_name,
+											verify_terms: 1,
+											user_category: ""
+										},
+										statusCode: login.login_handlers,
+										callback: function(r) {
+											console.log("Signup server response:", r);
+											if (r.message && r.message[0] === 0) {
+												login.set_status(r.message[1], "red");
+											} else if (r.message) {
+												login.set_status(r.message[1], "green");
+											} else if (r.exc) {
+												console.error("Exception during signup:", r.exc);
+												login.set_status("Error en el servidor al registrarse. Revisa la consola.", "red");
+											}
+										}
+									});
+									return false;
+								});
+							});
+						</script>			{%- if social_login -%}
 							<div class="social-logins" style="margin-top: 1rem;">
 								<p class="text-muted login-divider">{{ _("o regístrate con") }}</p>
 								<div class="social-login-buttons">
