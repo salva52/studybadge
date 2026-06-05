@@ -210,6 +210,11 @@
 		$("#user_category").css("color", category_color);
 	};
 
+	const validate_email = (email) => {
+		return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+	};
+
+
 	const signup = (e) => {
 		e.preventDefault();
 
