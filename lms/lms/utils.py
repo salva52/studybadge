@@ -1022,10 +1022,17 @@ def get_categorized_courses(courses: list) -> dict:
 
 
 @frappe.whitelist(allow_guest=True)
+@rate_limit(limit=500, seconds=60 * 60)
 def get_course_outline(course: str, progress: bool = False) -> list:
 	"""Returns the course outline."""
 
 	if not guest_access_allowed():
+		return []
+
+	is_course_published = frappe.db.get_value("LMS Course", course, "published")
+	membership = get_membership(course)
+	can_modify = can_modify_course(course)
+	if not is_course_published and not membership and not can_modify:
 		return []
 
 	chapters = get_outline_chapter(course)
@@ -1036,7 +1043,24 @@ def get_course_outline(course: str, progress: bool = False) -> list:
 	files_by_name = get_scorm_files(chapters)
 	completed = get_completed_lessons(course, lesson_rows) if progress else set()
 
-	return build_outline(chapters, lesson_rows, files_by_name, completed, progress)
+	outline = build_outline(chapters, lesson_rows, files_by_name, completed, progress)
+	if not membership and not can_modify:
+		outline = sanitize_public_outline(outline)
+	return outline
+
+
+def sanitize_public_outline(outline: list) -> list:
+	for chapter in outline:
+		chapter.launch_file = None
+		if chapter.get("is_scorm_package"):
+			chapter.scorm_package = None
+		for lesson in chapter.get("lessons", []):
+			if not lesson.get("include_in_preview"):
+				lesson.youtube = None
+				lesson.quiz_id = None
+				lesson.question = None
+				lesson.file_type = None
+	return outline
 
 
 def get_outline_chapter(course: str) -> list:

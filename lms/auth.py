@@ -26,13 +26,20 @@ ALLOWED_PATHS = [
 	"/api/method/frappe.www.login.custom",
 	"/api/method/frappe.integrations.oauth2.openid_profile",
 	"/api/method/frappe.website.doctype.web_page_view.web_page_view.make_view_log",
-	"/api/method/upload_file",
 	"/api/method/frappe.search.web_search",
 	"/api/method/frappe.email.queue.unsubscribe",
 	"/api/method/frappe.website.doctype.web_form.web_form.accept",
 	"/api/method/frappe.core.doctype.user.user.test_password_strength",
 	"/api/method/frappe.core.doctype.user.user.update_password",
 	"/api/method/frappe.utils.telemetry.pulse.client.is_enabled",
+	"/api/method/frappe.onboarding.get_onboarding_status",
+	"/api/method/frappe.desk.search.search_link",
+	"/api/method/frappe.core.doctype.user.user.reset_password",
+	"/api/method/frappe.sessions.clear",
+]
+
+AUTHENTICATED_ALLOWED_PATHS = [
+	"/api/method/upload_file",
 	"/api/method/frappe.client.get_value",
 	"/api/method/frappe.client.get_count",
 	"/api/method/frappe.client.get",
@@ -41,14 +48,10 @@ ALLOWED_PATHS = [
 	"/api/method/frappe.client.delete",
 	"/api/method/frappe.client.get_list",
 	"/api/method/frappe.client.rename_doc",
-	"/api/method/frappe.onboarding.get_onboarding_status",
 	"/api/method/frappe.utils.print_format.download_pdf",
-	"/api/method/frappe.desk.search.search_link",
 	"/api/method/frappe.core.doctype.communication.email.make",
-	"/api/method/frappe.core.doctype.user.user.reset_password",
 	"/api/method/frappe.desk.doctype.notification_log.notification_log.mark_as_read",
 	"/api/method/frappe.desk.doctype.notification_log.notification_log.mark_all_as_read",
-	"/api/method/frappe.sessions.clear",
 ]
 
 
@@ -75,6 +78,9 @@ def authenticate():
 		return
 
 	if is_custom_app_endpoint(path):
+		return
+
+	if frappe.session.user != "Guest" and path in AUTHENTICATED_ALLOWED_PATHS:
 		return
 
 	if path in ALLOWED_PATHS:

@@ -468,6 +468,12 @@ async function startLiveVoice() {
 			session: props.sessionId,
 		})
 
+		if (!token.live_supported || !token.token) {
+			liveError.value = token.message || __('Voz no disponible. ContinÃºa por texto.')
+			liveLoading.value = false
+			return
+		}
+
 		const url = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${token.token}`
 		const ws = new WebSocket(url)
 

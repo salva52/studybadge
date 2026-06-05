@@ -8,6 +8,7 @@ from frappe import _
 from frappe.email.doctype.email_template.email_template import get_email_template
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
+from frappe.rate_limiter import rate_limit
 from frappe.utils import nowdate
 from frappe.utils.telemetry import capture
 
@@ -223,6 +224,7 @@ def get_certificate_qr_svg(certificate_id: str, scale: int = 3):
 
 
 @frappe.whitelist(allow_guest=True)
+@rate_limit(limit=60, seconds=60 * 60)
 def download_public_certificate(certificate_id: str):
 	certificate = frappe.db.get_value(
 		"LMS Certificate",
