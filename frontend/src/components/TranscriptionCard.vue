@@ -1,60 +1,85 @@
 <template>
-  <div class="transcription-card-wrapper mt-3 mb-3">
+  <div class="transcription-card-wrapper mt-4 mb-6">
     <!-- Vista inicial / Inactiva -->
-    <div v-if="status === 'idle'" class="transcription-card idle-state">
-      <div class="tc-icon">
-        <Mic class="size-5" />
+    <div v-if="status === 'idle'" class="tc-idle group" @click="!loading && startTranscription()">
+      <div class="tc-idle-bg"></div>
+      <div class="tc-idle-content">
+        <div class="tc-icon-wrapper">
+          <div class="tc-icon-glow"></div>
+          <Mic class="size-6 tc-icon-svg" />
+        </div>
+        <div class="tc-text-content">
+          <h3 class="tc-title">{{ __('Transcribir clase') }}</h3>
+          <p class="tc-subtitle">{{ __('Convierte tu clase en apuntes inteligentes con TutorIA.') }}</p>
+        </div>
+        <div class="tc-action-area">
+          <button class="tc-start-btn" :disabled="loading" @click.stop="startTranscription">
+            <Loader2 v-if="loading" class="size-4 animate-spin" />
+            <span v-else>{{ __('Iniciar') }}</span>
+          </button>
+        </div>
       </div>
-      <div class="tc-content">
-        <strong>{{ __('Transcribir clase') }}</strong>
-        <small>{{ __('Convierte tu clase en apuntes inteligentes para estudiar con TutorIA.') }}</small>
-      </div>
-      <button class="primary-btn tc-start-btn" @click="startTranscription" :disabled="loading">
-        {{ loading ? __('Iniciando...') : __('Iniciar transcripción') }}
-      </button>
     </div>
 
     <!-- Vista Activa (Grabando, Pausado, Procesando) -->
-    <div v-else class="transcription-card active-state">
-      <div class="tc-header">
-        <div class="tc-status-indicator">
-          <span class="pulse-dot" :class="{ recording: status === 'recording', paused: status === 'paused', processing: status === 'processing' }"></span>
-          <span class="status-text">{{ statusText }}</span>
+    <div v-else class="tc-active-state">
+      <div class="tc-active-header">
+        <div class="tc-status-badge" :class="status">
+          <span v-if="status === 'recording'" class="recording-indicator">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+          </span>
+          <span v-else-if="status === 'paused'" class="paused-indicator">
+            <Pause class="size-3" />
+          </span>
+          <Loader2 v-else-if="status === 'processing'" class="size-3 animate-spin" />
+          <span class="status-label">{{ statusText }}</span>
         </div>
-        <div class="tc-timer">{{ formattedTime }} / 2:00:00</div>
-      </div>
-      
-      <div class="tc-options" v-if="status === 'recording' || status === 'paused'">
-        <select v-model="language" class="tc-select" :disabled="status !== 'idle' && status !== 'paused'">
-          <option value="auto">{{ __('Detectar automáticamente') }}</option>
-          <option value="es">{{ __('Español') }}</option>
-          <option value="en">{{ __('Inglés') }}</option>
-          <option value="pt">{{ __('Portugués') }}</option>
-        </select>
-      </div>
-
-      <div class="tc-transcript-preview" ref="transcriptBox">
-        <p v-if="!rawTranscript && status === 'recording'" class="text-muted">{{ __('Escuchando...') }}</p>
-        <p v-else>{{ rawTranscript }}</p>
-        <div v-if="status === 'processing'" class="tc-processing">
-          <Loader2 class="size-4 spin" /> {{ __('Generando resumen inteligente...') }}
+        <div class="tc-timer-display" :class="{ 'is-paused': status === 'paused' }">
+          {{ formattedTime }} <span class="tc-timer-limit">/ 2:00:00</span>
         </div>
       </div>
-
-      <div class="tc-actions" v-if="status === 'recording' || status === 'paused'">
-        <button v-if="status === 'recording'" class="secondary-btn" @click="pauseTranscription">
-          <Pause class="size-4" /> {{ __('Pausar') }}
-        </button>
-        <button v-if="status === 'paused'" class="secondary-btn" @click="resumeTranscription">
-          <Play class="size-4" /> {{ __('Continuar') }}
-        </button>
-        <button class="primary-btn finish-btn" @click="finishTranscription">
-          <Square class="size-4" /> {{ __('Finalizar') }}
-        </button>
-      </div>
       
-      <div class="tc-footer-notice" v-if="status === 'recording' || status === 'paused'">
-        <small>{{ __('Recuerda tener permiso para grabar. La transcripción es privada.') }}</small>
+      <div class="tc-controls-row" v-if="status === 'recording' || status === 'paused'">
+        <div class="tc-language-selector">
+          <select v-model="language" class="tc-select" :disabled="status !== 'idle' && status !== 'paused'">
+            <option value="auto">{{ __('Detectar idioma auto') }}</option>
+            <option value="es">{{ __('Español') }}</option>
+            <option value="en">{{ __('Inglés') }}</option>
+            <option value="pt">{{ __('Portugués') }}</option>
+          </select>
+        </div>
+        
+        <div class="tc-action-buttons">
+          <button v-if="status === 'recording'" class="tc-btn-icon tc-btn-pause" @click="pauseTranscription" title="Pausar">
+            <Pause class="size-5" />
+          </button>
+          <button v-if="status === 'paused'" class="tc-btn-icon tc-btn-resume" @click="resumeTranscription" title="Continuar">
+            <Play class="size-5" />
+          </button>
+          <button class="tc-btn-icon tc-btn-finish" @click="finishTranscription" title="Finalizar transcripción">
+            <Square class="size-4" />
+            <span>{{ __('Terminar') }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="tc-transcript-container">
+        <div class="tc-transcript-glass" ref="transcriptBox">
+          <div v-if="status === 'processing'" class="tc-processing-view">
+            <div class="ai-orb"></div>
+            <h4>{{ __('Analizando la clase...') }}</h4>
+            <p>{{ __('Generando resumen inteligente, ideas clave y preguntas de examen.') }}</p>
+          </div>
+          <div v-else class="tc-transcript-content">
+            <p v-if="!rawTranscript && status === 'recording'" class="tc-placeholder">{{ __('Escuchando atentamente...') }}</p>
+            <p v-else-if="!rawTranscript && status === 'paused'" class="tc-placeholder">{{ __('Grabación pausada.') }}</p>
+            <p v-else class="tc-transcript-text">{{ rawTranscript }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tc-footer" v-if="status === 'recording' || status === 'paused'">
+        <p>{{ __('La transcripción es privada. Asegúrate de tener permiso para grabar.') }}</p>
       </div>
     </div>
   </div>
@@ -83,7 +108,6 @@ const transcriptionId = ref(null)
 
 let mediaRecorder = null
 let timerInterval = null
-let chunkInterval = null
 let audioChunks = []
 
 const CHUNK_MS = 10000 // 10 seconds per chunk for faster-whisper
@@ -91,7 +115,7 @@ const CHUNK_MS = 10000 // 10 seconds per chunk for faster-whisper
 const statusText = computed(() => {
   if (status.value === 'recording') return __('Grabando')
   if (status.value === 'paused') return __('Pausado')
-  if (status.value === 'processing') return __('Procesando resumen')
+  if (status.value === 'processing') return __('Procesando')
   return ''
 })
 
@@ -99,7 +123,7 @@ const formattedTime = computed(() => {
   const h = Math.floor(timeElapsed.value / 3600)
   const m = Math.floor((timeElapsed.value % 3600) / 60)
   const s = timeElapsed.value % 60
-  return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+  return `${h ? h + ':' : ''}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
 })
 
 const transcriptBox = ref(null)
@@ -165,6 +189,7 @@ async function sendAudioChunk() {
     const res = await fetch('/api/method/studybadge_ai.ai_sessions.process_transcription_chunk', {
       method: 'POST',
       headers: {
+        'Accept': 'application/json',
         'X-Frappe-CSRF-Token': window.csrf_token || ''
       },
       body: formData
@@ -250,187 +275,394 @@ onUnmounted(() => {
   }
   clearInterval(timerInterval)
 })
-
 </script>
 
 <style scoped>
 .transcription-card-wrapper {
-  background: white;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  overflow: hidden;
+  position: relative;
+  width: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-.idle-state {
+/* =========================================
+   IDLE STATE (Premium Button Look)
+========================================= */
+.tc-idle {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.tc-idle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -4px rgba(59, 130, 246, 0.15);
+  border-color: #cbd5e1;
+}
+
+.tc-idle:active {
+  transform: translateY(1px);
+}
+
+.tc-idle-bg {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(248,250,252,1) 0%, rgba(241,245,249,0.5) 100%);
+  z-index: 0;
+}
+
+.tc-idle-content {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
-  padding: 12px;
-  gap: 12px;
+  padding: 16px 20px;
+  gap: 16px;
 }
 
-.tc-icon {
-  background: #f1f5f9;
-  color: #3b82f6;
-  padding: 8px;
-  border-radius: 50%;
+.tc-icon-wrapper {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
+  flex-shrink: 0;
 }
 
-.tc-content {
+.tc-icon-glow {
+  position: absolute;
+  inset: -2px;
+  background: inherit;
+  filter: blur(8px);
+  opacity: 0;
+  border-radius: inherit;
+  transition: opacity 0.3s ease;
+}
+
+.tc-idle:hover .tc-icon-glow {
+  opacity: 0.6;
+}
+
+.tc-icon-svg {
+  color: white;
+  z-index: 2;
+}
+
+.tc-text-content {
   flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
-.tc-content strong {
-  font-size: 0.9rem;
-  color: #1e293b;
+.tc-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.01em;
 }
 
-.tc-content small {
-  font-size: 0.75rem;
+.tc-subtitle {
+  font-size: 0.85rem;
   color: #64748b;
-  line-height: 1.2;
+  margin: 0;
+  line-height: 1.3;
 }
 
 .tc-start-btn {
-  font-size: 0.8rem;
-  padding: 6px 12px;
-  white-space: nowrap;
-}
-
-.active-state {
-  padding: 16px;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  background: #0f172a;
+  color: white;
+  border: none;
+  border-radius: 99px;
+  padding: 8px 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 90px;
 }
 
-.tc-header {
+.tc-idle:hover .tc-start-btn {
+  background: #1e293b;
+}
+
+/* =========================================
+   ACTIVE STATE (Glassmorphism & Neon)
+========================================= */
+.tc-active-state {
+  position: relative;
+  background: #0f172a; /* Dark premium background */
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+  overflow: hidden;
+  color: white;
+}
+
+.tc-active-state::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.15), transparent 40%),
+              radial-gradient(circle at bottom left, rgba(239, 68, 68, 0.1), transparent 40%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.tc-active-header, .tc-controls-row, .tc-transcript-container, .tc-footer {
+  position: relative;
+  z-index: 1;
+}
+
+.tc-active-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 20px;
 }
 
-.tc-status-indicator {
-  display: flex;
+.tc-status-badge {
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 6px 14px;
+  border-radius: 99px;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: #334155;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.pulse-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
+.tc-status-badge.recording { color: #f87171; border-color: rgba(248, 113, 113, 0.3); }
+.tc-status-badge.paused { color: #fbbf24; }
+.tc-status-badge.processing { color: #60a5fa; }
 
-.pulse-dot.recording {
-  background: #ef4444;
-  animation: pulse-red 1.5s infinite;
-}
-
-.pulse-dot.paused {
-  background: #f59e0b;
-}
-
-.pulse-dot.processing {
-  background: #3b82f6;
-  animation: pulse-blue 1.5s infinite;
-}
-
-.tc-timer {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #64748b;
-  font-variant-numeric: tabular-nums;
-}
-
-.tc-options {
+/* Animated Audio Bars */
+.recording-indicator {
   display: flex;
-  gap: 8px;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+
+.recording-indicator .bar {
+  width: 3px;
+  background: #ef4444;
+  border-radius: 2px;
+  animation: equalize 1s infinite alternate ease-in-out;
+}
+
+.recording-indicator .bar:nth-child(1) { height: 60%; animation-delay: 0s; }
+.recording-indicator .bar:nth-child(2) { height: 100%; animation-delay: 0.3s; }
+.recording-indicator .bar:nth-child(3) { height: 80%; animation-delay: 0.15s; }
+
+@keyframes equalize {
+  0% { height: 30%; }
+  100% { height: 100%; }
+}
+
+.tc-timer-display {
+  font-size: 1.5rem;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.tc-timer-display.is-paused {
+  opacity: 0.6;
+}
+
+.tc-timer-limit {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.tc-controls-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.tc-language-selector {
+  flex: 1;
+  max-width: 200px;
 }
 
 .tc-select {
-  flex: 1;
-  font-size: 0.8rem;
-  padding: 6px;
-  border-radius: 4px;
-  border: 1px solid #cbd5e1;
-  background: #f8fafc;
-}
-
-.tc-transcript-preview {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  padding: 10px;
-  height: 100px;
-  overflow-y: auto;
-  font-size: 0.8rem;
-  color: #334155;
-  line-height: 1.4;
-}
-
-.tc-processing {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #3b82f6;
-  font-weight: 500;
-  justify-content: center;
-  height: 100%;
-}
-
-.spin {
-  animation: spin 1s linear infinite;
-}
-
-.tc-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.tc-actions button {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 12px;
   font-size: 0.85rem;
-  padding: 8px;
+  outline: none;
+  appearance: none;
+  transition: all 0.2s;
 }
 
-.finish-btn {
+.tc-select:focus {
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tc-select option {
   background: #1e293b;
   color: white;
 }
 
-.tc-footer-notice {
+.tc-action-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.tc-btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.tc-btn-pause {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.tc-btn-pause:hover { background: rgba(255, 255, 255, 0.2); transform: scale(1.05); }
+
+.tc-btn-resume {
+  background: #f59e0b;
+  color: #fff;
+}
+
+.tc-btn-resume:hover { background: #fbbf24; transform: scale(1.05); }
+
+.tc-btn-finish {
+  background: #ef4444;
+  color: white;
+  width: auto;
+  padding: 0 20px;
+  border-radius: 99px;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.tc-btn-finish:hover {
+  background: #f87171;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+}
+
+.tc-transcript-container {
+  margin-top: 10px;
+}
+
+.tc-transcript-glass {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  height: 140px;
+  overflow-y: auto;
+  padding: 16px;
+  scroll-behavior: smooth;
+}
+
+.tc-transcript-glass::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tc-transcript-glass::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tc-transcript-glass::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.tc-transcript-content {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #e2e8f0;
+}
+
+.tc-placeholder {
+  color: #64748b;
+  font-style: italic;
   text-align: center;
+  margin-top: 30px;
+}
+
+.tc-processing-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+}
+
+.ai-orb {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  margin-bottom: 12px;
+  animation: pulse-orb 2s infinite ease-in-out;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+}
+
+@keyframes pulse-orb {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 30px rgba(139, 92, 246, 0.8); }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+.tc-processing-view h4 {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  color: #ffffff;
+}
+
+.tc-processing-view p {
+  margin: 0;
+  font-size: 0.8rem;
   color: #94a3b8;
-  font-size: 0.7rem;
 }
 
-@keyframes pulse-red {
-  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-  70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+.tc-footer {
+  margin-top: 16px;
+  text-align: center;
 }
 
-@keyframes pulse-blue {
-  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
-  70% { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.tc-footer p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #475569;
 }
 </style>
