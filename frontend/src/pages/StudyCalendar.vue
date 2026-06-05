@@ -735,7 +735,7 @@ function toServerDatetime(value) {
 .calendar-header,
 .coach-strip,
 .calendar-shell {
-	width: min(1500px, 100%);
+	width: min(1320px, 100%);
 	margin: 0 auto;
 }
 
@@ -949,7 +949,7 @@ function toServerDatetime(value) {
 
 .calendar-shell {
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+	grid-template-columns: minmax(0, 1fr) minmax(270px, 320px);
 	grid-template-areas:
 		'calendar upcoming'
 		'agenda upcoming';
@@ -968,7 +968,7 @@ function toServerDatetime(value) {
 
 .calendar-card {
 	grid-area: calendar;
-	padding: 1rem;
+	padding: 0.9rem;
 }
 
 .month-toolbar {
@@ -988,14 +988,14 @@ function toServerDatetime(value) {
 }
 
 .month-title strong {
-	font-size: clamp(1.35rem, 2.2vw, 2rem);
+	font-size: clamp(1.25rem, 2vw, 1.75rem);
 	letter-spacing: -0.04em;
 }
 
 .calendar-grid {
 	display: grid;
 	grid-template-columns: repeat(7, minmax(0, 1fr));
-	gap: 0.45rem;
+	gap: 0.38rem;
 }
 
 .weekday {
@@ -1015,11 +1015,11 @@ function toServerDatetime(value) {
 	grid-template-rows: auto auto minmax(0, 1fr);
 	align-content: start;
 	gap: 0.38rem;
-	min-height: clamp(92px, 8.2vw, 128px);
+	min-height: clamp(82px, 7.2vw, 112px);
 	border: 1px solid #f0f0f0;
-	border-radius: 22px;
+	border-radius: 19px;
 	background: #ffffff;
-	padding: 0.65rem;
+	padding: 0.58rem;
 	text-align: left;
 	cursor: pointer;
 	transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
@@ -1048,11 +1048,11 @@ function toServerDatetime(value) {
 
 .day-number {
 	display: grid;
-	width: 34px;
-	height: 34px;
+	width: 31px;
+	height: 31px;
 	place-items: center;
 	border-radius: 999px;
-	font-size: 0.95rem;
+	font-size: 0.9rem;
 	font-weight: 850;
 }
 
@@ -1397,7 +1397,18 @@ function toServerDatetime(value) {
 
 .picked-date strong {
 	display: block;
+	color: #111827;
+	font-weight: 900;
 	text-transform: capitalize;
+}
+
+.picked-date div {
+	min-width: 0;
+}
+
+.picked-date small {
+	display: block;
+	margin-top: 0.12rem;
 }
 
 .field {
