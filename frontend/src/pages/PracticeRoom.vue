@@ -474,7 +474,10 @@ async function startLiveVoice() {
 			return
 		}
 
-		const url = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${token.token}`
+		const liveEndpoint =
+			token.endpoint ||
+			'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained'
+		const url = `${liveEndpoint}?access_token=${encodeURIComponent(token.token)}`
 		const ws = new WebSocket(url)
 
 		liveSession.value = ws
