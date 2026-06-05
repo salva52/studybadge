@@ -381,7 +381,7 @@
 </template>
 
 <script setup>
-import { computed, ref, nextTick } from 'vue'
+import { computed, ref, nextTick, onMounted } from 'vue'
 import { Breadcrumbs, usePageMeta, Dialog, call } from 'frappe-ui'
 import { marked } from 'marked'
 import {
@@ -406,6 +406,20 @@ import {
 import { sessionStore } from '@/stores/session'
 
 const { brand } = sessionStore()
+
+onMounted(async () => {
+	try {
+		const siteKey = await call('studybadge_ai.keys.get_public_site_key')
+		if (siteKey) {
+			window.RECAPTCHA_SITE_KEY = siteKey
+			const script = document.createElement('script')
+			script.src = https://www.google.com/recaptcha/api.js?render= + siteKey
+			document.head.appendChild(script)
+		}
+	} catch (e) {
+		console.error('Failed to load recaptcha', e)
+	}
+})
 
 const showSupportChat = ref(false)
 const currentMessage = ref('')
@@ -479,10 +493,15 @@ const sendMessage = async () => {
 	await scrollToBottom()
 
 	try {
+		let captchaToken = null
+		if (window.grecaptcha && window.RECAPTCHA_SITE_KEY) {
+			captchaToken = await window.grecaptcha.execute(window.RECAPTCHA_SITE_KEY, {action: 'support_chat'})
+		}
 		const response = await call('studybadge_ai.ai_support.chat_with_support', {
 			message: msgText,
 			images_base64: imgBase64 ? JSON.stringify([imgBase64]) : '[]',
 			history: JSON.stringify(chatHistory.value.slice(0, -1)),
+			captcha_token: captchaToken
 		})
 
 		if (response.reply) {

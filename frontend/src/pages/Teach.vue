@@ -343,6 +343,20 @@ import {
 import { sessionStore } from '@/stores/session'
 
 const { brand } = sessionStore()
+
+onMounted(async () => {
+	try {
+		const siteKey = await call('studybadge_ai.keys.get_public_site_key')
+		if (siteKey) {
+			window.RECAPTCHA_SITE_KEY = siteKey
+			const script = document.createElement('script')
+			script.src = https://www.google.com/recaptcha/api.js?render= + siteKey
+			document.head.appendChild(script)
+		}
+	} catch (e) {
+		console.error('Failed to load recaptcha', e)
+	}
+})
 const loading = ref(false)
 const result = ref(null)
 
@@ -467,8 +481,13 @@ const submit = async () => {
 	)
 
 	try {
+		let captchaToken = null
+		if (window.grecaptcha && window.RECAPTCHA_SITE_KEY) {
+			captchaToken = await window.grecaptcha.execute(window.RECAPTCHA_SITE_KEY, {action: 'submit_application'})
+		}
 		const response = await call('studybadge_ai.instructor_review.submit_application', {
 			data: { ...form },
+			captcha_token: captchaToken
 		})
 
 		result.value = response
@@ -1703,3 +1722,4 @@ usePageMeta(() => ({
 	}
 }
 </style>
+

@@ -1,4 +1,8 @@
 {% set custom_signup_content = frappe.db.get_single_value("LMS Settings", "custom_signup_content") %}
+{% set recaptcha_site_key = frappe.db.get_single_value("StudyBadge AI Settings", "recaptcha_site_key") %}
+{% if recaptcha_site_key %}
+<script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_site_key }}"></script>
+{% endif %}
 
 <form class="signup-form" role="form">
 	<div class="page-card-body">
@@ -233,31 +237,44 @@
 
 		console.log("Signup started with email:", email, "name:", full_name);
 
-		frappe.call({
-			method: "lms.lms.user.sign_up",
-			args: {
-				email: email,
-				full_name: full_name,
-				verify_terms: $("#signup-terms").prop("checked") ? 1 : 0,
-				user_category: $("#user_category").length ? $("#user_category").val() : "",
-				ref_code: ref_code
-			},
-			statusCode: login.login_handlers,
-			callback: function(r) {
-				console.log("Signup server response:", r);
-				if (r.message && r.message[0] === 0) {
-					login.set_status(r.message[1], "red");
-				} else if (r.message) {
-					login.set_status(r.message[1], "green");
-				} else if (r.exc) {
-					console.error("Exception during signup:", r.exc);
-					if (r._server_messages) {
-						console.error("Server messages:", JSON.parse(r._server_messages));
+		const do_signup = (captchaToken) => {
+			frappe.call({
+				method: "lms.lms.user.sign_up",
+				args: {
+					email: email,
+					full_name: full_name,
+					verify_terms: $("#signup-terms").prop("checked") ? 1 : 0,
+					user_category: $("#user_category").length ? $("#user_category").val() : "",
+					ref_code: ref_code,
+					captcha_token: captchaToken
+				},
+				statusCode: login.login_handlers,
+				callback: function(r) {
+					console.log("Signup server response:", r);
+					if (r.message && r.message[0] === 0) {
+						login.set_status(r.message[1], "red");
+					} else if (r.message) {
+						login.set_status(r.message[1], "green");
+					} else if (r.exc) {
+						console.error("Exception during signup:", r.exc);
+						if (r._server_messages) {
+							console.error("Server messages:", JSON.parse(r._server_messages));
+						}
+						login.set_status("Error en el servidor al registrarse. Revisa la consola.", "red");
 					}
-					login.set_status("Error en el servidor al registrarse. Revisa la consola.", "red");
 				}
-			}
-		});
+			});
+		};
+
+		if (window.grecaptcha && '{{ recaptcha_site_key or "" }}') {
+			window.grecaptcha.ready(function() {
+				window.grecaptcha.execute('{{ recaptcha_site_key or "" }}', {action: 'sign_up'}).then(function(token) {
+					do_signup(token);
+				});
+			});
+		} else {
+			do_signup(null);
+		}
 
 		return false;
 	};

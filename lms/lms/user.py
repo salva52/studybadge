@@ -24,7 +24,14 @@ def add_lms_student_role(doc, method):
 
 
 @frappe.whitelist(allow_guest=True)  # nosemgrep: frappe-semgrep-rules.rules.security.guest-whitelisted-method
-def sign_up(email: str, full_name: str, verify_terms: bool, user_category: str, ref_code: str = None):
+def sign_up(email: str, full_name: str, verify_terms: bool, user_category: str, ref_code: str = None, captcha_token: str = None):
+	try:
+		from studybadge_ai.keys import verify_recaptcha
+		if not verify_recaptcha(captcha_token, "sign_up"):
+			frappe.throw(_("Fallo en verificación reCAPTCHA. Eres un bot?"), _("Not Allowed"))
+	except ImportError:
+		pass  # studybadge_ai not installed
+
 	if ref_code:
 		frappe.local.flags.studybadge_ref = ref_code
 
