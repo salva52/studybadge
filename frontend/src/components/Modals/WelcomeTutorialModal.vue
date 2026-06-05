@@ -1,7 +1,7 @@
 <template>
 	<div
 		v-if="isVisible"
-		class="fixed bottom-3 left-3 right-3 z-[9999] max-h-[82dvh] overflow-hidden rounded-2xl border border-surface-gray-2 bg-surface-white shadow-xl transition-all duration-300 dark:border-surface-gray-6 dark:bg-surface-gray-7 sm:bottom-5 sm:left-auto sm:right-5 sm:w-[380px] sm:max-w-[calc(100vw-2rem)]"
+		class="fixed bottom-3 left-3 right-3 z-[9999] max-h-[82dvh] overflow-hidden rounded-2xl border border-surface-gray-2/50 bg-white/90 shadow-[0_8px_30px_rgb(0,0,0,0.12)] backdrop-blur-xl transition-all duration-500 ease-out dark:border-white/10 dark:bg-[#0b1730]/90 sm:bottom-5 sm:left-auto sm:right-5 sm:w-[380px] sm:max-w-[calc(100vw-2rem)]"
 		role="dialog"
 		aria-live="polite"
 	>
@@ -9,8 +9,8 @@
 			<!-- Header -->
 			<div class="flex items-start justify-between gap-3 border-b border-surface-gray-2 px-4 py-3 dark:border-surface-gray-6 sm:px-5">
 				<div class="flex min-w-0 items-center gap-3">
-					<div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-surface-gray-2 dark:bg-surface-gray-6">
-						<component :is="currentStepData.icon" class="h-5 w-5 text-sb-primary" />
+					<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sb-primary/10 to-sb-primary/30 shadow-inner dark:from-sb-primary/20 dark:to-sb-primary/40">
+						<component :is="currentStepData.icon" class="h-5 w-5 text-sb-primary drop-shadow-sm" />
 					</div>
 					<div class="min-w-0">
 						<p class="text-[11px] font-semibold uppercase tracking-wide text-sb-primary">
@@ -77,6 +77,7 @@
 						</Button>
 						<Button
 							variant="solid"
+							class="transform transition-transform duration-200 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
 							@click="nextStep"
 						>
 							{{ currentStep === steps.length - 1 ? 'Terminar tour' : 'Siguiente' }}
