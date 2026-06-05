@@ -13,14 +13,14 @@ def on_user_creation(doc, method):
     ref_code = frappe.request.cookies.get("studybadge_ref") if getattr(frappe, "request", None) else None
     if not ref_code:
         return
-
+    
     if ref_code.strip().lower() == "studybadge":
-        # Create a 1 month Plus Subscription
+        # Give 1 month Plus Subscription to new users with the promo code
         try:
             frappe.get_doc({
-                "doctype": "Studybadge Plus Subscription",
+                "doctype": "StudyBadge Plus Subscription",
                 "member": doc.name,
-                "status": "Active",
+                "status": "active",
                 "amount": 0.0,
                 "payment_gateway": "Launch Promo",
                 "next_payment_date": frappe.utils.add_months(frappe.utils.today(), 1),
@@ -28,11 +28,12 @@ def on_user_creation(doc, method):
             }).insert(ignore_permissions=True)
             
             # Set cookie for frontend fireworks
-            frappe.local.cookie_manager.set_cookie("show_launch_fireworks", "1", expires_in_days=1)
+            if getattr(frappe, "local", None) and hasattr(frappe.local, "cookie_manager"):
+                frappe.local.cookie_manager.set_cookie("show_launch_fireworks", "1", expires_in_days=1)
         except Exception as e:
             frappe.log_error(f"Error granting Launch Promo: {e}")
-            
-        return # Skip normal referral logic
+
+        return # Already granted above, skip normal referral logic
 
     # Assuming ref_code is the username of the referrer
     referrer = frappe.db.get_value("User", {"username": ref_code}, "name")

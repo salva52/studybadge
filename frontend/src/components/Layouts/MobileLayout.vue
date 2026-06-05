@@ -10,7 +10,7 @@
 			<div v-if="showBottomSpacer" class="mobile-bottom-spacer"></div>
 		</div>
 
-		<div v-if="sidebarSettings.data" class="mobile-nav-layer">
+		<div class="mobile-nav-layer">
 			<Transition name="mobile-overlay">
 				<div
 					v-if="showMenu"
@@ -34,7 +34,7 @@
 						</button>
 					</div>
 
-					<div v-if="user" class="mobile-user-card">
+					<div v-if="isUserLoggedIn" class="mobile-user-card">
 						<div class="mobile-user-avatar">
 							<component :is="icons['UserRound']" class="size-5" />
 						</div>
@@ -57,7 +57,7 @@
 						<div class="mobile-quick-grid">
 							<button
 								v-for="link in quickSheetLinks"
-								:key="link.label"
+								:key="link.key"
 								class="mobile-quick-card"
 								:class="{ active: isActive(link) }"
 								@click="handleClick(link); showMenu = false"
@@ -74,19 +74,23 @@
 						</div>
 					</div>
 
-					<div v-if="filteredOtherLinks.length" class="mobile-sheet-section">
+					<div
+						v-for="group in mobileSheetGroups"
+						:key="group.title"
+						class="mobile-sheet-section"
+					>
 						<div class="mobile-section-title">
-							{{ __('Más opciones') }}
+							{{ __(group.title) }}
 						</div>
 
 						<div class="mobile-link-list">
 							<button
-								v-for="link in filteredOtherLinks"
-								:key="link.label"
+								v-for="link in group.links"
+								:key="link.key"
 								class="mobile-sheet-link"
 								:class="{
 									active: isActive(link),
-									danger: link.label === 'Cerrar sesión',
+									danger: link.key === 'logout',
 								}"
 								@click="handleClick(link); showMenu = false"
 							>
@@ -112,7 +116,7 @@
 			<nav class="mobile-bottom-nav" aria-label="Navegación móvil">
 				<button
 					v-for="tab in visibleBottomTabs"
-					:key="tab.label"
+					:key="tab.key"
 					class="mobile-nav-item"
 					:class="{ active: isActive(tab) }"
 					@click="handleClick(tab)"
@@ -153,7 +157,6 @@
 <script setup>
 import { getSidebarLinks } from '@/utils'
 import { useRouter } from 'vue-router'
-import { call } from 'frappe-ui'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { sessionStore } from '@/stores/session'
 import { useSettings } from '@/stores/settings'
@@ -167,7 +170,6 @@ const router = useRouter()
 const { userResource } = usersStore()
 
 const sidebarLinks = ref([])
-const otherLinks = ref([])
 const showMenu = ref(false)
 const menu = ref(null)
 const isModerator = ref(false)
@@ -177,6 +179,22 @@ const fullScreenRoutes = ['AISessions', 'AISessionRoom', 'AISessionChat']
 
 const showBottomSpacer = computed(() => {
 	return !fullScreenRoutes.includes(router?.currentRoute?.value?.name)
+})
+
+const unwrap = (value) => {
+	if (value && typeof value === 'object' && 'value' in value) {
+		return value.value
+	}
+
+	return value
+}
+
+const currentUser = computed(() => {
+	return userResource.data || unwrap(user) || null
+})
+
+const isUserLoggedIn = computed(() => {
+	return Boolean(isLoggedIn || currentUser.value)
 })
 
 const profileUsername = computed(() => {
@@ -196,6 +214,289 @@ const userLabel = computed(() => {
 		userResource.data?.name ||
 		'StudyBadger'
 	)
+})
+
+const mobileNavConfig = [
+	{
+		key: 'inicio',
+		label: 'Inicio',
+		shortLabel: 'Inicio',
+		icon: 'Home',
+		to: 'Home',
+		path: '/',
+		aliases: ['Home', 'Inicio'],
+		activeFor: ['Home'],
+	},
+	{
+		key: 'buscar',
+		label: 'Buscar',
+		shortLabel: 'Buscar',
+		icon: 'Search',
+		to: 'Search',
+		path: '/search',
+		aliases: ['Search', 'Buscar'],
+		activeFor: ['Search'],
+	},
+	{
+		key: 'notificaciones',
+		label: 'Notificaciones',
+		shortLabel: 'Notif.',
+		icon: 'Bell',
+		to: 'Notifications',
+		path: '/notifications',
+		aliases: ['Notifications', 'Notificaciones'],
+		activeFor: ['Notifications'],
+	},
+	{
+		key: 'referidos',
+		label: 'Referidos',
+		shortLabel: 'Referidos',
+		icon: 'Gift',
+		to: 'Referrals',
+		path: '/referrals',
+		aliases: ['Referrals', 'Referidos', 'Referidos StudyBadge'],
+		activeFor: ['Referrals'],
+	},
+	{
+		key: 'cursos',
+		label: 'Cursos',
+		shortLabel: 'Cursos',
+		icon: 'BookOpen',
+		to: 'Courses',
+		path: '/courses',
+		aliases: ['Courses', 'Cursos'],
+		activeFor: ['Courses', 'CourseDetail', 'Lesson'],
+	},
+	{
+		key: 'sesiones-ia',
+		label: 'Sesiones IA',
+		shortLabel: 'IA',
+		icon: 'MessagesSquare',
+		to: 'AISessions',
+		path: '/ai-sessions',
+		aliases: ['AISessions', 'AI Sessions', 'Sesiones IA', 'Sesiones de IA'],
+		activeFor: ['AISessions', 'AISessionRoom', 'AISessionChat'],
+	},
+	{
+		key: 'estudio-ia',
+		label: 'Estudio IA',
+		shortLabel: 'Estudio',
+		icon: 'Sparkles',
+		to: 'Study',
+		path: '/study',
+		aliases: ['Study', 'Estudio IA', 'AI Study', 'Estudiar con IA'],
+		activeFor: ['Study', 'AIStudy'],
+	},
+	{
+		key: 'grupos',
+		label: 'Grupos',
+		shortLabel: 'Grupos',
+		icon: 'UsersRound',
+		to: 'Groups',
+		path: '/groups',
+		aliases: ['Groups', 'Grupos'],
+		activeFor: ['Groups', 'GroupDetail'],
+	},
+	{
+		key: 'simulaciones-ia',
+		label: 'Simulaciones IA',
+		shortLabel: 'Simular',
+		icon: 'BrainCircuit',
+		to: 'Practice',
+		path: '/practice',
+		aliases: ['Practice', 'Practicar', 'Simulaciones IA', 'Simulations', 'AI Simulations'],
+		activeFor: ['Practice', 'Simulation', 'AISimulations'],
+	},
+	{
+		key: 'biblioteca-prompts',
+		label: 'Biblioteca de prompts',
+		shortLabel: 'Prompts',
+		icon: 'Library',
+		to: 'PromptLibrary',
+		path: '/prompt-library',
+		aliases: ['Prompt Library', 'Biblioteca de prompts', 'Prompts', 'Biblioteca'],
+		activeFor: ['PromptLibrary', 'Prompts'],
+	},
+	{
+		key: 'plus',
+		label: 'StudyBadge Plus',
+		shortLabel: 'Plus',
+		icon: 'BadgeCheck',
+		to: 'StudyBadgePlus',
+		path: '/plus',
+		aliases: ['StudyBadge Plus', 'Plus', 'Subscription', 'Billing'],
+		activeFor: ['StudyBadgePlus', 'Plus', 'Billing'],
+	},
+	{
+		key: 'rankings',
+		label: 'Rankings',
+		shortLabel: 'Ranking',
+		icon: 'Trophy',
+		to: 'Rankings',
+		path: '/rankings',
+		aliases: ['Rankings', 'Ranking', 'Leaderboard'],
+		activeFor: ['Rankings', 'Leaderboard'],
+	},
+	{
+		key: 'ayuda',
+		label: 'Ayuda',
+		shortLabel: 'Ayuda',
+		icon: 'CircleHelp',
+		to: 'Help',
+		path: '/help',
+		aliases: ['Help', 'Ayuda', 'Support', 'Soporte'],
+		activeFor: ['Help', 'Support'],
+	},
+]
+
+const bottomNavKeys = ['inicio', 'buscar', 'cursos', 'sesiones-ia']
+const quickNavKeys = [
+	'estudio-ia',
+	'simulaciones-ia',
+	'biblioteca-prompts',
+	'plus',
+]
+
+const secondaryGroups = [
+	{
+		title: 'Aprendizaje',
+		keys: ['notificaciones', 'referidos', 'grupos', 'rankings'],
+	},
+	{
+		title: 'Más opciones',
+		keys: ['ayuda'],
+	},
+]
+
+const normalize = (value = '') => {
+	return String(value)
+		.toLowerCase()
+		.normalize('NFD')
+		.replace(/[\u0300-\u036f]/g, '')
+		.replace(/[^a-z0-9]/g, '')
+}
+
+const flattenSidebarLinks = (links = []) => {
+	const result = []
+
+	links.forEach((link) => {
+		if (link.items?.length) {
+			link.items.forEach((item) => result.push(item))
+		} else {
+			result.push(link)
+		}
+	})
+
+	return result.filter(Boolean)
+}
+
+const filterLinksToShow = (links, data = {}) => {
+	let filteredLinks = [...links]
+
+	Object.keys(data || {}).forEach((key) => {
+		if (!parseInt(data[key])) {
+			filteredLinks = filteredLinks.filter(
+				(link) => normalize(link.label) !== normalize(key)
+			)
+		}
+	})
+
+	return filteredLinks.filter((link) => normalize(link.label) !== 'programs')
+}
+
+const linkMatchesConfig = (link, config) => {
+	const aliases = [config.label, config.to, ...(config.aliases || [])].map(normalize)
+
+	return (
+		aliases.includes(normalize(link.label)) ||
+		aliases.includes(normalize(link.to))
+	)
+}
+
+const resolveNavItem = (config) => {
+	const found = sidebarLinks.value.find((link) => linkMatchesConfig(link, config))
+
+	return {
+		...config,
+		label: config.label,
+		icon: config.icon,
+		to: found?.to || config.to,
+		path: found?.path || found?.route || config.path,
+		href: found?.href || config.href,
+		activeFor: [
+			...(config.activeFor || []),
+			...(found?.activeFor || []),
+			found?.to,
+		].filter(Boolean),
+	}
+}
+
+const getNavItemByKey = (key) => {
+	const config = mobileNavConfig.find((item) => item.key === key)
+	return config ? resolveNavItem(config) : null
+}
+
+const getNavItemsByKeys = (keys) => {
+	return keys
+		.map((key) => getNavItemByKey(key))
+		.filter(Boolean)
+}
+
+const visibleBottomTabs = computed(() => {
+	return getNavItemsByKeys(bottomNavKeys).filter((tab) => isVisible(tab))
+})
+
+const quickSheetLinks = computed(() => {
+	return getNavItemsByKeys(quickNavKeys).filter((tab) => isVisible(tab))
+})
+
+const accountLinks = computed(() => {
+	const links = []
+
+	if (isUserLoggedIn.value) {
+		links.push({
+			key: 'perfil',
+			label: 'Perfil',
+			shortLabel: 'Perfil',
+			icon: 'UserRound',
+			action: 'profile',
+			activeFor: ['Profile', 'ProfileCertificates'],
+		})
+
+		links.push({
+			key: 'logout',
+			label: 'Cerrar sesión',
+			shortLabel: 'Salir',
+			icon: 'LogOut',
+			action: 'logout',
+		})
+	} else {
+		links.push({
+			key: 'login',
+			label: 'Iniciar sesión',
+			shortLabel: 'Login',
+			icon: 'LogIn',
+			action: 'login',
+		})
+	}
+
+	return links
+})
+
+const mobileSheetGroups = computed(() => {
+	const groups = secondaryGroups
+		.map((group) => ({
+			title: group.title,
+			links: getNavItemsByKeys(group.keys).filter((link) => isVisible(link)),
+		}))
+		.filter((group) => group.links.length)
+
+	groups.push({
+		title: 'Cuenta',
+		links: accountLinks.value,
+	})
+
+	return groups
 })
 
 const handleOutsideClick = (e) => {
@@ -218,146 +519,24 @@ onBeforeUnmount(() => {
 	document.removeEventListener('click', handleOutsideClick)
 })
 
-const destructureSidebarLinks = () => {
-	const links = []
-
-	sidebarLinks.value.forEach((link) => {
-		link.items?.forEach((item) => {
-			links.push(item)
-		})
-	})
-
-	sidebarLinks.value = links
-}
-
-const filterLinksToShow = (data) => {
-	Object.keys(data).forEach((key) => {
-		if (!parseInt(data[key])) {
-			sidebarLinks.value = sidebarLinks.value.filter(
-				(link) => link.label.toLowerCase().split(' ').join('_') !== key
-			)
-		}
-	})
-}
-
-const addOtherLinks = () => {
-	if (user) {
-		addLink('Perfil', 'UserRound')
-		addLink('Cerrar sesión', 'LogOut')
-	} else {
-		addLink('Iniciar sesión', 'LogIn')
-	}
-}
-
-const addLink = (label, icon, to = '') => {
-	if (otherLinks.value.some((link) => link.label === label)) return
-
-	otherLinks.value.push({
-		label,
-		icon,
-		to,
-	})
-}
-
 const updateSidebarLinks = () => {
-	sidebarLinks.value = getSidebarLinks(true)
-	destructureSidebarLinks()
-	otherLinks.value = []
+	const baseLinks = flattenSidebarLinks(getSidebarLinks(true))
+	sidebarLinks.value = baseLinks.filter((link) => normalize(link.label) !== 'programs')
+
+	if (!sidebarSettings?.reload) return
 
 	sidebarSettings.reload(
 		{},
 		{
-			onSuccess: async (data) => {
-				filterLinksToShow(data)
-
-				const bottomTabs = pickBottomTabs(sidebarLinks.value)
-				const bottomLabels = bottomTabs.map((item) => item.label)
-
-				const extraLinks = sidebarLinks.value
-					.filter((link) => !bottomLabels.includes(link.label))
-					.map((link) => ({
-						label: link.label,
-						icon: link.icon,
-						to: link.to,
-						activeFor: link.activeFor,
-					}))
-
-				sidebarLinks.value = bottomTabs
-				otherLinks.value = [...extraLinks]
-
-				if (isModerator.value || isInstructor.value) {
-					addQuizzes()
-					addAssignments()
-					addProgrammingExercises()
-				}
-
-				addOtherLinks()
+			onSuccess: (data) => {
+				sidebarLinks.value = filterLinksToShow(baseLinks, data)
 			},
 		}
 	)
 }
 
-const pickBottomTabs = (links) => {
-	const priority = [
-		'Home',
-		'Inicio',
-		'Search',
-		'Buscar',
-		'Courses',
-		'Cursos',
-		'Sesiones IA',
-		'AISessions'
-	]
-
-	const selected = []
-
-	priority.forEach((label) => {
-		const found = links.find((link) => link.label === label)
-
-		if (found && !selected.some((item) => item.label === found.label)) {
-			selected.push(found)
-		}
-	})
-
-	links.forEach((link) => {
-		if (selected.length >= 4) return
-		if (!selected.some((item) => item.label === link.label)) {
-			selected.push(link)
-		}
-	})
-
-	return selected.slice(0, 4)
-}
-
-const addQuizzes = () => {
-	addLink('Quizzes', 'CircleHelp', 'Quizzes')
-}
-
-const addAssignments = () => {
-	addLink('Assignments', 'Pencil', 'Assignments')
-}
-
-const addProgrammingExercises = () => {
-	addLink('Programming Exercises', 'Code', 'ProgrammingExercises')
-}
-
-const addPrograms = async () => {
-	if (sidebarLinks.value.some((link) => link.label === 'Programs')) return
-
-	const canAddProgram = await checkIfCanAddProgram()
-
-	if (!canAddProgram) return
-
-	sidebarLinks.value.splice(1, 0, {
-		label: 'Programs',
-		icon: 'Route',
-		to: 'Programs',
-		activeFor: ['Programs', 'ProgramDetail'],
-	})
-}
-
 watch(
-	() => userResource.data,
+	userResource,
 	async () => {
 		await userResource.promise
 
@@ -371,147 +550,109 @@ watch(
 	{ immediate: true }
 )
 
-const checkIfCanAddProgram = async () => {
-	if (!userResource.data) return false
+const isActive = (tab) => {
+	const route = router.currentRoute.value
+	const routeName = route.name
+	const routePath = route.path || ''
 
-	if (isModerator.value || isInstructor.value) {
-		return true
+	if (tab.activeFor?.includes(routeName)) return true
+	if (tab.to && tab.to === routeName) return true
+
+	if (tab.path) {
+		if (tab.path === '/') return routePath === '/'
+		return routePath.startsWith(tab.path)
 	}
 
-	const programs = await call('lms.lms.utils.get_programs')
-	return programs.enrolled.length > 0 || programs.published.length > 0
+	return false
 }
 
-const isActive = (tab) => {
-	return tab.activeFor?.includes(router.currentRoute.value.name)
+const safePush = async (tab) => {
+	if (tab.href) {
+		window.location.href = tab.href
+		return
+	}
+
+	if (tab.to && router.hasRoute?.(tab.to)) {
+		await router.push({ name: tab.to })
+		return
+	}
+
+	if (tab.path) {
+		await router.push(tab.path)
+	}
 }
 
-const handleClick = (tab) => {
-	if (tab.label === 'Iniciar sesión') {
+const handleClick = async (tab) => {
+	if (tab.action === 'login' || tab.label === 'Iniciar sesión') {
 		window.location.href = '/login'
 		return
 	}
 
-	if (tab.label === 'Cerrar sesión') {
+	if (tab.action === 'logout' || tab.label === 'Cerrar sesión') {
 		logout.submit().then(() => {
 			isLoggedIn = false
 		})
 		return
 	}
 
-	if (tab.label === 'Certificados' && profileUsername.value) {
-		router.push({
-			name: 'ProfileCertificates',
-			params: {
-				username: profileUsername.value,
-			},
-		})
+	if (tab.action === 'profile' || tab.label === 'Perfil') {
+		if (profileUsername.value) {
+			router.push({
+				name: 'Profile',
+				params: {
+					username: profileUsername.value,
+				},
+			})
+		}
+
 		return
 	}
 
-	if (tab.label === 'Perfil' && profileUsername.value) {
-		router.push({
-			name: 'Profile',
-			params: {
-				username: profileUsername.value,
-			},
-		})
-		return
-	}
-
-	if (tab.to) {
-		router.push({ name: tab.to })
+	try {
+		await safePush(tab)
+	} catch {
+		if (tab.path) {
+			window.location.href = tab.path
+		}
 	}
 }
 
 const isVisible = (tab) => {
-	if (tab.label === 'Iniciar sesión') return !isLoggedIn
-	if (tab.label === 'Cerrar sesión') return isLoggedIn
+	if (tab.key === 'login') return !isUserLoggedIn.value
+	if (tab.key === 'logout') return isUserLoggedIn.value
 
 	return true
 }
-
-const visibleBottomTabs = computed(() => {
-	return sidebarLinks.value.filter((tab) => isVisible(tab)).slice(0, 4)
-})
-
-const quickSheetLinks = computed(() => {
-	const priority = [
-		'Study',
-		'Estudio IA',
-		'Groups',
-		'Grupos',
-		'Practice',
-		'Simulaciones IA',
-		'Prompt Library',
-		'Biblioteca de prompts'
-	]
-
-	const selected = []
-
-	priority.forEach((label) => {
-		const found = otherLinks.value.find((link) => link.label === label)
-		if (found && !selected.some((item) => item.label === found.label)) {
-			selected.push(found)
-		}
-	})
-
-	return selected.slice(0, 4)
-})
-
-const filteredOtherLinks = computed(() => {
-	const quickLabels = quickSheetLinks.value.map(link => link.label)
-	return otherLinks.value.filter(link => !quickLabels.includes(link.label) && isVisible(link))
-})
 
 const toggleMenu = () => {
 	showMenu.value = !showMenu.value
 }
 
 const getShortLabel = (tab) => {
-	const map = {
-		Home: __('Inicio'),
-		Inicio: __('Inicio'),
-		Courses: __('Cursos'),
-		Cursos: __('Cursos'),
-		Practice: __('IA'),
-		Practicar: __('IA'),
-		'Prompt Library': __('Prompts'),
-		Prompts: __('Prompts'),
-		Groups: __('Grupos'),
-		Grupos: __('Grupos'),
-		Certificates: __('Cert.'),
-		Certificados: __('Cert.'),
-		Programs: __('Rutas'),
-		Quizzes: __('Tests'),
-		Assignments: __('Tareas'),
-		Notifications: __('Notif.'),
-		Notificaciones: __('Notif.'),
-		Search: __('Buscar'),
-		Buscar: __('Buscar'),
-	}
-
-	return map[tab.label] || __(tab.label)
+	return __(tab.shortLabel || tab.label)
 }
 
 const getLinkDescription = (link) => {
 	const map = {
-		Referidos: __('Invita amigos y gana recompensas.'),
+		Inicio: __('Vuelve al panel principal.'),
+		Buscar: __('Encuentra cursos, sesiones y contenido.'),
 		Notificaciones: __('Revisa avisos y actualizaciones.'),
+		Referidos: __('Invita personas y revisa tus recompensas.'),
+		Cursos: __('Explora tus cursos y lecciones.'),
+		'Sesiones IA': __('Continúa tus conversaciones de estudio.'),
+		'Estudio IA': __('Estudia con herramientas inteligentes.'),
+		Grupos: __('Participa en comunidades de aprendizaje.'),
+		'Simulaciones IA': __('Practica con escenarios y ejercicios.'),
+		'Biblioteca de prompts': __('Guarda y reutiliza prompts útiles.'),
+		'StudyBadge Plus': __('Accede a beneficios y funciones premium.'),
+		Rankings: __('Mira tu posición y progreso.'),
+		Ayuda: __('Resuelve dudas sobre la plataforma.'),
 		Perfil: __('Edita tu información y certificados.'),
 		'Cerrar sesión': __('Salir de tu cuenta.'),
 		'Iniciar sesión': __('Accede a tu cuenta.'),
-		Quizzes: __('Gestiona evaluaciones rápidas.'),
-		Assignments: __('Revisa tareas y entregas.'),
-		'Programming Exercises': __('Ejercicios de programación.'),
-		Programs: __('Rutas y programas de aprendizaje.'),
-		Courses: __('Explora cursos disponibles.'),
-		Cursos: __('Explora cursos disponibles.'),
-		Groups: __('Participa en grupos de estudio.'),
-		Grupos: __('Participa en grupos de estudio.'),
 	}
 
-	return map[link.label] || __('Abrir sección')
+	return map[link.label] || __('Abrir sección.')
 }
 </script>
 
@@ -521,13 +662,15 @@ const getLinkDescription = (link) => {
 	--mobile-primary-hover: #12356f;
 	--mobile-bg: #f5f8fc;
 	--mobile-card: #ffffff;
+	--mobile-card-soft: #f8fafc;
 	--mobile-text: #0f172a;
 	--mobile-muted: #64748b;
 	--mobile-soft: #94a3b8;
 	--mobile-border: #d7e2f0;
+	--mobile-border-strong: #b9cbe3;
 	--mobile-gold: #f5b301;
-	--mobile-green: #16a34a;
-	--mobile-shadow: 0 24px 70px rgba(10, 34, 81, 0.18);
+	--mobile-red: #ef4444;
+	--mobile-shadow: 0 24px 70px rgba(10, 34, 81, 0.16);
 
 	position: relative;
 	display: flex;
@@ -541,10 +684,12 @@ const getLinkDescription = (link) => {
 :global(:root[data-theme='dark']) .mobile-layout {
 	--mobile-bg: #07111f;
 	--mobile-card: #101a2b;
+	--mobile-card-soft: #111d31;
 	--mobile-text: #f8fafc;
 	--mobile-muted: #cbd5e1;
 	--mobile-soft: #94a3b8;
 	--mobile-border: rgba(255, 255, 255, 0.1);
+	--mobile-border-strong: rgba(255, 255, 255, 0.18);
 	--mobile-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
 }
 
@@ -584,15 +729,20 @@ const getLinkDescription = (link) => {
 	right: 10px;
 	bottom: calc(82px + env(safe-area-inset-bottom));
 	z-index: 70;
-	max-height: min(74dvh, 640px);
+	max-height: min(78dvh, 680px);
 	overflow-y: auto;
-	border: 1px solid rgba(255, 255, 255, 0.14);
+	border: 1px solid var(--mobile-border);
 	border-radius: 28px;
+	background: var(--mobile-card);
+	color: var(--mobile-text);
+	padding: 0.85rem;
+	box-shadow: var(--mobile-shadow);
+	scrollbar-width: none;
+}
+
+:global(:root[data-theme='dark']) .mobile-sheet {
 	background: #07111f;
 	color: #ffffff;
-	padding: 0.8rem;
-	box-shadow: 0 30px 90px rgba(0, 0, 0, 0.42);
-	scrollbar-width: none;
 }
 
 .mobile-sheet::-webkit-scrollbar {
@@ -604,7 +754,7 @@ const getLinkDescription = (link) => {
 	height: 5px;
 	margin: 0.25rem auto 0.9rem;
 	border-radius: 999px;
-	background: rgba(255, 255, 255, 0.22);
+	background: var(--mobile-border-strong);
 }
 
 .mobile-sheet-header {
@@ -617,7 +767,7 @@ const getLinkDescription = (link) => {
 
 .mobile-sheet-header p {
 	margin: 0;
-	color: rgba(226, 232, 240, 0.62);
+	color: var(--mobile-muted);
 	font-size: 0.72rem;
 	font-weight: 950;
 	letter-spacing: 0.08em;
@@ -626,7 +776,7 @@ const getLinkDescription = (link) => {
 
 .mobile-sheet-header h2 {
 	margin: 0.2rem 0 0;
-	color: #ffffff;
+	color: var(--mobile-text);
 	font-size: 1.5rem;
 	font-weight: 950;
 	letter-spacing: -0.045em;
@@ -637,11 +787,21 @@ const getLinkDescription = (link) => {
 	place-items: center;
 	width: 42px;
 	height: 42px;
-	border: 1px solid rgba(255, 255, 255, 0.12);
+	border: 1px solid var(--mobile-border);
 	border-radius: 16px;
-	background: rgba(255, 255, 255, 0.08);
-	color: #ffffff;
+	background: var(--mobile-card-soft);
+	color: var(--mobile-text);
 	cursor: pointer;
+	transition: 0.18s ease;
+}
+
+.mobile-sheet-close:hover {
+	border-color: var(--mobile-border-strong);
+	background: rgba(10, 34, 81, 0.06);
+}
+
+:global(:root[data-theme='dark']) .mobile-sheet-close:hover {
+	background: rgba(255, 255, 255, 0.08);
 }
 
 .mobile-user-card {
@@ -649,10 +809,10 @@ const getLinkDescription = (link) => {
 	grid-template-columns: 44px minmax(0, 1fr) auto;
 	gap: 0.75rem;
 	align-items: center;
-	margin-bottom: 0.75rem;
-	border: 1px solid rgba(255, 255, 255, 0.1);
+	margin-bottom: 0.8rem;
+	border: 1px solid var(--mobile-border);
 	border-radius: 22px;
-	background: rgba(255, 255, 255, 0.07);
+	background: var(--mobile-card-soft);
 	padding: 0.85rem;
 }
 
@@ -662,6 +822,11 @@ const getLinkDescription = (link) => {
 	width: 44px;
 	height: 44px;
 	border-radius: 16px;
+	background: rgba(10, 34, 81, 0.08);
+	color: var(--mobile-primary);
+}
+
+:global(:root[data-theme='dark']) .mobile-user-avatar {
 	background: rgba(147, 197, 253, 0.14);
 	color: #bfdbfe;
 }
@@ -673,7 +838,7 @@ const getLinkDescription = (link) => {
 .mobile-user-copy strong {
 	display: block;
 	overflow: hidden;
-	color: #ffffff;
+	color: var(--mobile-text);
 	font-size: 0.95rem;
 	font-weight: 950;
 	text-overflow: ellipsis;
@@ -683,7 +848,7 @@ const getLinkDescription = (link) => {
 .mobile-user-copy span {
 	display: block;
 	margin-top: 0.15rem;
-	color: rgba(226, 232, 240, 0.62);
+	color: var(--mobile-muted);
 	font-size: 0.78rem;
 }
 
@@ -691,19 +856,23 @@ const getLinkDescription = (link) => {
 	border-radius: 999px;
 	background: rgba(245, 179, 1, 0.16);
 	padding: 0.38rem 0.55rem;
-	color: #fde68a;
+	color: #9a6700;
 	font-size: 0.68rem;
 	font-weight: 950;
 }
 
+:global(:root[data-theme='dark']) .mobile-user-badge {
+	color: #fde68a;
+}
+
 .mobile-sheet-section {
-	margin-top: 0.8rem;
+	margin-top: 0.85rem;
 }
 
 .mobile-section-title {
 	margin-bottom: 0.55rem;
 	padding: 0 0.2rem;
-	color: rgba(226, 232, 240, 0.5);
+	color: var(--mobile-soft);
 	font-size: 0.68rem;
 	font-weight: 950;
 	letter-spacing: 0.08em;
@@ -718,15 +887,15 @@ const getLinkDescription = (link) => {
 
 .mobile-quick-card {
 	display: flex;
-	min-height: 96px;
+	min-height: 100px;
 	flex-direction: column;
 	align-items: flex-start;
 	justify-content: space-between;
-	border: 1px solid rgba(255, 255, 255, 0.1);
+	border: 1px solid var(--mobile-border);
 	border-radius: 20px;
-	background: rgba(255, 255, 255, 0.07);
+	background: var(--mobile-card-soft);
 	padding: 0.85rem;
-	color: #ffffff;
+	color: var(--mobile-text);
 	text-align: left;
 	cursor: pointer;
 	transition: 0.18s ease;
@@ -734,6 +903,13 @@ const getLinkDescription = (link) => {
 
 .mobile-quick-card.active,
 .mobile-quick-card:hover {
+	border-color: rgba(10, 34, 81, 0.26);
+	background: rgba(10, 34, 81, 0.055);
+	transform: translateY(-1px);
+}
+
+:global(:root[data-theme='dark']) .mobile-quick-card.active,
+:global(:root[data-theme='dark']) .mobile-quick-card:hover {
 	border-color: rgba(147, 197, 253, 0.32);
 	background: rgba(147, 197, 253, 0.15);
 }
@@ -744,14 +920,19 @@ const getLinkDescription = (link) => {
 	width: 40px;
 	height: 40px;
 	border-radius: 15px;
+	background: rgba(10, 34, 81, 0.08);
+	color: var(--mobile-primary);
+}
+
+:global(:root[data-theme='dark']) .mobile-quick-icon {
 	background: rgba(255, 255, 255, 0.1);
 	color: #bfdbfe;
 }
 
 .mobile-quick-card span {
 	display: block;
-	color: #ffffff;
-	font-size: 0.85rem;
+	color: var(--mobile-text);
+	font-size: 0.86rem;
 	font-weight: 900;
 	line-height: 1.2;
 }
@@ -767,11 +948,11 @@ const getLinkDescription = (link) => {
 	gap: 0.75rem;
 	align-items: center;
 	width: 100%;
-	border: 1px solid rgba(255, 255, 255, 0.08);
+	border: 1px solid var(--mobile-border);
 	border-radius: 18px;
-	background: rgba(255, 255, 255, 0.055);
+	background: var(--mobile-card-soft);
 	padding: 0.75rem;
-	color: #ffffff;
+	color: var(--mobile-text);
 	text-align: left;
 	cursor: pointer;
 	transition: 0.18s ease;
@@ -779,16 +960,22 @@ const getLinkDescription = (link) => {
 
 .mobile-sheet-link:hover,
 .mobile-sheet-link.active {
+	border-color: rgba(10, 34, 81, 0.26);
+	background: rgba(10, 34, 81, 0.055);
+	transform: translateY(-1px);
+}
+
+:global(:root[data-theme='dark']) .mobile-sheet-link:hover,
+:global(:root[data-theme='dark']) .mobile-sheet-link.active {
 	border-color: rgba(147, 197, 253, 0.28);
 	background: rgba(147, 197, 253, 0.13);
 }
 
 .mobile-sheet-link.danger {
-	color: #fecaca;
+	color: var(--mobile-red);
 }
 
-.mobile-sheet-link.danger .mobile-sheet-link-icon {
-	background: rgba(239, 68, 68, 0.14);
+:global(:root[data-theme='dark']) .mobile-sheet-link.danger {
 	color: #fecaca;
 }
 
@@ -798,8 +985,23 @@ const getLinkDescription = (link) => {
 	width: 44px;
 	height: 44px;
 	border-radius: 16px;
+	background: rgba(10, 34, 81, 0.08);
+	color: var(--mobile-primary);
+}
+
+:global(:root[data-theme='dark']) .mobile-sheet-link-icon {
 	background: rgba(255, 255, 255, 0.09);
 	color: #bfdbfe;
+}
+
+.mobile-sheet-link.danger .mobile-sheet-link-icon {
+	background: rgba(239, 68, 68, 0.1);
+	color: var(--mobile-red);
+}
+
+:global(:root[data-theme='dark']) .mobile-sheet-link.danger .mobile-sheet-link-icon {
+	background: rgba(239, 68, 68, 0.14);
+	color: #fecaca;
 }
 
 .mobile-sheet-link-copy {
@@ -818,7 +1020,7 @@ const getLinkDescription = (link) => {
 	display: block;
 	margin-top: 0.18rem;
 	overflow: hidden;
-	color: rgba(226, 232, 240, 0.58);
+	color: var(--mobile-muted);
 	font-size: 0.75rem;
 	line-height: 1.35;
 	text-overflow: ellipsis;
@@ -834,12 +1036,17 @@ const getLinkDescription = (link) => {
 	display: grid;
 	grid-template-columns: repeat(5, minmax(0, 1fr));
 	gap: 0.25rem;
-	border: 1px solid rgba(255, 255, 255, 0.12);
+	border: 1px solid var(--mobile-border);
 	border-radius: 26px;
-	background: rgba(7, 17, 31, 0.94);
+	background: rgba(255, 255, 255, 0.94);
 	padding: 0.42rem;
-	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+	box-shadow: 0 20px 60px rgba(10, 34, 81, 0.15);
 	backdrop-filter: blur(20px);
+}
+
+:global(:root[data-theme='dark']) .mobile-bottom-nav {
+	background: rgba(7, 17, 31, 0.94);
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
 }
 
 .mobile-nav-item {
@@ -854,12 +1061,17 @@ const getLinkDescription = (link) => {
 	border: 0;
 	border-radius: 19px;
 	background: transparent;
-	color: rgba(226, 232, 240, 0.58);
+	color: var(--mobile-muted);
 	cursor: pointer;
 	transition: 0.18s ease;
 }
 
 .mobile-nav-item.active {
+	background: rgba(10, 34, 81, 0.08);
+	color: var(--mobile-primary);
+}
+
+:global(:root[data-theme='dark']) .mobile-nav-item.active {
 	background: rgba(255, 255, 255, 0.1);
 	color: #ffffff;
 }
