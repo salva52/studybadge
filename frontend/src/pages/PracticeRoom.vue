@@ -575,7 +575,7 @@ async function startLiveVoice() {
 		const liveEndpoint =
 			token.endpoint ||
 			'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained'
-		const url = `${liveEndpoint}?access_token=${encodeURIComponent(token.token)}`
+		const url = `${liveEndpoint}?access_token=${token.token}`
 		const ws = new WebSocket(url)
 
 		liveSession.value = ws
@@ -635,7 +635,10 @@ async function startLiveVoice() {
 
 		ws.onclose = (event) => {
 			if (!manualLiveStop && event.code !== 1000) {
-				liveError.value = `${__('Conexión cerrada')}: ${event.code}${event.reason ? ` - ${event.reason}` : ''}`
+				liveError.value =
+					event.code === 1011
+						? __('Live API cerró la sesión por un error interno. Intenta activar voz otra vez o continúa por texto.')
+						: `${__('Conexión cerrada')}: ${event.code}${event.reason ? ` - ${event.reason}` : ''}`
 			}
 
 			liveConnected.value = false
