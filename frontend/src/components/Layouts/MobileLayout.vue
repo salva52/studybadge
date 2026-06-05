@@ -278,6 +278,16 @@ const mobileNavConfig = [
 		activeFor: ['AISessions', 'AISessionRoom', 'AISessionChat'],
 	},
 	{
+		key: 'calendario-ia',
+		label: 'Calendario IA',
+		shortLabel: 'Agenda',
+		icon: 'CalendarDays',
+		to: 'StudyCalendar',
+		path: '/study-calendar',
+		aliases: ['StudyCalendar', 'Calendario IA', 'Coach IA Plus'],
+		activeFor: ['StudyCalendar'],
+	},
+	{
 		key: 'estudio-ia',
 		label: 'Estudio IA',
 		shortLabel: 'Estudio',
@@ -351,6 +361,7 @@ const mobileNavConfig = [
 
 const bottomNavKeys = ['inicio', 'buscar', 'cursos', 'sesiones-ia']
 const quickNavKeys = [
+	'calendario-ia',
 	'estudio-ia',
 	'simulaciones-ia',
 	'biblioteca-prompts',

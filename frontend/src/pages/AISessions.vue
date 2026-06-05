@@ -104,6 +104,9 @@
 							<Crown class="size-4" /> <span>Pro</span>
 						</button>
 					</div>
+					<button v-if="activeSession" class="icon-btn hide-on-mobile" :title="__('Agendar examen o tarea')" @click="scheduleActiveSession('exam')">
+						<CalendarDays class="size-5" />
+					</button>
 					<button class="icon-btn hide-on-mobile" :class="{ 'active': rightPanelCollapsed }" @click="rightPanelCollapsed = !rightPanelCollapsed" :title="__('Alternar panel derecho')">
 						<PanelRight class="size-5" />
 					</button>
@@ -247,6 +250,15 @@
 				<button class="icon-btn mobile-only" @click="showTools = false"><X class="size-4" /></button>
 			</div>
 
+			<div v-if="activeSession" class="calendar-actions">
+				<button class="secondary-btn full" @click="scheduleActiveSession('exam')">
+					<CalendarDays class="size-4" /> {{ __('Agendar examen') }}
+				</button>
+				<button class="secondary-btn full" @click="scheduleActiveSession('reminder')">
+					<BellRing class="size-4" /> {{ __('Crear recordatorio') }}
+				</button>
+			</div>
+
 			<div class="tools-head mt-0">
 				<h2>{{ __('Chats') }}</h2>
 				<p>{{ __('Historial de esta sesión') }}</p>
@@ -378,6 +390,8 @@ import DOMPurify from 'dompurify'
 import {
 	BookOpenCheck,
 	Bot,
+	BellRing,
+	CalendarDays,
 	Crown,
 	FileQuestion,
 	FileText,
@@ -722,6 +736,18 @@ async function createSession() {
 function openSession(name) {
 	showSessions.value = false
 	router.push({ name: 'AISessionRoom', params: { sessionId: name } })
+}
+
+function scheduleActiveSession(type = 'exam') {
+	if (!activeSession.value) return
+	showTools.value = false
+	router.push({
+		name: 'StudyCalendar',
+		query: {
+			session: activeSession.value.name,
+			type,
+		},
+	})
 }
 
 function startNewThread() {
@@ -3125,8 +3151,21 @@ function formatDate(value) {
 		color: var(--sb-text, #0f172a);
 	}
 
-	.thread-action-btn.delete-btn:hover {
-		background: #fee2e2;
-		color: #ef4444;
+.thread-action-btn.delete-btn:hover {
+	background: #fee2e2;
+	color: #ef4444;
+}
+
+.calendar-actions {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.55rem;
+	margin-bottom: 1rem;
+}
+
+@media (max-width: 430px) {
+	.calendar-actions {
+		grid-template-columns: 1fr;
 	}
+}
 </style>

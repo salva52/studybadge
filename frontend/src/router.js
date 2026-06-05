@@ -38,6 +38,11 @@ const routes = [
 		props: true,
 	},
 	{
+		path: '/study-calendar',
+		name: 'StudyCalendar',
+		component: () => import('@/pages/StudyCalendar.vue'),
+	},
+	{
 		path: '/practice',
 		name: 'Practice',
 		component: () => import('@/pages/Practice.vue'),

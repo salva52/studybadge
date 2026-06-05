@@ -488,6 +488,15 @@ const getSidebarItems = (forMobile = false) => {
 					},
 				},
 				{
+					label: 'Calendario IA',
+					icon: 'CalendarDays',
+					to: 'StudyCalendar',
+					activeFor: ['StudyCalendar'],
+					condition: () => {
+						return userResource?.data
+					},
+				},
+				{
 					label: 'Estudio IA',
 					icon: 'Brain',
 					to: 'Study',
