@@ -1368,6 +1368,11 @@ function toServerDatetime(value) {
 	font-size: 0.9rem;
 }
 
+.modal-head .text-button:first-child {
+	justify-self: start;
+	margin-left: -0.35rem;
+}
+
 .save-text {
 	justify-self: end;
 	font-weight: 900;
@@ -1758,6 +1763,10 @@ function toServerDatetime(value) {
 
 	.modal-head {
 		padding: 0.75rem 0.85rem;
+	}
+
+	.modal-head .text-button:first-child {
+		margin-left: -0.25rem;
 	}
 
 	.field input,
