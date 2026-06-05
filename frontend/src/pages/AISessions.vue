@@ -2850,6 +2850,12 @@ function formatDate(value) {
 	}
 }
 
+@media (max-width: 768px) {
+	.composer-wrap {
+		bottom: 80px;
+	}
+}
+
 /* Dark mode limpio */
 :global(:root[data-theme='dark']) .chat-page,
 :global(.dark) .chat-page {
