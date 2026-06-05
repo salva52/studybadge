@@ -1,70 +1,1419 @@
 {% extends "templates/web.html" %}
 
-{% block title %} {{_("New Sign Up")}} {% endblock %}
+{% block navbar %}
+{% if show_language_picker %}
+	{{ super() }}
+{% endif %}
+{% endblock %}
+
+{% macro email_login_body() -%}
+{% if not disable_user_pass_login or (ldap_settings and ldap_settings.enabled) %}
+<div class="page-card-body">
+	<div class="form-group">
+		<label class="sb-login-label" for="login_email">
+			{{ login_label or _("Correo electrónico") }}
+		</label>
+
+		<div class="sb-field">
+			<input
+				type="text"
+				id="login_email"
+				class="form-control sb-login-input"
+				placeholder="{% if login_name_placeholder %}{{ login_name_placeholder }}{% else %}{{ _('tu@email.com') }}{% endif %}"
+				required
+				autofocus
+				autocomplete="username"
+			/>
+
+			<svg
+				class="sb-field-icon"
+				width="18"
+				height="18"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
+				<rect x="3" y="5" width="18" height="14" rx="2"></rect>
+				<path d="m3 7 9 6 9-6"></path>
+			</svg>
+		</div>
+	</div>
+
+	<div class="form-group">
+		<label class="sb-login-label" for="login_password">
+			{{ _("Contraseña") }}
+		</label>
+
+		<div class="sb-field sb-password-field">
+			<input
+				type="password"
+				id="login_password"
+				class="form-control sb-login-input"
+				placeholder="••••••••"
+				autocomplete="current-password"
+				required
+			/>
+
+			<svg
+				class="sb-field-icon"
+				width="18"
+				height="18"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
+				<rect x="3" y="11" width="18" height="11" rx="2"></rect>
+				<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+			</svg>
+
+			<span toggle="#login_password" class="toggle-password text-muted">
+				{{ _("Mostrar") }}
+			</span>
+		</div>
+	</div>
+
+	{% if not disable_user_pass_login %}
+	<p class="forgot-password-message">
+		<a href="#forgot">{{ _("¿Olvidaste tu contraseña?") }}</a>
+	</p>
+	{% endif %}
+</div>
+{% endif %}
+
+<div class="page-card-actions">
+	{% if not disable_user_pass_login %}
+	<button class="btn btn-sm btn-primary btn-block btn-login sb-btn-login" type="submit">
+		{{ _("Iniciar sesión") }}
+	</button>
+	{% endif %}
+
+	{% if ldap_settings and ldap_settings.enabled %}
+	<button class="btn btn-sm {{ 'btn-primary' if disable_user_pass_login else 'btn-default' }} btn-block btn-login btn-ldap-login">
+		{{ _("Login with LDAP") }}
+	</button>
+	{% endif %}
+</div>
+{% endmacro %}
+
+{% block head_include %}
+{{ include_style('login.bundle.css') }}
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+	href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+	rel="stylesheet"
+/>
+
+<style>
+	:root {
+		--sb-primary: #0a2251;
+		--sb-primary-hover: #12356f;
+		--sb-primary-soft: #eef4fb;
+		--sb-primary-softer: #f5f8fc;
+		--sb-gold: #f5b301;
+		--sb-bg: #f3f6fb;
+		--sb-card: #ffffff;
+		--sb-text: #0f172a;
+		--sb-muted: #64748b;
+		--sb-soft: #94a3b8;
+		--sb-border: #d8e3f1;
+		--sb-border-strong: #b9cbe3;
+		--sb-shadow: 0 22px 58px rgba(10, 34, 81, 0.12);
+		--sb-shadow-soft: 0 12px 28px rgba(10, 34, 81, 0.08);
+	}
+
+	* {
+		box-sizing: border-box;
+	}
+
+	html,
+	body {
+		min-height: 100%;
+	}
+
+	body {
+		margin: 0;
+		padding: 0;
+		background: var(--sb-bg) !important;
+		color: var(--sb-text);
+		font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+		-webkit-font-smoothing: antialiased;
+		text-rendering: optimizeLegibility;
+	}
+
+	a {
+		text-decoration: none;
+	}
+
+	a:hover {
+		text-decoration: none;
+	}
+
+	.web-footer,
+	footer,
+	.page-header,
+	.page-head,
+	.page-card-head,
+	.page-header-wrapper {
+		display: none !important;
+	}
+
+	.container {
+		max-width: 100% !important;
+		padding: 0 !important;
+	}
+
+	.main-section,
+	.web-content,
+	.page_content {
+		margin: 0 !important;
+		padding: 0 !important;
+	}
+
+	.sb-login-wrapper {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(410px, 0.82fr);
+		width: 100%;
+		min-height: 100svh;
+		background: var(--sb-bg);
+		overflow: hidden;
+	}
+
+	.sb-login-left {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		min-height: 100svh;
+		background: var(--sb-primary);
+		color: #ffffff;
+		padding: 2.2rem 3.3rem;
+		overflow: hidden;
+	}
+
+	.sb-login-left::before {
+		content: "";
+		position: absolute;
+		inset: 18px;
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		border-radius: 30px;
+		pointer-events: none;
+	}
+
+	.sb-login-left-inner {
+		position: relative;
+		z-index: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		min-height: calc(100svh - 4.4rem);
+		max-width: 610px;
+	}
+
+	.sb-login-brand {
+		display: inline-flex;
+		align-items: center;
+		gap: 12px;
+		width: fit-content;
+		margin-bottom: 2.4rem;
+	}
+
+	.sb-login-brand img {
+		width: 46px;
+		height: 46px;
+		border-radius: 14px;
+		object-fit: contain;
+		background: #ffffff;
+		padding: 4px;
+		box-shadow: 0 16px 34px rgba(0, 0, 0, 0.18);
+	}
+
+	.sb-login-brand-name {
+		color: #ffffff;
+		font-size: 1.42rem;
+		font-weight: 950;
+		letter-spacing: -0.055em;
+	}
+
+	.sb-login-kicker {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		width: fit-content;
+		margin-bottom: 1rem;
+		border: 1px solid rgba(255, 255, 255, 0.16);
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.08);
+		padding: 0.42rem 0.72rem;
+		color: rgba(255, 255, 255, 0.9);
+		font-size: 0.74rem;
+		font-weight: 850;
+		letter-spacing: 0.01em;
+	}
+
+	.sb-login-kicker-dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 999px;
+		background: var(--sb-gold);
+		box-shadow: 0 0 0 5px rgba(245, 179, 1, 0.16);
+	}
+
+	.sb-login-tagline h2 {
+		margin: 0;
+		max-width: 580px;
+		color: #ffffff;
+		font-size: clamp(2.45rem, 4.3vw, 4.25rem);
+		font-weight: 950;
+		letter-spacing: -0.07em;
+		line-height: 0.95;
+	}
+
+	.sb-login-tagline p {
+		max-width: 520px;
+		margin: 1.1rem 0 0;
+		color: rgba(255, 255, 255, 0.76);
+		font-size: 1rem;
+		line-height: 1.7;
+	}
+
+	.sb-login-features {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 10px;
+		max-width: 520px;
+		margin-top: 1.6rem;
+	}
+
+	.sb-login-feature {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		border: 1px solid rgba(255, 255, 255, 0.14);
+		border-radius: 16px;
+		background: rgba(255, 255, 255, 0.08);
+		padding: 12px 13px;
+		color: rgba(255, 255, 255, 0.92);
+		font-size: 0.82rem;
+		font-weight: 800;
+	}
+
+	.sb-login-feature svg {
+		width: 18px;
+		height: 18px;
+		flex: 0 0 auto;
+		stroke: rgba(255, 255, 255, 0.92);
+	}
+
+	.sb-login-proof {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 10px;
+		max-width: 520px;
+		margin-top: 1.6rem;
+	}
+
+	.sb-proof-card {
+		border: 1px solid rgba(255, 255, 255, 0.14);
+		border-radius: 18px;
+		background: rgba(255, 255, 255, 0.08);
+		padding: 13px;
+	}
+
+	.sb-proof-card strong {
+		display: block;
+		color: #ffffff;
+		font-size: 1.12rem;
+		font-weight: 950;
+		letter-spacing: -0.04em;
+	}
+
+	.sb-proof-card span {
+		display: block;
+		margin-top: 4px;
+		color: rgba(255, 255, 255, 0.68);
+		font-size: 0.72rem;
+		line-height: 1.35;
+	}
+
+	.sb-login-left-bottom {
+		position: relative;
+		z-index: 1;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		color: rgba(255, 255, 255, 0.62);
+		font-size: 0.76rem;
+		font-weight: 650;
+	}
+
+	.sb-login-left-bottom span {
+		width: 5px;
+		height: 5px;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.36);
+	}
+
+	.sb-login-right {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 0;
+		min-height: 100svh;
+		background: var(--sb-bg);
+		padding: 1.4rem;
+		overflow-y: auto;
+	}
+
+	.sb-login-form-shell {
+		width: min(100%, 430px);
+	}
+
+	.sb-login-mobile-brand {
+		display: none;
+		align-items: center;
+		justify-content: center;
+		gap: 10px;
+		margin-bottom: 0.95rem;
+	}
+
+	.sb-login-mobile-brand img {
+		width: 38px;
+		height: 38px;
+		border-radius: 12px;
+		object-fit: contain;
+		background: #ffffff;
+		padding: 3px;
+		box-shadow: var(--sb-shadow-soft);
+	}
+
+	.sb-login-mobile-brand span {
+		color: var(--sb-primary);
+		font-size: 1.15rem;
+		font-weight: 950;
+		letter-spacing: -0.05em;
+	}
+
+	.sb-login-form-container {
+		width: 100%;
+		border: 1px solid var(--sb-border);
+		border-radius: 28px;
+		background: var(--sb-card);
+		padding: 1.35rem;
+		box-shadow: var(--sb-shadow);
+	}
+
+	.sb-login-form-header {
+		margin-bottom: 1rem;
+		text-align: left;
+	}
+
+	.sb-form-eyebrow {
+		display: inline-flex;
+		align-items: center;
+		width: fit-content;
+		margin-bottom: 0.6rem;
+		border: 1px solid #dbe7f5;
+		border-radius: 999px;
+		background: var(--sb-primary-soft);
+		padding: 0.32rem 0.62rem;
+		color: var(--sb-primary);
+		font-size: 0.66rem;
+		font-weight: 950;
+		letter-spacing: 0.07em;
+		text-transform: uppercase;
+	}
+
+	.sb-login-form-header h3 {
+		margin: 0;
+		color: var(--sb-primary);
+		font-size: 1.55rem;
+		font-weight: 950;
+		letter-spacing: -0.05em;
+		line-height: 1.05;
+	}
+
+	.sb-login-form-header p {
+		margin: 0.45rem 0 0;
+		color: var(--sb-muted);
+		font-size: 0.87rem;
+		line-height: 1.5;
+	}
+
+	.login-content.page-card {
+		border: 0 !important;
+		background: transparent !important;
+		box-shadow: none !important;
+		padding: 0 !important;
+		margin: 0 !important;
+	}
+
+	.page-card-body {
+		padding: 0 !important;
+	}
+
+	.page-card-actions {
+		margin-top: 0.95rem;
+		padding: 0 !important;
+	}
+
+	.form-group {
+		margin-bottom: 0.78rem;
+	}
+
+	.sb-login-label {
+		display: block;
+		margin-bottom: 0.36rem;
+		color: #334155;
+		font-size: 0.76rem;
+		font-weight: 900;
+		letter-spacing: -0.01em;
+	}
+
+	.sb-field,
+	.email-field,
+	.password-field,
+	.name-field,
+	.category-field {
+		position: relative;
+		width: 100%;
+	}
+
+	.sb-field-icon,
+	.field-icon {
+		position: absolute;
+		top: 50%;
+		left: 14px;
+		z-index: 2;
+		width: 17px;
+		height: 17px;
+		color: #94a3b8;
+		transform: translateY(-50%);
+		pointer-events: none;
+		transition: 0.18s ease;
+	}
+
+	.sb-login-input {
+		width: 100% !important;
+		min-height: 46px !important;
+		border: 1px solid var(--sb-border) !important;
+		border-radius: 15px !important;
+		background: #f8fafc !important;
+		color: var(--sb-text) !important;
+		padding: 0.68rem 0.95rem 0.68rem 2.7rem !important;
+		font-size: 0.92rem !important;
+		font-weight: 650 !important;
+		outline: none !important;
+		transition: 0.18s ease !important;
+	}
+
+	.sb-login-input:hover {
+		border-color: var(--sb-border-strong) !important;
+		background: #ffffff !important;
+	}
+
+	.sb-login-input:focus {
+		border-color: rgba(10, 34, 81, 0.48) !important;
+		background: #ffffff !important;
+		box-shadow: 0 0 0 4px rgba(10, 34, 81, 0.08) !important;
+	}
+
+	.sb-login-input:focus ~ .sb-field-icon,
+	.sb-login-input:focus ~ .field-icon,
+	.sb-login-input:focus ~ svg,
+	.form-control:focus ~ .field-icon,
+	.form-control:focus ~ svg {
+		color: var(--sb-primary) !important;
+		stroke: var(--sb-primary) !important;
+	}
+
+	.sb-login-input::placeholder {
+		color: #9aa8bb !important;
+		font-weight: 500 !important;
+	}
+
+	.sb-password-field .sb-login-input,
+	.password-field .sb-login-input {
+		padding-right: 5.1rem !important;
+	}
+
+	.sb-password-field .toggle-password,
+	.password-field .toggle-password {
+		position: absolute !important;
+		top: 50% !important;
+		right: 14px !important;
+		margin: 0 !important;
+		float: none !important;
+		z-index: 3;
+		color: var(--sb-muted);
+		font-size: 0.73rem;
+		font-weight: 850;
+		transform: translateY(-50%) !important;
+		cursor: pointer;
+		user-select: none;
+		transition: 0.18s ease;
+	}
+
+	.sb-password-field .toggle-password:hover,
+	.password-field .toggle-password:hover {
+		color: var(--sb-primary);
+	}
+
+	.forgot-password-message {
+		margin: -0.15rem 0 0;
+		text-align: right;
+	}
+
+	.forgot-password-message a,
+	.sign-up-message a {
+		color: var(--sb-primary) !important;
+		font-weight: 850;
+		text-decoration: none;
+	}
+
+	.forgot-password-message a {
+		font-size: 0.77rem;
+	}
+
+	.forgot-password-message a:hover,
+	.sign-up-message a:hover {
+		text-decoration: underline;
+	}
+
+	.sb-btn-login {
+		width: 100% !important;
+		min-height: 46px !important;
+		border: 1px solid var(--sb-primary) !important;
+		border-radius: 15px !important;
+		background: var(--sb-primary) !important;
+		color: #ffffff !important;
+		padding: 0.72rem 1rem !important;
+		font-size: 0.92rem !important;
+		font-weight: 950 !important;
+		letter-spacing: -0.01em !important;
+		box-shadow: 0 14px 28px rgba(10, 34, 81, 0.17) !important;
+		transition: 0.18s ease !important;
+	}
+
+	.sb-btn-login:hover {
+		background: var(--sb-primary-hover) !important;
+		border-color: var(--sb-primary-hover) !important;
+		transform: translateY(-1px) !important;
+		box-shadow: 0 18px 36px rgba(10, 34, 81, 0.23) !important;
+	}
+
+	.sb-btn-login:active {
+		transform: translateY(0) !important;
+	}
+
+	.sign-up-message {
+		margin: 0.95rem 0 0;
+		color: var(--sb-muted);
+		font-size: 0.82rem;
+		line-height: 1.5;
+	}
+
+	.social-logins {
+		margin-top: 0;
+	}
+
+	.login-button-wrapper {
+		margin-bottom: 0.5rem;
+	}
+
+	.btn-login-option {
+		position: relative;
+		display: flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+		gap: 10px !important;
+		width: 100% !important;
+		min-height: 46px !important;
+		overflow: hidden;
+		border: 1px solid var(--sb-border) !important;
+		border-radius: 15px !important;
+		background: #ffffff !important;
+		color: #334155 !important;
+		padding: 0.7rem 0.9rem !important;
+		font-size: 0.88rem !important;
+		font-weight: 850 !important;
+		text-decoration: none !important;
+		transition: 0.18s ease !important;
+	}
+
+	.btn-login-option:hover {
+		border-color: var(--sb-primary) !important;
+		background: var(--sb-primary-soft) !important;
+		color: var(--sb-primary) !important;
+		transform: translateY(-1px) !important;
+	}
+
+	.btn-google img,
+	.btn-google .google-icon-svg,
+	.google-icon-svg {
+		width: 20px !important;
+		height: 20px !important;
+		flex: 0 0 auto;
+		object-fit: contain;
+	}
+
+	.login-divider {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin: 0.85rem 0;
+		color: var(--sb-soft) !important;
+		font-size: 0.73rem;
+		font-weight: 850;
+	}
+
+	.login-divider::before,
+	.login-divider::after {
+		content: "";
+		height: 1px;
+		flex: 1;
+		background: var(--sb-border);
+	}
+
+	.signup-form {
+		margin-top: 0.25rem;
+	}
+
+	.signup-form .form-group {
+		margin-bottom: 0.7rem;
+	}
+
+	.signup-form select.sb-login-input {
+		min-height: 46px !important;
+		appearance: none !important;
+		-webkit-appearance: none !important;
+		padding-right: 42px !important;
+		background-color: #f8fafc !important;
+		background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+		background-repeat: no-repeat !important;
+		background-position: right 15px center !important;
+		background-size: 16px !important;
+	}
+
+	.signup-form select.sb-login-input:focus {
+		background-color: #ffffff !important;
+	}
+
+	.sb-optional-label {
+		margin-left: 0.35rem;
+		color: var(--sb-soft);
+		font-size: 0.68rem;
+		font-weight: 800;
+	}
+
+	.terms-group {
+		margin-top: 0.75rem;
+		margin-bottom: 0.85rem;
+	}
+
+	.sb-checkbox-label {
+		display: flex !important;
+		align-items: flex-start !important;
+		gap: 10px;
+		color: var(--sb-muted);
+		font-size: 0.76rem;
+		line-height: 1.38;
+		cursor: pointer;
+	}
+
+	.sb-checkbox-label input[type="checkbox"] {
+		width: 16px;
+		height: 16px;
+		margin-top: 2px;
+		border: 1px solid var(--sb-border-strong);
+		border-radius: 5px;
+		cursor: pointer;
+		accent-color: var(--sb-primary);
+	}
+
+	.sb-form-trust {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 7px;
+		margin-top: 1rem;
+	}
+
+	.sb-form-trust-item {
+		border: 1px solid var(--sb-border);
+		border-radius: 14px;
+		background: #ffffff;
+		padding: 0.6rem 0.45rem;
+		color: var(--sb-muted);
+		font-size: 0.66rem;
+		font-weight: 800;
+		text-align: center;
+		line-height: 1.35;
+	}
+
+	.sb-form-trust-item strong {
+		display: block;
+		margin-bottom: 2px;
+		color: var(--sb-primary);
+		font-size: 0.76rem;
+		font-weight: 950;
+	}
+
+	.sb-login-footer {
+		margin-top: 0.9rem;
+		color: var(--sb-soft);
+		font-size: 0.69rem;
+		line-height: 1.5;
+		text-align: center;
+	}
+
+	.sr-only {
+		display: none;
+	}
+
+	.hide {
+		display: none !important;
+	}
+
+	@media (max-width: 1180px) {
+		.sb-login-wrapper {
+			grid-template-columns: minmax(0, 0.95fr) minmax(390px, 0.9fr);
+		}
+
+		.sb-login-left {
+			padding: 2rem 2.4rem;
+		}
+
+		.sb-login-tagline h2 {
+			font-size: clamp(2.15rem, 4vw, 3.35rem);
+		}
+
+		.sb-login-proof {
+			display: none;
+		}
+	}
+
+	@media (max-width: 980px) {
+		.sb-login-wrapper {
+			display: flex;
+			min-height: 100svh;
+			overflow: auto;
+		}
+
+		.sb-login-left {
+			display: none;
+		}
+
+		.sb-login-right {
+			width: 100%;
+			min-height: 100svh;
+			padding: 0.95rem;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.sb-login-form-shell {
+			width: min(100%, 420px);
+		}
+
+		.sb-login-mobile-brand {
+			display: flex;
+		}
+
+		.sb-login-form-container {
+			padding: 1.15rem;
+			border-radius: 24px;
+		}
+
+		.sb-form-trust {
+			display: none;
+		}
+
+		.sb-login-footer {
+			display: none;
+		}
+	}
+
+	@media (max-width: 480px) {
+		body {
+			background: #ffffff !important;
+		}
+
+		.sb-login-right {
+			padding: 0.75rem;
+			align-items: flex-start;
+			background: #ffffff;
+		}
+
+		.sb-login-form-shell {
+			width: 100%;
+			padding-top: 0.35rem;
+		}
+
+		.sb-login-mobile-brand {
+			margin-bottom: 0.7rem;
+		}
+
+		.sb-login-form-container {
+			border-radius: 22px;
+			padding: 0.95rem;
+			box-shadow: none;
+		}
+
+		.sb-login-form-header {
+			margin-bottom: 0.85rem;
+		}
+
+		.sb-form-eyebrow {
+			display: none;
+		}
+
+		.sb-login-form-header h3 {
+			font-size: 1.32rem;
+		}
+
+		.sb-login-form-header p {
+			font-size: 0.8rem;
+			line-height: 1.42;
+		}
+
+		.form-group {
+			margin-bottom: 0.62rem;
+		}
+
+		.sb-login-label {
+			font-size: 0.73rem;
+		}
+
+		.sb-login-input {
+			min-height: 43px !important;
+			border-radius: 14px !important;
+			font-size: 16px !important;
+			padding-top: 0.58rem !important;
+			padding-bottom: 0.58rem !important;
+		}
+
+		.sb-btn-login,
+		.btn-login-option {
+			min-height: 43px !important;
+			border-radius: 14px !important;
+			font-size: 0.85rem !important;
+		}
+
+		.login-divider {
+			margin: 0.65rem 0;
+		}
+
+		.sign-up-message {
+			margin-top: 0.72rem;
+			font-size: 0.77rem;
+		}
+
+		.terms-group {
+			margin-top: 0.6rem;
+			margin-bottom: 0.7rem;
+		}
+
+		.sb-checkbox-label {
+			font-size: 0.72rem;
+			line-height: 1.32;
+		}
+
+		.page-card-actions {
+			margin-top: 0.72rem;
+		}
+	}
+
+	@media (max-height: 720px) and (max-width: 980px) {
+		.sb-login-right {
+			align-items: flex-start;
+		}
+
+		.sb-login-mobile-brand {
+			display: none;
+		}
+
+		.sb-login-form-container {
+			padding: 0.85rem;
+		}
+
+		.sb-login-form-header {
+			margin-bottom: 0.68rem;
+		}
+
+		.sb-login-form-header h3 {
+			font-size: 1.18rem;
+		}
+
+		.sb-login-form-header p {
+			display: none;
+		}
+
+		.form-group {
+			margin-bottom: 0.5rem;
+		}
+
+		.sb-login-input {
+			min-height: 39px !important;
+		}
+
+		.sb-btn-login,
+		.btn-login-option {
+			min-height: 39px !important;
+		}
+
+		.login-divider {
+			margin: 0.48rem 0;
+		}
+
+		.sign-up-message {
+			margin-top: 0.55rem;
+		}
+	}
+</style>
+{% endblock %}
 
 {% block page_content %}
+<div class="sb-login-wrapper">
+	<div class="sb-login-left">
+		<div class="sb-login-left-inner">
+			<div class="sb-login-brand">
+				<img src="/assets/lms/images/studybadge/studybadge-logo.png" alt="StudyBadge" />
+				<span class="sb-login-brand-name">StudyBadge</span>
+			</div>
 
-<form id="new-sign-up">
-	<div class="form-group">
-		<label for="full_name">Full Name:</label>
-		<input id="full_name" type="text" class="form-control" required>
-	</div>
-	<div class="form-group">
-		<label for="signup_email">Email:</label>
-		<input id="signup_email" type="email" class="form-control" required>
-	</div>
-	<div class="form-group">
-		<label for="username">Username:</label>
-		<input id="username" type="text" class="form-control" required>
-	</div>
-	<div class="form-group">
-		<label for="password">Password:</label>
-		<input id="password" type="password" class="form-control" required>
-		<span class="password-strength-indicator indicator"></span>
+			<div class="sb-login-tagline">
+				<div class="sb-login-kicker">
+					<span class="sb-login-kicker-dot"></span>
+					Aprendizaje práctico con IA
+				</div>
 
+				<h2>Aprende mejor. Avanza más rápido.</h2>
+
+				<p>
+					Entra a tus cursos, practica con TutorIA y demuestra tu progreso con certificados verificables.
+				</p>
+			</div>
+
+			<div class="sb-login-features">
+				<div class="sb-login-feature">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+					</svg>
+					Cursos claros
+				</div>
+
+				<div class="sb-login-feature">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="12" cy="8" r="6"></circle>
+						<path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
+					</svg>
+					Certificados
+				</div>
+
+				<div class="sb-login-feature">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M12 2v20"></path>
+						<path d="M2 12h20"></path>
+						<path d="m5 5 14 14"></path>
+						<path d="m19 5-14 14"></path>
+					</svg>
+					TutorIA
+				</div>
+
+				<div class="sb-login-feature">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+						<line x1="12" x2="12" y1="20" y2="10"></line>
+						<line x1="18" x2="18" y1="20" y2="4"></line>
+						<line x1="6" x2="6" y1="20" y2="16"></line>
+					</svg>
+					Progreso real
+				</div>
+			</div>
+
+			<div class="sb-login-proof">
+				<div class="sb-proof-card">
+					<strong>IA</strong>
+					<span>Sesiones para estudiar mejor</span>
+				</div>
+
+				<div class="sb-proof-card">
+					<strong>24/7</strong>
+					<span>Acceso a tus cursos online</span>
+				</div>
+
+				<div class="sb-proof-card">
+					<strong>Plus</strong>
+					<span>Herramientas para avanzar más</span>
+				</div>
+			</div>
+		</div>
+
+		<div class="sb-login-left-bottom">
+			StudyBadge
+			<span></span>
+			Cursos, IA y certificados en un solo lugar
+		</div>
 	</div>
-	<p class='password-strength-message text-muted small hidden'></p>
-	<div class="form-group">
-		<label for="invite_code">Invite Code:</label>
-		<input id="invite_code" type="text" class="form-control" readonly required
-			value="{{ frappe.form_dict['invite_code'] }}">
+
+	<div class="sb-login-right">
+		<noscript>
+			<div class="text-center my-5">
+				<h4>{{ _("Javascript está deshabilitado en tu navegador") }}</h4>
+				<p class="text-muted">{{ _("Necesitas habilitar JavaScript para usar la aplicación.") }}</p>
+			</div>
+		</noscript>
+
+		<div class="sb-login-form-shell">
+			<div class="sb-login-mobile-brand">
+				<img src="/assets/lms/images/studybadge/studybadge-logo.png" alt="StudyBadge" />
+				<span>StudyBadge</span>
+			</div>
+
+			<div class="sb-login-form-container">
+				<section class="for-login">
+					<div class="sb-login-form-header">
+						<div class="sb-form-eyebrow">Inicio de sesión</div>
+						<h3>Bienvenido de vuelta</h3>
+						<p>Continúa tus cursos, sesiones IA y certificados desde donde lo dejaste.</p>
+					</div>
+
+					<div class="login-content page-card">
+						<form class="form-signin form-login" role="form">
+							{%- if social_login or login_with_email_link -%}
+							<div class="page-card-body">
+								{%- if social_login -%}
+								<div class="social-logins">
+									<div class="social-login-buttons">
+										{% for provider in provider_logins %}
+										<div class="login-button-wrapper">
+											<a
+												href="{{ provider.auth_url }}"
+												class="btn btn-block btn-default btn-sm btn-login-option btn-{{ provider.name }}"
+												id="btn-login-{{ provider.name }}"
+											>
+												{% if provider.name == 'google' %}
+												<svg class="google-icon-svg" width="20" height="20" viewBox="0 0 48 48">
+													<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+													<path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+													<path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+													<path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+												</svg>
+												{% elif provider.icon %}
+													{{ provider.icon }}
+												{% endif %}
+
+												{{ _("Continuar con {0}").format(provider.provider_name) }}
+											</a>
+										</div>
+										{% endfor %}
+									</div>
+								</div>
+
+								{% if not disable_user_pass_login or (ldap_settings and ldap_settings.enabled) %}
+								<p class="text-muted login-divider">{{ _("o ingresa con tu email") }}</p>
+								{% endif %}
+								{%- endif -%}
+
+								{{ email_login_body() }}
+
+								{% if login_with_email_link %}
+								<div class="login-with-email-link social-login-buttons" style="margin-top: 0.7rem;">
+									<div class="login-button-wrapper">
+										<a
+											href="#login-with-email-link"
+											class="btn btn-block btn-default btn-sm btn-login-option btn-login-with-email-link"
+										>
+											{{ _("Iniciar con enlace por email") }}
+										</a>
+									</div>
+								</div>
+								{% endif %}
+							</div>
+							{% else %}
+								{{ email_login_body() }}
+							{%- endif -%}
+						</form>
+					</div>
+
+					{%- if not disable_signup and not disable_user_pass_login -%}
+					<div class="text-center sign-up-message">
+						{{ _("¿No tienes cuenta?") }}
+						<a href="#signup">{{ _("Regístrate gratis") }}</a>
+					</div>
+					{%- endif -%}
+				</section>
+
+				{%- if social_login -%}
+				<section class="for-email-login">
+					<div class="sb-login-form-header">
+						<div class="sb-form-eyebrow">Email</div>
+						<h3>Iniciar con email</h3>
+						<p>Ingresa tu correo y contraseña para continuar.</p>
+					</div>
+
+					<div class="login-content page-card">
+						<form class="form-signin form-login" role="form">
+							{{ email_login_body() }}
+						</form>
+					</div>
+
+					{%- if not disable_signup and not disable_user_pass_login -%}
+					<div class="text-center sign-up-message">
+						{{ _("¿No tienes cuenta?") }}
+						<a href="#signup">{{ _("Regístrate gratis") }}</a>
+					</div>
+					{%- endif -%}
+				</section>
+				{%- endif -%}
+
+				<section class='for-signup {{ "signup-disabled" if disable_signup else "" }}'>
+					<div class="sb-login-form-header">
+						<div class="sb-form-eyebrow">Registro gratis</div>
+						<h3>Crea tu cuenta</h3>
+						<p>Empieza a aprender con cursos, TutorIA y certificados verificables.</p>
+					</div>
+
+					<div class="login-content page-card">
+						{%- if not disable_signup -%}
+
+						{%- if social_login -%}
+						<div class="form-group" style="margin-bottom: 1rem;">
+							<label class="sb-login-label" for="login_ref_code">
+								{{ _("Código de referido o promoción") }}
+								<span class="sb-optional-label">{{ _("Opcional") }}</span>
+							</label>
+
+							<div class="sb-field">
+								<input
+									type="text"
+									id="login_ref_code"
+									class="form-control sb-login-input"
+									placeholder="{{ _('Ej: STUDYBADGE') }}"
+									oninput="document.cookie = 'studybadge_ref=' + this.value.trim() + '; path=/; max-age=' + (30 * 24 * 60 * 60)"
+								/>
+
+								<svg
+									class="sb-field-icon"
+									width="18"
+									height="18"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								>
+									<polyline points="20 12 20 22 4 22 4 12"></polyline>
+									<rect x="2" y="7" width="20" height="5"></rect>
+									<line x1="12" y1="22" x2="12" y2="7"></line>
+									<path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+									<path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+								</svg>
+							</div>
+						</div>
+
+						<script>
+							document.addEventListener("DOMContentLoaded", function() {
+								const urlParams = new URLSearchParams(window.location.search);
+								let refCode = urlParams.get("ref");
+
+								if (!refCode) {
+									const match = document.cookie.match(new RegExp("(^| )studybadge_ref=([^;]+)"));
+									if (match) refCode = match[2];
+								} else {
+									document.cookie = 'studybadge_ref=' + refCode.trim() + '; path=/; max-age=' + (30 * 24 * 60 * 60);
+								}
+
+								if (refCode) {
+									const el = document.getElementById("login_ref_code");
+									if (el) el.value = refCode;
+								}
+							});
+						</script>
+
+						<div class="social-logins">
+							<div class="social-login-buttons">
+								{% for provider in provider_logins %}
+								<div class="login-button-wrapper">
+									<a
+										href="{{ provider.auth_url }}"
+										class="btn btn-block btn-default btn-sm btn-login-option btn-{{ provider.name }}"
+										id="btn-signup-{{ provider.name }}"
+									>
+										{% if provider.name == 'google' %}
+										<svg class="google-icon-svg" width="20" height="20" viewBox="0 0 48 48">
+											<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+											<path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+											<path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+											<path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+										</svg>
+										{% elif provider.icon %}
+											{{ provider.icon }}
+										{% endif %}
+
+										{{ _("Registrarse con {0}").format(provider.provider_name) }}
+									</a>
+								</div>
+								{% endfor %}
+							</div>
+						</div>
+
+						{% if not disable_user_pass_login %}
+						<p class="text-muted login-divider">{{ _("o regístrate con tu email") }}</p>
+						{% endif %}
+						{%- endif -%}
+
+						{{ signup_form_template }}
+
+						{%- else -%}
+						<div class="page-card-head mb-2">
+							<span class="indicator gray">{{ _("Registro deshabilitado") }}</span>
+							<p class="text-muted text-normal sign-up-message mt-1 mb-8">
+								{{ _("Los registros están deshabilitados para este sitio.") }}
+							</p>
+							<div>
+								<a href="/" class="btn btn-primary btn-md">{{ _("Inicio") }}</a>
+							</div>
+						</div>
+						{%- endif -%}
+					</div>
+				</section>
+
+				<section class="for-forgot">
+					<div class="sb-login-form-header">
+						<div class="sb-form-eyebrow">Recuperación</div>
+						<h3>Recuperar contraseña</h3>
+						<p>Te enviaremos un enlace seguro para restablecer tu acceso.</p>
+					</div>
+
+					<div class="login-content page-card">
+						<form class="form-signin form-forgot hide" role="form">
+							<div class="page-card-body">
+								<div class="sb-field">
+									<input
+										type="email"
+										id="forgot_email"
+										class="form-control sb-login-input"
+										placeholder="{{ _('Correo electrónico') }}"
+										required
+										autofocus
+										autocomplete="username"
+									/>
+
+									<svg
+										class="sb-field-icon"
+										width="18"
+										height="18"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+									>
+										<rect x="3" y="5" width="18" height="14" rx="2"></rect>
+										<path d="m3 7 9 6 9-6"></path>
+									</svg>
+								</div>
+							</div>
+
+							<div class="page-card-actions">
+								<button class="btn btn-sm btn-primary btn-block btn-forgot sb-btn-login" type="submit">
+									{{ _("Restablecer contraseña") }}
+								</button>
+
+								<p class="text-center sign-up-message">
+									<a href="#login">{{ _("Volver al inicio de sesión") }}</a>
+								</p>
+							</div>
+						</form>
+					</div>
+				</section>
+
+				<section class="for-login-with-email-link">
+					<div class="sb-login-form-header">
+						<div class="sb-form-eyebrow">Sin contraseña</div>
+						<h3>Inicio con enlace</h3>
+						<p>Recibe un enlace mágico en tu correo para entrar rápido.</p>
+					</div>
+
+					<div class="login-content page-card">
+						<form class="form-signin form-login-with-email-link hide" role="form">
+							<div class="page-card-body">
+								<div class="sb-field">
+									<input
+										type="email"
+										id="login_with_email_link_email"
+										class="form-control sb-login-input"
+										placeholder="{{ _('Correo electrónico') }}"
+										required
+										autofocus
+										autocomplete="username"
+									/>
+
+									<svg
+										class="sb-field-icon"
+										width="18"
+										height="18"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+									>
+										<rect x="3" y="5" width="18" height="14" rx="2"></rect>
+										<path d="m3 7 9 6 9-6"></path>
+									</svg>
+								</div>
+							</div>
+
+							<div class="page-card-actions">
+								<button class="btn btn-sm btn-primary btn-block btn-login-with-email-link sb-btn-login" type="submit">
+									{{ _("Enviar enlace") }}
+								</button>
+
+								<p class="text-center sign-up-message">
+									<a href="#login">{{ _("Volver al inicio de sesión") }}</a>
+								</p>
+							</div>
+						</form>
+					</div>
+				</section>
+
+				<div class="sb-form-trust">
+					<div class="sb-form-trust-item">
+						<strong>IA</strong>
+						Tutor de estudio
+					</div>
+					<div class="sb-form-trust-item">
+						<strong>Curso</strong>
+						Aprendizaje guiado
+					</div>
+					<div class="sb-form-trust-item">
+						<strong>24/7</strong>
+						Acceso online
+					</div>
+				</div>
+			</div>
+
+			<div class="sb-login-footer">
+				© {{ frappe.utils.now_datetime().strftime('%Y') }} StudyBadge. Todos los derechos reservados.
+			</div>
+		</div>
 	</div>
-	<button type="submit" id="submit" class="btn btn-primary">{{_("Submit")}}</button>
-</form>
-
-<script>
-	frappe.ready(() => {
-		$("#submit").click(function () {
-			var data = {
-				full_name: $("#full_name").val(),
-				signup_email: $("#signup_email").val(),
-				username: $("#username").val(),
-				password: $("#password").val(),
-				invite_code: $("#invite_code").val(),
-			};
-
-			frappe.call({
-				type: "POST",
-				method: "lms.lms.doctype.invite_request.invite_request.update_invite",
-				args: {
-					"data": data
-				},
-				callback: (data) => {
-					$("input").val("");
-					if (data.message == "OK") {
-						frappe.msgprint({
-							message: __("Your Account has been successfully created!"),
-							clear: true
-						});
-						setTimeout(function() {
-							window.location.href = "/login";
-						}, 2000);
-					}
-				}
-			});
-			return false;
-		});
-	})
-</script>
-
+</div>
 {% endblock %}
+
+{% block script %}
+<script>{% include "templates/includes/login/login.js" %}</script>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}

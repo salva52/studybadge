@@ -14,7 +14,7 @@
 			{{ login_label or _("Correo electrónico") }}
 		</label>
 
-		<div class="email-field">
+		<div class="sb-field">
 			<input
 				type="text"
 				id="login_email"
@@ -26,7 +26,7 @@
 			/>
 
 			<svg
-				class="field-icon"
+				class="sb-field-icon"
 				width="18"
 				height="18"
 				viewBox="0 0 24 24"
@@ -47,7 +47,7 @@
 			{{ _("Contraseña") }}
 		</label>
 
-		<div class="password-field">
+		<div class="sb-field sb-password-field">
 			<input
 				type="password"
 				id="login_password"
@@ -58,7 +58,7 @@
 			/>
 
 			<svg
-				class="field-icon"
+				class="sb-field-icon"
 				width="18"
 				height="18"
 				viewBox="0 0 24 24"
@@ -94,7 +94,7 @@
 	{% endif %}
 
 	{% if ldap_settings and ldap_settings.enabled %}
-	<button class="btn btn-sm {{ "btn-primary" if disable_user_pass_login else "btn-default" }} btn-block btn-login btn-ldap-login">
+	<button class="btn btn-sm {{ 'btn-primary' if disable_user_pass_login else 'btn-default' }} btn-block btn-login btn-ldap-login">
 		{{ _("Login with LDAP") }}
 	</button>
 	{% endif %}
@@ -115,16 +115,18 @@
 	:root {
 		--sb-primary: #0a2251;
 		--sb-primary-hover: #12356f;
-		--sb-primary-soft: #edf3fb;
+		--sb-primary-soft: #eef4fb;
+		--sb-primary-softer: #f5f8fc;
 		--sb-gold: #f5b301;
-		--sb-bg: #f5f8fc;
+		--sb-bg: #f3f6fb;
 		--sb-card: #ffffff;
 		--sb-text: #0f172a;
 		--sb-muted: #64748b;
 		--sb-soft: #94a3b8;
-		--sb-border: #d9e4f2;
+		--sb-border: #d8e3f1;
 		--sb-border-strong: #b9cbe3;
-		--sb-shadow: 0 18px 46px rgba(10, 34, 81, 0.11);
+		--sb-shadow: 0 22px 58px rgba(10, 34, 81, 0.12);
+		--sb-shadow-soft: 0 12px 28px rgba(10, 34, 81, 0.08);
 	}
 
 	* {
@@ -150,6 +152,10 @@
 		text-decoration: none;
 	}
 
+	a:hover {
+		text-decoration: none;
+	}
+
 	.web-footer,
 	footer,
 	.page-header,
@@ -164,78 +170,76 @@
 		padding: 0 !important;
 	}
 
-	.main-section {
-		padding: 0 !important;
-	}
-
-	.web-content {
-		margin: 0 !important;
-	}
-
+	.main-section,
+	.web-content,
 	.page_content {
+		margin: 0 !important;
 		padding: 0 !important;
 	}
 
 	.sb-login-wrapper {
 		display: grid;
-		grid-template-columns: minmax(0, 0.95fr) minmax(390px, 0.85fr);
+		grid-template-columns: minmax(0, 1fr) minmax(410px, 0.82fr);
 		width: 100%;
-		height: 100svh;
 		min-height: 100svh;
-		overflow: hidden;
 		background: var(--sb-bg);
+		overflow: hidden;
 	}
 
 	.sb-login-left {
 		position: relative;
 		display: flex;
 		flex-direction: column;
-		justify-content: center;
-		overflow: hidden;
+		justify-content: space-between;
+		min-height: 100svh;
 		background: var(--sb-primary);
 		color: #ffffff;
-		padding: 2rem 3.2rem;
+		padding: 2.2rem 3.3rem;
+		overflow: hidden;
 	}
 
 	.sb-login-left::before {
 		content: "";
 		position: absolute;
 		inset: 18px;
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: 26px;
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		border-radius: 30px;
 		pointer-events: none;
 	}
 
-	.sb-login-brand {
+	.sb-login-left-inner {
 		position: relative;
 		z-index: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		min-height: calc(100svh - 4.4rem);
+		max-width: 610px;
+	}
+
+	.sb-login-brand {
 		display: inline-flex;
 		align-items: center;
 		gap: 12px;
 		width: fit-content;
-		margin-bottom: 2rem;
+		margin-bottom: 2.4rem;
 	}
 
 	.sb-login-brand img {
-		width: 44px;
-		height: 44px;
-		border-radius: 13px;
+		width: 46px;
+		height: 46px;
+		border-radius: 14px;
 		object-fit: contain;
 		background: #ffffff;
-		box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+		padding: 4px;
+		box-shadow: 0 16px 34px rgba(0, 0, 0, 0.18);
 	}
 
 	.sb-login-brand-name {
 		color: #ffffff;
-		font-size: 1.45rem;
+		font-size: 1.42rem;
 		font-weight: 950;
-		letter-spacing: -0.05em;
-	}
-
-	.sb-login-tagline {
-		position: relative;
-		z-index: 1;
-		max-width: 520px;
+		letter-spacing: -0.055em;
 	}
 
 	.sb-login-kicker {
@@ -243,14 +247,15 @@
 		align-items: center;
 		gap: 8px;
 		width: fit-content;
-		margin-bottom: 0.75rem;
-		border: 1px solid rgba(255, 255, 255, 0.18);
+		margin-bottom: 1rem;
+		border: 1px solid rgba(255, 255, 255, 0.16);
 		border-radius: 999px;
 		background: rgba(255, 255, 255, 0.08);
-		padding: 0.35rem 0.65rem;
+		padding: 0.42rem 0.72rem;
 		color: rgba(255, 255, 255, 0.9);
-		font-size: 0.72rem;
+		font-size: 0.74rem;
 		font-weight: 850;
+		letter-spacing: 0.01em;
 	}
 
 	.sb-login-kicker-dot {
@@ -258,87 +263,102 @@
 		height: 8px;
 		border-radius: 999px;
 		background: var(--sb-gold);
-		box-shadow: 0 0 0 5px rgba(245, 179, 1, 0.18);
+		box-shadow: 0 0 0 5px rgba(245, 179, 1, 0.16);
 	}
 
 	.sb-login-tagline h2 {
 		margin: 0;
-		max-width: 520px;
+		max-width: 580px;
 		color: #ffffff;
-		font-size: clamp(2rem, 4vw, 3.55rem);
+		font-size: clamp(2.45rem, 4.3vw, 4.25rem);
 		font-weight: 950;
-		letter-spacing: -0.065em;
-		line-height: 1;
+		letter-spacing: -0.07em;
+		line-height: 0.95;
 	}
 
 	.sb-login-tagline p {
-		max-width: 480px;
-		margin: 1rem 0 0;
-		color: rgba(255, 255, 255, 0.78);
-		font-size: 0.95rem;
-		line-height: 1.6;
+		max-width: 520px;
+		margin: 1.1rem 0 0;
+		color: rgba(255, 255, 255, 0.76);
+		font-size: 1rem;
+		line-height: 1.7;
 	}
 
 	.sb-login-features {
-		position: relative;
-		z-index: 1;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px;
-		margin-top: 1.5rem;
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 10px;
+		max-width: 520px;
+		margin-top: 1.6rem;
 	}
 
 	.sb-login-feature {
-		display: inline-flex;
+		display: flex;
 		align-items: center;
-		gap: 7px;
+		gap: 10px;
 		border: 1px solid rgba(255, 255, 255, 0.14);
-		border-radius: 999px;
+		border-radius: 16px;
 		background: rgba(255, 255, 255, 0.08);
-		padding: 7px 11px;
-		color: rgba(255, 255, 255, 0.9);
-		font-size: 0.78rem;
-		font-weight: 750;
+		padding: 12px 13px;
+		color: rgba(255, 255, 255, 0.92);
+		font-size: 0.82rem;
+		font-weight: 800;
 	}
 
 	.sb-login-feature svg {
-		width: 16px;
-		height: 16px;
+		width: 18px;
+		height: 18px;
 		flex: 0 0 auto;
-		stroke: rgba(255, 255, 255, 0.9);
+		stroke: rgba(255, 255, 255, 0.92);
 	}
 
 	.sb-login-proof {
-		position: relative;
-		z-index: 1;
 		display: grid;
 		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 9px;
+		gap: 10px;
 		max-width: 520px;
-		margin-top: 1.5rem;
+		margin-top: 1.6rem;
 	}
 
 	.sb-proof-card {
 		border: 1px solid rgba(255, 255, 255, 0.14);
-		border-radius: 16px;
+		border-radius: 18px;
 		background: rgba(255, 255, 255, 0.08);
-		padding: 11px;
+		padding: 13px;
 	}
 
 	.sb-proof-card strong {
 		display: block;
 		color: #ffffff;
-		font-size: 1.05rem;
+		font-size: 1.12rem;
 		font-weight: 950;
 		letter-spacing: -0.04em;
 	}
 
 	.sb-proof-card span {
 		display: block;
-		margin-top: 3px;
-		color: rgba(255, 255, 255, 0.72);
-		font-size: 0.68rem;
+		margin-top: 4px;
+		color: rgba(255, 255, 255, 0.68);
+		font-size: 0.72rem;
 		line-height: 1.35;
+	}
+
+	.sb-login-left-bottom {
+		position: relative;
+		z-index: 1;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		color: rgba(255, 255, 255, 0.62);
+		font-size: 0.76rem;
+		font-weight: 650;
+	}
+
+	.sb-login-left-bottom span {
+		width: 5px;
+		height: 5px;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.36);
 	}
 
 	.sb-login-right {
@@ -346,22 +366,14 @@
 		align-items: center;
 		justify-content: center;
 		min-width: 0;
-		overflow-y: auto;
+		min-height: 100svh;
 		background: var(--sb-bg);
-		padding: 1rem;
+		padding: 1.4rem;
+		overflow-y: auto;
 	}
 
 	.sb-login-form-shell {
-		width: min(100%, 400px);
-	}
-
-	.sb-login-form-container {
-		width: 100%;
-		border: 1px solid var(--sb-border);
-		border-radius: 24px;
-		background: rgba(255, 255, 255, 0.96);
-		padding: 1.15rem;
-		box-shadow: var(--sb-shadow);
+		width: min(100%, 430px);
 	}
 
 	.sb-login-mobile-brand {
@@ -369,14 +381,17 @@
 		align-items: center;
 		justify-content: center;
 		gap: 10px;
-		margin-bottom: 0.85rem;
+		margin-bottom: 0.95rem;
 	}
 
 	.sb-login-mobile-brand img {
-		width: 36px;
-		height: 36px;
+		width: 38px;
+		height: 38px;
 		border-radius: 12px;
 		object-fit: contain;
+		background: #ffffff;
+		padding: 3px;
+		box-shadow: var(--sb-shadow-soft);
 	}
 
 	.sb-login-mobile-brand span {
@@ -384,6 +399,15 @@
 		font-size: 1.15rem;
 		font-weight: 950;
 		letter-spacing: -0.05em;
+	}
+
+	.sb-login-form-container {
+		width: 100%;
+		border: 1px solid var(--sb-border);
+		border-radius: 28px;
+		background: var(--sb-card);
+		padding: 1.35rem;
+		box-shadow: var(--sb-shadow);
 	}
 
 	.sb-login-form-header {
@@ -395,31 +419,32 @@
 		display: inline-flex;
 		align-items: center;
 		width: fit-content;
-		margin-bottom: 0.55rem;
+		margin-bottom: 0.6rem;
+		border: 1px solid #dbe7f5;
 		border-radius: 999px;
 		background: var(--sb-primary-soft);
-		padding: 0.3rem 0.55rem;
+		padding: 0.32rem 0.62rem;
 		color: var(--sb-primary);
 		font-size: 0.66rem;
 		font-weight: 950;
-		letter-spacing: 0.06em;
+		letter-spacing: 0.07em;
 		text-transform: uppercase;
 	}
 
 	.sb-login-form-header h3 {
 		margin: 0;
 		color: var(--sb-primary);
-		font-size: 1.35rem;
+		font-size: 1.55rem;
 		font-weight: 950;
-		letter-spacing: -0.045em;
-		line-height: 1.08;
+		letter-spacing: -0.05em;
+		line-height: 1.05;
 	}
 
 	.sb-login-form-header p {
-		margin: 0.35rem 0 0;
+		margin: 0.45rem 0 0;
 		color: var(--sb-muted);
-		font-size: 0.82rem;
-		line-height: 1.45;
+		font-size: 0.87rem;
+		line-height: 1.5;
 	}
 
 	.login-content.page-card {
@@ -427,6 +452,7 @@
 		background: transparent !important;
 		box-shadow: none !important;
 		padding: 0 !important;
+		margin: 0 !important;
 	}
 
 	.page-card-body {
@@ -434,22 +460,24 @@
 	}
 
 	.page-card-actions {
-		margin-top: 0.9rem;
+		margin-top: 0.95rem;
 		padding: 0 !important;
 	}
 
 	.form-group {
-		margin-bottom: 0.65rem;
+		margin-bottom: 0.78rem;
 	}
 
 	.sb-login-label {
 		display: block;
-		margin-bottom: 0.3rem;
+		margin-bottom: 0.36rem;
 		color: #334155;
-		font-size: 0.75rem;
+		font-size: 0.76rem;
 		font-weight: 900;
+		letter-spacing: -0.01em;
 	}
 
+	.sb-field,
 	.email-field,
 	.password-field,
 	.name-field,
@@ -458,13 +486,14 @@
 		width: 100%;
 	}
 
+	.sb-field-icon,
 	.field-icon {
 		position: absolute;
 		top: 50%;
-		left: 13px;
+		left: 14px;
 		z-index: 2;
-		width: 16px;
-		height: 16px;
+		width: 17px;
+		height: 17px;
 		color: #94a3b8;
 		transform: translateY(-50%);
 		pointer-events: none;
@@ -473,14 +502,14 @@
 
 	.sb-login-input {
 		width: 100% !important;
-		min-height: 41px !important;
+		min-height: 46px !important;
 		border: 1px solid var(--sb-border) !important;
-		border-radius: 13px !important;
+		border-radius: 15px !important;
 		background: #f8fafc !important;
 		color: var(--sb-text) !important;
-		padding: 0.58rem 0.9rem 0.58rem 2.45rem !important;
-		font-size: 0.88rem !important;
-		font-weight: 600 !important;
+		padding: 0.68rem 0.95rem 0.68rem 2.7rem !important;
+		font-size: 0.92rem !important;
+		font-weight: 650 !important;
 		outline: none !important;
 		transition: 0.18s ease !important;
 	}
@@ -491,11 +520,12 @@
 	}
 
 	.sb-login-input:focus {
-		border-color: rgba(10, 34, 81, 0.42) !important;
+		border-color: rgba(10, 34, 81, 0.48) !important;
 		background: #ffffff !important;
 		box-shadow: 0 0 0 4px rgba(10, 34, 81, 0.08) !important;
 	}
 
+	.sb-login-input:focus ~ .sb-field-icon,
 	.sb-login-input:focus ~ .field-icon,
 	.sb-login-input:focus ~ svg,
 	.form-control:focus ~ .field-icon,
@@ -505,14 +535,16 @@
 	}
 
 	.sb-login-input::placeholder {
-		color: #94a3b8 !important;
+		color: #9aa8bb !important;
 		font-weight: 500 !important;
 	}
 
+	.sb-password-field .sb-login-input,
 	.password-field .sb-login-input {
-		padding-right: 4.8rem !important;
+		padding-right: 5.1rem !important;
 	}
 
+	.sb-password-field .toggle-password,
 	.password-field .toggle-password {
 		position: absolute !important;
 		top: 50% !important;
@@ -521,7 +553,7 @@
 		float: none !important;
 		z-index: 3;
 		color: var(--sb-muted);
-		font-size: 0.72rem;
+		font-size: 0.73rem;
 		font-weight: 850;
 		transform: translateY(-50%) !important;
 		cursor: pointer;
@@ -529,12 +561,13 @@
 		transition: 0.18s ease;
 	}
 
+	.sb-password-field .toggle-password:hover,
 	.password-field .toggle-password:hover {
 		color: var(--sb-primary);
 	}
 
 	.forgot-password-message {
-		margin: -0.2rem 0 0;
+		margin: -0.15rem 0 0;
 		text-align: right;
 	}
 
@@ -546,7 +579,7 @@
 	}
 
 	.forgot-password-message a {
-		font-size: 0.76rem;
+		font-size: 0.77rem;
 	}
 
 	.forgot-password-message a:hover,
@@ -556,16 +589,16 @@
 
 	.sb-btn-login {
 		width: 100% !important;
-		min-height: 42px !important;
+		min-height: 46px !important;
 		border: 1px solid var(--sb-primary) !important;
-		border-radius: 13px !important;
+		border-radius: 15px !important;
 		background: var(--sb-primary) !important;
 		color: #ffffff !important;
-		padding: 0.65rem 0.9rem !important;
-		font-size: 0.88rem !important;
+		padding: 0.72rem 1rem !important;
+		font-size: 0.92rem !important;
 		font-weight: 950 !important;
 		letter-spacing: -0.01em !important;
-		box-shadow: 0 12px 24px rgba(10, 34, 81, 0.16) !important;
+		box-shadow: 0 14px 28px rgba(10, 34, 81, 0.17) !important;
 		transition: 0.18s ease !important;
 	}
 
@@ -573,14 +606,18 @@
 		background: var(--sb-primary-hover) !important;
 		border-color: var(--sb-primary-hover) !important;
 		transform: translateY(-1px) !important;
-		box-shadow: 0 16px 32px rgba(10, 34, 81, 0.22) !important;
+		box-shadow: 0 18px 36px rgba(10, 34, 81, 0.23) !important;
+	}
+
+	.sb-btn-login:active {
+		transform: translateY(0) !important;
 	}
 
 	.sign-up-message {
-		margin: 0.9rem 0 0;
+		margin: 0.95rem 0 0;
 		color: var(--sb-muted);
-		font-size: 0.8rem;
-		line-height: 1.45;
+		font-size: 0.82rem;
+		line-height: 1.5;
 	}
 
 	.social-logins {
@@ -588,7 +625,7 @@
 	}
 
 	.login-button-wrapper {
-		margin-bottom: 0.45rem;
+		margin-bottom: 0.5rem;
 	}
 
 	.btn-login-option {
@@ -598,14 +635,14 @@
 		justify-content: center !important;
 		gap: 10px !important;
 		width: 100% !important;
-		min-height: 42px !important;
+		min-height: 46px !important;
 		overflow: hidden;
 		border: 1px solid var(--sb-border) !important;
-		border-radius: 13px !important;
+		border-radius: 15px !important;
 		background: #ffffff !important;
 		color: #334155 !important;
-		padding: 0.62rem 0.85rem !important;
-		font-size: 0.84rem !important;
+		padding: 0.7rem 0.9rem !important;
+		font-size: 0.88rem !important;
 		font-weight: 850 !important;
 		text-decoration: none !important;
 		transition: 0.18s ease !important;
@@ -619,7 +656,8 @@
 	}
 
 	.btn-google img,
-	.btn-google .google-icon-svg {
+	.btn-google .google-icon-svg,
+	.google-icon-svg {
 		width: 20px !important;
 		height: 20px !important;
 		flex: 0 0 auto;
@@ -630,10 +668,10 @@
 		display: flex;
 		align-items: center;
 		gap: 12px;
-		margin: 0.75rem 0;
+		margin: 0.85rem 0;
 		color: var(--sb-soft) !important;
-		font-size: 0.72rem;
-		font-weight: 800;
+		font-size: 0.73rem;
+		font-weight: 850;
 	}
 
 	.login-divider::before,
@@ -649,11 +687,11 @@
 	}
 
 	.signup-form .form-group {
-		margin-bottom: 0.6rem;
+		margin-bottom: 0.7rem;
 	}
 
 	.signup-form select.sb-login-input {
-		min-height: 41px !important;
+		min-height: 46px !important;
 		appearance: none !important;
 		-webkit-appearance: none !important;
 		padding-right: 42px !important;
@@ -676,8 +714,8 @@
 	}
 
 	.terms-group {
-		margin-top: 0.7rem;
-		margin-bottom: 0.8rem;
+		margin-top: 0.75rem;
+		margin-bottom: 0.85rem;
 	}
 
 	.sb-checkbox-label {
@@ -686,13 +724,13 @@
 		gap: 10px;
 		color: var(--sb-muted);
 		font-size: 0.76rem;
-		line-height: 1.35;
+		line-height: 1.38;
 		cursor: pointer;
 	}
 
 	.sb-checkbox-label input[type="checkbox"] {
-		width: 15px;
-		height: 15px;
+		width: 16px;
+		height: 16px;
 		margin-top: 2px;
 		border: 1px solid var(--sb-border-strong);
 		border-radius: 5px;
@@ -703,17 +741,17 @@
 	.sb-form-trust {
 		display: grid;
 		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 6px;
-		margin-top: 0.9rem;
+		gap: 7px;
+		margin-top: 1rem;
 	}
 
 	.sb-form-trust-item {
 		border: 1px solid var(--sb-border);
-		border-radius: 12px;
+		border-radius: 14px;
 		background: #ffffff;
-		padding: 0.52rem 0.4rem;
+		padding: 0.6rem 0.45rem;
 		color: var(--sb-muted);
-		font-size: 0.65rem;
+		font-size: 0.66rem;
 		font-weight: 800;
 		text-align: center;
 		line-height: 1.35;
@@ -723,14 +761,14 @@
 		display: block;
 		margin-bottom: 2px;
 		color: var(--sb-primary);
-		font-size: 0.74rem;
+		font-size: 0.76rem;
 		font-weight: 950;
 	}
 
 	.sb-login-footer {
-		margin-top: 0.8rem;
+		margin-top: 0.9rem;
 		color: var(--sb-soft);
-		font-size: 0.68rem;
+		font-size: 0.69rem;
 		line-height: 1.5;
 		text-align: center;
 	}
@@ -744,26 +782,28 @@
 	}
 
 	@media (max-width: 1180px) {
-		.sb-login-proof {
-			display: none;
+		.sb-login-wrapper {
+			grid-template-columns: minmax(0, 0.95fr) minmax(390px, 0.9fr);
+		}
+
+		.sb-login-left {
+			padding: 2rem 2.4rem;
 		}
 
 		.sb-login-tagline h2 {
-			font-size: clamp(1.9rem, 3.7vw, 3rem);
+			font-size: clamp(2.15rem, 4vw, 3.35rem);
 		}
 
-		.sb-login-tagline p {
-			font-size: 0.9rem;
+		.sb-login-proof {
+			display: none;
 		}
 	}
 
 	@media (max-width: 980px) {
 		.sb-login-wrapper {
 			display: flex;
-			height: auto;
 			min-height: 100svh;
 			overflow: auto;
-			background: var(--sb-bg);
 		}
 
 		.sb-login-left {
@@ -773,13 +813,13 @@
 		.sb-login-right {
 			width: 100%;
 			min-height: 100svh;
-			padding: 0.85rem;
+			padding: 0.95rem;
 			align-items: center;
 			justify-content: center;
 		}
 
 		.sb-login-form-shell {
-			width: min(100%, 390px);
+			width: min(100%, 420px);
 		}
 
 		.sb-login-mobile-brand {
@@ -787,8 +827,8 @@
 		}
 
 		.sb-login-form-container {
-			padding: 1rem;
-			border-radius: 22px;
+			padding: 1.15rem;
+			border-radius: 24px;
 		}
 
 		.sb-form-trust {
@@ -801,24 +841,29 @@
 	}
 
 	@media (max-width: 480px) {
+		body {
+			background: #ffffff !important;
+		}
+
 		.sb-login-right {
-			padding: 0.65rem;
-			justify-content: flex-start;
+			padding: 0.75rem;
+			align-items: flex-start;
+			background: #ffffff;
 		}
 
 		.sb-login-form-shell {
 			width: 100%;
-			padding-top: 0.3rem;
+			padding-top: 0.35rem;
 		}
 
 		.sb-login-mobile-brand {
-			margin-bottom: 0.65rem;
+			margin-bottom: 0.7rem;
 		}
 
 		.sb-login-form-container {
-			padding: 0.9rem;
-			border-radius: 20px;
-			box-shadow: 0 14px 34px rgba(10, 34, 81, 0.1);
+			border-radius: 22px;
+			padding: 0.95rem;
+			box-shadow: none;
 		}
 
 		.sb-login-form-header {
@@ -830,64 +875,64 @@
 		}
 
 		.sb-login-form-header h3 {
-			font-size: 1.25rem;
+			font-size: 1.32rem;
 		}
 
 		.sb-login-form-header p {
-			font-size: 0.78rem;
-			line-height: 1.35;
+			font-size: 0.8rem;
+			line-height: 1.42;
 		}
 
 		.form-group {
-			margin-bottom: 0.55rem;
+			margin-bottom: 0.62rem;
 		}
 
 		.sb-login-label {
-			font-size: 0.72rem;
+			font-size: 0.73rem;
 		}
 
 		.sb-login-input {
-			min-height: 39px !important;
-			border-radius: 12px !important;
+			min-height: 43px !important;
+			border-radius: 14px !important;
 			font-size: 16px !important;
-			padding-top: 0.5rem !important;
-			padding-bottom: 0.5rem !important;
+			padding-top: 0.58rem !important;
+			padding-bottom: 0.58rem !important;
 		}
 
 		.sb-btn-login,
 		.btn-login-option {
-			min-height: 40px !important;
-			border-radius: 12px !important;
-			font-size: 0.82rem !important;
+			min-height: 43px !important;
+			border-radius: 14px !important;
+			font-size: 0.85rem !important;
 		}
 
 		.login-divider {
-			margin: 0.55rem 0;
+			margin: 0.65rem 0;
 		}
 
 		.sign-up-message {
-			margin-top: 0.65rem;
-			font-size: 0.76rem;
+			margin-top: 0.72rem;
+			font-size: 0.77rem;
 		}
 
 		.terms-group {
-			margin-top: 0.55rem;
-			margin-bottom: 0.65rem;
+			margin-top: 0.6rem;
+			margin-bottom: 0.7rem;
 		}
 
 		.sb-checkbox-label {
 			font-size: 0.72rem;
-			line-height: 1.3;
+			line-height: 1.32;
 		}
 
 		.page-card-actions {
-			margin-top: 0.65rem;
+			margin-top: 0.72rem;
 		}
 	}
 
 	@media (max-height: 720px) and (max-width: 980px) {
 		.sb-login-right {
-			justify-content: flex-start;
+			align-items: flex-start;
 		}
 
 		.sb-login-mobile-brand {
@@ -895,15 +940,15 @@
 		}
 
 		.sb-login-form-container {
-			padding: 0.75rem;
+			padding: 0.85rem;
 		}
 
 		.sb-login-form-header {
-			margin-bottom: 0.65rem;
+			margin-bottom: 0.68rem;
 		}
 
 		.sb-login-form-header h3 {
-			font-size: 1.15rem;
+			font-size: 1.18rem;
 		}
 
 		.sb-login-form-header p {
@@ -911,24 +956,24 @@
 		}
 
 		.form-group {
-			margin-bottom: 0.48rem;
+			margin-bottom: 0.5rem;
 		}
 
 		.sb-login-input {
-			min-height: 37px !important;
+			min-height: 39px !important;
 		}
 
 		.sb-btn-login,
 		.btn-login-option {
-			min-height: 38px !important;
+			min-height: 39px !important;
 		}
 
 		.login-divider {
-			margin: 0.45rem 0;
+			margin: 0.48rem 0;
 		}
 
 		.sign-up-message {
-			margin-top: 0.5rem;
+			margin-top: 0.55rem;
 		}
 	}
 </style>
@@ -937,75 +982,83 @@
 {% block page_content %}
 <div class="sb-login-wrapper">
 	<div class="sb-login-left">
-		<div class="sb-login-brand">
-			<img src="/assets/lms/images/studybadge/studybadge-logo.png" alt="StudyBadge" />
-			<span class="sb-login-brand-name">StudyBadge</span>
+		<div class="sb-login-left-inner">
+			<div class="sb-login-brand">
+				<img src="/assets/lms/images/studybadge/studybadge-logo.png" alt="StudyBadge" />
+				<span class="sb-login-brand-name">StudyBadge</span>
+			</div>
+
+			<div class="sb-login-tagline">
+				<div class="sb-login-kicker">
+					<span class="sb-login-kicker-dot"></span>
+					Aprendizaje práctico con IA
+				</div>
+
+				<h2>Aprende mejor. Avanza más rápido.</h2>
+
+				<p>
+					Entra a tus cursos, practica con TutorIA y demuestra tu progreso con certificados verificables.
+				</p>
+			</div>
+
+			<div class="sb-login-features">
+				<div class="sb-login-feature">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+					</svg>
+					Cursos claros
+				</div>
+
+				<div class="sb-login-feature">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="12" cy="8" r="6"></circle>
+						<path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
+					</svg>
+					Certificados
+				</div>
+
+				<div class="sb-login-feature">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M12 2v20"></path>
+						<path d="M2 12h20"></path>
+						<path d="m5 5 14 14"></path>
+						<path d="m19 5-14 14"></path>
+					</svg>
+					TutorIA
+				</div>
+
+				<div class="sb-login-feature">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+						<line x1="12" x2="12" y1="20" y2="10"></line>
+						<line x1="18" x2="18" y1="20" y2="4"></line>
+						<line x1="6" x2="6" y1="20" y2="16"></line>
+					</svg>
+					Progreso real
+				</div>
+			</div>
+
+			<div class="sb-login-proof">
+				<div class="sb-proof-card">
+					<strong>IA</strong>
+					<span>Sesiones para estudiar mejor</span>
+				</div>
+
+				<div class="sb-proof-card">
+					<strong>24/7</strong>
+					<span>Acceso a tus cursos online</span>
+				</div>
+
+				<div class="sb-proof-card">
+					<strong>Plus</strong>
+					<span>Herramientas para avanzar más</span>
+				</div>
+			</div>
 		</div>
 
-		<div class="sb-login-tagline">
-			<div class="sb-login-kicker">
-				<span class="sb-login-kicker-dot"></span>
-				Aprendizaje práctico con IA
-			</div>
-
-			<h2>Aprende mejor. Certifica tu progreso.</h2>
-
-			<p>
-				Entra a tus cursos, practica con TutorIA y construye habilidades digitales que puedes demostrar con certificados verificables.
-			</p>
-		</div>
-
-		<div class="sb-login-features">
-			<div class="sb-login-feature">
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-				</svg>
-				Cursos cortos
-			</div>
-
-			<div class="sb-login-feature">
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-					<circle cx="12" cy="8" r="6" />
-					<path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
-				</svg>
-				Certificados
-			</div>
-
-			<div class="sb-login-feature">
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M12 2v20" />
-					<path d="M2 12h20" />
-					<path d="m5 5 14 14" />
-					<path d="m19 5-14 14" />
-				</svg>
-				TutorIA
-			</div>
-
-			<div class="sb-login-feature">
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-					<line x1="12" x2="12" y1="20" y2="10" />
-					<line x1="18" x2="18" y1="20" y2="4" />
-					<line x1="6" x2="6" y1="20" y2="16" />
-				</svg>
-				Progreso real
-			</div>
-		</div>
-
-		<div class="sb-login-proof">
-			<div class="sb-proof-card">
-				<strong>IA</strong>
-				<span>Sesiones para estudiar más rápido</span>
-			</div>
-
-			<div class="sb-proof-card">
-				<strong>24/7</strong>
-				<span>Acceso a tus cursos cuando quieras</span>
-			</div>
-
-			<div class="sb-proof-card">
-				<strong>✓</strong>
-				<span>Certificados verificables</span>
-			</div>
+		<div class="sb-login-left-bottom">
+			StudyBadge
+			<span></span>
+			Cursos, IA y certificados en un solo lugar
 		</div>
 	</div>
 
@@ -1047,10 +1100,10 @@
 											>
 												{% if provider.name == 'google' %}
 												<svg class="google-icon-svg" width="20" height="20" viewBox="0 0 48 48">
-													<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
-													<path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
-													<path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
-													<path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+													<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+													<path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+													<path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+													<path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
 												</svg>
 												{% elif provider.icon %}
 													{{ provider.icon }}
@@ -1071,7 +1124,7 @@
 								{{ email_login_body() }}
 
 								{% if login_with_email_link %}
-								<div class="login-with-email-link social-login-buttons" style="margin-top: 0.65rem;">
+								<div class="login-with-email-link social-login-buttons" style="margin-top: 0.7rem;">
 									<div class="login-button-wrapper">
 										<a
 											href="#login-with-email-link"
@@ -1131,13 +1184,13 @@
 						{%- if not disable_signup -%}
 
 						{%- if social_login -%}
-						<div class="form-group" style="margin-bottom: 1.25rem;">
+						<div class="form-group" style="margin-bottom: 1rem;">
 							<label class="sb-login-label" for="login_ref_code">
 								{{ _("Código de referido o promoción") }}
 								<span class="sb-optional-label">{{ _("Opcional") }}</span>
 							</label>
 
-							<div class="name-field">
+							<div class="sb-field">
 								<input
 									type="text"
 									id="login_ref_code"
@@ -1147,7 +1200,7 @@
 								/>
 
 								<svg
-									class="field-icon"
+									class="sb-field-icon"
 									width="18"
 									height="18"
 									viewBox="0 0 24 24"
@@ -1167,17 +1220,17 @@
 						</div>
 
 						<script>
-							// Inicializar el campo de referido con la cookie si existe
 							document.addEventListener("DOMContentLoaded", function() {
 								const urlParams = new URLSearchParams(window.location.search);
 								let refCode = urlParams.get("ref");
+
 								if (!refCode) {
 									const match = document.cookie.match(new RegExp("(^| )studybadge_ref=([^;]+)"));
 									if (match) refCode = match[2];
 								} else {
-									// Si vino por URL, forzar el guardado de la cookie inmediatamente para Google Login
 									document.cookie = 'studybadge_ref=' + refCode.trim() + '; path=/; max-age=' + (30 * 24 * 60 * 60);
 								}
+
 								if (refCode) {
 									const el = document.getElementById("login_ref_code");
 									if (el) el.value = refCode;
@@ -1196,10 +1249,10 @@
 									>
 										{% if provider.name == 'google' %}
 										<svg class="google-icon-svg" width="20" height="20" viewBox="0 0 48 48">
-											<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
-											<path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
-											<path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
-											<path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+											<path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+											<path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+											<path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+											<path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
 										</svg>
 										{% elif provider.icon %}
 											{{ provider.icon }}
@@ -1243,7 +1296,7 @@
 					<div class="login-content page-card">
 						<form class="form-signin form-forgot hide" role="form">
 							<div class="page-card-body">
-								<div class="email-field">
+								<div class="sb-field">
 									<input
 										type="email"
 										id="forgot_email"
@@ -1255,7 +1308,7 @@
 									/>
 
 									<svg
-										class="field-icon"
+										class="sb-field-icon"
 										width="18"
 										height="18"
 										viewBox="0 0 24 24"
@@ -1294,7 +1347,7 @@
 					<div class="login-content page-card">
 						<form class="form-signin form-login-with-email-link hide" role="form">
 							<div class="page-card-body">
-								<div class="email-field">
+								<div class="sb-field">
 									<input
 										type="email"
 										id="login_with_email_link_email"
@@ -1306,7 +1359,7 @@
 									/>
 
 									<svg
-										class="field-icon"
+										class="sb-field-icon"
 										width="18"
 										height="18"
 										viewBox="0 0 24 24"
@@ -1341,8 +1394,8 @@
 						Tutor de estudio
 					</div>
 					<div class="sb-form-trust-item">
-						<strong>✓</strong>
-						Certificados
+						<strong>Curso</strong>
+						Aprendizaje guiado
 					</div>
 					<div class="sb-form-trust-item">
 						<strong>24/7</strong>
