@@ -175,31 +175,39 @@ async function startTranscription() {
   }
 }
 
+const isUploading = ref(false)
+
 async function sendAudioChunk() {
   if (!audioChunks.length || !transcriptionId.value) return
   
+  isUploading.value = true
   const blob = new Blob(audioChunks, { type: 'audio/webm' })
   audioChunks = [] // Clear for next chunk
   
   // Convert blob to base64
-  const reader = new FileReader()
-  reader.readAsDataURL(blob)
-  reader.onloadend = async () => {
-    const base64data = reader.result
-    
-    try {
-      const data = await call('studybadge_ai.ai_sessions.process_transcription_chunk', {
-        transcription_id: transcriptionId.value,
-        chunk_data: base64data
-      })
+  return new Promise((resolve) => {
+    const reader = new FileReader()
+    reader.readAsDataURL(blob)
+    reader.onloadend = async () => {
+      const base64data = reader.result
       
-      if (typeof data === 'string') {
-        rawTranscript.value = data
+      try {
+        const data = await call('studybadge_ai.ai_sessions.process_transcription_chunk', {
+          transcription_id: transcriptionId.value,
+          chunk_data: base64data
+        })
+        
+        if (typeof data === 'string') {
+          rawTranscript.value = data
+        }
+      } catch (e) {
+        console.error('Error sending chunk', e)
+      } finally {
+        isUploading.value = false
+        resolve()
       }
-    } catch (e) {
-      console.error('Error sending chunk', e)
     }
-  }
+  })
 }
 
 async function pauseTranscription() {
@@ -228,6 +236,14 @@ async function finishTranscription() {
   clearInterval(timerInterval)
   
   status.value = 'processing'
+  
+  // Wait a short time for the final ondataavailable event to fire
+  await new Promise(resolve => setTimeout(resolve, 300))
+  
+  // Wait until the final chunk finishes uploading
+  while (isUploading.value) {
+    await new Promise(resolve => setTimeout(resolve, 500))
+  }
   
   try {
     const res = await call('studybadge_ai.ai_sessions.finish_transcription', { transcription_id: transcriptionId.value })
