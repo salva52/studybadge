@@ -5,7 +5,7 @@ from frappe.utils import get_url
 def track_referral_click(ref_code):
     if not ref_code:
         return
-    frappe.local.cookie_manager.set_cookie("studybadge_ref", ref_code, expires_in_days=30)
+    frappe.local.cookie_manager.set_cookie("studybadge_ref", ref_code, max_age=2592000)
     return {"status": "success"}
 
 def on_user_creation(doc, method):
