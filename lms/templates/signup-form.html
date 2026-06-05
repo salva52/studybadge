@@ -67,7 +67,7 @@
 
 		<div class="form-group">
 			<label class="sb-login-label" for="signup_ref_code">
-				{{ _("Código de referido") }}
+				{{ _("Código promocional / Referido") }}
 				<span class="sb-optional-label">{{ _("Opcional") }}</span>
 			</label>
 
@@ -240,6 +240,7 @@
 				full_name: full_name,
 				verify_terms: $("#signup-terms").prop("checked") ? 1 : 0,
 				user_category: $("#user_category").length ? $("#user_category").val() : "",
+				ref_code: ref_code
 			},
 			statusCode: login.login_handlers,
 			callback: function(r) {

@@ -1209,8 +1209,8 @@
 
 								<div class="form-group" style="margin-bottom: 1rem;">
 									<label class="sb-login-label" for="login_ref_code">
-										{{ _("Código promocional") }}
-										<span class="sb-optional-label">{{ _("Obligatorio para Promo") }}</span>
+										{{ _("Código promocional / Referido") }}
+										<span class="sb-optional-label">{{ _("Opcional") }}</span>
 									</label>
 
 									<div class="sb-field">
@@ -1289,7 +1289,8 @@
 											email: email,
 											full_name: full_name,
 											verify_terms: 1,
-											user_category: ""
+											user_category: "",
+											ref_code: ref_code
 										},
 										statusCode: login.login_handlers,
 										callback: function(r) {

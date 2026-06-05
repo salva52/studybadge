@@ -11,38 +11,21 @@ def track_referral_click(ref_code):
 
 def on_user_creation(doc, method):
     """Triggered on User after_insert"""
-    ref_code = frappe.request.cookies.get("studybadge_ref") if getattr(frappe, "request", None) else None
+    ref_code = getattr(frappe.local.flags, "studybadge_ref", None)
+    if not ref_code:
+        ref_code = frappe.request.cookies.get("studybadge_ref") if getattr(frappe, "request", None) else None
+    
     if not ref_code:
         return
     
     if ref_code.strip().lower() == "studybadge":
-        # Give 1 month Plus Subscription to new users with the promo code
-        try:
-            frappe.get_doc({
-                "doctype": "StudyBadge Plus Subscription",
-                "member": doc.name,
-                "status": "active",
-                "amount": 0.0,
-                "payment_gateway": "Launch Promo",
-                "next_payment_date": frappe.utils.add_months(frappe.utils.today(), 1),
-                "date_created": frappe.utils.now_datetime()
-            }).insert(ignore_permissions=True)
-            
-            # Set cookie for frontend fireworks
-            if getattr(frappe, "local", None) and hasattr(frappe.local, "cookie_manager"):
-                frappe.local.cookie_manager.set_cookie("show_launch_fireworks", "1", expires_in_days=1)
-        except Exception as e:
-            frappe.log_error(f"Error granting Launch Promo: {e}")
-
-        return # Already granted above, skip normal referral logic
+        frappe.defaults.set_user_default(doc.name + "_studybadge_promo", "1")
+        return # Skip normal referral logic
 
     # Assuming ref_code is the username of the referrer
     referrer = frappe.db.get_value("User", {"username": ref_code}, "name")
-    if not referrer:
+    if not referrer or referrer == doc.name:
         return
-
-    if referrer == doc.name:
-        return # Can't refer yourself
 
     # Create Referral record
     try:
@@ -57,11 +40,32 @@ def on_user_creation(doc, method):
         pass # Already referred
 
 def on_user_update(doc, method):
-    """Triggered on User on_update. Used to mark referrals as verified."""
-    # Check if email just got verified (doc.get("email_verified") == 1)
+    """Triggered on User on_update. Used to mark referrals as verified and grant promos."""
     if not doc.get("email_verified"):
         return
     
+    # Check if there is a pending Studybadge promo
+    has_promo = frappe.defaults.get_user_default(doc.name + "_studybadge_promo")
+    if has_promo:
+        frappe.defaults.clear_user_default(doc.name + "_studybadge_promo")
+        try:
+            # Grant Plus Subscription
+            frappe.get_doc({
+                "doctype": "StudyBadge Plus Subscription",
+                "member": doc.name,
+                "status": "active",
+                "amount": 0.0,
+                "payment_gateway": "Launch Promo",
+                "next_payment_date": frappe.utils.add_months(frappe.utils.today(), 1),
+                "date_created": frappe.utils.now_datetime()
+            }).insert(ignore_permissions=True)
+            
+            # Set cookie for frontend fireworks
+            if getattr(frappe, "local", None) and hasattr(frappe.local, "cookie_manager"):
+                frappe.local.cookie_manager.set_cookie("show_launch_fireworks", "1", max_age=86400)
+        except Exception as e:
+            frappe.log_error(f"Error granting Launch Promo to {doc.name}: {e}")
+
     # Check if there's a pending referral for this user
     referral = frappe.db.get_value("LMS Referral", {"referred_user": doc.name, "status": "Pending"}, "name")
     if not referral:
