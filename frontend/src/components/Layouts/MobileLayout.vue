@@ -269,13 +269,6 @@ const updateSidebarLinks = () => {
 		{
 			onSuccess: async (data) => {
 				filterLinksToShow(data)
-				await addPrograms()
-
-				if (isModerator.value || isInstructor.value) {
-					addQuizzes()
-					addAssignments()
-					addProgrammingExercises()
-				}
 
 				const bottomTabs = pickBottomTabs(sidebarLinks.value)
 				const bottomLabels = bottomTabs.map((item) => item.label)
@@ -291,6 +284,12 @@ const updateSidebarLinks = () => {
 
 				sidebarLinks.value = bottomTabs
 				otherLinks.value = [...extraLinks]
+
+				if (isModerator.value || isInstructor.value) {
+					addQuizzes()
+					addAssignments()
+					addProgrammingExercises()
+				}
 
 				addOtherLinks()
 			},
@@ -358,7 +357,7 @@ const addPrograms = async () => {
 }
 
 watch(
-	userResource,
+	() => userResource.data,
 	async () => {
 		await userResource.promise
 
