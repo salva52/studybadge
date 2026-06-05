@@ -413,7 +413,7 @@ onMounted(async () => {
 		if (siteKey) {
 			window.RECAPTCHA_SITE_KEY = siteKey
 			const script = document.createElement('script')
-			script.src = https://www.google.com/recaptcha/api.js?render= + siteKey
+			script.src = "https://www.google.com/recaptcha/api.js?render=" + siteKey
 			document.head.appendChild(script)
 		}
 	} catch (e) {
