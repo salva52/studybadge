@@ -598,7 +598,9 @@ function roundToHour(date = new Date()) {
 
 function parseDate(value) {
 	if (value instanceof Date) return value
-	return new Date(String(value || '').replace(' ', 'T'))
+	let str = String(value || '').trim()
+	if (str.length === 10) str += 'T00:00:00'
+	return new Date(str.replace(' ', 'T'))
 }
 
 function dateKey(date) {
