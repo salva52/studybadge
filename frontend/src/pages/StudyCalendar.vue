@@ -141,7 +141,7 @@
 				</main>
 
 				<aside class="planner-panel">
-					<section class="plan-status">
+					<section class="plan-status" :class="{ 'plus-status': access?.is_plus }">
 						<div>
 							<strong>{{ access?.is_plus ? __('Plus activo') : __('Plan gratuito') }}</strong>
 							<small v-if="access?.is_plus">{{ __('Coach IA y eventos ilimitados') }}</small>
@@ -151,15 +151,32 @@
 						<LockKeyhole v-else class="size-4 muted-icon" />
 					</section>
 
-					<form class="event-form" @submit.prevent="saveEvent">
-						<div class="form-head">
+					<form class="event-form manual-event-form" @submit.prevent="saveEvent">
+						<div class="form-head event-form-head">
 							<div>
+								<span class="panel-eyebrow">{{ editingEvent ? __('Modo edicion') : __('Crear evento') }}</span>
 								<strong>{{ editingEvent ? __('Editar evento') : __('Crear evento') }}</strong>
-								<small>{{ __('Conectalo con una Sesion IA.') }}</small>
+								<small>{{ __('Conectalo con una Sesion IA para estudiar con tus materiales y recibir una guia mas precisa.') }}</small>
 							</div>
 							<button v-if="editingEvent" type="button" class="icon-button" :title="__('Cancelar')" @click="resetDraft">
 								<X class="size-4" />
 							</button>
+						</div>
+
+						<div class="ai-link-card">
+							<div class="ai-link-copy">
+								<div class="ai-link-icon"><Bot class="size-4" /></div>
+								<div>
+									<strong>{{ __('Sesion IA') }}</strong>
+									<small>{{ __('Vincula este evento a una sesion para practicar el curso, tema y documentos correctos.') }}</small>
+								</div>
+							</div>
+							<select v-model="draft.linked_ai_session">
+								<option value="">{{ __('Sin vincular') }}</option>
+								<option v-for="session in sessions" :key="session.name" :value="session.name">
+									{{ session.title || session.name }}
+								</option>
+							</select>
 						</div>
 
 						<label class="field-wide">
@@ -167,7 +184,7 @@
 							<input v-model="draft.title" required :placeholder="__('Examen de Matematica Basica')" />
 						</label>
 
-						<div class="two-cols">
+						<div class="two-cols form-row-split">
 							<label>
 								<span>{{ __('Tipo') }}</span>
 								<select v-model="draft.event_type">
@@ -185,20 +202,51 @@
 							<input v-model="draft.topic" :placeholder="__('Matrices y metodo de Gauss')" />
 						</label>
 
-						<div class="two-cols">
-							<label>
-								<span>{{ __('Inicio') }}</span>
-								<input v-model="draft.start_datetime" type="datetime-local" required />
+						<section class="date-box">
+							<div class="date-box-head">
+								<div>
+									<strong>{{ __('Fecha y horario') }}</strong>
+									<small>{{ __('Inicio y fin separados para que sea facil editarlo desde celular.') }}</small>
+								</div>
+								<CalendarDays class="size-4 muted-icon" />
+							</div>
+
+							<label class="field-wide">
+								<span>{{ __('Fecha') }}</span>
+								<input v-model="draftDate" type="date" required />
 							</label>
-							<label>
-								<span>{{ __('Fin') }}</span>
-								<input v-model="draft.end_datetime" type="datetime-local" />
-							</label>
-						</div>
+
+							<div class="time-grid">
+								<label>
+									<span>{{ __('Inicio') }}</span>
+									<input v-model="draftStartTime" type="time" required />
+								</label>
+								<label>
+									<span>{{ __('Fin') }}</span>
+									<input v-model="draftEndTime" type="time" required />
+								</label>
+							</div>
+
+							<div class="date-shortcuts" :aria-label="__('Atajos de fecha')">
+								<button type="button" @click="setQuickDate('today')">{{ __('Hoy') }}</button>
+								<button type="button" @click="setQuickDate('tomorrow')">{{ __('Manana') }}</button>
+								<button type="button" @click="setQuickDate('saturday')">{{ __('Sabado') }}</button>
+								<button type="button" @click="setQuickDate('next_week')">{{ __('+1 semana') }}</button>
+							</div>
+
+							<div class="duration-row">
+								<span>{{ __('Duracion rapida') }}</span>
+								<div>
+									<button type="button" @click="setDuration(30)">30 min</button>
+									<button type="button" @click="setDuration(60)">1 h</button>
+									<button type="button" @click="setDuration(120)">2 h</button>
+								</div>
+							</div>
+						</section>
 
 						<button type="button" class="advanced-toggle" @click="showAdvanced = !showAdvanced">
 							<Settings2 class="size-3.5" />
-							<span>{{ showAdvanced ? __('Ocultar opciones') : __('Opciones opcionales') }}</span>
+							<span>{{ showAdvanced ? __('Ocultar opciones adicionales') : __('Opciones adicionales para extender el calendario') }}</span>
 							<ChevronDown class="size-3.5" :style="{ marginLeft: 'auto', transition: 'transform 0.2s', transform: showAdvanced ? 'rotate(180deg)' : 'none' }" />
 						</button>
 
@@ -222,17 +270,7 @@
 								</label>
 							</div>
 
-							<label class="field-wide">
-								<span>{{ __('Sesion IA') }}</span>
-								<select v-model="draft.linked_ai_session">
-									<option value="">{{ __('Sin vincular') }}</option>
-									<option v-for="session in sessions" :key="session.name" :value="session.name">
-										{{ session.title || session.name }}
-									</option>
-								</select>
-							</label>
-
-							<div class="reminder-row">
+							<div class="reminder-row clean-reminder-row">
 								<label class="check-row">
 									<input v-model="draft.reminder_enabled" type="checkbox" />
 									<span>{{ __('Recordatorio') }}</span>
@@ -244,12 +282,22 @@
 									<option value="2_days_before">{{ __('2 dias antes') }}</option>
 								</select>
 							</div>
+
+							<div class="extend-note">
+								<strong>{{ __('Extender calendario') }}</strong>
+								<small>{{ __('Espacio listo para agregar repeticion semanal, preparacion previa, checklist o bloques de estudio sin tocar el diseno principal.') }}</small>
+							</div>
 						</div>
 
-						<button class="primary-button full" :disabled="saving || (!access?.can_create_event && !editingEvent)">
-							<Save class="size-4" />
-							<span>{{ saving ? __('Guardando...') : editingEvent ? __('Guardar cambios') : __('Crear evento') }}</span>
-						</button>
+						<div class="form-actions">
+							<button type="button" class="secondary-button full" @click="resetDraft">
+								<span>{{ __('Limpiar') }}</span>
+							</button>
+							<button class="primary-button full" :disabled="saving || (!access?.can_create_event && !editingEvent)">
+								<Save class="size-4" />
+								<span>{{ saving ? __('Guardando...') : editingEvent ? __('Guardar cambios') : __('Crear evento') }}</span>
+							</button>
+						</div>
 					</form>
 
 					<section class="upcoming-panel">
@@ -328,6 +376,45 @@ const eventTypes = [
 const weekdays = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom']
 
 const draft = ref(makeDraft())
+
+const draftDate = computed({
+	get() {
+		return String(draft.value.start_datetime || '').slice(0, 10) || dateKey(new Date())
+	},
+	set(value) {
+		if (!value) return
+		const startTime = draftStartTime.value || '09:00'
+		const endTime = draftEndTime.value || addMinutesToTime(startTime, 60)
+		draft.value.start_datetime = `${value}T${startTime}`
+		draft.value.end_datetime = `${value}T${endTime}`
+	},
+})
+
+const draftStartTime = computed({
+	get() {
+		return String(draft.value.start_datetime || '').slice(11, 16) || '09:00'
+	},
+	set(value) {
+		if (!value) return
+		const date = draftDate.value || dateKey(new Date())
+		draft.value.start_datetime = `${date}T${value}`
+
+		if (!draft.value.end_datetime || parseDate(draft.value.end_datetime) <= parseDate(draft.value.start_datetime)) {
+			draft.value.end_datetime = `${date}T${addMinutesToTime(value, 60)}`
+		}
+	},
+})
+
+const draftEndTime = computed({
+	get() {
+		return String(draft.value.end_datetime || '').slice(11, 16) || addMinutesToTime(draftStartTime.value, 60)
+	},
+	set(value) {
+		if (!value) return
+		const date = draftDate.value || dateKey(new Date())
+		draft.value.end_datetime = `${date}T${value}`
+	},
+})
 
 usePageMeta(() => ({ title: __('Calendario Inteligente'), icon: brand.favicon }))
 
@@ -585,6 +672,41 @@ function formatTime(value) {
 	return parseDate(value).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
 }
 
+function setQuickDate(option) {
+	const date = new Date()
+
+	if (option === 'tomorrow') date.setDate(date.getDate() + 1)
+	if (option === 'next_week') date.setDate(date.getDate() + 7)
+	if (option === 'saturday') {
+		const daysUntilSaturday = (6 - date.getDay() + 7) % 7 || 7
+		date.setDate(date.getDate() + daysUntilSaturday)
+	}
+
+	const key = dateKey(date)
+	const startTime = draftStartTime.value || '09:00'
+	draft.value.start_datetime = `${key}T${startTime}`
+	setDuration(getCurrentDuration() || 60)
+}
+
+function setDuration(minutes) {
+	const start = parseDate(draft.value.start_datetime)
+	const end = new Date(start.getTime() + minutes * 60 * 1000)
+	draft.value.end_datetime = formatInputDate(end)
+}
+
+function getCurrentDuration() {
+	const start = parseDate(draft.value.start_datetime)
+	const end = parseDate(draft.value.end_datetime)
+	const minutes = Math.round((end - start) / 60000)
+	return Number.isFinite(minutes) && minutes > 0 ? minutes : 60
+}
+
+function addMinutesToTime(value, minutes) {
+	const [hours = '09', mins = '00'] = String(value || '09:00').split(':')
+	const date = new Date(2000, 0, 1, Number(hours), Number(mins) + minutes)
+	return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+}
+
 function startOfMonth(date) {
 	return new Date(date.getFullYear(), date.getMonth(), 1)
 }
@@ -625,40 +747,6 @@ function toServerDatetime(value) {
 </script>
 
 <style scoped>
-.advanced-toggle {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	width: 100%;
-	background: #f8fafc;
-	border: 1px dashed #cbd5e1;
-	border-radius: 8px;
-	padding: 8px 12px;
-	color: #64748b;
-	font-size: 0.8rem;
-	font-weight: 600;
-	cursor: pointer;
-	margin-top: 4px;
-	transition: all 0.2s;
-}
-
-.advanced-toggle:hover {
-	background: #f1f5f9;
-	color: #475569;
-	border-color: #94a3b8;
-}
-
-.advanced-fields {
-	display: flex;
-	flex-direction: column;
-	gap: 0.75rem;
-	padding: 12px;
-	background: #f8fafc;
-	border: 1px solid #e2e8f0;
-	border-radius: 8px;
-	margin-top: -4px;
-}
-
 .study-calendar-page {
 	height: 100vh;
 	min-height: 720px;
@@ -690,7 +778,8 @@ function toServerDatetime(value) {
 	min-width: 0;
 }
 
-.header-kicker {
+.header-kicker,
+.panel-eyebrow {
 	display: inline-flex;
 	align-items: center;
 	width: fit-content;
@@ -700,8 +789,13 @@ function toServerDatetime(value) {
 	color: #475467;
 	padding: 0.22rem 0.55rem;
 	font-size: 0.7rem;
-	font-weight: 700;
+	font-weight: 750;
 	letter-spacing: 0.01em;
+}
+
+.panel-eyebrow {
+	margin-bottom: 0.25rem;
+	background: #f8fafc;
 }
 
 .calendar-header h1 {
@@ -720,7 +814,10 @@ function toServerDatetime(value) {
 .month-toolbar small,
 .section-head small,
 .empty-day,
-.empty-small {
+.empty-small,
+.ai-link-copy small,
+.date-box-head small,
+.extend-note small {
 	color: #667085;
 }
 
@@ -738,7 +835,12 @@ function toServerDatetime(value) {
 .reminder-row,
 .event-meta span,
 .type-pill,
-.event-title-line span {
+.event-title-line span,
+.form-actions,
+.date-shortcuts,
+.duration-row,
+.duration-row > div,
+.ai-link-copy {
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
@@ -757,13 +859,13 @@ function toServerDatetime(value) {
 	gap: 0.45rem;
 	border: 1px solid transparent;
 	border-radius: 10px;
-	font-weight: 700;
+	font-weight: 750;
 	line-height: 1;
 	transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 
 .primary-button {
-	min-height: 38px;
+	min-height: 40px;
 	background: #111827;
 	color: #ffffff;
 	padding: 0 0.9rem;
@@ -796,14 +898,14 @@ function toServerDatetime(value) {
 }
 
 .secondary-button {
-	min-height: 36px;
+	min-height: 38px;
 	padding: 0 0.75rem;
 	font-size: 0.84rem;
 }
 
 .icon-button {
-	width: 36px;
-	height: 36px;
+	width: 38px;
+	height: 38px;
 	padding: 0;
 	flex: 0 0 auto;
 }
@@ -850,7 +952,9 @@ function toServerDatetime(value) {
 	color: #344054;
 }
 
-.coach-copy {
+.coach-copy,
+.event-body,
+.ai-link-card select {
 	min-width: 0;
 }
 
@@ -860,7 +964,10 @@ function toServerDatetime(value) {
 .plan-status strong,
 .section-head strong,
 .month-toolbar strong,
-.upcoming-item strong {
+.upcoming-item strong,
+.ai-link-card strong,
+.date-box strong,
+.extend-note strong {
 	color: #101828;
 }
 
@@ -889,7 +996,7 @@ function toServerDatetime(value) {
 .calendar-layout {
 	min-height: 0;
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) minmax(330px, 390px);
+	grid-template-columns: minmax(0, 1fr) minmax(360px, 420px);
 	gap: 0.75rem;
 }
 
@@ -1061,17 +1168,10 @@ function toServerDatetime(value) {
 .event-form,
 .plan-status,
 .upcoming-panel {
-	border: 1px solid rgba(226, 232, 240, 0.8);
+	border: 1px solid #e4e7ec;
 	border-radius: 16px;
 	background: #ffffff;
-	box-shadow: 0 6px 20px -4px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
-	transition: box-shadow 0.2s ease;
-}
-
-.day-agenda:hover,
-.event-form:hover,
-.upcoming-panel:hover {
-	box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.04);
+	box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
 }
 
 .day-agenda {
@@ -1089,7 +1189,8 @@ function toServerDatetime(value) {
 
 .section-head > div,
 .form-head > div,
-.plan-status > div {
+.plan-status > div,
+.date-box-head > div {
 	display: grid;
 	gap: 0.12rem;
 	min-width: 0;
@@ -1117,10 +1218,6 @@ function toServerDatetime(value) {
 .type-mark {
 	width: 7px;
 	border-radius: 999px;
-}
-
-.event-body {
-	min-width: 0;
 }
 
 .event-title-line {
@@ -1190,13 +1287,11 @@ function toServerDatetime(value) {
 	align-items: center;
 	justify-content: space-between;
 	padding: 0.85rem 1rem;
-	background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
 	border-left: 4px solid #cbd5e1;
 }
 
-.plan-status:has(.gold) {
+.plan-status.plus-status {
 	border-left-color: #f59e0b;
-	background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
 }
 
 .gold {
@@ -1210,21 +1305,30 @@ function toServerDatetime(value) {
 .event-form {
 	min-height: 0;
 	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
 	align-content: start;
-	gap: 0.55rem;
-	padding: 0.75rem;
-	overflow: hidden;
+	gap: 0.7rem;
+	padding: 0.85rem;
+	overflow: auto;
+}
+
+.manual-event-form {
+	grid-template-columns: 1fr;
 }
 
 .form-head,
 .field-wide,
 .reminder-row,
-.event-form .full {
+.event-form .full,
+.ai-link-card,
+.date-box,
+.advanced-toggle,
+.advanced-fields,
+.form-actions {
 	grid-column: 1 / -1;
 }
 
-.form-head {
+.form-head,
+.date-box-head {
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
@@ -1233,45 +1337,138 @@ function toServerDatetime(value) {
 
 .event-form label {
 	display: grid;
-	gap: 0.26rem;
+	gap: 0.28rem;
 	min-width: 0;
 }
 
 .event-form label > span,
-.check-row span {
+.check-row span,
+.duration-row > span {
 	color: #64748b;
 	font-size: 0.75rem;
-	font-weight: 600;
+	font-weight: 650;
 	letter-spacing: 0.01em;
 }
 
 .event-form input,
-.event-form select {
+.event-form select,
+.ai-link-card select {
 	width: 100%;
-	min-height: 38px;
-	border: 1px solid #e2e8f0;
+	min-height: 42px;
+	border: 1px solid #d9dee7;
 	border-radius: 10px;
-	background: #f8fafc;
+	background: #ffffff;
 	color: #1e293b;
 	padding: 0 0.75rem;
 	font: inherit;
-	font-size: 0.85rem;
+	font-size: 0.88rem;
 	outline: none;
-	transition: all 0.2s ease;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .event-form input:focus,
-.event-form select:focus {
-	border-color: #3b82f6;
-	background: #ffffff;
-	box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+.event-form select:focus,
+.ai-link-card select:focus {
+	border-color: #111827;
+	box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
 }
 
-.two-cols {
+.two-cols,
+.time-grid {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 0.55rem;
 	grid-column: 1 / -1;
+}
+
+.ai-link-card,
+.date-box,
+.advanced-fields {
+	border: 1px solid #e4e7ec;
+	border-radius: 14px;
+	background: #f9fafb;
+}
+
+.ai-link-card {
+	display: grid;
+	gap: 0.65rem;
+	padding: 0.75rem;
+}
+
+.ai-link-icon {
+	display: grid;
+	width: 34px;
+	height: 34px;
+	place-items: center;
+	flex: 0 0 auto;
+	border: 1px solid #e4e7ec;
+	border-radius: 10px;
+	background: #ffffff;
+	color: #344054;
+}
+
+.date-box {
+	display: grid;
+	gap: 0.65rem;
+	padding: 0.75rem;
+}
+
+.date-shortcuts {
+	flex-wrap: wrap;
+	gap: 0.4rem;
+}
+
+.date-shortcuts button,
+.duration-row button {
+	min-height: 32px;
+	border: 1px solid #d0d5dd;
+	border-radius: 999px;
+	background: #ffffff;
+	color: #344054;
+	padding: 0 0.65rem;
+	font-size: 0.78rem;
+	font-weight: 750;
+	cursor: pointer;
+}
+
+.date-shortcuts button:hover,
+.duration-row button:hover {
+	border-color: #111827;
+	color: #101828;
+}
+
+.duration-row {
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 0.45rem;
+}
+
+.advanced-toggle {
+	display: flex;
+	align-items: center;
+	gap: 0.45rem;
+	width: 100%;
+	background: #ffffff;
+	border: 1px dashed #cbd5e1;
+	border-radius: 12px;
+	padding: 0.7rem 0.75rem;
+	color: #475569;
+	font-size: 0.84rem;
+	font-weight: 750;
+	cursor: pointer;
+	transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.advanced-toggle:hover {
+	background: #f9fafb;
+	border-color: #98a2b3;
+}
+
+.advanced-fields {
+	display: flex;
+	flex-direction: column;
+	gap: 0.7rem;
+	padding: 0.75rem;
 }
 
 .check-row {
@@ -1282,8 +1479,8 @@ function toServerDatetime(value) {
 }
 
 .check-row input {
-	width: 15px;
-	min-height: 15px;
+	width: 16px;
+	min-height: 16px;
 }
 
 .reminder-row {
@@ -1291,8 +1488,23 @@ function toServerDatetime(value) {
 	gap: 0.55rem;
 }
 
-.reminder-row select {
-	max-width: 180px;
+.clean-reminder-row select {
+	max-width: 185px;
+}
+
+.extend-note {
+	display: grid;
+	gap: 0.15rem;
+	border: 1px solid #e4e7ec;
+	border-radius: 12px;
+	background: #ffffff;
+	padding: 0.65rem;
+}
+
+.form-actions {
+	grid-template-columns: 0.78fr 1.22fr;
+	display: grid;
+	gap: 0.55rem;
 }
 
 .upcoming-panel {
@@ -1399,9 +1611,19 @@ function toServerDatetime(value) {
 		gap: 0.45rem;
 	}
 
+	.primary-button,
+	.secondary-button,
+	.icon-button {
+		min-height: 42px;
+	}
+
 	.primary-button {
-		min-height: 36px;
 		padding: 0 0.75rem;
+	}
+
+	.icon-button {
+		width: 42px;
+		height: 42px;
 	}
 
 	.coach-strip {
@@ -1489,39 +1711,47 @@ function toServerDatetime(value) {
 	}
 
 	.planner-panel {
+		order: -1;
 		grid-template-columns: 1fr;
 		grid-template-rows: auto auto auto;
 		gap: 0.6rem;
 	}
 
 	.event-form {
-		grid-template-columns: 1fr;
-		padding: 0.65rem;
-		gap: 0.5rem;
+		padding: 0.75rem;
+		gap: 0.65rem;
 	}
 
-	.two-cols {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 0.45rem;
+	.two-cols,
+	.time-grid,
+	.form-actions {
+		grid-template-columns: 1fr;
+	}
+
+	.ai-link-card,
+	.date-box,
+	.advanced-fields {
+		padding: 0.68rem;
 	}
 
 	.event-form input,
-	.event-form select {
-		min-height: 33px;
-		font-size: 0.8rem;
-		padding: 0 0.45rem;
+	.event-form select,
+	.ai-link-card select {
+		min-height: 44px;
+		font-size: 0.88rem;
 	}
 
 	.reminder-row {
-		align-items: center;
+		align-items: stretch;
+		flex-direction: column;
 	}
 
-	.reminder-row select {
-		max-width: 165px;
+	.clean-reminder-row select {
+		max-width: none;
 	}
 
 	.upcoming-panel {
-		max-height: 180px;
+		max-height: 220px;
 	}
 }
 
@@ -1556,8 +1786,16 @@ function toServerDatetime(value) {
 		gap: 0.3rem;
 	}
 
-	.two-cols {
-		grid-template-columns: 1fr;
+	.date-shortcuts,
+	.duration-row > div {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		width: 100%;
+	}
+
+	.date-shortcuts button,
+	.duration-row button {
+		width: 100%;
 	}
 }
 </style>
