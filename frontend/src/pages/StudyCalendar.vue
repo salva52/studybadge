@@ -2,18 +2,21 @@
 	<div class="study-calendar-page">
 		<header class="calendar-header">
 			<div class="header-copy">
-				<span class="header-kicker">{{ __('Coach IA Plus') }}</span>
-				<h1>{{ __('Calendario Inteligente') }}</h1>
-				<p>{{ __('Organiza sesiones, examenes, tareas y recordatorios desde un solo panel.') }}</p>
+				<span class="header-kicker">{{ __('StudyBadge Plus') }}</span>
+				<h1>{{ __('Calendario') }}</h1>
+				<p>{{ __('Toca una fecha para crear un evento. Los dias con actividades quedan marcados automaticamente.') }}</p>
 			</div>
 
 			<div class="header-actions">
-				<button class="icon-button" :title="__('Recargar')" @click="loadDashboard">
+				<button class="soft-button" type="button" @click="goToday">
+					<span>{{ __('Hoy') }}</span>
+				</button>
+				<button class="icon-button" :title="__('Recargar')" type="button" @click="loadDashboard">
 					<RefreshCw class="size-4" />
 				</button>
-				<button class="primary-button" @click="startCreate()">
+				<button class="primary-button" type="button" @click="openCreateForDay(selectedDate)">
 					<Plus class="size-4" />
-					<span>{{ __('Nuevo evento') }}</span>
+					<span>{{ __('Nuevo') }}</span>
 				</button>
 			</div>
 		</header>
@@ -23,19 +26,20 @@
 				<Sparkles class="size-4" />
 			</div>
 			<div class="coach-copy">
-				<strong>{{ __('Mi guia de estudio') }}</strong>
-				<p>{{ generatedMessage || coachMessage?.message || __('Crea o vincula un evento para recibir una recomendacion de estudio.') }}</p>
+				<strong>{{ __('Guia IA') }}</strong>
+				<p>{{ generatedMessage || coachMessage?.message || __('Crea un evento y conectalo con una Sesion IA para preparar examenes, tareas o practicas.') }}</p>
 			</div>
 			<button
 				v-if="access?.is_plus"
-				class="secondary-button"
+				class="soft-button"
+				type="button"
 				:disabled="!nextEvent || generating"
 				@click="generateCoachMessage(nextEvent)"
 			>
 				<Wand2 class="size-4" />
-				<span>{{ generating ? __('Generando...') : __('Generar IA') }}</span>
+				<span>{{ generating ? __('Generando...') : __('Generar') }}</span>
 			</button>
-			<router-link v-else :to="{ name: 'Plus' }" class="secondary-button plus-link">
+			<router-link v-else :to="{ name: 'Plus' }" class="soft-button plus-link">
 				<Crown class="size-4" />
 				<span>{{ __('Activar Plus') }}</span>
 			</router-link>
@@ -47,276 +51,233 @@
 		</div>
 
 		<template v-else>
-			<div class="calendar-layout">
-				<main class="calendar-main">
+			<main class="calendar-shell">
+				<section class="calendar-card">
 					<div class="month-toolbar">
-						<button class="icon-button" :title="__('Mes anterior')" @click="moveMonth(-1)">
-							<ChevronLeft class="size-4" />
+						<button class="round-button" type="button" :title="__('Mes anterior')" @click="moveMonth(-1)">
+							<ChevronLeft class="size-5" />
 						</button>
 						<div class="month-title">
 							<strong>{{ monthLabel }}</strong>
-							<small>{{ visibleEvents.length }} {{ __('eventos') }}</small>
+							<small>{{ visibleEvents.length }} {{ visibleEvents.length === 1 ? __('evento') : __('eventos') }}</small>
 						</div>
-						<button class="icon-button" :title="__('Mes siguiente')" @click="moveMonth(1)">
-							<ChevronRight class="size-4" />
+						<button class="round-button" type="button" :title="__('Mes siguiente')" @click="moveMonth(1)">
+							<ChevronRight class="size-5" />
 						</button>
 					</div>
 
-					<div class="calendar-grid">
+					<div class="calendar-grid" role="grid">
 						<div v-for="day in weekdays" :key="day" class="weekday">{{ day }}</div>
+
 						<button
 							v-for="cell in monthCells"
 							:key="cell.key"
+							type="button"
 							class="day-cell"
-							:class="{ muted: !cell.inMonth, today: cell.isToday, selected: selectedDate === cell.key }"
-							@click="selectDay(cell.key)"
+							:class="{
+								muted: !cell.inMonth,
+								today: cell.isToday,
+								selected: selectedDate === cell.key,
+								'has-events': !!eventsByDay[cell.key]?.length,
+								'draft-day': showEventModal && draftDate === cell.key,
+							}"
+							@click="openCreateForDay(cell.key)"
 						>
 							<span class="day-number">{{ cell.day }}</span>
-							<div class="day-events">
+
+							<div v-if="eventsByDay[cell.key]?.length" class="event-markers" :aria-label="__('Eventos del dia')">
 								<span
-									v-for="event in eventsByDay[cell.key]?.slice(0, 2)"
+									v-for="event in eventsByDay[cell.key].slice(0, 4)"
 									:key="event.name"
 									:class="['event-dot', event.event_type]"
-								>
-									{{ event.title }}
-								</span>
-								<span v-if="eventsByDay[cell.key]?.length > 2" class="event-more">
-									+{{ eventsByDay[cell.key].length - 2 }}
-								</span>
+								></span>
 							</div>
+
+							<div v-if="eventsByDay[cell.key]?.[0]" class="event-preview">
+								<span :class="['preview-pill', eventsByDay[cell.key][0].event_type]">
+									{{ formatTime(eventsByDay[cell.key][0].start_datetime) }}
+								</span>
+								<strong>{{ eventsByDay[cell.key][0].title }}</strong>
+							</div>
+
+							<span v-if="eventsByDay[cell.key]?.length > 1" class="event-count">
+								+{{ eventsByDay[cell.key].length - 1 }}
+							</span>
+						</button>
+					</div>
+				</section>
+
+				<section class="agenda-card">
+					<div class="agenda-head">
+						<div>
+							<strong>{{ selectedDateLabel }}</strong>
+							<small>{{ selectedDayEvents.length ? __('Eventos marcados en este dia') : __('No hay eventos en este dia') }}</small>
+						</div>
+						<button class="primary-button compact" type="button" @click="openCreateForDay(selectedDate)">
+							<Plus class="size-4" />
+							<span>{{ __('Agregar') }}</span>
 						</button>
 					</div>
 
-					<section class="day-agenda">
-						<div class="section-head">
-							<div>
-								<strong>{{ selectedDateLabel }}</strong>
-								<small>{{ selectedDayEvents.length ? __('Eventos del dia') : __('Sin eventos') }}</small>
+					<div v-if="selectedDayEvents.length" class="event-list">
+						<article v-for="event in selectedDayEvents" :key="event.name" class="event-row">
+							<div :class="['type-line', event.event_type]"></div>
+							<div class="event-body">
+								<div class="event-title-line">
+									<strong>{{ event.title }}</strong>
+									<span>{{ eventTypeLabel(event.event_type) }}</span>
+								</div>
+								<p>
+									<Clock3 class="size-3.5" />
+									{{ formatTime(event.start_datetime) }} - {{ formatTime(event.end_datetime || event.start_datetime) }}
+									<span v-if="event.subject"> · {{ event.subject }}</span>
+									<span v-if="event.linked_ai_session"> · {{ __('Sesion IA') }}</span>
+								</p>
 							</div>
-							<button class="secondary-button compact" @click="startCreate(selectedDate)">
-								<Plus class="size-4" />
-								<span>{{ __('Agregar') }}</span>
-							</button>
-						</div>
+							<div class="row-actions">
+								<router-link
+									v-if="event.linked_ai_session"
+									class="icon-button"
+									:title="__('Practicar con IA')"
+									:to="{ name: 'AISessionRoom', params: { sessionId: event.linked_ai_session } }"
+								>
+									<Bot class="size-4" />
+								</router-link>
+								<button class="icon-button" type="button" :title="__('Editar')" @click="editEvent(event)">
+									<Pencil class="size-4" />
+								</button>
+								<button class="icon-button danger" type="button" :title="__('Eliminar')" @click="removeEvent(event)">
+									<Trash2 class="size-4" />
+								</button>
+							</div>
+						</article>
+					</div>
 
-						<div v-if="selectedDayEvents.length" class="event-list">
-							<article v-for="event in selectedDayEvents" :key="event.name" class="event-row">
-								<div :class="['type-mark', event.event_type]"></div>
-								<div class="event-body">
-									<div class="event-title-line">
-										<strong>{{ event.title }}</strong>
-										<span>{{ eventTypeLabel(event.event_type) }}</span>
-									</div>
-									<p>{{ event.subject || __('Sin curso') }} <span v-if="event.topic">- {{ event.topic }}</span></p>
-									<div class="event-meta">
-										<span><Clock3 class="size-3.5" /> {{ formatTime(event.start_datetime) }}</span>
-										<span><Flag class="size-3.5" /> {{ importanceLabel(event.importance) }}</span>
-										<span v-if="event.linked_ai_session"><MessagesSquare class="size-3.5" /> {{ __('Sesion IA') }}</span>
-									</div>
-								</div>
-								<div class="row-actions">
-									<router-link
-										v-if="event.linked_ai_session"
-										class="icon-button"
-										:title="__('Practicar con IA')"
-										:to="{ name: 'AISessionRoom', params: { sessionId: event.linked_ai_session } }"
-									>
-										<Bot class="size-4" />
-									</router-link>
-									<button class="icon-button" :title="__('Editar')" @click="editEvent(event)">
-										<Pencil class="size-4" />
-									</button>
-									<button class="icon-button danger" :title="__('Eliminar')" @click="removeEvent(event)">
-										<Trash2 class="size-4" />
-									</button>
-								</div>
-							</article>
-						</div>
-
-						<div v-else class="empty-day">
-							<CalendarDays class="size-4" />
-							<span>{{ __('Agenda un examen, tarea o recordatorio de estudio.') }}</span>
-						</div>
-					</section>
-				</main>
-
-				<aside class="planner-panel">
-					<section class="plan-status" :class="{ 'plus-status': access?.is_plus }">
+					<div v-else class="empty-day" @click="openCreateForDay(selectedDate)">
+						<CalendarDays class="size-5" />
 						<div>
-							<strong>{{ access?.is_plus ? __('Plus activo') : __('Plan gratuito') }}</strong>
-							<small v-if="access?.is_plus">{{ __('Coach IA y eventos ilimitados') }}</small>
-							<small v-else>{{ access?.events_used || 0 }}/{{ access?.free_event_limit || 5 }} {{ __('eventos gratis') }}</small>
+							<strong>{{ __('Toca para crear un evento') }}</strong>
+							<small>{{ __('Ejemplo: Examen de Matematica Basica, tarea o sesion de practica.') }}</small>
 						</div>
-						<Crown v-if="access?.is_plus" class="size-4 gold" />
-						<LockKeyhole v-else class="size-4 muted-icon" />
-					</section>
+					</div>
+				</section>
 
-					<form class="event-form manual-event-form" @submit.prevent="saveEvent">
-						<div class="form-head event-form-head">
+				<section class="upcoming-card">
+					<div class="upcoming-head">
+						<strong>{{ __('Proximos eventos') }}</strong>
+						<small>{{ upcomingEvents.length }}</small>
+					</div>
+					<div class="upcoming-list">
+						<button v-for="event in upcomingEvents" :key="event.name" class="upcoming-item" type="button" @click="focusEvent(event)">
+							<span :class="['type-chip', event.event_type]">{{ eventTypeLabel(event.event_type) }}</span>
+							<strong>{{ event.title }}</strong>
+							<small>{{ formatDateTime(event.start_datetime) }}</small>
+						</button>
+						<div v-if="!upcomingEvents.length" class="empty-small">{{ __('Nada pendiente por ahora.') }}</div>
+					</div>
+				</section>
+			</main>
+		</template>
+
+		<Teleport to="body">
+			<div v-if="showEventModal" class="modal-backdrop" @click.self="closeModal">
+				<section class="event-modal" role="dialog" aria-modal="true">
+					<div class="modal-handle"></div>
+
+					<header class="modal-head">
+						<button class="text-button" type="button" @click="closeModal">{{ __('Cancelar') }}</button>
+						<strong>{{ editingEvent ? __('Editar evento') : __('Nuevo evento') }}</strong>
+						<button class="text-button save-text" type="button" :disabled="saving || (!access?.can_create_event && !editingEvent)" @click="saveEvent">
+							{{ saving ? __('Guardando...') : __('Guardar') }}
+						</button>
+					</header>
+
+					<form class="modal-form" @submit.prevent="saveEvent">
+						<div class="picked-date">
+							<CalendarDays class="size-5" />
 							<div>
-								<span class="panel-eyebrow">{{ editingEvent ? __('Modo edicion') : __('Crear evento') }}</span>
-								<strong>{{ editingEvent ? __('Editar evento') : __('Crear evento') }}</strong>
-								<small>{{ __('Conectalo con una Sesion IA para estudiar con tus materiales y recibir una guia mas precisa.') }}</small>
+								<strong>{{ draftDateLabel }}</strong>
+								<small>{{ __('El evento se marcara en esta fecha del calendario.') }}</small>
 							</div>
-							<button v-if="editingEvent" type="button" class="icon-button" :title="__('Cancelar')" @click="resetDraft">
-								<X class="size-4" />
-							</button>
 						</div>
 
-						<div class="ai-link-card">
-							<div class="ai-link-copy">
-								<div class="ai-link-icon"><Bot class="size-4" /></div>
-								<div>
-									<strong>{{ __('Sesion IA') }}</strong>
-									<small>{{ __('Vincula este evento a una sesion para practicar el curso, tema y documentos correctos.') }}</small>
-								</div>
+						<label class="field title-field">
+							<span>{{ __('Titulo') }}</span>
+							<input v-model="draft.title" required :placeholder="__('Examen de Matematica Basica')" />
+						</label>
+
+						<div class="field">
+							<span>{{ __('Tipo') }}</span>
+							<div class="type-tabs">
+								<button
+									v-for="type in eventTypes"
+									:key="type.value"
+									type="button"
+									:class="['type-tab', { active: draft.event_type === type.value }]"
+									@click="draft.event_type = type.value"
+								>
+									{{ type.label }}
+								</button>
 							</div>
+						</div>
+
+						<label class="field ai-field">
+							<span>{{ __('Sesion IA') }}</span>
 							<select v-model="draft.linked_ai_session">
 								<option value="">{{ __('Sin vincular') }}</option>
 								<option v-for="session in sessions" :key="session.name" :value="session.name">
 									{{ session.title || session.name }}
 								</option>
 							</select>
-						</div>
-
-						<label class="field-wide">
-							<span>{{ __('Titulo') }}</span>
-							<input v-model="draft.title" required :placeholder="__('Examen de Matematica Basica')" />
+							<small>{{ __('Opcional, pero recomendado para estudiar con tus documentos.') }}</small>
 						</label>
 
-						<div class="two-cols form-row-split">
-							<label>
-								<span>{{ __('Tipo') }}</span>
-								<select v-model="draft.event_type">
-									<option v-for="type in eventTypes" :key="type.value" :value="type.value">{{ type.label }}</option>
-								</select>
-							</label>
-							<label>
-								<span>{{ __('Curso') }}</span>
-								<input v-model="draft.subject" :placeholder="__('Matematica Basica')" />
-							</label>
-						</div>
-
-						<label class="field-wide">
-							<span>{{ __('Tema') }}</span>
-							<input v-model="draft.topic" :placeholder="__('Matrices y metodo de Gauss')" />
-						</label>
-
-						<section class="date-box">
-							<div class="date-box-head">
-								<div>
-									<strong>{{ __('Fecha y horario') }}</strong>
-									<small>{{ __('Inicio y fin separados para que sea facil editarlo desde celular.') }}</small>
-								</div>
-								<CalendarDays class="size-4 muted-icon" />
-							</div>
-
-							<label class="field-wide">
+						<div class="time-card">
+							<label class="field">
 								<span>{{ __('Fecha') }}</span>
 								<input v-model="draftDate" type="date" required />
 							</label>
-
-							<div class="time-grid">
-								<label>
+							<div class="time-row">
+								<label class="field">
 									<span>{{ __('Inicio') }}</span>
 									<input v-model="draftStartTime" type="time" required />
 								</label>
-								<label>
+								<label class="field">
 									<span>{{ __('Fin') }}</span>
 									<input v-model="draftEndTime" type="time" required />
 								</label>
 							</div>
-
-							<div class="date-shortcuts" :aria-label="__('Atajos de fecha')">
-								<button type="button" @click="setQuickDate('today')">{{ __('Hoy') }}</button>
-								<button type="button" @click="setQuickDate('tomorrow')">{{ __('Manana') }}</button>
-								<button type="button" @click="setQuickDate('saturday')">{{ __('Sabado') }}</button>
-								<button type="button" @click="setQuickDate('next_week')">{{ __('+1 semana') }}</button>
+							<div class="duration-tabs">
+								<button type="button" @click="setDuration(30)">30 min</button>
+								<button type="button" @click="setDuration(60)">1 h</button>
+								<button type="button" @click="setDuration(120)">2 h</button>
 							</div>
+						</div>
 
-							<div class="duration-row">
-								<span>{{ __('Duracion rapida') }}</span>
-								<div>
-									<button type="button" @click="setDuration(30)">30 min</button>
-									<button type="button" @click="setDuration(60)">1 h</button>
-									<button type="button" @click="setDuration(120)">2 h</button>
-								</div>
-							</div>
-						</section>
-
-						<button type="button" class="advanced-toggle" @click="showAdvanced = !showAdvanced">
-							<Settings2 class="size-3.5" />
-							<span>{{ showAdvanced ? __('Ocultar opciones adicionales') : __('Opciones adicionales para extender el calendario') }}</span>
-							<ChevronDown class="size-3.5" :style="{ marginLeft: 'auto', transition: 'transform 0.2s', transform: showAdvanced ? 'rotate(180deg)' : 'none' }" />
+						<button class="more-options" type="button" @click="showExtraFields = !showExtraFields">
+							<span>{{ showExtraFields ? __('Ocultar detalles') : __('Agregar curso o tema') }}</span>
+							<ChevronRight class="size-4" :class="{ rotated: showExtraFields }" />
 						</button>
 
-						<div v-show="showAdvanced" class="advanced-fields">
-							<div class="two-cols">
-								<label>
-									<span>{{ __('Dificultad') }}</span>
-									<select v-model="draft.difficulty">
-										<option value="low">{{ __('Baja') }}</option>
-										<option value="medium">{{ __('Media') }}</option>
-										<option value="high">{{ __('Alta') }}</option>
-									</select>
-								</label>
-								<label>
-									<span>{{ __('Importancia') }}</span>
-									<select v-model="draft.importance">
-										<option value="low">{{ __('Baja') }}</option>
-										<option value="medium">{{ __('Media') }}</option>
-										<option value="high">{{ __('Alta') }}</option>
-									</select>
-								</label>
-							</div>
-
-							<div class="reminder-row clean-reminder-row">
-								<label class="check-row">
-									<input v-model="draft.reminder_enabled" type="checkbox" />
-									<span>{{ __('Recordatorio') }}</span>
-								</label>
-								<select v-model="draft.reminder_time" :disabled="!draft.reminder_enabled">
-									<option value="same_day">{{ __('Mismo dia') }}</option>
-									<option value="night_before">{{ __('Noche anterior') }}</option>
-									<option value="1_day_before">{{ __('1 dia antes') }}</option>
-									<option value="2_days_before">{{ __('2 dias antes') }}</option>
-								</select>
-							</div>
-
-							<div class="extend-note">
-								<strong>{{ __('Extender calendario') }}</strong>
-								<small>{{ __('Espacio listo para agregar repeticion semanal, preparacion previa, checklist o bloques de estudio sin tocar el diseno principal.') }}</small>
-							</div>
+						<div v-show="showExtraFields" class="extra-fields">
+							<label class="field">
+								<span>{{ __('Curso') }}</span>
+								<input v-model="draft.subject" :placeholder="__('Matematica Basica')" />
+							</label>
+							<label class="field">
+								<span>{{ __('Tema') }}</span>
+								<input v-model="draft.topic" :placeholder="__('Matrices y metodo de Gauss')" />
+							</label>
 						</div>
 
-						<div class="form-actions">
-							<button type="button" class="secondary-button full" @click="resetDraft">
-								<span>{{ __('Limpiar') }}</span>
-							</button>
-							<button class="primary-button full" :disabled="saving || (!access?.can_create_event && !editingEvent)">
-								<Save class="size-4" />
-								<span>{{ saving ? __('Guardando...') : editingEvent ? __('Guardar cambios') : __('Crear evento') }}</span>
-							</button>
-						</div>
+						<button class="modal-save-button" type="submit" :disabled="saving || (!access?.can_create_event && !editingEvent)">
+							<Save class="size-4" />
+							<span>{{ saving ? __('Guardando...') : editingEvent ? __('Guardar cambios') : __('Crear evento') }}</span>
+						</button>
 					</form>
-
-					<section class="upcoming-panel">
-						<div class="section-head compact-head">
-							<strong>{{ __('Proximos eventos') }}</strong>
-							<small>{{ upcomingEvents.length }}</small>
-						</div>
-						<div class="upcoming-list">
-							<button v-for="event in upcomingEvents" :key="event.name" class="upcoming-item" @click="focusEvent(event)">
-								<span :class="['type-pill', event.event_type]">{{ eventTypeLabel(event.event_type) }}</span>
-								<strong>{{ event.title }}</strong>
-								<small>{{ formatDateTime(event.start_datetime) }}</small>
-							</button>
-							<div v-if="!upcomingEvents.length" class="empty-small">{{ __('Nada pendiente por ahora.') }}</div>
-						</div>
-					</section>
-				</aside>
+				</section>
 			</div>
-		</template>
+		</Teleport>
 	</div>
 </template>
 
@@ -329,22 +290,16 @@ import {
 	CalendarDays,
 	ChevronLeft,
 	ChevronRight,
-	ChevronDown,
 	Clock3,
 	Crown,
-	Flag,
 	Loader2,
-	LockKeyhole,
-	MessagesSquare,
 	Pencil,
 	Plus,
 	RefreshCw,
 	Save,
-	Settings2,
 	Sparkles,
 	Trash2,
 	Wand2,
-	X,
 } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
 
@@ -360,9 +315,11 @@ const events = ref([])
 const coachMessage = ref(null)
 const generatedMessage = ref('')
 const editingEvent = ref(null)
-const showAdvanced = ref(false)
+const showEventModal = ref(false)
+const showExtraFields = ref(false)
 const selectedDate = ref(dateKey(new Date()))
 const monthCursor = ref(startOfMonth(new Date()))
+const draft = ref(makeDraft(selectedDate.value))
 
 const eventTypes = [
 	{ value: 'exam', label: __('Examen') },
@@ -375,18 +332,17 @@ const eventTypes = [
 
 const weekdays = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom']
 
-const draft = ref(makeDraft())
-
 const draftDate = computed({
 	get() {
-		return String(draft.value.start_datetime || '').slice(0, 10) || dateKey(new Date())
+		return String(draft.value.start_datetime || '').slice(0, 10) || selectedDate.value || dateKey(new Date())
 	},
 	set(value) {
 		if (!value) return
 		const startTime = draftStartTime.value || '09:00'
-		const endTime = draftEndTime.value || addMinutesToTime(startTime, 60)
 		draft.value.start_datetime = `${value}T${startTime}`
-		draft.value.end_datetime = `${value}T${endTime}`
+		draft.value.end_datetime = `${value}T${addMinutesToTime(startTime, getCurrentDuration() || 60)}`
+		selectedDate.value = value
+		monthCursor.value = startOfMonth(parseDate(value))
 	},
 })
 
@@ -416,7 +372,7 @@ const draftEndTime = computed({
 	},
 })
 
-usePageMeta(() => ({ title: __('Calendario Inteligente'), icon: brand.favicon }))
+usePageMeta(() => ({ title: __('Calendario'), icon: brand.favicon }))
 
 onMounted(loadDashboard)
 
@@ -428,6 +384,7 @@ watch(
 		if (!draft.value.subject) draft.value.subject = session.academic_context || ''
 		if (!draft.value.topic) draft.value.topic = session.goal || session.desired_topics || ''
 		if (!draft.value.title) draft.value.title = `${eventTypeLabel(draft.value.event_type)} - ${session.title || session.name}`
+		if (draft.value.subject || draft.value.topic) showExtraFields.value = true
 	}
 )
 
@@ -436,6 +393,7 @@ const eventsByDay = computed(() => {
 		const key = dateKey(parseDate(event.start_datetime))
 		if (!map[key]) map[key] = []
 		map[key].push(event)
+		map[key].sort((a, b) => parseDate(a.start_datetime) - parseDate(b.start_datetime))
 		return map
 	}, {})
 })
@@ -445,6 +403,7 @@ const monthCells = computed(() => {
 	const offset = (first.getDay() + 6) % 7
 	const start = new Date(first)
 	start.setDate(first.getDate() - offset)
+
 	return Array.from({ length: 42 }, (_, index) => {
 		const date = new Date(start)
 		date.setDate(start.getDate() + index)
@@ -466,6 +425,15 @@ const selectedDateLabel = computed(() => {
 		weekday: 'long',
 		day: 'numeric',
 		month: 'long',
+	})
+})
+
+const draftDateLabel = computed(() => {
+	return parseDate(draftDate.value).toLocaleDateString(undefined, {
+		weekday: 'long',
+		day: 'numeric',
+		month: 'long',
+		year: 'numeric',
 	})
 })
 
@@ -511,27 +479,38 @@ async function loadDashboard() {
 	}
 }
 
+async function refreshDashboard() {
+	const data = await api('get_calendar_dashboard')
+	access.value = data.access
+	sessions.value = data.sessions || sessions.value
+	events.value = data.events || []
+	coachMessage.value = data.coach_message
+}
+
 function applyRouteDraft() {
 	const sessionName = route.query.session
 	if (!sessionName) return
+
 	const session = sessions.value.find((item) => item.name === sessionName)
 	const eventType = route.query.type || 'exam'
+	const date = route.query.date || selectedDate.value
+
+	selectedDate.value = date
+	monthCursor.value = startOfMonth(parseDate(date))
 	draft.value = {
-		...makeDraft(),
+		...makeDraft(date),
 		linked_ai_session: sessionName,
 		title: session ? `${eventTypeLabel(eventType)} - ${session.title || session.name}` : '',
 		subject: session?.academic_context || '',
 		topic: session?.goal || session?.desired_topics || '',
 		event_type: eventType,
 	}
-	if (route.query.date) {
-		draft.value.start_datetime = `${route.query.date}T09:00`
-		draft.value.end_datetime = `${route.query.date}T10:00`
-	}
+	showExtraFields.value = !!(draft.value.subject || draft.value.topic)
+	showEventModal.value = true
 }
 
-function makeDraft(date = new Date(Date.now() + 24 * 60 * 60 * 1000)) {
-	const start = roundToHour(date)
+function makeDraft(date = dateKey(new Date())) {
+	const start = defaultStartForDate(date)
 	const end = new Date(start.getTime() + 60 * 60 * 1000)
 	return {
 		title: '',
@@ -548,31 +527,41 @@ function makeDraft(date = new Date(Date.now() + 24 * 60 * 60 * 1000)) {
 	}
 }
 
-function startCreate(date) {
+function openCreateForDay(key = selectedDate.value) {
+	selectedDate.value = key
+	monthCursor.value = startOfMonth(parseDate(key))
 	editingEvent.value = null
-	draft.value = makeDraft(date ? parseDate(`${date} 09:00:00`) : undefined)
+	draft.value = makeDraft(key)
+	showExtraFields.value = false
+	showEventModal.value = true
 }
 
 function editEvent(event) {
 	editingEvent.value = event
+	selectedDate.value = dateKey(parseDate(event.start_datetime))
+	monthCursor.value = startOfMonth(parseDate(event.start_datetime))
 	draft.value = {
 		title: event.title || '',
 		event_type: event.event_type || 'exam',
 		subject: event.subject || '',
 		topic: event.topic || '',
 		difficulty: event.difficulty || 'medium',
-		importance: event.importance || 'medium',
+		importance: event.importance || 'high',
 		start_datetime: formatInputDate(parseDate(event.start_datetime)),
 		end_datetime: formatInputDate(parseDate(event.end_datetime || event.start_datetime)),
 		linked_ai_session: event.linked_ai_session || '',
-		reminder_enabled: !!event.reminder_enabled,
+		reminder_enabled: event.reminder_enabled === undefined ? true : !!event.reminder_enabled,
 		reminder_time: event.reminder_time || '1_day_before',
 	}
+	showExtraFields.value = !!(draft.value.subject || draft.value.topic)
+	showEventModal.value = true
 }
 
-function resetDraft() {
+function closeModal() {
+	if (saving.value) return
+	showEventModal.value = false
 	editingEvent.value = null
-	draft.value = makeDraft()
+	showExtraFields.value = false
 }
 
 async function saveEvent() {
@@ -584,6 +573,7 @@ async function saveEvent() {
 			end_datetime: toServerDatetime(draft.value.end_datetime),
 			reminder_enabled: draft.value.reminder_enabled ? 1 : 0,
 		}
+
 		if (editingEvent.value) {
 			await api('update_study_calendar_event', { event: editingEvent.value.name, data: payload })
 			toast.success(__('Evento actualizado.'))
@@ -591,11 +581,13 @@ async function saveEvent() {
 			await api('create_study_calendar_event', { data: payload })
 			toast.success(__('Evento creado.'))
 		}
-		resetDraft()
-		const data = await api('get_calendar_dashboard')
-		access.value = data.access
-		events.value = data.events || []
-		coachMessage.value = data.coach_message
+
+		selectedDate.value = draftDate.value
+		monthCursor.value = startOfMonth(parseDate(draftDate.value))
+		showEventModal.value = false
+		editingEvent.value = null
+		showExtraFields.value = false
+		await refreshDashboard()
 	} finally {
 		saving.value = false
 	}
@@ -605,11 +597,8 @@ async function removeEvent(event) {
 	if (!confirm(__('Eliminar este evento del calendario?'))) return
 	await api('delete_study_calendar_event', { event: event.name })
 	toast.success(__('Evento eliminado.'))
-	const data = await api('get_calendar_dashboard')
-	access.value = data.access
-	events.value = data.events || []
-	coachMessage.value = data.coach_message
-	if (editingEvent.value?.name === event.name) resetDraft()
+	await refreshDashboard()
+	if (editingEvent.value?.name === event.name) closeModal()
 }
 
 async function generateCoachMessage(event) {
@@ -624,8 +613,10 @@ async function generateCoachMessage(event) {
 	}
 }
 
-function selectDay(key) {
-	selectedDate.value = key
+function goToday() {
+	const today = dateKey(new Date())
+	selectedDate.value = today
+	monthCursor.value = startOfMonth(new Date())
 }
 
 function moveMonth(delta) {
@@ -651,14 +642,6 @@ function eventTypeLabel(type) {
 	}[type] || __('Evento')
 }
 
-function importanceLabel(value) {
-	return {
-		low: __('Baja'),
-		medium: __('Media'),
-		high: __('Alta'),
-	}[value] || __('Media')
-}
-
 function formatDateTime(value) {
 	return parseDate(value).toLocaleString(undefined, {
 		day: '2-digit',
@@ -670,22 +653,6 @@ function formatDateTime(value) {
 
 function formatTime(value) {
 	return parseDate(value).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
-}
-
-function setQuickDate(option) {
-	const date = new Date()
-
-	if (option === 'tomorrow') date.setDate(date.getDate() + 1)
-	if (option === 'next_week') date.setDate(date.getDate() + 7)
-	if (option === 'saturday') {
-		const daysUntilSaturday = (6 - date.getDay() + 7) % 7 || 7
-		date.setDate(date.getDate() + daysUntilSaturday)
-	}
-
-	const key = dateKey(date)
-	const startTime = draftStartTime.value || '09:00'
-	draft.value.start_datetime = `${key}T${startTime}`
-	setDuration(getCurrentDuration() || 60)
 }
 
 function setDuration(minutes) {
@@ -705,6 +672,17 @@ function addMinutesToTime(value, minutes) {
 	const [hours = '09', mins = '00'] = String(value || '09:00').split(':')
 	const date = new Date(2000, 0, 1, Number(hours), Number(mins) + minutes)
 	return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+}
+
+function defaultStartForDate(value) {
+	const key = typeof value === 'string' ? value.slice(0, 10) : dateKey(value)
+	const today = dateKey(new Date())
+
+	if (key === today) return roundToHour(new Date())
+
+	const date = parseDate(key)
+	date.setHours(9, 0, 0, 0)
+	return date
 }
 
 function startOfMonth(date) {
@@ -748,21 +726,16 @@ function toServerDatetime(value) {
 
 <style scoped>
 .study-calendar-page {
-	height: 100vh;
-	min-height: 720px;
-	overflow: hidden;
-	display: grid;
-	grid-template-rows: auto auto minmax(0, 1fr);
-	gap: 0.75rem;
-	background: #f6f7f9;
-	color: #101828;
+	min-height: 100dvh;
+	background: #f5f5f7;
+	color: #111827;
 	padding: 1rem;
 }
 
 .calendar-header,
 .coach-strip,
-.calendar-layout {
-	width: min(1480px, 100%);
+.calendar-shell {
+	width: min(1500px, 100%);
 	margin: 0 auto;
 }
 
@@ -771,79 +744,64 @@ function toServerDatetime(value) {
 	align-items: center;
 	justify-content: space-between;
 	gap: 1rem;
-	min-height: 64px;
+	margin-bottom: 0.75rem;
 }
 
 .header-copy {
 	min-width: 0;
 }
 
-.header-kicker,
-.panel-eyebrow {
+.header-kicker {
 	display: inline-flex;
-	align-items: center;
 	width: fit-content;
-	border: 1px solid #d9dee7;
+	border: 1px solid #e5e7eb;
 	border-radius: 999px;
 	background: #ffffff;
-	color: #475467;
-	padding: 0.22rem 0.55rem;
-	font-size: 0.7rem;
-	font-weight: 750;
-	letter-spacing: 0.01em;
-}
-
-.panel-eyebrow {
-	margin-bottom: 0.25rem;
-	background: #f8fafc;
+	color: #6b7280;
+	padding: 0.25rem 0.6rem;
+	font-size: 0.72rem;
+	font-weight: 800;
 }
 
 .calendar-header h1 {
-	margin: 0.3rem 0 0.1rem;
-	font-size: clamp(1.45rem, 2.8vw, 2.3rem);
-	line-height: 1.05;
-	letter-spacing: -0.03em;
-	color: #101828;
+	margin: 0.35rem 0 0.12rem;
+	font-size: clamp(2rem, 4vw, 3.25rem);
+	line-height: 0.95;
+	letter-spacing: -0.06em;
 }
 
 .calendar-header p,
 .coach-copy p,
 .event-body p,
-.event-meta,
-.planner-panel small,
-.month-toolbar small,
-.section-head small,
-.empty-day,
+.agenda-head small,
+.upcoming-head small,
+.month-title small,
 .empty-small,
-.ai-link-copy small,
-.date-box-head small,
-.extend-note small {
-	color: #667085;
+.empty-day small,
+.ai-field small,
+.picked-date small {
+	color: #6b7280;
 }
 
 .calendar-header p {
-	max-width: 620px;
+	max-width: 660px;
 	margin: 0;
-	font-size: 0.88rem;
-	line-height: 1.35;
+	font-size: 0.95rem;
 }
 
 .header-actions,
+.coach-strip,
+.coach-copy,
+.agenda-head,
+.upcoming-head,
 .row-actions,
-.section-head,
-.month-toolbar,
-.reminder-row,
-.event-meta span,
-.type-pill,
-.event-title-line span,
-.form-actions,
-.date-shortcuts,
-.duration-row,
-.duration-row > div,
-.ai-link-copy {
+.event-body p,
+.event-markers,
+.duration-tabs,
+.time-row {
 	display: flex;
 	align-items: center;
-	gap: 0.5rem;
+	gap: 0.55rem;
 }
 
 .header-actions {
@@ -851,41 +809,69 @@ function toServerDatetime(value) {
 }
 
 .primary-button,
-.secondary-button,
-.icon-button {
+.soft-button,
+.icon-button,
+.round-button,
+.text-button,
+.modal-save-button {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	gap: 0.45rem;
 	border: 1px solid transparent;
-	border-radius: 10px;
-	font-weight: 750;
+	border-radius: 999px;
+	font-weight: 800;
 	line-height: 1;
-	transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+	cursor: pointer;
+	transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
 }
 
 .primary-button {
-	min-height: 40px;
+	min-height: 42px;
 	background: #111827;
 	color: #ffffff;
-	padding: 0 0.9rem;
+	padding: 0 1rem;
 }
 
-.primary-button:hover:not(:disabled) {
+.primary-button:hover:not(:disabled),
+.modal-save-button:hover:not(:disabled) {
 	background: #000000;
 }
 
-.secondary-button,
-.icon-button {
+.soft-button,
+.icon-button,
+.round-button {
 	background: #ffffff;
-	border-color: #d0d5dd;
-	color: #101828;
+	border-color: #e5e7eb;
+	color: #111827;
 }
 
-.secondary-button:hover:not(:disabled),
-.icon-button:hover {
+.soft-button:hover:not(:disabled),
+.icon-button:hover,
+.round-button:hover {
 	background: #f9fafb;
-	border-color: #98a2b3;
+	border-color: #d1d5db;
+}
+
+.soft-button {
+	min-height: 40px;
+	padding: 0 0.85rem;
+	font-size: 0.86rem;
+	text-decoration: none;
+}
+
+.icon-button,
+.round-button {
+	width: 42px;
+	height: 42px;
+	padding: 0;
+	flex: 0 0 auto;
+}
+
+.round-button {
+	width: 46px;
+	height: 46px;
+	background: #f5f5f7;
 }
 
 .icon-button.danger {
@@ -893,89 +879,56 @@ function toServerDatetime(value) {
 }
 
 .icon-button.danger:hover {
-	border-color: #fecdca;
-	background: #fffbfa;
-}
-
-.secondary-button {
-	min-height: 38px;
-	padding: 0 0.75rem;
-	font-size: 0.84rem;
-}
-
-.icon-button {
-	width: 38px;
-	height: 38px;
-	padding: 0;
-	flex: 0 0 auto;
+	background: #fef3f2;
+	border-color: #fecaca;
 }
 
 .primary-button:disabled,
-.secondary-button:disabled {
-	opacity: 0.55;
+.soft-button:disabled,
+.text-button:disabled,
+.modal-save-button:disabled {
+	opacity: 0.5;
 	cursor: not-allowed;
 }
 
-.full {
-	width: 100%;
-}
-
 .compact {
-	min-height: 32px;
-	padding: 0 0.65rem;
-	font-size: 0.8rem;
-}
-
-.plus-link {
-	text-decoration: none;
+	min-height: 38px;
+	padding: 0 0.85rem;
+	font-size: 0.85rem;
 }
 
 .coach-strip {
-	display: grid;
 	grid-template-columns: auto minmax(0, 1fr) auto;
-	align-items: center;
-	gap: 0.75rem;
-	border: 1px solid #d9dee7;
-	border-radius: 14px;
+	margin-bottom: 0.85rem;
+	border: 1px solid #e5e7eb;
+	border-radius: 24px;
 	background: #ffffff;
-	padding: 0.65rem 0.75rem;
-	box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+	padding: 0.85rem;
+	box-shadow: 0 10px 30px rgba(17, 24, 39, 0.05);
 }
 
 .coach-icon {
 	display: grid;
-	width: 34px;
-	height: 34px;
+	width: 42px;
+	height: 42px;
 	place-items: center;
-	border-radius: 10px;
-	background: #f2f4f7;
-	color: #344054;
+	border-radius: 14px;
+	background: #f3f4f6;
+	color: #111827;
 }
 
-.coach-copy,
-.event-body,
-.ai-link-card select {
+.coach-copy {
+	align-items: flex-start;
+	flex-direction: column;
+	gap: 0.1rem;
 	min-width: 0;
-}
-
-.coach-copy strong,
-.event-body strong,
-.form-head strong,
-.plan-status strong,
-.section-head strong,
-.month-toolbar strong,
-.upcoming-item strong,
-.ai-link-card strong,
-.date-box strong,
-.extend-note strong {
-	color: #101828;
 }
 
 .coach-copy p {
 	overflow: hidden;
 	display: -webkit-box;
-	margin: 0.12rem 0 0;
-	font-size: 0.86rem;
+	margin: 0;
+	font-size: 0.9rem;
 	line-height: 1.35;
 	-webkit-line-clamp: 2;
 	-webkit-box-orient: vertical;
@@ -986,96 +939,121 @@ function toServerDatetime(value) {
 	align-items: center;
 	justify-content: center;
 	gap: 0.55rem;
-	color: #667085;
+	min-height: 420px;
+	color: #6b7280;
 }
 
 .spin {
 	animation: spin 0.9s linear infinite;
 }
 
-.calendar-layout {
-	min-height: 0;
+.calendar-shell {
 	display: grid;
-	grid-template-columns: minmax(0, 1fr) minmax(360px, 420px);
-	gap: 0.75rem;
+	grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+	grid-template-areas:
+		'calendar upcoming'
+		'agenda upcoming';
+	gap: 0.85rem;
+	align-items: start;
 }
 
-.calendar-main,
-.planner-panel {
-	min-width: 0;
-	min-height: 0;
+.calendar-card,
+.agenda-card,
+.upcoming-card {
+	border: 1px solid #e5e7eb;
+	border-radius: 28px;
+	background: #ffffff;
+	box-shadow: 0 14px 40px rgba(17, 24, 39, 0.06);
 }
 
-.calendar-main {
-	display: grid;
-	grid-template-rows: auto minmax(300px, 1fr) minmax(118px, 0.38fr);
-	gap: 0.75rem;
+.calendar-card {
+	grid-area: calendar;
+	padding: 1rem;
 }
 
 .month-toolbar {
-	justify-content: space-between;
-	border: 1px solid #d9dee7;
-	border-radius: 14px;
-	background: #ffffff;
-	padding: 0.55rem;
-	box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 1rem;
+	margin-bottom: 0.8rem;
 }
 
 .month-title {
 	display: grid;
+	justify-items: center;
+	gap: 0.15rem;
 	text-align: center;
-	gap: 0.05rem;
 	text-transform: capitalize;
 }
 
+.month-title strong {
+	font-size: clamp(1.35rem, 2.2vw, 2rem);
+	letter-spacing: -0.04em;
+}
+
 .calendar-grid {
-	min-height: 0;
 	display: grid;
 	grid-template-columns: repeat(7, minmax(0, 1fr));
-	grid-auto-rows: minmax(0, 1fr);
-	gap: 1px;
-	overflow: hidden;
-	border: 1px solid #d9dee7;
-	border-radius: 14px;
-	background: #e4e7ec;
-	box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+	gap: 0.45rem;
 }
 
 .weekday {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	min-height: 28px;
-	background: #f2f4f7;
-	color: #667085;
-	font-size: 0.66rem;
-	font-weight: 800;
+	min-height: 32px;
+	color: #9ca3af;
+	font-size: 0.73rem;
+	font-weight: 900;
 	text-transform: uppercase;
 }
 
 .day-cell {
 	position: relative;
 	display: grid;
-	grid-template-rows: auto minmax(0, 1fr);
-	gap: 0.25rem;
-	min-height: 0;
-	border: 0;
+	grid-template-rows: auto auto minmax(0, 1fr);
+	align-content: start;
+	gap: 0.38rem;
+	min-height: clamp(92px, 8.2vw, 128px);
+	border: 1px solid #f0f0f0;
+	border-radius: 22px;
 	background: #ffffff;
-	padding: 0.45rem;
+	padding: 0.65rem;
 	text-align: left;
 	cursor: pointer;
+	transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease;
 }
 
-.day-cell:hover,
-.day-cell.selected {
-	background: #f9fafb;
-	outline: 2px solid #111827;
-	outline-offset: -2px;
+.day-cell:hover {
+	background: #fafafa;
+	border-color: #d1d5db;
+	transform: translateY(-1px);
 }
 
 .day-cell.muted {
-	background: #fbfcfe;
-	color: #98a2b3;
+	background: #fbfbfc;
+	color: #c0c4cc;
+}
+
+.day-cell.selected,
+.day-cell.draft-day {
+	border-color: #111827;
+	box-shadow: inset 0 0 0 1px #111827;
+}
+
+.day-cell.has-events {
+	background: #fdfdfd;
+}
+
+.day-number {
+	display: grid;
+	width: 34px;
+	height: 34px;
+	place-items: center;
+	border-radius: 999px;
+	font-size: 0.95rem;
+	font-weight: 850;
 }
 
 .day-cell.today .day-number {
@@ -1083,141 +1061,172 @@ function toServerDatetime(value) {
 	color: #ffffff;
 }
 
-.day-number {
-	display: grid;
-	width: 24px;
-	height: 24px;
-	place-items: center;
-	border-radius: 8px;
-	font-size: 0.78rem;
-	font-weight: 800;
+.day-cell.selected:not(.today) .day-number,
+.day-cell.draft-day:not(.today) .day-number {
+	background: #e5e7eb;
+	color: #111827;
 }
 
-.day-events {
-	display: grid;
-	align-content: start;
-	gap: 0.2rem;
-	min-width: 0;
-	overflow: hidden;
+.event-markers {
+	gap: 0.22rem;
+	min-height: 8px;
 }
 
 .event-dot {
+	width: 7px;
+	height: 7px;
+	border-radius: 999px;
+	background: #6b7280;
+}
+
+.event-preview {
+	min-width: 0;
+	display: grid;
+	align-content: start;
+	gap: 0.25rem;
+	margin-top: 0.1rem;
+}
+
+.event-preview strong {
 	overflow: hidden;
-	border: 1px solid transparent;
-	border-radius: 7px;
-	padding: 0.16rem 0.3rem;
-	font-size: 0.66rem;
-	font-weight: 700;
+	color: #111827;
+	font-size: 0.78rem;
+	font-weight: 800;
+	line-height: 1.1;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-.event-more {
+.preview-pill,
+.type-chip,
+.event-title-line span {
 	width: fit-content;
 	border-radius: 999px;
-	background: #f2f4f7;
-	color: #475467;
-	padding: 0.1rem 0.32rem;
+	padding: 0.2rem 0.45rem;
+	font-size: 0.68rem;
+	font-weight: 900;
+	line-height: 1;
+}
+
+.event-count {
+	position: absolute;
+	right: 0.65rem;
+	top: 0.72rem;
+	border-radius: 999px;
+	background: #f3f4f6;
+	color: #6b7280;
+	padding: 0.12rem 0.35rem;
 	font-size: 0.66rem;
-	font-weight: 800;
+	font-weight: 900;
 }
 
 .event-dot.exam,
-.type-mark.exam,
-.type-pill.exam {
-	background: #fef3f2;
+.preview-pill.exam,
+.type-line.exam,
+.type-chip.exam,
+.event-title-line span.exam {
+	background: #fee2e2;
 	color: #b42318;
 }
 
 .event-dot.task,
-.type-mark.task,
-.type-pill.task {
-	background: #eff8ff;
+.preview-pill.task,
+.type-line.task,
+.type-chip.task,
+.event-title-line span.task {
+	background: #dbeafe;
 	color: #175cd3;
 }
 
 .event-dot.delivery,
-.type-mark.delivery,
-.type-pill.delivery {
-	background: #fffaeb;
+.preview-pill.delivery,
+.type-line.delivery,
+.type-chip.delivery,
+.event-title-line span.delivery {
+	background: #fef3c7;
 	color: #b54708;
 }
 
 .event-dot.class,
-.type-mark.class,
-.type-pill.class {
-	background: #ecfdf3;
+.preview-pill.class,
+.type-line.class,
+.type-chip.class,
+.event-title-line span.class {
+	background: #dcfce7;
 	color: #027a48;
 }
 
 .event-dot.practice,
-.type-mark.practice,
-.type-pill.practice {
-	background: #f4f3ff;
+.preview-pill.practice,
+.type-line.practice,
+.type-chip.practice,
+.event-title-line span.practice {
+	background: #ede9fe;
 	color: #5925dc;
 }
 
 .event-dot.reminder,
-.type-mark.reminder,
-.type-pill.reminder {
-	background: #f0f9ff;
+.preview-pill.reminder,
+.type-line.reminder,
+.type-chip.reminder,
+.event-title-line span.reminder {
+	background: #e0f2fe;
 	color: #026aa2;
 }
 
-.day-agenda,
-.event-form,
-.plan-status,
-.upcoming-panel {
-	border: 1px solid #e4e7ec;
-	border-radius: 16px;
-	background: #ffffff;
-	box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+.agenda-card {
+	grid-area: agenda;
+	padding: 1rem;
 }
 
-.day-agenda {
-	min-height: 0;
-	display: grid;
-	grid-template-rows: auto minmax(0, 1fr);
-	padding: 0.75rem;
-	overflow: hidden;
-}
-
-.section-head {
+.agenda-head,
+.upcoming-head {
 	justify-content: space-between;
+	margin-bottom: 0.75rem;
+}
+
+.agenda-head > div,
+.upcoming-head {
 	min-width: 0;
 }
 
-.section-head > div,
-.form-head > div,
-.plan-status > div,
-.date-box-head > div {
-	display: grid;
-	gap: 0.12rem;
-	min-width: 0;
+.agenda-head strong,
+.upcoming-head strong {
+	font-size: 1.05rem;
+	letter-spacing: -0.02em;
+	text-transform: capitalize;
+}
+
+.agenda-head small,
+.upcoming-head small {
+	display: block;
+	margin-top: 0.15rem;
+	font-size: 0.82rem;
 }
 
 .event-list {
-	min-height: 0;
 	display: grid;
-	align-content: start;
-	gap: 0.45rem;
-	margin-top: 0.55rem;
-	overflow: auto;
-	padding-right: 0.15rem;
+	gap: 0.55rem;
 }
 
 .event-row {
 	display: grid;
 	grid-template-columns: 7px minmax(0, 1fr) auto;
-	gap: 0.55rem;
-	border: 1px solid #eaecf0;
-	border-radius: 12px;
-	padding: 0.55rem;
+	gap: 0.65rem;
+	align-items: stretch;
+	border: 1px solid #f0f0f0;
+	border-radius: 18px;
+	background: #ffffff;
+	padding: 0.7rem;
 }
 
-.type-mark {
+.type-line {
 	width: 7px;
 	border-radius: 999px;
+}
+
+.event-body {
+	min-width: 0;
 }
 
 .event-title-line {
@@ -1235,316 +1244,283 @@ function toServerDatetime(value) {
 	white-space: nowrap;
 }
 
-.event-title-line span,
-.type-pill {
-	border-radius: 999px;
-	padding: 0.16rem 0.42rem;
-	font-size: 0.64rem;
-	font-weight: 800;
+.event-title-line span {
+	background: #f3f4f6;
+	color: #6b7280;
 	white-space: nowrap;
 }
 
 .event-body p {
-	overflow: hidden;
-	margin: 0.18rem 0 0;
-	font-size: 0.8rem;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
-.event-meta {
+	gap: 0.32rem;
 	flex-wrap: wrap;
-	gap: 0.45rem;
-	margin-top: 0.35rem;
-	font-size: 0.72rem;
+	margin: 0.25rem 0 0;
+	font-size: 0.82rem;
 	font-weight: 700;
 }
 
-.row-actions {
-	justify-content: flex-end;
-	gap: 0.35rem;
-}
-
-.empty-day,
-.empty-small {
+.empty-day {
 	display: flex;
 	align-items: center;
-	gap: 0.45rem;
-	padding: 0.65rem 0;
-	font-size: 0.84rem;
-	font-weight: 700;
-}
-
-.planner-panel {
-	display: grid;
-	grid-template-rows: auto minmax(0, 1fr) minmax(120px, 0.35fr);
-	align-content: start;
 	gap: 0.75rem;
-}
-
-.plan-status {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 0.85rem 1rem;
-	border-left: 4px solid #cbd5e1;
-}
-
-.plan-status.plus-status {
-	border-left-color: #f59e0b;
-}
-
-.gold {
-	color: #b54708;
-}
-
-.muted-icon {
-	color: #98a2b3;
-}
-
-.event-form {
-	min-height: 0;
-	display: grid;
-	align-content: start;
-	gap: 0.7rem;
-	padding: 0.85rem;
-	overflow: auto;
-}
-
-.manual-event-form {
-	grid-template-columns: 1fr;
-}
-
-.form-head,
-.field-wide,
-.reminder-row,
-.event-form .full,
-.ai-link-card,
-.date-box,
-.advanced-toggle,
-.advanced-fields,
-.form-actions {
-	grid-column: 1 / -1;
-}
-
-.form-head,
-.date-box-head {
-	display: flex;
-	align-items: flex-start;
-	justify-content: space-between;
-	gap: 0.6rem;
-}
-
-.event-form label {
-	display: grid;
-	gap: 0.28rem;
-	min-width: 0;
-}
-
-.event-form label > span,
-.check-row span,
-.duration-row > span {
-	color: #64748b;
-	font-size: 0.75rem;
-	font-weight: 650;
-	letter-spacing: 0.01em;
-}
-
-.event-form input,
-.event-form select,
-.ai-link-card select {
-	width: 100%;
-	min-height: 42px;
-	border: 1px solid #d9dee7;
-	border-radius: 10px;
-	background: #ffffff;
-	color: #1e293b;
-	padding: 0 0.75rem;
-	font: inherit;
-	font-size: 0.88rem;
-	outline: none;
-	transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.event-form input:focus,
-.event-form select:focus,
-.ai-link-card select:focus {
-	border-color: #111827;
-	box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
-}
-
-.two-cols,
-.time-grid {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 0.55rem;
-	grid-column: 1 / -1;
-}
-
-.ai-link-card,
-.date-box,
-.advanced-fields {
-	border: 1px solid #e4e7ec;
-	border-radius: 14px;
-	background: #f9fafb;
-}
-
-.ai-link-card {
-	display: grid;
-	gap: 0.65rem;
-	padding: 0.75rem;
-}
-
-.ai-link-icon {
-	display: grid;
-	width: 34px;
-	height: 34px;
-	place-items: center;
-	flex: 0 0 auto;
-	border: 1px solid #e4e7ec;
-	border-radius: 10px;
-	background: #ffffff;
-	color: #344054;
-}
-
-.date-box {
-	display: grid;
-	gap: 0.65rem;
-	padding: 0.75rem;
-}
-
-.date-shortcuts {
-	flex-wrap: wrap;
-	gap: 0.4rem;
-}
-
-.date-shortcuts button,
-.duration-row button {
-	min-height: 32px;
-	border: 1px solid #d0d5dd;
-	border-radius: 999px;
-	background: #ffffff;
-	color: #344054;
-	padding: 0 0.65rem;
-	font-size: 0.78rem;
-	font-weight: 750;
+	border: 1px dashed #d1d5db;
+	border-radius: 18px;
+	background: #fafafa;
+	padding: 1rem;
 	cursor: pointer;
 }
 
-.date-shortcuts button:hover,
-.duration-row button:hover {
-	border-color: #111827;
-	color: #101828;
+.empty-day strong {
+	display: block;
 }
 
-.duration-row {
-	justify-content: space-between;
-	flex-wrap: wrap;
-	gap: 0.45rem;
-}
-
-.advanced-toggle {
-	display: flex;
-	align-items: center;
-	gap: 0.45rem;
-	width: 100%;
-	background: #ffffff;
-	border: 1px dashed #cbd5e1;
-	border-radius: 12px;
-	padding: 0.7rem 0.75rem;
-	color: #475569;
-	font-size: 0.84rem;
-	font-weight: 750;
-	cursor: pointer;
-	transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.advanced-toggle:hover {
-	background: #f9fafb;
-	border-color: #98a2b3;
-}
-
-.advanced-fields {
-	display: flex;
-	flex-direction: column;
-	gap: 0.7rem;
-	padding: 0.75rem;
-}
-
-.check-row {
-	display: inline-flex !important;
-	grid-template-columns: auto 1fr;
-	align-items: center;
-	gap: 0.45rem !important;
-}
-
-.check-row input {
-	width: 16px;
-	min-height: 16px;
-}
-
-.reminder-row {
-	justify-content: space-between;
-	gap: 0.55rem;
-}
-
-.clean-reminder-row select {
-	max-width: 185px;
-}
-
-.extend-note {
-	display: grid;
-	gap: 0.15rem;
-	border: 1px solid #e4e7ec;
-	border-radius: 12px;
-	background: #ffffff;
-	padding: 0.65rem;
-}
-
-.form-actions {
-	grid-template-columns: 0.78fr 1.22fr;
-	display: grid;
-	gap: 0.55rem;
-}
-
-.upcoming-panel {
-	min-height: 0;
-	display: grid;
-	grid-template-rows: auto minmax(0, 1fr);
-	padding: 0.75rem;
-	overflow: hidden;
-}
-
-.compact-head {
-	margin-bottom: 0.45rem;
+.upcoming-card {
+	grid-area: upcoming;
+	position: sticky;
+	top: 1rem;
+	padding: 1rem;
 }
 
 .upcoming-list {
-	min-height: 0;
 	display: grid;
-	align-content: start;
-	gap: 0.4rem;
+	gap: 0.5rem;
+	max-height: 620px;
 	overflow: auto;
-	padding-right: 0.15rem;
+	padding-right: 0.1rem;
 }
 
 .upcoming-item {
 	display: grid;
-	gap: 0.18rem;
-	border: 1px solid #eaecf0;
-	border-radius: 10px;
+	gap: 0.28rem;
+	border: 1px solid #f0f0f0;
+	border-radius: 18px;
 	background: #ffffff;
-	padding: 0.5rem;
+	padding: 0.75rem;
 	text-align: left;
+	cursor: pointer;
 }
 
 .upcoming-item:hover {
+	border-color: #d1d5db;
+	background: #fafafa;
+}
+
+.upcoming-item small {
+	color: #6b7280;
+	font-weight: 700;
+}
+
+.empty-small {
+	border: 1px dashed #d1d5db;
+	border-radius: 16px;
+	padding: 0.9rem;
+	font-weight: 750;
+}
+
+.modal-backdrop {
+	position: fixed;
+	inset: 0;
+	z-index: 1000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(17, 24, 39, 0.38);
+	padding: 1rem;
+}
+
+.event-modal {
+	width: min(560px, 100%);
+	max-height: min(92dvh, 760px);
+	overflow: hidden;
+	border: 1px solid #e5e7eb;
+	border-radius: 30px;
+	background: #ffffff;
+	box-shadow: 0 30px 80px rgba(17, 24, 39, 0.2);
+}
+
+.modal-handle {
+	display: none;
+	width: 42px;
+	height: 5px;
+	border-radius: 999px;
+	background: #d1d5db;
+	margin: 0.7rem auto 0;
+}
+
+.modal-head {
+	display: grid;
+	grid-template-columns: 1fr auto 1fr;
+	align-items: center;
+	gap: 0.5rem;
+	border-bottom: 1px solid #f0f0f0;
+	padding: 0.9rem 1rem;
+}
+
+.modal-head strong {
+	text-align: center;
+	font-size: 1rem;
+}
+
+.text-button {
+	min-height: 36px;
+	background: transparent;
+	color: #2563eb;
+	padding: 0 0.35rem;
+	font-size: 0.9rem;
+}
+
+.save-text {
+	justify-self: end;
+	font-weight: 900;
+}
+
+.modal-form {
+	display: grid;
+	gap: 0.85rem;
+	max-height: calc(min(92dvh, 760px) - 62px);
+	overflow: auto;
+	padding: 1rem;
+}
+
+.picked-date {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	border: 1px solid #e5e7eb;
+	border-radius: 20px;
+	background: #f9fafb;
+	padding: 0.85rem;
+}
+
+.picked-date svg {
+	color: #2563eb;
+}
+
+.picked-date strong {
+	display: block;
+	text-transform: capitalize;
+}
+
+.field {
+	display: grid;
+	gap: 0.35rem;
+	min-width: 0;
+}
+
+.field > span {
+	color: #6b7280;
+	font-size: 0.78rem;
+	font-weight: 850;
+}
+
+.field input,
+.field select {
+	width: 100%;
+	min-height: 48px;
+	border: 1px solid #e5e7eb;
+	border-radius: 16px;
+	background: #ffffff;
+	color: #111827;
+	padding: 0 0.9rem;
+	font: inherit;
+	font-size: 0.95rem;
+	outline: none;
+	transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.title-field input {
+	min-height: 54px;
+	font-size: 1.02rem;
+	font-weight: 760;
+}
+
+.field input:focus,
+.field select:focus {
 	border-color: #111827;
+	box-shadow: 0 0 0 4px rgba(17, 24, 39, 0.08);
+}
+
+.type-tabs,
+.duration-tabs {
+	display: flex;
+	gap: 0.45rem;
+	overflow-x: auto;
+	padding-bottom: 0.05rem;
+}
+
+.type-tab,
+.duration-tabs button,
+.more-options {
+	border: 1px solid #e5e7eb;
+	border-radius: 999px;
+	background: #ffffff;
+	color: #374151;
+	padding: 0 0.8rem;
+	font-weight: 850;
+	white-space: nowrap;
+	cursor: pointer;
+}
+
+.type-tab {
+	min-height: 38px;
+}
+
+.type-tab.active {
+	background: #111827;
+	border-color: #111827;
+	color: #ffffff;
+}
+
+.time-card,
+.extra-fields {
+	display: grid;
+	gap: 0.75rem;
+	border: 1px solid #f0f0f0;
+	border-radius: 20px;
+	background: #fbfbfc;
+	padding: 0.85rem;
+}
+
+.time-row {
+	align-items: flex-start;
+}
+
+.time-row .field {
+	flex: 1;
+}
+
+.duration-tabs button {
+	min-height: 34px;
+	font-size: 0.82rem;
+}
+
+.duration-tabs button:hover,
+.more-options:hover {
+	border-color: #d1d5db;
 	background: #f9fafb;
 }
 
-.upcoming-item .type-pill {
-	width: fit-content;
+.more-options {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+	min-height: 44px;
+	border-radius: 16px;
+}
+
+.more-options svg {
+	transition: transform 0.16s ease;
+}
+
+.more-options svg.rotated {
+	transform: rotate(90deg);
+}
+
+.modal-save-button {
+	min-height: 52px;
+	background: #111827;
+	color: #ffffff;
+	font-size: 0.95rem;
 }
 
 @keyframes spin {
@@ -1553,82 +1529,56 @@ function toServerDatetime(value) {
 	}
 }
 
-@media (max-width: 1180px) {
-	.study-calendar-page {
-		min-height: 820px;
-		overflow: auto;
-	}
-
-	.calendar-layout {
+@media (max-width: 1100px) {
+	.calendar-shell {
 		grid-template-columns: 1fr;
+		grid-template-areas:
+			'calendar'
+			'agenda'
+			'upcoming';
 	}
 
-	.calendar-main {
-		grid-template-rows: auto minmax(360px, 46vh) minmax(120px, auto);
+	.upcoming-card {
+		position: static;
 	}
 
-	.planner-panel {
-		grid-template-columns: minmax(0, 1fr) minmax(320px, 390px);
-		grid-template-rows: auto minmax(0, auto);
-	}
-
-	.plan-status {
-		grid-column: 1 / -1;
-	}
-
-	.event-form {
-		grid-column: 1;
-	}
-
-	.upcoming-panel {
-		grid-column: 2;
+	.upcoming-list {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		max-height: none;
 	}
 }
 
 @media (max-width: 760px) {
 	.study-calendar-page {
-		height: auto;
-		min-height: 100dvh;
 		padding: 0.75rem;
-		gap: 0.6rem;
-		overflow: auto;
 	}
 
 	.calendar-header {
 		align-items: flex-start;
-		gap: 0.7rem;
 	}
 
 	.calendar-header h1 {
-		font-size: 1.45rem;
+		font-size: 2rem;
 	}
 
-	.calendar-header p {
+	.calendar-header p,
+	.header-kicker {
 		display: none;
 	}
 
 	.header-actions {
-		gap: 0.45rem;
+		gap: 0.35rem;
 	}
 
-	.primary-button,
-	.secondary-button,
-	.icon-button {
-		min-height: 42px;
-	}
-
-	.primary-button {
-		padding: 0 0.75rem;
-	}
-
-	.icon-button {
-		width: 42px;
-		height: 42px;
+	.header-actions .primary-button span,
+	.coach-strip .soft-button span {
+		display: none;
 	}
 
 	.coach-strip {
 		grid-template-columns: minmax(0, 1fr) auto;
-		padding: 0.65rem;
+		border-radius: 20px;
+		padding: 0.75rem;
 	}
 
 	.coach-icon {
@@ -1639,70 +1589,70 @@ function toServerDatetime(value) {
 		-webkit-line-clamp: 1;
 	}
 
-	.calendar-layout {
-		gap: 0.6rem;
+	.calendar-card,
+	.agenda-card,
+	.upcoming-card {
+		border-radius: 22px;
 	}
 
-	.calendar-main {
-		gap: 0.6rem;
-		grid-template-rows: auto 300px minmax(104px, auto);
+	.calendar-card {
+		padding: 0.7rem;
 	}
 
-	.month-toolbar,
-	.day-agenda,
-	.event-form,
-	.plan-status,
-	.upcoming-panel {
-		border-radius: 12px;
+	.month-toolbar {
+		gap: 0.55rem;
+		margin-bottom: 0.5rem;
+	}
+
+	.round-button {
+		width: 40px;
+		height: 40px;
+	}
+
+	.month-title strong {
+		font-size: 1.25rem;
 	}
 
 	.calendar-grid {
-		border-radius: 12px;
+		gap: 0.28rem;
 	}
 
 	.weekday {
-		min-height: 24px;
-		font-size: 0.58rem;
+		min-height: 28px;
+		font-size: 0.64rem;
 	}
 
 	.day-cell {
-		padding: 0.28rem;
-		gap: 0.12rem;
+		min-height: 68px;
+		border-radius: 15px;
+		padding: 0.42rem;
+		gap: 0.22rem;
 	}
 
 	.day-number {
-		width: 20px;
-		height: 20px;
-		border-radius: 6px;
-		font-size: 0.7rem;
+		width: 28px;
+		height: 28px;
+		font-size: 0.82rem;
 	}
 
-	.event-dot {
-		max-width: 100%;
-		padding: 0;
-		border: 0;
-		background: currentColor !important;
-		color: currentColor !important;
-		height: 5px;
-		width: 5px;
-		border-radius: 999px;
-		text-indent: -999px;
+	.event-preview {
+		display: none;
 	}
 
-	.event-more {
-		padding: 0;
-		background: transparent;
-		font-size: 0.58rem;
+	.event-count {
+		top: auto;
+		right: 0.45rem;
+		bottom: 0.42rem;
+		font-size: 0.6rem;
 	}
 
-	.day-agenda {
-		padding: 0.65rem;
+	.agenda-head {
+		align-items: flex-start;
 	}
 
 	.event-row {
 		grid-template-columns: 6px minmax(0, 1fr);
-		gap: 0.45rem;
-		padding: 0.5rem;
+		border-radius: 16px;
 	}
 
 	.row-actions {
@@ -1710,92 +1660,112 @@ function toServerDatetime(value) {
 		justify-content: flex-start;
 	}
 
-	.planner-panel {
-		order: -1;
-		grid-template-columns: 1fr;
-		grid-template-rows: auto auto auto;
-		gap: 0.6rem;
-	}
-
-	.event-form {
-		padding: 0.75rem;
-		gap: 0.65rem;
-	}
-
-	.two-cols,
-	.time-grid,
-	.form-actions {
+	.upcoming-list {
 		grid-template-columns: 1fr;
 	}
 
-	.ai-link-card,
-	.date-box,
-	.advanced-fields {
-		padding: 0.68rem;
+	.modal-backdrop {
+		align-items: flex-end;
+		padding: 0;
 	}
 
-	.event-form input,
-	.event-form select,
-	.ai-link-card select {
-		min-height: 44px;
-		font-size: 0.88rem;
+	.event-modal {
+		width: 100%;
+		max-height: 92dvh;
+		border-radius: 28px 28px 0 0;
+		border-bottom: 0;
 	}
 
-	.reminder-row {
-		align-items: stretch;
-		flex-direction: column;
+	.modal-handle {
+		display: block;
 	}
 
-	.clean-reminder-row select {
-		max-width: none;
+	.modal-form {
+		padding: 0.9rem;
 	}
 
-	.upcoming-panel {
-		max-height: 220px;
+	.time-row {
+		gap: 0.5rem;
 	}
 }
 
 @media (max-width: 430px) {
-	.header-kicker {
-		display: none;
+	.study-calendar-page {
+		padding: 0.55rem;
 	}
 
-	.calendar-header {
-		min-height: auto;
+	.calendar-shell {
+		gap: 0.6rem;
 	}
 
 	.calendar-header h1 {
-		margin: 0;
-		font-size: 1.25rem;
+		font-size: 1.65rem;
 	}
 
-	.header-actions .primary-button span,
-	.coach-strip .secondary-button span {
+	.soft-button,
+	.primary-button,
+	.icon-button {
+		min-height: 40px;
+	}
+
+	.icon-button,
+	.header-actions .primary-button {
+		width: 40px;
+		padding: 0;
+	}
+
+	.calendar-card,
+	.agenda-card,
+	.upcoming-card {
+		box-shadow: none;
+	}
+
+	.day-cell {
+		min-height: 58px;
+		border-radius: 13px;
+		padding: 0.32rem;
+	}
+
+	.day-number {
+		width: 24px;
+		height: 24px;
+		font-size: 0.76rem;
+	}
+
+	.event-dot {
+		width: 5px;
+		height: 5px;
+	}
+
+	.event-markers {
+		gap: 0.15rem;
+	}
+
+	.event-count {
 		display: none;
 	}
 
-	.coach-strip {
-		grid-template-columns: minmax(0, 1fr) auto;
+	.modal-head {
+		padding: 0.75rem 0.85rem;
 	}
 
-	.calendar-main {
-		grid-template-rows: auto 270px minmax(96px, auto);
+	.field input,
+	.field select {
+		min-height: 46px;
 	}
 
-	.event-meta {
-		gap: 0.3rem;
-	}
-
-	.date-shortcuts,
-	.duration-row > div {
+	.time-row {
 		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		width: 100%;
+		grid-template-columns: 1fr 1fr;
 	}
 
-	.date-shortcuts button,
-	.duration-row button {
-		width: 100%;
+	.duration-tabs {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	.duration-tabs button {
+		padding: 0;
 	}
 }
 </style>
