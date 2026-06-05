@@ -18,7 +18,7 @@
 
 				<button class="room-danger" :disabled="finishing" @click="finishSession">
 					<Square class="size-4" />
-					<span>{{ finishing ? __('Finalizando...') : __('Finalizar') }}</span>
+					<span>{{ finishing ? __('Evaluando...') : __('Finalizar y Evaluar') }}</span>
 				</button>
 			</div>
 		</header>
