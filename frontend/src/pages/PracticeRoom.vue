@@ -8,6 +8,12 @@
 				</div>
 
 				<h1>{{ session?.title || __('Sala de práctica') }}</h1>
+
+				<div class="room-meta">
+					<span>{{ practiceTypeLabel }}</span>
+					<span>{{ liveConnected ? __('Voz') : __('Chat') }}</span>
+					<span>{{ elapsedTime }}</span>
+				</div>
 			</div>
 
 			<div class="room-header-actions">
@@ -18,13 +24,59 @@
 
 				<button class="room-danger" :disabled="finishing" @click="finishSession">
 					<Square class="size-4" />
-					<span>{{ finishing ? __('Evaluando...') : __('Finalizar y Evaluar') }}</span>
+					<span>{{ finishing ? __('Evaluando...') : __('Finalizar y ver resumen') }}</span>
 				</button>
 			</div>
 		</header>
 
 		<main class="room-layout">
 			<section class="room-stage">
+				<div v-if="hasFeedback" class="feedback-panel">
+					<div class="feedback-head">
+						<div class="feedback-score-wrap">
+							<div class="feedback-score">{{ feedbackScore }}</div>
+							<span>{{ feedbackScoreLabel }}</span>
+						</div>
+
+						<div class="feedback-copy">
+							<div class="room-kicker">{{ __('Resumen final de la IA') }}</div>
+							<h2>{{ __('Así te fue en la práctica') }}</h2>
+							<p>{{ feedback.summary || __('La IA preparó una evaluación con tus fortalezas, puntos de mejora y próximos pasos.') }}</p>
+						</div>
+					</div>
+
+					<div class="feedback-grid">
+						<div class="feedback-card">
+							<h3>{{ __('Fortalezas') }}</h3>
+							<ul v-if="feedback.strengths?.length">
+								<li v-for="item in feedback.strengths" :key="item">{{ item }}</li>
+							</ul>
+							<p v-else>{{ __('Aún no hay fortalezas detalladas.') }}</p>
+						</div>
+
+						<div class="feedback-card">
+							<h3>{{ __('Por mejorar') }}</h3>
+							<ul v-if="feedback.improvements?.length">
+								<li v-for="item in feedback.improvements" :key="item">{{ item }}</li>
+							</ul>
+							<p v-else>{{ __('Aún no hay mejoras detalladas.') }}</p>
+						</div>
+
+						<div class="feedback-card">
+							<h3>{{ __('Siguiente práctica') }}</h3>
+							<ul v-if="feedback.next_steps?.length">
+								<li v-for="item in feedback.next_steps" :key="item">{{ item }}</li>
+							</ul>
+							<p v-else>{{ __('Repite la simulación con un objetivo más específico.') }}</p>
+						</div>
+					</div>
+
+					<div v-if="feedback.sample_better_answer" class="better-answer">
+						<strong>{{ __('Ejemplo de mejor respuesta') }}</strong>
+						<p>{{ feedback.sample_better_answer }}</p>
+					</div>
+				</div>
+
 				<div class="meeting-grid">
 					<div class="ai-tile">
 						<div class="tile-topbar">
@@ -48,7 +100,7 @@
 						<div class="tile-info">
 							<h2>{{ interviewerLabel }}</h2>
 							<p>
-								{{ __('La IA hará preguntas, retará tus respuestas y mantendrá la simulación.') }}
+								{{ __('La IA hará preguntas, presionará con objeciones y evaluará tu desempeño al finalizar.') }}
 							</p>
 						</div>
 
@@ -58,27 +110,35 @@
 						</div>
 					</div>
 
-					<div class="user-tile">
-						<div class="user-tile-top">
-							<div class="tile-status" :class="{ live: micEnabled }">
-								<span></span>
-								{{ micEnabled ? __('Micrófono activo') : __('Mic apagado') }}
+					<div class="participant-column">
+						<div class="user-tile">
+							<div class="user-tile-top">
+								<div class="tile-status" :class="{ live: micEnabled }">
+									<span></span>
+									{{ micEnabled ? __('Micrófono activo') : __('Mic apagado') }}
+								</div>
+							</div>
+
+							<div class="user-avatar">
+								<User class="size-12" />
+							</div>
+
+							<h3>{{ __('Tú') }}</h3>
+
+							<p>
+								{{ micEnabled ? __('Responde con naturalidad por voz.') : __('Puedes responder por texto o activar voz.') }}
+							</p>
+
+							<div class="tile-name-bar user">
+								<User class="size-4" />
+								<span>{{ __('Tú') }}</span>
 							</div>
 						</div>
 
-						<div class="user-avatar">
-							<User class="size-12" />
-						</div>
-
-						<h3>{{ __('Tú') }}</h3>
-
-						<p>
-							{{ micEnabled ? __('Estás respondiendo por voz') : __('Puedes responder por texto o activar voz') }}
-						</p>
-
-						<div class="tile-name-bar user">
-							<User class="size-4" />
-							<span>{{ __('Tú') }}</span>
+						<div class="practice-card">
+							<div class="room-kicker">{{ __('Consejo rápido') }}</div>
+							<h3>{{ quickTip.title }}</h3>
+							<p>{{ quickTip.text }}</p>
 						</div>
 					</div>
 				</div>
@@ -86,52 +146,6 @@
 				<div v-if="liveError" class="room-warning">
 					<CircleAlert class="size-4" />
 					<span>{{ liveError }}</span>
-				</div>
-
-				<div v-if="feedback && Object.keys(feedback).length" class="feedback-panel">
-					<div class="feedback-head">
-						<div class="feedback-score">{{ feedback.score || 0 }}</div>
-
-						<div>
-							<div class="room-kicker">{{ __('Resultado') }}</div>
-							<h2>{{ __('Feedback final') }}</h2>
-							<p>{{ feedback.summary }}</p>
-						</div>
-					</div>
-
-					<div class="feedback-grid">
-						<div class="feedback-card">
-							<h3>{{ __('Fortalezas') }}</h3>
-							<ul>
-								<li v-for="item in feedback.strengths || []" :key="item">
-									{{ item }}
-								</li>
-							</ul>
-						</div>
-
-						<div class="feedback-card">
-							<h3>{{ __('Mejoras') }}</h3>
-							<ul>
-								<li v-for="item in feedback.improvements || []" :key="item">
-									{{ item }}
-								</li>
-							</ul>
-						</div>
-
-						<div class="feedback-card">
-							<h3>{{ __('Siguientes pasos') }}</h3>
-							<ul>
-								<li v-for="item in feedback.next_steps || []" :key="item">
-									{{ item }}
-								</li>
-							</ul>
-						</div>
-					</div>
-
-					<div v-if="feedback.sample_better_answer" class="better-answer">
-						<strong>{{ __('Ejemplo de mejor respuesta') }}</strong>
-						<p>{{ feedback.sample_better_answer }}</p>
-					</div>
 				</div>
 
 				<div class="room-controls">
@@ -177,9 +191,12 @@
 							<h2>{{ __('Conversación') }}</h2>
 						</div>
 
-						<button class="side-icon" @click="saveTranscript" aria-label="Guardar transcripción">
-							<Save class="size-4" />
-						</button>
+						<div class="side-actions">
+							<span class="message-count">{{ transcript.length }} {{ transcript.length === 1 ? __('mensaje') : __('mensajes') }}</span>
+							<button class="side-icon" @click="saveTranscript" aria-label="Guardar transcripción">
+								<Save class="size-4" />
+							</button>
+						</div>
 					</div>
 
 					<div ref="transcriptBox" class="transcript-box">
@@ -224,7 +241,7 @@
 				</div>
 
 				<div class="side-section notes-section">
-					<div class="side-head">
+					<div class="side-head compact">
 						<div>
 							<div class="room-kicker">{{ __('Notas') }}</div>
 							<h2>{{ __('Apuntes privados') }}</h2>
@@ -234,8 +251,8 @@
 					<textarea
 						v-model="notes"
 						class="notes-area"
-						rows="7"
-						:placeholder="__('Anota preguntas difíciles, ideas o respuestas para mejorar.')"
+						rows="6"
+						:placeholder="__('Anota preguntas difíciles, objeciones, ideas o respuestas para mejorar.')"
 					/>
 				</div>
 			</aside>
@@ -291,12 +308,19 @@ const outputPlayTime = ref(0)
 const liveSocketOpen = ref(false)
 const audioStreaming = ref(false)
 const isAiSpeaking = ref(false)
+const elapsedTime = ref('00:00')
 
 let speakingInterval = null
+let timerInterval = null
+let startedAt = Date.now()
 let lastTurnWasComplete = true
+let manualLiveStop = false
 
 onMounted(() => {
 	loadSession()
+	updateElapsedTime()
+
+	timerInterval = setInterval(updateElapsedTime, 1000)
 
 	speakingInterval = setInterval(() => {
 		if (outputAudioContext.value && outputPlayTime.value) {
@@ -313,6 +337,22 @@ onBeforeUnmount(() => {
 	if (speakingInterval) {
 		clearInterval(speakingInterval)
 	}
+
+	if (timerInterval) {
+		clearInterval(timerInterval)
+	}
+})
+
+const practiceTypeLabel = computed(() => {
+	const labels = {
+		interview: __('Entrevista laboral'),
+		sales: __('Práctica de ventas'),
+		english: __('Inglés conversacional'),
+		marketing: __('Caso de marketing'),
+		custom: __('Práctica personalizada'),
+	}
+
+	return labels[session.value?.practice_type] || __('Práctica IA')
 })
 
 const interviewerLabel = computed(() => {
@@ -325,6 +365,50 @@ const interviewerLabel = computed(() => {
 	}
 
 	return labels[session.value?.practice_type] || __('Entrevistador IA')
+})
+
+const quickTip = computed(() => {
+	const tips = {
+		interview: {
+			title: __('Responde con estructura'),
+			text: __('Usa situación, acción y resultado. Evita respuestas demasiado largas.'),
+		},
+		sales: {
+			title: __('Escucha antes de vender'),
+			text: __('Haz preguntas, detecta dolor y conecta tu solución con un beneficio claro.'),
+		},
+		english: {
+			title: __('Habla simple y claro'),
+			text: __('No busques perfección. Prioriza fluidez, intención y frases naturales.'),
+		},
+		marketing: {
+			title: __('Parte del objetivo'),
+			text: __('Aclara público, oferta, canal y métrica antes de proponer una campaña.'),
+		},
+		custom: {
+			title: __('Practica con intención'),
+			text: __('Responde como si fuera una situación real y pide presión si quieres subir dificultad.'),
+		},
+	}
+
+	return tips[session.value?.practice_type] || tips.custom
+})
+
+const hasFeedback = computed(() => feedback.value && Object.keys(feedback.value).length)
+
+const feedbackScore = computed(() => {
+	const rawScore = Number(feedback.value?.score || 0)
+	return Number.isInteger(rawScore) ? rawScore : rawScore.toFixed(1)
+})
+
+const feedbackScoreLabel = computed(() => {
+	const score = Number(feedback.value?.score || 0)
+
+	if (score >= 9) return __('Excelente')
+	if (score >= 7.5) return __('Muy bien')
+	if (score >= 6) return __('Buen avance')
+	if (score > 0) return __('Necesita práctica')
+	return __('Evaluación')
 })
 
 usePageMeta(() => ({
@@ -340,9 +424,18 @@ async function loadSession() {
 
 		transcript.value = session.value.transcript || []
 		feedback.value = session.value.feedback || null
+		notes.value = session.value.notes || ''
 	} catch (error) {
 		toast.error(error.messages?.[0] || __('No se pudo abrir la práctica.'))
 	}
+}
+
+function updateElapsedTime() {
+	const totalSeconds = Math.max(0, Math.floor((Date.now() - startedAt) / 1000))
+	const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0')
+	const seconds = String(totalSeconds % 60).padStart(2, '0')
+
+	elapsedTime.value = `${minutes}:${seconds}`
 }
 
 function appendLine(role, content, append = false) {
@@ -371,7 +464,7 @@ function appendLine(role, content, append = false) {
 function insertStarter() {
 	const starters = {
 		interview: __('Hola, gracias por la oportunidad. Estoy listo para comenzar la entrevista.'),
-		sales: __('Hola, me gustaría entender mejor tu situación antes de proponerte una solución.'),
+		sales: __('Hola, antes de proponerte algo me gustaría entender mejor tu situación.'),
 		english: __('Hi, I am ready to practice. Please ask me a natural first question.'),
 		marketing: __('Estoy listo para analizar el caso. Primero quiero entender el objetivo de negocio.'),
 		custom: __('Estoy listo para empezar la simulación.'),
@@ -414,35 +507,39 @@ async function sendMessage() {
 	}
 }
 
-async function saveTranscript() {
+async function saveTranscript(showToast = true) {
 	try {
 		await call('studybadge_ai.ai_practice.save_practice_transcript', {
 			session: props.sessionId,
 			transcript: JSON.stringify(transcript.value),
 		})
 
-		toast.success(__('Transcripción guardada.'))
+		if (showToast) {
+			toast.success(__('Transcripción guardada.'))
+		}
 	} catch (error) {
 		toast.error(error.messages?.[0] || __('No se pudo guardar.'))
 	}
 }
 
 async function finishSession() {
+	if (finishing.value) return
+
 	finishing.value = true
 
 	await stopLiveVoice()
 
 	try {
-		await saveTranscript()
+		await saveTranscript(false)
 
 		const result = await call('studybadge_ai.ai_practice.finish_practice_session', {
 			session: props.sessionId,
 		})
 
-		feedback.value = result.feedback
-		session.value = result.session
+		feedback.value = result.feedback || feedback.value
+		session.value = result.session || session.value
 
-		toast.success(__('Práctica finalizada.'))
+		toast.success(__('Resumen final generado.'))
 	} catch (error) {
 		toast.error(error.messages?.[0] || __('No se pudo finalizar la práctica.'))
 	} finally {
@@ -462,6 +559,7 @@ async function toggleLiveVoice() {
 async function startLiveVoice() {
 	liveLoading.value = true
 	liveError.value = ''
+	manualLiveStop = false
 
 	try {
 		const token = await call('studybadge_ai.ai_practice.create_live_token', {
@@ -469,7 +567,7 @@ async function startLiveVoice() {
 		})
 
 		if (!token.live_supported || !token.token) {
-			liveError.value = token.message || __('Voz no disponible. ContinÃºa por texto.')
+			liveError.value = token.message || __('Voz no disponible. Continúa por texto.')
 			liveLoading.value = false
 			return
 		}
@@ -520,7 +618,7 @@ async function startLiveVoice() {
 				} else if (data.serverContent) {
 					handleLiveMessage(data)
 				} else if (data.error) {
-					liveError.value = data.error.message || 'Error en servidor'
+					liveError.value = data.error.message || __('Error en servidor')
 				}
 			} catch (e) {
 				console.error('Error parsing onmessage:', e)
@@ -536,7 +634,10 @@ async function startLiveVoice() {
 		}
 
 		ws.onclose = (event) => {
-			liveError.value = `Conexión cerrada: ${event.code} - ${event.reason || 'Sin razón específica'}`
+			if (!manualLiveStop && event.code !== 1000) {
+				liveError.value = `${__('Conexión cerrada')}: ${event.code}${event.reason ? ` - ${event.reason}` : ''}`
+			}
+
 			liveConnected.value = false
 			liveSocketOpen.value = false
 			stopMicrophoneOnly()
@@ -713,10 +814,11 @@ function playAudio(data, mimeType) {
 }
 
 async function stopLiveVoice() {
+	manualLiveStop = true
 	stopMicrophoneOnly()
 
 	try {
-		liveSession.value?.close?.()
+		liveSession.value?.close?.(1000, 'manual-stop')
 	} catch {}
 
 	liveSession.value = null
@@ -751,22 +853,22 @@ function stopMicrophoneOnly() {
 
 <style scoped>
 .room-page {
-	--room-bg: #070b14;
-	--room-panel: #111827;
-	--room-panel-2: #0b1220;
-	--room-panel-3: #151f32;
-	--room-border: rgba(255, 255, 255, 0.1);
-	--room-border-strong: rgba(255, 255, 255, 0.18);
-	--room-text: #f8fafc;
-	--room-muted: #cbd5e1;
-	--room-soft: #94a3b8;
+	--room-bg: #f3f6fb;
+	--room-surface: #ffffff;
+	--room-surface-soft: #f8fafc;
+	--room-ink: #071632;
+	--room-muted: #526173;
+	--room-soft: #7b8aa0;
+	--room-border: #d9e4f2;
+	--room-border-strong: #c7d6ea;
 	--room-primary: #0a2251;
-	--room-blue: #2563eb;
-	--room-blue-soft: rgba(37, 99, 235, 0.14);
-	--room-green: #22c55e;
-	--room-red: #ef4444;
-	--room-yellow: #f5b301;
-	--room-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+	--room-primary-hover: #12336f;
+	--room-primary-soft: #e9f0fb;
+	--room-green: #16a34a;
+	--room-red: #dc2626;
+	--room-red-soft: #fef2f2;
+	--room-yellow: #f7c948;
+	--room-shadow: 0 18px 48px rgba(7, 22, 50, 0.1);
 
 	display: flex;
 	height: 100vh;
@@ -774,7 +876,7 @@ function stopMicrophoneOnly() {
 	min-height: 100vh;
 	flex-direction: column;
 	background: var(--room-bg);
-	color: var(--room-text);
+	color: var(--room-ink);
 	overflow: hidden;
 }
 
@@ -783,11 +885,11 @@ function stopMicrophoneOnly() {
 	align-items: center;
 	justify-content: space-between;
 	gap: 1rem;
-	min-height: 72px;
-	padding: 0.85rem 1rem;
+	min-height: 76px;
+	padding: 0.9rem 1.1rem;
 	border-bottom: 1px solid var(--room-border);
-	background: rgba(7, 11, 20, 0.92);
-	backdrop-filter: blur(18px);
+	background: rgba(255, 255, 255, 0.96);
+	box-shadow: 0 10px 30px rgba(7, 22, 50, 0.04);
 }
 
 .room-header-left {
@@ -798,7 +900,7 @@ function stopMicrophoneOnly() {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.45rem;
-	color: #93c5fd;
+	color: var(--room-primary);
 	font-size: 0.7rem;
 	font-weight: 950;
 	letter-spacing: 0.08em;
@@ -809,24 +911,45 @@ function stopMicrophoneOnly() {
 	width: 8px;
 	height: 8px;
 	border-radius: 999px;
-	background: #64748b;
+	background: #94a3b8;
 }
 
 .room-live-dot.active {
 	background: var(--room-green);
-	box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.14);
+	box-shadow: 0 0 0 6px rgba(22, 163, 74, 0.12);
 }
 
 .room-header h1 {
-	margin: 0.2rem 0 0;
-	max-width: 56vw;
+	margin: 0.18rem 0 0;
+	max-width: 54vw;
 	overflow: hidden;
-	color: #ffffff;
+	color: var(--room-ink);
 	font-size: 1.08rem;
-	font-weight: 900;
+	font-weight: 950;
 	line-height: 1.25;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+.room-meta {
+	display: flex;
+	align-items: center;
+	gap: 0.45rem;
+	flex-wrap: wrap;
+	margin-top: 0.45rem;
+}
+
+.room-meta span,
+.message-count {
+	display: inline-flex;
+	align-items: center;
+	border: 1px solid var(--room-border);
+	border-radius: 999px;
+	background: var(--room-surface-soft);
+	padding: 0.25rem 0.55rem;
+	color: var(--room-muted);
+	font-size: 0.72rem;
+	font-weight: 850;
 }
 
 .room-header-actions {
@@ -839,7 +962,7 @@ function stopMicrophoneOnly() {
 .room-layout {
 	display: grid;
 	flex: 1;
-	grid-template-columns: minmax(0, 1fr) minmax(360px, 410px);
+	grid-template-columns: minmax(0, 1fr) minmax(350px, 420px);
 	gap: 1rem;
 	min-height: 0;
 	padding: 1rem;
@@ -858,25 +981,27 @@ function stopMicrophoneOnly() {
 .meeting-grid {
 	display: grid;
 	flex: 1;
-	grid-template-columns: minmax(0, 1fr) 260px;
+	grid-template-columns: minmax(0, 1fr) minmax(230px, 285px);
 	gap: 1rem;
 	min-height: 0;
 }
 
 .ai-tile,
 .user-tile,
+.practice-card,
 .side-section,
 .feedback-panel {
 	border: 1px solid var(--room-border);
-	background: var(--room-panel);
+	background: var(--room-surface);
 	box-shadow: var(--room-shadow);
 }
 
 .ai-tile,
-.user-tile {
+.user-tile,
+.practice-card {
 	position: relative;
 	overflow: hidden;
-	border-radius: 22px;
+	border-radius: 24px;
 }
 
 .ai-tile {
@@ -885,17 +1010,11 @@ function stopMicrophoneOnly() {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+	border-color: #16356b;
+	background: var(--room-primary);
 	padding: 2rem;
 	text-align: center;
-}
-
-.ai-tile::before {
-	content: "";
-	position: absolute;
-	inset: auto -30% -34% -30%;
-	height: 44%;
-	background: radial-gradient(circle, rgba(37, 99, 235, 0.44), transparent 62%);
-	pointer-events: none;
+	color: #ffffff;
 }
 
 .tile-topbar,
@@ -917,15 +1036,21 @@ function stopMicrophoneOnly() {
 	align-items: center;
 	gap: 0.45rem;
 	min-height: 30px;
-	border: 1px solid rgba(255, 255, 255, 0.1);
+	border: 1px solid rgba(255, 255, 255, 0.16);
 	border-radius: 999px;
-	background: rgba(15, 23, 42, 0.68);
+	background: rgba(255, 255, 255, 0.1);
 	padding: 0.35rem 0.65rem;
-	color: #dbeafe;
+	color: #eff6ff;
 	font-size: 0.72rem;
-	font-weight: 850;
-	backdrop-filter: blur(12px);
+	font-weight: 900;
 	white-space: nowrap;
+}
+
+.user-tile .tile-status,
+.practice-card .tile-status {
+	border-color: var(--room-border);
+	background: var(--room-surface-soft);
+	color: var(--room-muted);
 }
 
 .tile-status span {
@@ -937,7 +1062,7 @@ function stopMicrophoneOnly() {
 
 .tile-status.live span {
 	background: var(--room-green);
-	box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.14);
+	box-shadow: 0 0 0 6px rgba(22, 163, 74, 0.14);
 }
 
 .ai-avatar-wrap {
@@ -950,17 +1075,16 @@ function stopMicrophoneOnly() {
 	display: grid;
 	place-items: center;
 	border-radius: 999px;
-	color: #ffffff;
 	transition: 0.3s ease;
 }
 
 .ai-avatar {
 	width: 150px;
 	height: 150px;
-	background: #2563eb;
-	box-shadow:
-		0 0 0 12px rgba(37, 99, 235, 0.12),
-		0 24px 80px rgba(37, 99, 235, 0.28);
+	border: 1px solid rgba(255, 255, 255, 0.22);
+	background: #ffffff;
+	color: var(--room-primary);
+	box-shadow: 0 20px 58px rgba(0, 0, 0, 0.22);
 }
 
 .ai-avatar.speaking {
@@ -970,23 +1094,20 @@ function stopMicrophoneOnly() {
 @keyframes pulse-ring {
 	0% {
 		box-shadow:
-			0 0 0 0 rgba(37, 99, 235, 0.65),
-			0 0 0 12px rgba(37, 99, 235, 0.12),
-			0 24px 80px rgba(37, 99, 235, 0.28);
+			0 0 0 0 rgba(255, 255, 255, 0.46),
+			0 20px 58px rgba(0, 0, 0, 0.22);
 	}
 
 	70% {
 		box-shadow:
-			0 0 0 30px rgba(37, 99, 235, 0),
-			0 0 0 12px rgba(37, 99, 235, 0.12),
-			0 24px 80px rgba(37, 99, 235, 0.28);
+			0 0 0 30px rgba(255, 255, 255, 0),
+			0 20px 58px rgba(0, 0, 0, 0.22);
 	}
 
 	100% {
 		box-shadow:
-			0 0 0 0 rgba(37, 99, 235, 0),
-			0 0 0 12px rgba(37, 99, 235, 0.12),
-			0 24px 80px rgba(37, 99, 235, 0.28);
+			0 0 0 0 rgba(255, 255, 255, 0),
+			0 20px 58px rgba(0, 0, 0, 0.22);
 	}
 }
 
@@ -996,26 +1117,47 @@ function stopMicrophoneOnly() {
 }
 
 .ai-tile h2,
-.user-tile h3 {
+.user-tile h3,
+.practice-card h3 {
 	margin: 1rem 0 0;
-	color: #ffffff;
 	font-size: 1.4rem;
 	font-weight: 950;
 	letter-spacing: -0.035em;
 }
 
+.ai-tile h2 {
+	color: #ffffff;
+}
+
 .ai-tile p,
-.user-tile p {
+.user-tile p,
+.practice-card p {
 	margin: 0.5rem auto 0;
 	max-width: 36rem;
-	color: var(--room-muted);
 	font-size: 0.95rem;
 	line-height: 1.6;
 }
 
+.ai-tile p {
+	color: #dbeafe;
+}
+
+.user-tile p,
+.practice-card p {
+	color: var(--room-muted);
+}
+
+.participant-column {
+	display: flex;
+	min-height: 0;
+	flex-direction: column;
+	gap: 1rem;
+}
+
 .user-tile {
 	display: flex;
-	min-height: 220px;
+	min-height: 255px;
+	flex: 1;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
@@ -1026,8 +1168,27 @@ function stopMicrophoneOnly() {
 .user-avatar {
 	width: 92px;
 	height: 92px;
-	background: #1f2937;
-	box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.05);
+	background: var(--room-primary-soft);
+	color: var(--room-primary);
+	box-shadow: 0 0 0 10px #f4f7fc;
+}
+
+.user-tile h3,
+.practice-card h3 {
+	color: var(--room-ink);
+}
+
+.practice-card {
+	padding: 1rem;
+	min-height: 155px;
+}
+
+.practice-card h3 {
+	font-size: 1rem;
+}
+
+.practice-card p {
+	font-size: 0.88rem;
 }
 
 .tile-name-bar {
@@ -1042,32 +1203,32 @@ function stopMicrophoneOnly() {
 	width: fit-content;
 	max-width: calc(100% - 2rem);
 	border-radius: 999px;
-	background: rgba(0, 0, 0, 0.42);
+	background: rgba(255, 255, 255, 0.12);
 	padding: 0.45rem 0.7rem;
 	color: #ffffff;
 	font-size: 0.78rem;
-	font-weight: 850;
-	backdrop-filter: blur(12px);
+	font-weight: 900;
 }
 
 .tile-name-bar.user {
-	background: rgba(255, 255, 255, 0.08);
+	border: 1px solid var(--room-border);
+	background: var(--room-surface-soft);
+	color: var(--room-muted);
 }
 
 .room-controls {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 0.75rem;
+	gap: 0.65rem;
 	width: fit-content;
 	max-width: 100%;
 	margin: 0 auto;
 	border: 1px solid var(--room-border);
 	border-radius: 999px;
-	background: rgba(15, 23, 42, 0.88);
+	background: rgba(255, 255, 255, 0.96);
 	padding: 0.6rem;
-	box-shadow: 0 18px 46px rgba(0, 0, 0, 0.34);
-	backdrop-filter: blur(16px);
+	box-shadow: var(--room-shadow);
 }
 
 .control-btn,
@@ -1092,27 +1253,28 @@ function stopMicrophoneOnly() {
 	border-radius: 999px;
 	padding: 0.7rem 1rem;
 	font-size: 0.88rem;
-	font-weight: 900;
+	font-weight: 950;
 	transition: 0.18s ease;
 	white-space: nowrap;
 }
 
 .control-btn {
-	border: 1px solid rgba(255, 255, 255, 0.12);
-	background: rgba(255, 255, 255, 0.08);
-	color: #ffffff;
+	border: 1px solid var(--room-border);
+	background: var(--room-surface-soft);
+	color: var(--room-primary);
 }
 
 .control-btn:hover {
-	background: rgba(255, 255, 255, 0.14);
+	border-color: var(--room-border-strong);
+	background: #eef4fc;
 	transform: translateY(-1px);
 }
 
 .control-btn.active,
 .control-btn.mic.active {
 	border-color: var(--room-red);
-	background: var(--room-red);
-	color: #ffffff;
+	background: var(--room-red-soft);
+	color: var(--room-red);
 }
 
 .control-icon {
@@ -1123,13 +1285,13 @@ function stopMicrophoneOnly() {
 
 .room-primary {
 	width: 100%;
-	border: 1px solid var(--room-blue);
-	background: var(--room-blue);
+	border: 1px solid var(--room-primary);
+	background: var(--room-primary);
 	color: #ffffff;
 }
 
 .room-primary:hover:not(:disabled) {
-	background: #1d4ed8;
+	background: var(--room-primary-hover);
 	transform: translateY(-1px);
 }
 
@@ -1141,13 +1303,13 @@ function stopMicrophoneOnly() {
 }
 
 .room-ghost {
-	border: 1px solid rgba(255, 255, 255, 0.14);
-	background: rgba(255, 255, 255, 0.08);
-	color: #ffffff;
+	border: 1px solid var(--room-border);
+	background: var(--room-surface-soft);
+	color: var(--room-primary);
 }
 
 .room-ghost:hover {
-	background: rgba(255, 255, 255, 0.14);
+	background: #eef4fc;
 }
 
 .room-danger {
@@ -1157,17 +1319,17 @@ function stopMicrophoneOnly() {
 }
 
 .room-danger:hover:not(:disabled) {
-	background: #dc2626;
+	background: #b91c1c;
 }
 
 .room-warning {
 	display: flex;
 	align-items: flex-start;
 	gap: 0.55rem;
-	border: 1px solid rgba(251, 191, 36, 0.32);
+	border: 1px solid #f8d677;
 	border-radius: 18px;
-	background: rgba(251, 191, 36, 0.12);
-	color: #fde68a;
+	background: #fff8db;
+	color: #7a5400;
 	padding: 0.85rem 1rem;
 	font-size: 0.88rem;
 	line-height: 1.5;
@@ -1184,7 +1346,7 @@ function stopMicrophoneOnly() {
 .side-section {
 	min-height: 0;
 	overflow: hidden;
-	border-radius: 22px;
+	border-radius: 24px;
 }
 
 .transcript-section {
@@ -1201,15 +1363,25 @@ function stopMicrophoneOnly() {
 	gap: 1rem;
 	border-bottom: 1px solid var(--room-border);
 	padding: 1rem;
-	background: rgba(255, 255, 255, 0.02);
+	background: var(--room-surface);
+}
+
+.side-head.compact {
+	padding-bottom: 0.85rem;
 }
 
 .side-head h2 {
 	margin: 0.2rem 0 0;
-	color: #ffffff;
+	color: var(--room-ink);
 	font-size: 1rem;
 	font-weight: 950;
 	letter-spacing: -0.02em;
+}
+
+.side-actions {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
 }
 
 .side-icon {
@@ -1217,14 +1389,15 @@ function stopMicrophoneOnly() {
 	place-items: center;
 	width: 36px;
 	height: 36px;
+	border: 1px solid var(--room-border);
 	border-radius: 999px;
-	background: rgba(255, 255, 255, 0.08);
-	color: #ffffff;
+	background: var(--room-surface-soft);
+	color: var(--room-primary);
 	transition: 0.18s ease;
 }
 
 .side-icon:hover {
-	background: rgba(255, 255, 255, 0.14);
+	background: #eef4fc;
 }
 
 .transcript-box {
@@ -1232,8 +1405,9 @@ function stopMicrophoneOnly() {
 	min-height: 0;
 	overflow-y: auto;
 	padding: 1rem;
+	background: #fbfdff;
 	scrollbar-width: thin;
-	scrollbar-color: rgba(148, 163, 184, 0.5) transparent;
+	scrollbar-color: rgba(123, 138, 160, 0.5) transparent;
 }
 
 .empty-transcript {
@@ -1253,14 +1427,15 @@ function stopMicrophoneOnly() {
 	width: 72px;
 	height: 72px;
 	margin-bottom: 1rem;
+	border: 1px solid var(--room-border);
 	border-radius: 24px;
-	background: rgba(255, 255, 255, 0.06);
-	color: #93c5fd;
+	background: var(--room-primary-soft);
+	color: var(--room-primary);
 }
 
 .empty-transcript h3 {
 	margin: 0;
-	color: #ffffff;
+	color: var(--room-ink);
 	font-size: 1rem;
 	font-weight: 950;
 }
@@ -1286,7 +1461,7 @@ function stopMicrophoneOnly() {
 
 .line-role {
 	margin-bottom: 0.3rem;
-	color: #93c5fd;
+	color: var(--room-primary);
 	font-size: 0.68rem;
 	font-weight: 950;
 	letter-spacing: 0.08em;
@@ -1294,30 +1469,33 @@ function stopMicrophoneOnly() {
 }
 
 .transcript-line.user .line-role {
-	color: #fbbf24;
+	color: #9a6700;
 }
 
 .line-content {
 	max-width: 88%;
+	border: 1px solid var(--room-border);
 	border-radius: 18px 18px 18px 6px;
-	background: rgba(255, 255, 255, 0.08);
-	color: #e5e7eb;
+	background: #ffffff;
+	color: var(--room-ink);
 	padding: 0.75rem 0.85rem;
 	font-size: 0.9rem;
 	line-height: 1.55;
 	word-break: break-word;
+	box-shadow: 0 8px 22px rgba(7, 22, 50, 0.05);
 }
 
 .transcript-line.user .line-content {
+	border-color: var(--room-primary);
 	border-radius: 18px 18px 6px 18px;
-	background: var(--room-blue);
+	background: var(--room-primary);
 	color: #ffffff;
 }
 
 .chat-compose {
 	border-top: 1px solid var(--room-border);
 	padding: 1rem;
-	background: rgba(255, 255, 255, 0.02);
+	background: var(--room-surface);
 	flex-shrink: 0;
 }
 
@@ -1327,8 +1505,8 @@ function stopMicrophoneOnly() {
 	resize: vertical;
 	border: 1px solid var(--room-border);
 	border-radius: 16px;
-	background: var(--room-panel-2);
-	color: #ffffff;
+	background: var(--room-surface-soft);
+	color: var(--room-ink);
 	padding: 0.8rem;
 	outline: none;
 	font-size: 0.9rem;
@@ -1338,13 +1516,13 @@ function stopMicrophoneOnly() {
 
 .chat-compose textarea:focus,
 .notes-area:focus {
-	border-color: rgba(37, 99, 235, 0.8);
-	box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+	border-color: var(--room-primary);
+	box-shadow: 0 0 0 4px rgba(10, 34, 81, 0.1);
 }
 
 .chat-compose textarea::placeholder,
 .notes-area::placeholder {
-	color: #64748b;
+	color: var(--room-soft);
 }
 
 .chat-compose .room-primary {
@@ -1356,16 +1534,16 @@ function stopMicrophoneOnly() {
 }
 
 .notes-area {
-	min-height: 150px;
+	min-height: 135px;
 	border: 0;
 	border-top: 1px solid var(--room-border);
 	border-radius: 0;
 }
 
 .feedback-panel {
-	border-radius: 22px;
+	border-radius: 24px;
 	padding: 1rem;
-	color: #e5e7eb;
+	color: var(--room-ink);
 }
 
 .feedback-head {
@@ -1374,24 +1552,43 @@ function stopMicrophoneOnly() {
 	gap: 1rem;
 }
 
+.feedback-score-wrap {
+	display: flex;
+	align-items: center;
+	gap: 0.7rem;
+	flex: 0 0 auto;
+	border: 1px solid #f0d674;
+	border-radius: 999px;
+	background: #fff8db;
+	padding: 0.45rem 0.8rem 0.45rem 0.45rem;
+	color: #5d4300;
+	font-size: 0.82rem;
+	font-weight: 950;
+}
+
 .feedback-score {
 	display: grid;
 	place-items: center;
-	width: 74px;
-	height: 74px;
+	width: 64px;
+	height: 64px;
 	border-radius: 999px;
 	background: var(--room-yellow);
-	color: #3b2a00;
-	font-size: 1.8rem;
+	color: #392800;
+	font-size: 1.65rem;
 	font-weight: 950;
 	flex: 0 0 auto;
 }
 
+.feedback-copy {
+	min-width: 0;
+}
+
 .feedback-panel h2 {
 	margin: 0.2rem 0 0;
-	color: #ffffff;
+	color: var(--room-ink);
 	font-size: 1.25rem;
 	font-weight: 950;
+	letter-spacing: -0.03em;
 }
 
 .feedback-panel p {
@@ -1410,13 +1607,13 @@ function stopMicrophoneOnly() {
 .feedback-card {
 	border: 1px solid var(--room-border);
 	border-radius: 18px;
-	background: rgba(255, 255, 255, 0.05);
+	background: var(--room-surface-soft);
 	padding: 1rem;
 }
 
 .feedback-grid h3 {
 	margin: 0;
-	color: #93c5fd;
+	color: var(--room-primary);
 	font-size: 0.82rem;
 	font-weight: 950;
 	text-transform: uppercase;
@@ -1435,12 +1632,12 @@ function stopMicrophoneOnly() {
 	margin-top: 1rem;
 	border: 1px solid var(--room-border);
 	border-radius: 18px;
-	background: rgba(255, 255, 255, 0.06);
+	background: #fbfdff;
 	padding: 1rem;
 }
 
 .better-answer strong {
-	color: #ffffff;
+	color: var(--room-ink);
 	font-size: 0.9rem;
 	font-weight: 950;
 }
@@ -1463,7 +1660,7 @@ function stopMicrophoneOnly() {
 	}
 
 	.meeting-grid {
-		grid-template-columns: minmax(0, 1fr) 240px;
+		grid-template-columns: minmax(0, 1fr) minmax(220px, 270px);
 		min-height: 520px;
 	}
 
@@ -1486,8 +1683,14 @@ function stopMicrophoneOnly() {
 		min-height: 380px;
 	}
 
-	.user-tile {
-		min-height: 180px;
+	.participant-column {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+	}
+
+	.user-tile,
+	.practice-card {
+		min-height: 190px;
 	}
 
 	.room-controls {
@@ -1519,16 +1722,16 @@ function stopMicrophoneOnly() {
 
 	.room-header-actions {
 		display: grid;
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: 0.85fr 1.15fr;
 		width: 100%;
 	}
 
 	.room-ghost,
 	.room-danger {
 		width: 100%;
-		min-height: 40px;
-		padding: 0.6rem 0.75rem;
-		font-size: 0.82rem;
+		min-height: 42px;
+		padding: 0.6rem 0.7rem;
+		font-size: 0.8rem;
 	}
 
 	.room-layout {
@@ -1538,17 +1741,19 @@ function stopMicrophoneOnly() {
 
 	.ai-tile,
 	.user-tile,
+	.practice-card,
 	.side-section,
 	.feedback-panel {
 		border-radius: 18px;
 	}
 
 	.ai-tile {
-		min-height: 300px;
+		min-height: 310px;
 		padding: 1.2rem;
 	}
 
-	.tile-topbar {
+	.tile-topbar,
+	.user-tile-top {
 		top: 0.75rem;
 		left: 0.75rem;
 		right: 0.75rem;
@@ -1581,9 +1786,17 @@ function stopMicrophoneOnly() {
 		bottom: 0.75rem;
 	}
 
+	.participant-column {
+		grid-template-columns: 1fr;
+	}
+
 	.user-tile {
-		min-height: 135px;
+		min-height: 145px;
 		padding: 1rem;
+	}
+
+	.practice-card {
+		min-height: auto;
 	}
 
 	.user-avatar {
@@ -1591,11 +1804,13 @@ function stopMicrophoneOnly() {
 		height: 62px;
 	}
 
-	.user-tile h3 {
+	.user-tile h3,
+	.practice-card h3 {
 		font-size: 1rem;
 	}
 
-	.user-tile p {
+	.user-tile p,
+	.practice-card p {
 		font-size: 0.8rem;
 	}
 
@@ -1617,13 +1832,17 @@ function stopMicrophoneOnly() {
 	}
 
 	.transcript-section {
-		height: 520px;
-		min-height: 520px;
+		height: 540px;
+		min-height: 540px;
 		max-height: none;
 	}
 
 	.side-head {
 		padding: 0.85rem;
+	}
+
+	.side-actions .message-count {
+		display: none;
 	}
 
 	.transcript-box {
@@ -1650,6 +1869,10 @@ function stopMicrophoneOnly() {
 	.feedback-head {
 		align-items: flex-start;
 		flex-direction: column;
+	}
+
+	.feedback-score-wrap {
+		width: 100%;
 	}
 
 	.feedback-grid {
