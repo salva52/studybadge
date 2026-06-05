@@ -1,17 +1,15 @@
 <template>
 	<div class="study-calendar-page">
 		<header class="calendar-header">
-			<div>
-				<div class="eyebrow">
-					<Crown class="size-4" />
-					<span>{{ __('Coach IA Plus') }}</span>
-				</div>
+			<div class="header-copy">
+				<span class="header-kicker">{{ __('Coach IA Plus') }}</span>
 				<h1>{{ __('Calendario Inteligente') }}</h1>
-				<p>{{ __('Sesiones IA, examenes, tareas y recordatorios en un solo lugar.') }}</p>
+				<p>{{ __('Organiza sesiones, examenes, tareas y recordatorios desde un solo panel.') }}</p>
 			</div>
+
 			<div class="header-actions">
 				<button class="icon-button" :title="__('Recargar')" @click="loadDashboard">
-					<RefreshCw class="size-5" />
+					<RefreshCw class="size-4" />
 				</button>
 				<button class="primary-button" @click="startCreate()">
 					<Plus class="size-4" />
@@ -22,15 +20,20 @@
 
 		<section class="coach-strip">
 			<div class="coach-icon">
-				<Sparkles class="size-5" />
+				<Sparkles class="size-4" />
 			</div>
 			<div class="coach-copy">
 				<strong>{{ __('Mi guia de estudio') }}</strong>
-				<p>{{ generatedMessage || coachMessage?.message }}</p>
+				<p>{{ generatedMessage || coachMessage?.message || __('Crea o vincula un evento para recibir una recomendacion de estudio.') }}</p>
 			</div>
-			<button v-if="access?.is_plus" class="secondary-button" :disabled="!nextEvent || generating" @click="generateCoachMessage(nextEvent)">
+			<button
+				v-if="access?.is_plus"
+				class="secondary-button"
+				:disabled="!nextEvent || generating"
+				@click="generateCoachMessage(nextEvent)"
+			>
 				<Wand2 class="size-4" />
-				<span>{{ generating ? __('Generando...') : __('Generar mensaje IA') }}</span>
+				<span>{{ generating ? __('Generando...') : __('Generar IA') }}</span>
 			</button>
 			<router-link v-else :to="{ name: 'Plus' }" class="secondary-button plus-link">
 				<Crown class="size-4" />
@@ -39,7 +42,7 @@
 		</section>
 
 		<div v-if="loading" class="loading-state">
-			<Loader2 class="size-6 spin" />
+			<Loader2 class="size-5 spin" />
 			<span>{{ __('Cargando calendario...') }}</span>
 		</div>
 
@@ -48,14 +51,14 @@
 				<main class="calendar-main">
 					<div class="month-toolbar">
 						<button class="icon-button" :title="__('Mes anterior')" @click="moveMonth(-1)">
-							<ChevronLeft class="size-5" />
+							<ChevronLeft class="size-4" />
 						</button>
-						<div>
+						<div class="month-title">
 							<strong>{{ monthLabel }}</strong>
 							<small>{{ visibleEvents.length }} {{ __('eventos') }}</small>
 						</div>
 						<button class="icon-button" :title="__('Mes siguiente')" @click="moveMonth(1)">
-							<ChevronRight class="size-5" />
+							<ChevronRight class="size-4" />
 						</button>
 					</div>
 
@@ -70,8 +73,15 @@
 						>
 							<span class="day-number">{{ cell.day }}</span>
 							<div class="day-events">
-								<span v-for="event in eventsByDay[cell.key]?.slice(0, 3)" :key="event.name" :class="['event-dot', event.event_type]">
+								<span
+									v-for="event in eventsByDay[cell.key]?.slice(0, 2)"
+									:key="event.name"
+									:class="['event-dot', event.event_type]"
+								>
 									{{ event.title }}
+								</span>
+								<span v-if="eventsByDay[cell.key]?.length > 2" class="event-more">
+									+{{ eventsByDay[cell.key].length - 2 }}
 								</span>
 							</div>
 						</button>
@@ -111,7 +121,7 @@
 										:title="__('Practicar con IA')"
 										:to="{ name: 'AISessionRoom', params: { sessionId: event.linked_ai_session } }"
 									>
-										<Bot class="size-5" />
+										<Bot class="size-4" />
 									</router-link>
 									<button class="icon-button" :title="__('Editar')" @click="editEvent(event)">
 										<Pencil class="size-4" />
@@ -122,8 +132,9 @@
 								</div>
 							</article>
 						</div>
+
 						<div v-else class="empty-day">
-							<CalendarDays class="size-5" />
+							<CalendarDays class="size-4" />
 							<span>{{ __('Agenda un examen, tarea o recordatorio de estudio.') }}</span>
 						</div>
 					</section>
@@ -133,25 +144,25 @@
 					<section class="plan-status">
 						<div>
 							<strong>{{ access?.is_plus ? __('Plus activo') : __('Plan gratuito') }}</strong>
-							<small v-if="access?.is_plus">{{ __('Eventos ilimitados y Coach IA personalizado') }}</small>
+							<small v-if="access?.is_plus">{{ __('Coach IA y eventos ilimitados') }}</small>
 							<small v-else>{{ access?.events_used || 0 }}/{{ access?.free_event_limit || 5 }} {{ __('eventos gratis') }}</small>
 						</div>
-						<Crown v-if="access?.is_plus" class="size-5 gold" />
-						<LockKeyhole v-else class="size-5 muted-icon" />
+						<Crown v-if="access?.is_plus" class="size-4 gold" />
+						<LockKeyhole v-else class="size-4 muted-icon" />
 					</section>
 
 					<form class="event-form" @submit.prevent="saveEvent">
 						<div class="form-head">
 							<div>
 								<strong>{{ editingEvent ? __('Editar evento') : __('Crear evento') }}</strong>
-								<small>{{ __('Vinculalo con una Sesion IA si corresponde.') }}</small>
+								<small>{{ __('Conectalo con una Sesion IA.') }}</small>
 							</div>
 							<button v-if="editingEvent" type="button" class="icon-button" :title="__('Cancelar')" @click="resetDraft">
 								<X class="size-4" />
 							</button>
 						</div>
 
-						<label>
+						<label class="field-wide">
 							<span>{{ __('Titulo') }}</span>
 							<input v-model="draft.title" required :placeholder="__('Examen de Matematica Basica')" />
 						</label>
@@ -169,8 +180,8 @@
 							</label>
 						</div>
 
-						<label>
-							<span>{{ __('Tema especifico') }}</span>
+						<label class="field-wide">
+							<span>{{ __('Tema') }}</span>
 							<input v-model="draft.topic" :placeholder="__('Matrices y metodo de Gauss')" />
 						</label>
 
@@ -204,8 +215,8 @@
 							</label>
 						</div>
 
-						<label>
-							<span>{{ __('Sesion IA vinculada') }}</span>
+						<label class="field-wide">
+							<span>{{ __('Sesion IA') }}</span>
 							<select v-model="draft.linked_ai_session">
 								<option value="">{{ __('Sin vincular') }}</option>
 								<option v-for="session in sessions" :key="session.name" :value="session.name">
@@ -601,182 +612,158 @@ function toServerDatetime(value) {
 </script>
 
 <style scoped>
-/* ─── Base ─────────────────────────────────────────────────── */
 .study-calendar-page {
 	height: 100vh;
+	min-height: 720px;
 	overflow: hidden;
 	display: grid;
-	grid-template-rows: auto auto 1fr;
-	gap: 0;
-	background: #f9fafb;
-	color: #111827;
-	font-size: 0.875rem;
-	padding: 1rem 1.25rem;
-	box-sizing: border-box;
+	grid-template-rows: auto auto minmax(0, 1fr);
+	gap: 0.75rem;
+	background: #f6f7f9;
+	color: #101828;
+	padding: 1rem;
 }
 
-/* ─── Header ────────────────────────────────────────────────── */
+.calendar-header,
+.coach-strip,
+.calendar-layout {
+	width: min(1480px, 100%);
+	margin: 0 auto;
+}
+
 .calendar-header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 1rem;
-	padding-bottom: 0.75rem;
-	max-width: 1440px;
-	width: 100%;
-	margin: 0 auto;
+	min-height: 64px;
 }
 
-.eyebrow {
+.header-copy {
+	min-width: 0;
+}
+
+.header-kicker {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.3rem;
+	width: fit-content;
+	border: 1px solid #d9dee7;
+	border-radius: 999px;
+	background: #ffffff;
+	color: #475467;
+	padding: 0.22rem 0.55rem;
 	font-size: 0.7rem;
 	font-weight: 700;
-	letter-spacing: 0.06em;
-	text-transform: uppercase;
-	color: #92400e;
-	background: #fef3c7;
-	border: 1px solid #fde68a;
-	border-radius: 4px;
-	padding: 0.2rem 0.55rem;
-	margin-bottom: 0.35rem;
+	letter-spacing: 0.01em;
 }
 
 .calendar-header h1 {
-	margin: 0;
-	font-size: clamp(1.25rem, 2.5vw, 1.75rem);
-	font-weight: 700;
+	margin: 0.3rem 0 0.1rem;
+	font-size: clamp(1.45rem, 2.8vw, 2.3rem);
+	line-height: 1.05;
 	letter-spacing: -0.03em;
-	line-height: 1.1;
-	color: #111827;
+	color: #101828;
+}
+
+.calendar-header p,
+.coach-copy p,
+.event-body p,
+.event-meta,
+.planner-panel small,
+.month-toolbar small,
+.section-head small,
+.empty-day,
+.empty-small {
+	color: #667085;
 }
 
 .calendar-header p {
-	margin: 0.15rem 0 0;
-	color: #6b7280;
-	font-size: 0.78rem;
+	max-width: 620px;
+	margin: 0;
+	font-size: 0.88rem;
+	line-height: 1.35;
 }
 
-.header-actions {
+.header-actions,
+.row-actions,
+.section-head,
+.month-toolbar,
+.reminder-row,
+.event-meta span,
+.type-pill,
+.event-title-line span {
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
+}
+
+.header-actions {
 	flex-shrink: 0;
 }
 
-/* ─── Coach Strip ───────────────────────────────────────────── */
-.coach-strip {
-	display: grid;
-	grid-template-columns: 36px minmax(0, 1fr) auto;
-	align-items: center;
-	gap: 0.75rem;
-	background: white;
-	border: 1px solid #e5e7eb;
-	border-radius: 8px;
-	padding: 0.65rem 0.9rem;
-	margin-bottom: 0.75rem;
-	max-width: 1440px;
-	width: 100%;
-	margin-left: auto;
-	margin-right: auto;
-}
-
-.coach-icon {
-	display: grid;
-	width: 36px;
-	height: 36px;
-	place-items: center;
-	border-radius: 6px;
-	background: #fef9ee;
-	color: #92400e;
-	border: 1px solid #fde68a;
-	flex-shrink: 0;
-}
-
-.coach-copy strong {
-	font-size: 0.78rem;
-	font-weight: 700;
-	color: #111827;
-}
-
-.coach-copy p {
-	margin: 0.1rem 0 0;
-	font-size: 0.75rem;
-	color: #6b7280;
-	line-height: 1.4;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-}
-
-/* ─── Buttons ───────────────────────────────────────────────── */
 .primary-button,
 .secondary-button,
 .icon-button {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 0.35rem;
+	gap: 0.45rem;
 	border: 1px solid transparent;
-	border-radius: 6px;
-	font-weight: 600;
-	font-size: 0.8rem;
+	border-radius: 10px;
+	font-weight: 700;
 	line-height: 1;
-	cursor: pointer;
-	transition: background 0.12s, border-color 0.12s, opacity 0.12s;
-	white-space: nowrap;
+	transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 
 .primary-button {
-	height: 34px;
+	min-height: 38px;
 	background: #111827;
-	color: white;
-	padding: 0 0.85rem;
+	color: #ffffff;
+	padding: 0 0.9rem;
 }
 
 .primary-button:hover:not(:disabled) {
-	background: #1f2937;
+	background: #000000;
 }
 
-.secondary-button {
-	height: 34px;
-	background: white;
-	border-color: #d1d5db;
-	color: #374151;
-	padding: 0 0.85rem;
-}
-
-.secondary-button:hover:not(:disabled) {
-	background: #f9fafb;
-	border-color: #9ca3af;
-}
-
+.secondary-button,
 .icon-button {
-	width: 34px;
-	height: 34px;
-	background: white;
-	border-color: #d1d5db;
-	color: #374151;
-	padding: 0;
+	background: #ffffff;
+	border-color: #d0d5dd;
+	color: #101828;
 }
 
+.secondary-button:hover:not(:disabled),
 .icon-button:hover {
-	background: #f3f4f6;
+	background: #f9fafb;
+	border-color: #98a2b3;
 }
 
 .icon-button.danger {
-	color: #dc2626;
+	color: #b42318;
 }
 
 .icon-button.danger:hover {
-	background: #fef2f2;
-	border-color: #fca5a5;
+	border-color: #fecdca;
+	background: #fffbfa;
+}
+
+.secondary-button {
+	min-height: 36px;
+	padding: 0 0.75rem;
+	font-size: 0.84rem;
+}
+
+.icon-button {
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	flex: 0 0 auto;
 }
 
 .primary-button:disabled,
 .secondary-button:disabled {
-	opacity: 0.45;
+	opacity: 0.55;
 	cursor: not-allowed;
 }
 
@@ -785,227 +772,297 @@ function toServerDatetime(value) {
 }
 
 .compact {
-	height: 30px;
-	padding: 0 0.6rem;
-	font-size: 0.76rem;
+	min-height: 32px;
+	padding: 0 0.65rem;
+	font-size: 0.8rem;
 }
 
 .plus-link {
 	text-decoration: none;
 }
 
-/* ─── Loading ───────────────────────────────────────────────── */
+.coach-strip {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 0.75rem;
+	border: 1px solid #d9dee7;
+	border-radius: 14px;
+	background: #ffffff;
+	padding: 0.65rem 0.75rem;
+	box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.coach-icon {
+	display: grid;
+	width: 34px;
+	height: 34px;
+	place-items: center;
+	border-radius: 10px;
+	background: #f2f4f7;
+	color: #344054;
+}
+
+.coach-copy {
+	min-width: 0;
+}
+
+.coach-copy strong,
+.event-body strong,
+.form-head strong,
+.plan-status strong,
+.section-head strong,
+.month-toolbar strong,
+.upcoming-item strong {
+	color: #101828;
+}
+
+.coach-copy p {
+	overflow: hidden;
+	display: -webkit-box;
+	margin: 0.12rem 0 0;
+	font-size: 0.86rem;
+	line-height: 1.35;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+}
+
 .loading-state {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 0.5rem;
-	color: #9ca3af;
-	font-size: 0.8rem;
+	gap: 0.55rem;
+	color: #667085;
 }
 
 .spin {
 	animation: spin 0.9s linear infinite;
 }
 
-/* ─── Layout ────────────────────────────────────────────────── */
 .calendar-layout {
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) 340px;
-	gap: 0.75rem;
-	max-width: 1440px;
-	width: 100%;
-	margin: 0 auto;
 	min-height: 0;
-	overflow: hidden;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(330px, 390px);
+	gap: 0.75rem;
+}
+
+.calendar-main,
+.planner-panel {
+	min-width: 0;
+	min-height: 0;
 }
 
 .calendar-main {
 	display: grid;
-	grid-template-rows: auto auto 1fr;
-	gap: 0.5rem;
-	min-height: 0;
-	overflow: hidden;
+	grid-template-rows: auto minmax(300px, 1fr) minmax(118px, 0.38fr);
+	gap: 0.75rem;
 }
 
-.planner-panel {
-	display: grid;
-	grid-template-rows: auto 1fr auto;
-	gap: 0.5rem;
-	min-height: 0;
-	overflow: hidden;
-}
-
-/* ─── Month Toolbar ─────────────────────────────────────────── */
 .month-toolbar {
-	display: flex;
-	align-items: center;
 	justify-content: space-between;
-	gap: 0.5rem;
-	background: white;
-	border: 1px solid #e5e7eb;
-	border-radius: 8px;
-	padding: 0.5rem 0.75rem;
+	border: 1px solid #d9dee7;
+	border-radius: 14px;
+	background: #ffffff;
+	padding: 0.55rem;
+	box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
 }
 
-.month-toolbar > div {
+.month-title {
+	display: grid;
 	text-align: center;
-}
-
-.month-toolbar strong {
-	display: block;
-	font-size: 0.85rem;
-	font-weight: 700;
-	color: #111827;
+	gap: 0.05rem;
 	text-transform: capitalize;
 }
 
-.month-toolbar small {
-	font-size: 0.68rem;
-	color: #9ca3af;
-}
-
-/* ─── Calendar Grid ─────────────────────────────────────────── */
 .calendar-grid {
+	min-height: 0;
 	display: grid;
 	grid-template-columns: repeat(7, minmax(0, 1fr));
+	grid-auto-rows: minmax(0, 1fr);
 	gap: 1px;
-	background: #e5e7eb;
-	border: 1px solid #e5e7eb;
-	border-radius: 8px;
 	overflow: hidden;
+	border: 1px solid #d9dee7;
+	border-radius: 14px;
+	background: #e4e7ec;
+	box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
 }
 
 .weekday {
-	background: #f3f4f6;
-	color: #9ca3af;
-	font-size: 0.65rem;
-	font-weight: 700;
-	letter-spacing: 0.06em;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 28px;
+	background: #f2f4f7;
+	color: #667085;
+	font-size: 0.66rem;
+	font-weight: 800;
 	text-transform: uppercase;
-	padding: 0.4rem;
-	text-align: center;
 }
 
 .day-cell {
+	position: relative;
 	display: grid;
-	align-content: start;
-	gap: 0.2rem;
-	background: white;
-	padding: 0.4rem;
+	grid-template-rows: auto minmax(0, 1fr);
+	gap: 0.25rem;
+	min-height: 0;
+	border: 0;
+	background: #ffffff;
+	padding: 0.45rem;
 	text-align: left;
 	cursor: pointer;
-	border: 0;
-	min-height: 0;
-	transition: background 0.1s;
 }
 
-.day-cell:hover {
-	background: #f9fafb;
-}
-
+.day-cell:hover,
 .day-cell.selected {
-	background: #f0f9ff;
+	background: #f9fafb;
 	outline: 2px solid #111827;
 	outline-offset: -2px;
 }
 
 .day-cell.muted {
-	background: #fafafa;
-	color: #d1d5db;
+	background: #fbfcfe;
+	color: #98a2b3;
 }
 
 .day-cell.today .day-number {
 	background: #111827;
-	color: white;
+	color: #ffffff;
 }
 
 .day-number {
 	display: grid;
-	width: 22px;
-	height: 22px;
+	width: 24px;
+	height: 24px;
 	place-items: center;
-	border-radius: 4px;
-	font-size: 0.72rem;
-	font-weight: 700;
+	border-radius: 8px;
+	font-size: 0.78rem;
+	font-weight: 800;
 }
 
 .day-events {
 	display: grid;
-	gap: 0.15rem;
+	align-content: start;
+	gap: 0.2rem;
 	min-width: 0;
+	overflow: hidden;
 }
 
 .event-dot {
 	overflow: hidden;
-	border-radius: 3px;
-	padding: 0.12rem 0.3rem;
-	font-size: 0.6rem;
-	font-weight: 600;
+	border: 1px solid transparent;
+	border-radius: 7px;
+	padding: 0.16rem 0.3rem;
+	font-size: 0.66rem;
+	font-weight: 700;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-/* ─── Day Agenda ────────────────────────────────────────────── */
+.event-more {
+	width: fit-content;
+	border-radius: 999px;
+	background: #f2f4f7;
+	color: #475467;
+	padding: 0.1rem 0.32rem;
+	font-size: 0.66rem;
+	font-weight: 800;
+}
+
+.event-dot.exam,
+.type-mark.exam,
+.type-pill.exam {
+	background: #fef3f2;
+	color: #b42318;
+}
+
+.event-dot.task,
+.type-mark.task,
+.type-pill.task {
+	background: #eff8ff;
+	color: #175cd3;
+}
+
+.event-dot.delivery,
+.type-mark.delivery,
+.type-pill.delivery {
+	background: #fffaeb;
+	color: #b54708;
+}
+
+.event-dot.class,
+.type-mark.class,
+.type-pill.class {
+	background: #ecfdf3;
+	color: #027a48;
+}
+
+.event-dot.practice,
+.type-mark.practice,
+.type-pill.practice {
+	background: #f4f3ff;
+	color: #5925dc;
+}
+
+.event-dot.reminder,
+.type-mark.reminder,
+.type-pill.reminder {
+	background: #f0f9ff;
+	color: #026aa2;
+}
+
+.day-agenda,
+.event-form,
+.plan-status,
+.upcoming-panel {
+	border: 1px solid #d9dee7;
+	border-radius: 14px;
+	background: #ffffff;
+	box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
 .day-agenda {
-	background: white;
-	border: 1px solid #e5e7eb;
-	border-radius: 8px;
-	padding: 0.75rem;
 	min-height: 0;
-	overflow-y: auto;
+	display: grid;
+	grid-template-rows: auto minmax(0, 1fr);
+	padding: 0.75rem;
+	overflow: hidden;
 }
 
 .section-head {
-	display: flex;
-	align-items: center;
 	justify-content: space-between;
-	gap: 0.5rem;
+	min-width: 0;
 }
 
 .section-head > div,
 .form-head > div,
 .plan-status > div {
 	display: grid;
-	gap: 0.1rem;
-}
-
-.section-head strong,
-.form-head strong,
-.plan-status strong {
-	font-size: 0.82rem;
-	font-weight: 700;
-	color: #111827;
-}
-
-.section-head small,
-.form-head small,
-.month-toolbar small,
-.planner-panel small {
-	font-size: 0.68rem;
-	color: #9ca3af;
+	gap: 0.12rem;
+	min-width: 0;
 }
 
 .event-list {
+	min-height: 0;
 	display: grid;
+	align-content: start;
 	gap: 0.45rem;
-	margin-top: 0.65rem;
+	margin-top: 0.55rem;
+	overflow: auto;
+	padding-right: 0.15rem;
 }
 
 .event-row {
 	display: grid;
-	grid-template-columns: 3px minmax(0, 1fr) auto;
-	gap: 0.6rem;
-	border: 1px solid #f3f4f6;
-	border-radius: 6px;
-	padding: 0.6rem;
-	align-items: start;
+	grid-template-columns: 7px minmax(0, 1fr) auto;
+	gap: 0.55rem;
+	border: 1px solid #eaecf0;
+	border-radius: 12px;
+	padding: 0.55rem;
 }
 
 .type-mark {
-	width: 3px;
+	width: 7px;
 	border-radius: 999px;
-	align-self: stretch;
 }
 
 .event-body {
@@ -1017,89 +1074,93 @@ function toServerDatetime(value) {
 	align-items: center;
 	justify-content: space-between;
 	gap: 0.5rem;
+	min-width: 0;
 }
 
-.event-title-line strong {
-	font-size: 0.8rem;
-	font-weight: 600;
-	color: #111827;
+.event-title-line strong,
+.upcoming-item strong {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .event-title-line span,
 .type-pill {
-	border-radius: 3px;
-	padding: 0.15rem 0.4rem;
-	font-size: 0.62rem;
-	font-weight: 700;
-	letter-spacing: 0.03em;
+	border-radius: 999px;
+	padding: 0.16rem 0.42rem;
+	font-size: 0.64rem;
+	font-weight: 800;
+	white-space: nowrap;
 }
 
 .event-body p {
-	margin: 0.2rem 0 0;
-	font-size: 0.72rem;
-	color: #6b7280;
+	overflow: hidden;
+	margin: 0.18rem 0 0;
+	font-size: 0.8rem;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .event-meta {
-	display: flex;
 	flex-wrap: wrap;
-	gap: 0.4rem;
+	gap: 0.45rem;
 	margin-top: 0.35rem;
-	font-size: 0.68rem;
-	color: #9ca3af;
-}
-
-.event-meta span {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.2rem;
+	font-size: 0.72rem;
+	font-weight: 700;
 }
 
 .row-actions {
-	display: flex;
-	align-items: center;
-	gap: 0.3rem;
+	justify-content: flex-end;
+	gap: 0.35rem;
 }
 
 .empty-day,
 .empty-small {
 	display: flex;
 	align-items: center;
-	gap: 0.4rem;
-	padding: 0.75rem 0;
-	color: #9ca3af;
-	font-size: 0.76rem;
+	gap: 0.45rem;
+	padding: 0.65rem 0;
+	font-size: 0.84rem;
+	font-weight: 700;
 }
 
-/* ─── Plan Status ───────────────────────────────────────────── */
+.planner-panel {
+	display: grid;
+	grid-template-rows: auto minmax(0, 1fr) minmax(120px, 0.35fr);
+	align-content: start;
+	gap: 0.75rem;
+}
+
 .plan-status {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	padding: 0.65rem 0.75rem;
-	background: white;
-	border: 1px solid #e5e7eb;
-	border-radius: 8px;
 }
 
 .gold {
-	color: #d97706;
+	color: #b54708;
 }
 
 .muted-icon {
-	color: #d1d5db;
+	color: #98a2b3;
 }
 
-/* ─── Event Form ────────────────────────────────────────────── */
 .event-form {
-	display: grid;
-	gap: 0.5rem;
-	padding: 0.75rem;
-	background: white;
-	border: 1px solid #e5e7eb;
-	border-radius: 8px;
-	overflow-y: auto;
 	min-height: 0;
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	align-content: start;
+	gap: 0.55rem;
+	padding: 0.75rem;
+	overflow: hidden;
+}
+
+.form-head,
+.field-wide,
+.reminder-row,
+.event-form .full {
+	grid-column: 1 / -1;
 }
 
 .form-head {
@@ -1111,290 +1172,328 @@ function toServerDatetime(value) {
 
 .event-form label {
 	display: grid;
-	gap: 0.25rem;
+	gap: 0.26rem;
+	min-width: 0;
 }
 
 .event-form label > span,
 .check-row span {
+	color: #475467;
 	font-size: 0.7rem;
-	font-weight: 600;
-	color: #6b7280;
-	letter-spacing: 0.02em;
-	text-transform: uppercase;
+	font-weight: 800;
 }
 
 .event-form input,
 .event-form select {
 	width: 100%;
-	height: 32px;
-	border: 1px solid #e5e7eb;
-	border-radius: 5px;
-	background: #f9fafb;
-	color: #111827;
+	min-height: 34px;
+	border: 1px solid #d0d5dd;
+	border-radius: 9px;
+	background: #ffffff;
+	color: #101828;
 	padding: 0 0.6rem;
 	font: inherit;
-	font-size: 0.8rem;
-	transition: border-color 0.12s;
-	box-sizing: border-box;
+	font-size: 0.82rem;
+	outline: none;
 }
 
 .event-form input:focus,
 .event-form select:focus {
-	outline: none;
-	border-color: #6b7280;
-	background: white;
+	border-color: #111827;
+	box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
 }
 
 .two-cols {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 0.45rem;
+	gap: 0.55rem;
+	grid-column: 1 / -1;
 }
 
 .check-row {
 	display: inline-flex !important;
+	grid-template-columns: auto 1fr;
 	align-items: center;
-	gap: 0.4rem !important;
+	gap: 0.45rem !important;
 }
 
 .check-row input {
-	width: 14px;
-	min-height: 14px;
+	width: 15px;
+	min-height: 15px;
 }
 
 .reminder-row {
-	display: flex;
-	align-items: center;
 	justify-content: space-between;
-	gap: 0.5rem;
+	gap: 0.55rem;
 }
 
 .reminder-row select {
-	max-width: 160px;
+	max-width: 180px;
 }
 
-/* ─── Upcoming Panel ────────────────────────────────────────── */
 .upcoming-panel {
-	padding: 0.65rem 0.75rem;
-	background: white;
-	border: 1px solid #e5e7eb;
-	border-radius: 8px;
 	min-height: 0;
-	overflow-y: auto;
+	display: grid;
+	grid-template-rows: auto minmax(0, 1fr);
+	padding: 0.75rem;
+	overflow: hidden;
 }
 
 .compact-head {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 0.5rem;
-}
-
-.compact-head strong {
-	font-size: 0.78rem;
-	font-weight: 700;
-	color: #111827;
-}
-
-.compact-head small {
-	font-size: 0.68rem;
-	background: #f3f4f6;
-	color: #6b7280;
-	border-radius: 999px;
-	padding: 0.1rem 0.45rem;
+	margin-bottom: 0.45rem;
 }
 
 .upcoming-list {
+	min-height: 0;
 	display: grid;
-	gap: 0.35rem;
+	align-content: start;
+	gap: 0.4rem;
+	overflow: auto;
+	padding-right: 0.15rem;
 }
 
 .upcoming-item {
 	display: grid;
 	gap: 0.18rem;
-	border: 1px solid #f3f4f6;
-	border-radius: 6px;
-	background: #fafafa;
-	padding: 0.5rem 0.6rem;
+	border: 1px solid #eaecf0;
+	border-radius: 10px;
+	background: #ffffff;
+	padding: 0.5rem;
 	text-align: left;
-	cursor: pointer;
-	transition: border-color 0.12s, background 0.12s;
 }
 
 .upcoming-item:hover {
-	border-color: #d1d5db;
-	background: white;
+	border-color: #111827;
+	background: #f9fafb;
 }
 
 .upcoming-item .type-pill {
 	width: fit-content;
 }
 
-.upcoming-item strong {
-	font-size: 0.76rem;
-	font-weight: 600;
-	color: #111827;
-}
-
-.upcoming-item small {
-	font-size: 0.67rem;
-	color: #9ca3af;
-}
-
-/* ─── Event Type Colors ─────────────────────────────────────── */
-.event-dot.exam,
-.type-mark.exam,
-.type-pill.exam {
-	background: #fee2e2;
-	color: #991b1b;
-}
-
-.event-dot.task,
-.type-mark.task,
-.type-pill.task {
-	background: #dbeafe;
-	color: #1e40af;
-}
-
-.event-dot.delivery,
-.type-mark.delivery,
-.type-pill.delivery {
-	background: #fef3c7;
-	color: #92400e;
-}
-
-.event-dot.class,
-.type-mark.class,
-.type-pill.class {
-	background: #dcfce7;
-	color: #166534;
-}
-
-.event-dot.practice,
-.type-mark.practice,
-.type-pill.practice {
-	background: #ede9fe;
-	color: #5b21b6;
-}
-
-.event-dot.reminder,
-.type-mark.reminder,
-.type-pill.reminder {
-	background: #e0f2fe;
-	color: #075985;
-}
-
-/* ─── Animations ────────────────────────────────────────────── */
 @keyframes spin {
-	to { transform: rotate(360deg); }
+	to {
+		transform: rotate(360deg);
+	}
 }
 
-/* ─── Tablet ────────────────────────────────────────────────── */
-@media (max-width: 1100px) {
+@media (max-width: 1180px) {
 	.study-calendar-page {
-		height: auto;
+		min-height: 820px;
 		overflow: auto;
-		grid-template-rows: auto auto auto;
 	}
 
 	.calendar-layout {
 		grid-template-columns: 1fr;
-		overflow: visible;
 	}
 
 	.calendar-main {
-		overflow: visible;
+		grid-template-rows: auto minmax(360px, 46vh) minmax(120px, auto);
 	}
 
 	.planner-panel {
-		grid-template-rows: auto auto auto;
-		overflow: visible;
+		grid-template-columns: minmax(0, 1fr) minmax(320px, 390px);
+		grid-template-rows: auto minmax(0, auto);
 	}
 
-	.day-agenda,
-	.event-form,
+	.plan-status {
+		grid-column: 1 / -1;
+	}
+
+	.event-form {
+		grid-column: 1;
+	}
+
 	.upcoming-panel {
-		overflow: visible;
+		grid-column: 2;
 	}
 }
 
-/* ─── Mobile ────────────────────────────────────────────────── */
-@media (max-width: 640px) {
+@media (max-width: 760px) {
 	.study-calendar-page {
+		height: auto;
+		min-height: 100dvh;
 		padding: 0.75rem;
-		gap: 0;
+		gap: 0.6rem;
+		overflow: auto;
 	}
 
 	.calendar-header {
-		flex-wrap: wrap;
-		padding-bottom: 0.6rem;
+		align-items: flex-start;
+		gap: 0.7rem;
 	}
 
 	.calendar-header h1 {
-		font-size: 1.2rem;
+		font-size: 1.45rem;
+	}
+
+	.calendar-header p {
+		display: none;
 	}
 
 	.header-actions {
-		width: 100%;
-		justify-content: space-between;
+		gap: 0.45rem;
+	}
+
+	.primary-button {
+		min-height: 36px;
+		padding: 0 0.75rem;
 	}
 
 	.coach-strip {
-		grid-template-columns: 36px minmax(0, 1fr);
-		gap: 0.6rem;
+		grid-template-columns: minmax(0, 1fr) auto;
+		padding: 0.65rem;
 	}
 
-	.coach-strip > .secondary-button,
-	.coach-strip > .router-link {
-		grid-column: 1 / -1;
-		width: 100%;
+	.coach-icon {
+		display: none;
 	}
 
 	.coach-copy p {
-		white-space: normal;
-		overflow: visible;
+		-webkit-line-clamp: 1;
 	}
 
 	.calendar-layout {
 		gap: 0.6rem;
 	}
 
+	.calendar-main {
+		gap: 0.6rem;
+		grid-template-rows: auto 300px minmax(104px, auto);
+	}
+
+	.month-toolbar,
+	.day-agenda,
+	.event-form,
+	.plan-status,
+	.upcoming-panel {
+		border-radius: 12px;
+	}
+
 	.calendar-grid {
-		grid-template-columns: repeat(7, minmax(0, 1fr));
-	}
-
-	.day-cell {
-		min-height: 42px;
-		padding: 0.3rem;
-	}
-
-	.day-events {
-		display: none;
+		border-radius: 12px;
 	}
 
 	.weekday {
-		font-size: 0.6rem;
-		padding: 0.3rem 0.2rem;
+		min-height: 24px;
+		font-size: 0.58rem;
 	}
 
-	.two-cols {
-		grid-template-columns: 1fr;
+	.day-cell {
+		padding: 0.28rem;
+		gap: 0.12rem;
+	}
+
+	.day-number {
+		width: 20px;
+		height: 20px;
+		border-radius: 6px;
+		font-size: 0.7rem;
+	}
+
+	.event-dot {
+		max-width: 100%;
+		padding: 0;
+		border: 0;
+		background: currentColor !important;
+		color: currentColor !important;
+		height: 5px;
+		width: 5px;
+		border-radius: 999px;
+		text-indent: -999px;
+	}
+
+	.event-more {
+		padding: 0;
+		background: transparent;
+		font-size: 0.58rem;
+	}
+
+	.day-agenda {
+		padding: 0.65rem;
 	}
 
 	.event-row {
-		grid-template-columns: 3px minmax(0, 1fr);
+		grid-template-columns: 6px minmax(0, 1fr);
+		gap: 0.45rem;
+		padding: 0.5rem;
 	}
 
 	.row-actions {
 		grid-column: 2;
+		justify-content: flex-start;
 	}
 
-	.month-toolbar {
-		padding: 0.45rem 0.6rem;
+	.planner-panel {
+		grid-template-columns: 1fr;
+		grid-template-rows: auto auto auto;
+		gap: 0.6rem;
 	}
 
-	.plan-status {
-		padding: 0.5rem 0.65rem;
+	.event-form {
+		grid-template-columns: 1fr;
+		padding: 0.65rem;
+		gap: 0.5rem;
+	}
+
+	.two-cols {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.45rem;
+	}
+
+	.event-form input,
+	.event-form select {
+		min-height: 33px;
+		font-size: 0.8rem;
+		padding: 0 0.45rem;
+	}
+
+	.reminder-row {
+		align-items: center;
+	}
+
+	.reminder-row select {
+		max-width: 165px;
+	}
+
+	.upcoming-panel {
+		max-height: 180px;
+	}
+}
+
+@media (max-width: 430px) {
+	.header-kicker {
+		display: none;
+	}
+
+	.calendar-header {
+		min-height: auto;
+	}
+
+	.calendar-header h1 {
+		margin: 0;
+		font-size: 1.25rem;
+	}
+
+	.header-actions .primary-button span,
+	.coach-strip .secondary-button span {
+		display: none;
+	}
+
+	.coach-strip {
+		grid-template-columns: minmax(0, 1fr) auto;
+	}
+
+	.calendar-main {
+		grid-template-rows: auto 270px minmax(96px, auto);
+	}
+
+	.event-meta {
+		gap: 0.3rem;
+	}
+
+	.two-cols {
+		grid-template-columns: 1fr;
 	}
 }
 </style>
