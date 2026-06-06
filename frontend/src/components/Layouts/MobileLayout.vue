@@ -117,7 +117,8 @@
 			<nav
 				class="mobile-bottom-nav"
 				:class="{
-					'is-compact': isNavCompact && !showMenu && !navPressed,
+					'is-compact': (isNavCompact || forceMiniNav) && !showMenu && !navPressed,
+					'is-ai-minimized': forceMiniNav,
 					'is-expanded': showMenu || navPressed,
 				}"
 				aria-label="Navegación móvil"
@@ -195,6 +196,23 @@ let scrollTicking = false
 let navPressTimeout = null
 
 const fullScreenRoutes = ['AISessions', 'AISessionRoom', 'AISessionChat']
+
+const aiSessionsRoutes = ['AISessions', 'AISessionRoom', 'AISessionChat']
+
+const isAiSessionsPage = computed(() => {
+	const route = router.currentRoute.value
+	const routeName = route.name
+	const routePath = route.path || ''
+
+	return (
+		aiSessionsRoutes.includes(routeName) ||
+		routePath.includes('/ai-sessions')
+	)
+})
+
+const forceMiniNav = computed(() => {
+	return isAiSessionsPage.value && !showMenu.value && !navPressed.value
+})
 
 const showBottomSpacer = computed(() => {
 	return !fullScreenRoutes.includes(router?.currentRoute?.value?.name)
@@ -1786,5 +1804,51 @@ const getLinkDescription = (link) => {
 		right: 8px;
 		border-radius: 30px;
 	}
+}
+
+.mobile-bottom-nav.is-ai-minimized {
+	left: 76px;
+	right: 76px;
+	bottom: calc(8px + env(safe-area-inset-bottom));
+	min-height: 52px;
+	padding: 0.28rem;
+	opacity: 0.72;
+	transform: translateY(10px) scale(0.9);
+	z-index: 10 !important;
+}
+
+.mobile-bottom-nav.is-ai-minimized .mobile-nav-label {
+	max-height: 0;
+	margin-top: -0.25rem;
+	opacity: 0;
+	transform: translateY(6px) scale(0.9);
+}
+
+.mobile-bottom-nav.is-ai-minimized .mobile-nav-item {
+	min-height: 38px;
+}
+
+.mobile-bottom-nav.is-ai-minimized .mobile-nav-icon :deep(svg) {
+	width: 21px;
+	height: 21px;
+}
+
+.mobile-bottom-nav.is-ai-minimized:hover,
+.mobile-bottom-nav.is-ai-minimized:active {
+	left: 14px;
+	right: 14px;
+	bottom: calc(14px + env(safe-area-inset-bottom));
+	min-height: 76px;
+	opacity: 1;
+	transform: translateY(0) scale(1);
+	z-index: 90 !important;
+}
+
+.mobile-bottom-nav.is-ai-minimized:hover .mobile-nav-label,
+.mobile-bottom-nav.is-ai-minimized:active .mobile-nav-label {
+	max-height: 20px;
+	margin-top: 0;
+	opacity: 1;
+	transform: translateY(0) scale(1);
 }
 </style>
