@@ -205,39 +205,61 @@
 			</section>
 
 			<footer v-if="activeSession" class="composer-wrap">
-				<div v-if="pendingFiles.length" class="pending-row">
-					<span v-for="file in pendingFiles" :key="file.file_url">{{ file.file_name || file.file_url }}</span>
-				</div>
-				<div class="composer">
-					<button class="icon-btn" :title="__('Subir fuentes')" @click="openUploader">
-						<Paperclip class="size-5" />
-					</button>
-					<button class="icon-btn" :class="{ 'active-search': useSearch }" :title="__('Activar búsqueda en Google')" @click="useSearch = !useSearch">
-						<Globe class="size-5" />
-					</button>
-					<div class="relative mode-dropdown-wrapper">
-						<button class="icon-btn" :class="{ 'active-mode': showModesDropdown || chatMode !== 'chat' }" :title="__('Modos de IA')" @click="showModesDropdown = !showModesDropdown">
-							<Plus class="size-5" />
-						</button>
-						<div v-if="showModesDropdown" class="modes-dropdown-menu">
-							<div class="modes-header">{{ __('Modo de IA') }}</div>
-							<button v-for="m in chatModesList" :key="m.value" class="mode-dropdown-item" :class="{ active: chatMode === m.value }" @click="chatMode = m.value; showModesDropdown = false">
-								{{ m.label }}
+				<div class="composer-container">
+					<!-- Bandeja de archivos pendientes (Estilo 'Chips' modernos) -->
+					<div v-if="pendingFiles.length" class="pending-files-tray">
+						<div v-for="file in pendingFiles" :key="file.file_url" class="pending-chip">
+							<Paperclip class="size-3.5" />
+							<span class="pending-chip-text">{{ file.file_name || file.file_url }}</span>
+						</div>
+					</div>
+
+					<!-- Caja principal del input -->
+					<div class="composer">
+						<!-- Herramientas (Izquierda) -->
+						<div class="composer-tools">
+							<button class="composer-btn-ghost" :title="__('Subir fuentes')" @click="openUploader">
+								<Paperclip class="size-5" />
+							</button>
+							<button class="composer-btn-ghost" :class="{ 'is-active': useSearch }" :title="__('Activar búsqueda web')" @click="useSearch = !useSearch">
+								<Globe class="size-5" />
+							</button>
+							<div class="relative mode-dropdown-wrapper">
+								<button class="composer-btn-ghost" :class="{ 'is-active': showModesDropdown || chatMode !== 'chat' }" :title="__('Modos de IA')" @click="showModesDropdown = !showModesDropdown">
+									<Plus class="size-5" />
+								</button>
+								<div v-if="showModesDropdown" class="modes-dropdown-menu">
+									<div class="modes-header">{{ __('Modo de IA') }}</div>
+									<button v-for="m in chatModesList" :key="m.value" class="mode-dropdown-item" :class="{ active: chatMode === m.value }" @click="chatMode = m.value; showModesDropdown = false">
+										{{ m.label }}
+									</button>
+								</div>
+							</div>
+						</div>
+
+						<!-- Área de texto fluida -->
+						<textarea
+							ref="chatTextarea"
+							v-model="chatInput"
+							rows="1"
+							:placeholder="__('Escríbeme…')"
+							@input="autoResizeTextarea"
+							@keydown.enter.exact.prevent="sendChat"
+							@keydown.shift.enter.stop
+						/>
+
+						<!-- Botón de enviar interactivo (Derecha) -->
+						<div class="composer-send-wrapper">
+							<button 
+								class="composer-send" 
+								:class="{ 'can-send': chatInput.trim() || pendingFiles.length }" 
+								:disabled="chatLoading || (!chatInput.trim() && !pendingFiles.length)" 
+								@click="sendChat"
+							>
+								<SendHorizontal class="size-5" />
 							</button>
 						</div>
 					</div>
-					<textarea
-						ref="chatTextarea"
-						v-model="chatInput"
-						rows="1"
-						:placeholder="__('Escríbeme…')"
-						@input="autoResizeTextarea"
-						@keydown.enter.exact.prevent="sendChat"
-						@keydown.shift.enter.stop
-					/>
-					<button class="send-btn" :disabled="chatLoading || (!chatInput.trim() && !pendingFiles.length)" @click="sendChat">
-						<SendHorizontal class="size-5" />
-					</button>
 				</div>
 			</footer>
 		</main>
@@ -2248,78 +2270,158 @@ function formatDate(value) {
 	color: var(--sb-primary);
 }
 
-/* Composer */
+/* =========================================
+   COMPOSER (Área de escritura moderna)
+   ========================================= */
 .composer-wrap {
 	position: sticky;
 	bottom: 0;
 	z-index: 6;
 	width: 100%;
-	border-top: 1px solid rgba(229, 231, 235, 0.7);
-	background: rgba(247, 248, 250, 0.95);
-	padding: 0.75rem 1rem 1rem;
-	backdrop-filter: blur(14px);
+	/* Fondo difuminado moderno en lugar de un borde estricto */
+	background: linear-gradient(180deg, transparent 0%, var(--sb-bg) 20%);
+	padding: 0 1rem 1.5rem;
+}
+
+.composer-container {
+	position: relative;
+	width: min(860px, 100%);
+	margin: 0 auto;
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
 }
 
 .composer {
 	display: flex;
 	align-items: flex-end;
-	gap: 0.45rem;
-	width: min(920px, 100%);
-	margin: 0 auto;
-	border: 1px solid var(--sb-border-strong);
-	border-radius: 24px;
+	gap: 0.2rem;
 	background: var(--sb-panel);
-	padding: 0.45rem;
-	box-shadow: var(--sb-shadow-sm);
+	border: 1px solid var(--sb-border-strong);
+	border-radius: 26px; /* Forma de píldora/cápsula redonda */
+	padding: 0.35rem 0.5rem;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+	transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .composer:focus-within {
 	border-color: var(--sb-primary);
-	box-shadow: 0 0 0 3px rgba(10, 34, 81, 0.08);
+	box-shadow: 0 4px 24px rgba(10, 34, 81, 0.08);
 }
 
+/* Herramientas (Botones Izquierda) */
+.composer-tools {
+	display: flex;
+	align-items: center;
+	gap: 0.15rem;
+	padding-bottom: 0.18rem; /* Ancla los botones abajo cuando el textarea crece */
+}
+
+.composer-btn-ghost {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+	border: none;
+	background: transparent;
+	color: var(--sb-muted);
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.composer-btn-ghost:hover {
+	background: var(--sb-panel-soft);
+	color: var(--sb-text);
+}
+
+.composer-btn-ghost.is-active {
+	color: var(--sb-primary);
+	background: var(--sb-info-bg);
+}
+
+/* Textarea fluido */
 .composer textarea {
-	min-height: 42px;
-	max-height: 150px;
 	flex: 1;
-	resize: none;
-	border: 0;
-	outline: 0;
+	min-height: 42px;
+	max-height: 200px;
+	padding: 0.65rem 0.4rem;
+	border: none;
 	background: transparent;
 	color: var(--sb-text);
-	padding: 0.6rem 0.4rem;
-	font-size: 0.95rem;
-	line-height: 1.55;
+	font-size: 0.98rem;
+	line-height: 1.5;
+	resize: none;
+	outline: none;
 }
 
-.composer-meta {
-	width: min(920px, 100%);
-	margin: 0.35rem auto 0;
-	text-align: center;
+.composer textarea::placeholder {
+	color: var(--sb-soft);
 }
 
-.pending-row {
+/* Botón de Enviar dinámico (Derecha) */
+.composer-send-wrapper {
+	padding-bottom: 0.18rem;
+}
+
+.composer-send {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	border: none;
+	background: var(--sb-panel-soft);
+	color: var(--sb-muted);
+	cursor: pointer;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Estado activo: cuando hay texto o archivos */
+.composer-send.can-send {
+	background: var(--sb-primary);
+	color: white;
+	box-shadow: 0 4px 12px rgba(10, 34, 81, 0.2);
+}
+
+.composer-send.can-send:hover:not(:disabled) {
+	transform: scale(1.05);
+	background: var(--sb-primary-hover);
+}
+
+/* Archivos pendientes (Chips) */
+.pending-files-tray {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0.42rem;
-	width: min(920px, 100%);
-	margin: 0 auto 0.55rem;
+	gap: 0.5rem;
+	padding: 0 0.5rem;
 }
 
-.pending-row span {
+.pending-chip {
 	display: inline-flex;
 	align-items: center;
-	max-width: 100%;
+	gap: 0.35rem;
+	background: var(--sb-panel);
 	border: 1px solid var(--sb-border);
-	border-radius: 999px;
-	background: var(--sb-panel-muted);
-	padding: 0.34rem 0.62rem;
-	color: var(--sb-muted);
-	font-size: 0.74rem;
+	border-radius: 12px;
+	padding: 0.4rem 0.7rem;
+	font-size: 0.82rem;
 	font-weight: 650;
+	color: var(--sb-text);
+	box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+
+.pending-chip svg {
+	color: var(--sb-primary);
+}
+
+.pending-chip-text {
+	max-width: 180px;
+	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	white-space: nowrap;
 }
 
 /* Dropdown */
@@ -2909,9 +3011,44 @@ function formatDate(value) {
 	}
 }
 
-@media (max-width: 768px) {
+@media (max-width: 760px) {
 	.composer-wrap {
-		bottom: 80px;
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		z-index: 50;
+		padding: 0.5rem 0.6rem calc(0.8rem + env(safe-area-inset-bottom, 0px));
+		background: rgba(247, 248, 250, 0.88);
+		backdrop-filter: blur(14px);
+		-webkit-backdrop-filter: blur(14px);
+		border-top: 1px solid var(--sb-border);
+	}
+
+	.composer {
+		border-radius: 24px;
+		padding: 0.35rem;
+	}
+
+	.composer-btn-ghost {
+		width: 36px;
+		height: 36px;
+	}
+
+	.composer textarea {
+		min-height: 40px;
+		padding: 0.55rem 0.2rem;
+		font-size: 16px;
+	}
+
+	.composer-send {
+		width: 36px;
+		height: 36px;
+	}
+
+	.pending-chip {
+		padding: 0.3rem 0.6rem;
+		font-size: 0.75rem;
 	}
 }
 
@@ -2938,13 +3075,31 @@ function formatDate(value) {
 }
 
 :global(:root[data-theme='dark']) .chat-header,
-:global(.dark) .chat-header,
-:global(:root[data-theme='dark']) .composer-wrap,
-:global(.dark) .composer-wrap {
+:global(.dark) .chat-header {
 	background: rgba(11, 15, 23, 0.75);
 	backdrop-filter: blur(16px);
 	-webkit-backdrop-filter: blur(16px);
 	border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Soporte Dark Mode para el nuevo diseño */
+:global(:root[data-theme='dark']) .composer,
+:global(.dark) .composer {
+	background: var(--sb-panel);
+	border-color: rgba(255,255,255,0.08);
+}
+
+:global(:root[data-theme='dark']) .composer-wrap,
+:global(.dark) .composer-wrap {
+	background: linear-gradient(180deg, transparent 0%, var(--sb-bg) 35%);
+}
+
+@media (max-width: 760px) {
+	:global(:root[data-theme='dark']) .composer-wrap,
+	:global(.dark) .composer-wrap {
+		background: rgba(11, 15, 23, 0.85);
+		border-top-color: rgba(255,255,255,0.05);
+	}
 }
 
 :global(:root[data-theme='dark']) .message-row.user .message-bubble,
