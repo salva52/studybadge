@@ -120,17 +120,19 @@
 	:root {
 		--sb-primary: #0a2251;
 		--sb-primary-hover: #12356f;
+		--sb-primary-deep: #061634;
 		--sb-primary-soft: #eef4fb;
 		--sb-primary-softer: #f5f8fc;
 		--sb-gold: #f5b301;
-		--sb-bg: #f3f6fb;
+		--sb-gold-soft: rgba(245, 179, 1, 0.18);
+		--sb-bg: #eef3f9;
 		--sb-card: #ffffff;
 		--sb-text: #0f172a;
 		--sb-muted: #64748b;
 		--sb-soft: #94a3b8;
-		--sb-border: #d8e3f1;
+		--sb-border: #dce6f2;
 		--sb-border-strong: #b9cbe3;
-		--sb-shadow: 0 22px 58px rgba(10, 34, 81, 0.12);
+		--sb-shadow: 0 30px 72px rgba(10, 34, 81, 0.16);
 		--sb-shadow-soft: 0 12px 28px rgba(10, 34, 81, 0.08);
 	}
 
@@ -184,7 +186,7 @@
 
 	.sb-login-wrapper {
 		display: grid;
-		grid-template-columns: minmax(0, 1fr) minmax(410px, 0.82fr);
+		grid-template-columns: minmax(0, 1.08fr) minmax(410px, 0.8fr);
 		width: 100%;
 		min-height: 100svh;
 		background: var(--sb-bg);
@@ -197,29 +199,83 @@
 		flex-direction: column;
 		justify-content: space-between;
 		min-height: 100svh;
-		background: var(--sb-primary);
+		background:
+			radial-gradient(115% 90% at 12% 8%, #14397e 0%, rgba(20, 57, 126, 0) 55%),
+			linear-gradient(155deg, #0a2251 0%, #0c2a63 48%, var(--sb-primary-deep) 100%);
 		color: #ffffff;
-		padding: 2.2rem 3.3rem;
+		padding: 2.4rem 3.4rem;
 		overflow: hidden;
+	}
+
+	/* decorative layers */
+	.sb-login-left-bg {
+		position: absolute;
+		inset: 0;
+		z-index: 0;
+		pointer-events: none;
+		overflow: hidden;
+	}
+
+	.sb-login-left-bg::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background-image:
+			linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+		background-size: 46px 46px;
+		mask-image: radial-gradient(120% 90% at 30% 20%, #000 0%, transparent 72%);
+		-webkit-mask-image: radial-gradient(120% 90% at 30% 20%, #000 0%, transparent 72%);
+	}
+
+	.sb-glow {
+		position: absolute;
+		border-radius: 999px;
+		filter: blur(70px);
+		opacity: 0.55;
+	}
+
+	.sb-glow-gold {
+		width: 360px;
+		height: 360px;
+		top: -90px;
+		right: -60px;
+		background: radial-gradient(circle, rgba(245, 179, 1, 0.5) 0%, rgba(245, 179, 1, 0) 70%);
+		animation: sbFloat 11s ease-in-out infinite;
+	}
+
+	.sb-glow-blue {
+		width: 420px;
+		height: 420px;
+		bottom: -140px;
+		left: -120px;
+		background: radial-gradient(circle, rgba(64, 124, 235, 0.45) 0%, rgba(64, 124, 235, 0) 70%);
+		animation: sbFloat 13s ease-in-out infinite reverse;
+	}
+
+	@keyframes sbFloat {
+		0%, 100% { transform: translate(0, 0); }
+		50% { transform: translate(18px, -22px); }
 	}
 
 	.sb-login-left::before {
 		content: "";
 		position: absolute;
 		inset: 18px;
-		border: 1px solid rgba(255, 255, 255, 0.12);
+		z-index: 1;
+		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: 30px;
 		pointer-events: none;
 	}
 
 	.sb-login-left-inner {
 		position: relative;
-		z-index: 1;
+		z-index: 2;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-		min-height: calc(100svh - 4.4rem);
-		max-width: 610px;
+		min-height: calc(100svh - 4.8rem);
+		max-width: 600px;
 	}
 
 	.sb-login-brand {
@@ -227,7 +283,7 @@
 		align-items: center;
 		gap: 12px;
 		width: fit-content;
-		margin-bottom: 2.4rem;
+		margin-bottom: 2.2rem;
 	}
 
 	.sb-login-brand img {
@@ -237,7 +293,7 @@
 		object-fit: contain;
 		background: #ffffff;
 		padding: 4px;
-		box-shadow: 0 16px 34px rgba(0, 0, 0, 0.18);
+		box-shadow: 0 16px 34px rgba(0, 0, 0, 0.22);
 	}
 
 	.sb-login-brand-name {
@@ -252,13 +308,13 @@
 		align-items: center;
 		gap: 8px;
 		width: fit-content;
-		margin-bottom: 1rem;
-		border: 1px solid rgba(255, 255, 255, 0.16);
+		margin-bottom: 1.05rem;
+		border: 1px solid rgba(245, 179, 1, 0.32);
 		border-radius: 999px;
-		background: rgba(255, 255, 255, 0.08);
-		padding: 0.42rem 0.72rem;
-		color: rgba(255, 255, 255, 0.9);
-		font-size: 0.74rem;
+		background: rgba(245, 179, 1, 0.1);
+		padding: 0.44rem 0.78rem;
+		color: #ffe6a8;
+		font-size: 0.73rem;
 		font-weight: 850;
 		letter-spacing: 0.01em;
 	}
@@ -268,25 +324,169 @@
 		height: 8px;
 		border-radius: 999px;
 		background: var(--sb-gold);
-		box-shadow: 0 0 0 5px rgba(245, 179, 1, 0.16);
+		box-shadow: 0 0 0 5px var(--sb-gold-soft);
 	}
 
 	.sb-login-tagline h2 {
 		margin: 0;
 		max-width: 580px;
 		color: #ffffff;
-		font-size: clamp(2.45rem, 4.3vw, 4.25rem);
+		font-size: clamp(2.35rem, 4vw, 3.95rem);
 		font-weight: 950;
-		letter-spacing: -0.07em;
-		line-height: 0.95;
+		letter-spacing: -0.06em;
+		line-height: 0.98;
+	}
+
+	.sb-login-tagline h2 .sb-accent {
+		background: linear-gradient(100deg, var(--sb-gold) 10%, #ffd970 90%);
+		-webkit-background-clip: text;
+		background-clip: text;
+		-webkit-text-fill-color: transparent;
 	}
 
 	.sb-login-tagline p {
-		max-width: 520px;
+		max-width: 500px;
 		margin: 1.1rem 0 0;
-		color: rgba(255, 255, 255, 0.76);
+		color: rgba(255, 255, 255, 0.78);
 		font-size: 1rem;
-		line-height: 1.7;
+		line-height: 1.65;
+	}
+
+	/* product preview card */
+	.sb-hero-card {
+		max-width: 520px;
+		margin-top: 1.9rem;
+		border: 1px solid rgba(255, 255, 255, 0.14);
+		border-radius: 22px;
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%);
+		box-shadow: 0 26px 56px rgba(0, 0, 0, 0.28);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		overflow: hidden;
+		animation: sbRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+	}
+
+	@keyframes sbRise {
+		from { opacity: 0; transform: translateY(18px); }
+		to { opacity: 1; transform: translateY(0); }
+	}
+
+	.sb-hero-card-top {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		padding: 11px 15px;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		background: rgba(255, 255, 255, 0.04);
+	}
+
+	.sb-hero-dot {
+		width: 9px;
+		height: 9px;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.32);
+	}
+
+	.sb-hero-url {
+		margin-left: 8px;
+		color: rgba(255, 255, 255, 0.58);
+		font-size: 0.72rem;
+		font-weight: 700;
+		letter-spacing: 0.01em;
+	}
+
+	.sb-hero-card-body {
+		padding: 1.05rem 1.15rem 1.2rem;
+	}
+
+	.sb-hero-row {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 14px;
+	}
+
+	.sb-hero-label {
+		color: #ffe6a8;
+		font-size: 0.66rem;
+		font-weight: 900;
+		letter-spacing: 0.09em;
+		text-transform: uppercase;
+	}
+
+	.sb-hero-course {
+		margin-top: 5px;
+		color: #ffffff;
+		font-size: 1.02rem;
+		font-weight: 900;
+		letter-spacing: -0.02em;
+	}
+
+	.sb-hero-sub {
+		margin-top: 3px;
+		color: rgba(255, 255, 255, 0.62);
+		font-size: 0.76rem;
+		font-weight: 600;
+	}
+
+	.sb-hero-pct {
+		flex: 0 0 auto;
+		color: var(--sb-gold);
+		font-size: 1.5rem;
+		font-weight: 950;
+		letter-spacing: -0.04em;
+		line-height: 1;
+	}
+
+	.sb-hero-progress {
+		margin-top: 0.85rem;
+		height: 8px;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.14);
+		overflow: hidden;
+	}
+
+	.sb-hero-progress span {
+		display: block;
+		height: 100%;
+		border-radius: 999px;
+		background: linear-gradient(90deg, var(--sb-gold) 0%, #ffd970 100%);
+		box-shadow: 0 0 14px rgba(245, 179, 1, 0.5);
+		animation: sbFill 1.3s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both;
+	}
+
+	@keyframes sbFill {
+		from { width: 0; }
+	}
+
+	.sb-hero-stats {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 8px;
+		margin-top: 1rem;
+	}
+
+	.sb-hero-stat {
+		border: 1px solid rgba(255, 255, 255, 0.12);
+		border-radius: 13px;
+		background: rgba(255, 255, 255, 0.06);
+		padding: 9px 10px;
+	}
+
+	.sb-hero-stat strong {
+		display: block;
+		color: #ffffff;
+		font-size: 0.78rem;
+		font-weight: 900;
+		letter-spacing: -0.01em;
+	}
+
+	.sb-hero-stat span {
+		display: block;
+		margin-top: 2px;
+		color: rgba(255, 255, 255, 0.6);
+		font-size: 0.68rem;
+		font-weight: 600;
 	}
 
 	.sb-login-features {
@@ -294,67 +494,43 @@
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: 10px;
 		max-width: 520px;
-		margin-top: 1.6rem;
+		margin-top: 1.5rem;
 	}
 
 	.sb-login-feature {
 		display: flex;
 		align-items: center;
 		gap: 10px;
-		border: 1px solid rgba(255, 255, 255, 0.14);
-		border-radius: 16px;
-		background: rgba(255, 255, 255, 0.08);
-		padding: 12px 13px;
+		border: 1px solid rgba(255, 255, 255, 0.13);
+		border-radius: 14px;
+		background: rgba(255, 255, 255, 0.06);
+		padding: 11px 13px;
 		color: rgba(255, 255, 255, 0.92);
 		font-size: 0.82rem;
 		font-weight: 800;
+		transition: 0.2s ease;
+	}
+
+	.sb-login-feature:hover {
+		border-color: rgba(245, 179, 1, 0.4);
+		background: rgba(255, 255, 255, 0.1);
+		transform: translateY(-1px);
 	}
 
 	.sb-login-feature svg {
 		width: 18px;
 		height: 18px;
 		flex: 0 0 auto;
-		stroke: rgba(255, 255, 255, 0.92);
-	}
-
-	.sb-login-proof {
-		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 10px;
-		max-width: 520px;
-		margin-top: 1.6rem;
-	}
-
-	.sb-proof-card {
-		border: 1px solid rgba(255, 255, 255, 0.14);
-		border-radius: 18px;
-		background: rgba(255, 255, 255, 0.08);
-		padding: 13px;
-	}
-
-	.sb-proof-card strong {
-		display: block;
-		color: #ffffff;
-		font-size: 1.12rem;
-		font-weight: 950;
-		letter-spacing: -0.04em;
-	}
-
-	.sb-proof-card span {
-		display: block;
-		margin-top: 4px;
-		color: rgba(255, 255, 255, 0.68);
-		font-size: 0.72rem;
-		line-height: 1.35;
+		stroke: var(--sb-gold);
 	}
 
 	.sb-login-left-bottom {
 		position: relative;
-		z-index: 1;
+		z-index: 2;
 		display: flex;
 		align-items: center;
 		gap: 10px;
-		color: rgba(255, 255, 255, 0.62);
+		color: rgba(255, 255, 255, 0.6);
 		font-size: 0.76rem;
 		font-weight: 650;
 	}
@@ -407,12 +583,24 @@
 	}
 
 	.sb-login-form-container {
+		position: relative;
 		width: 100%;
 		border: 1px solid var(--sb-border);
 		border-radius: 28px;
 		background: var(--sb-card);
-		padding: 1.35rem;
+		padding: 1.6rem 1.45rem 1.45rem;
 		box-shadow: var(--sb-shadow);
+		overflow: hidden;
+	}
+
+	.sb-login-form-container::before {
+		content: "";
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 4px;
+		background: linear-gradient(90deg, var(--sb-primary) 0%, var(--sb-gold) 100%);
 	}
 
 	.sb-login-form-header {
@@ -423,17 +611,27 @@
 	.sb-form-eyebrow {
 		display: inline-flex;
 		align-items: center;
+		gap: 7px;
 		width: fit-content;
 		margin-bottom: 0.6rem;
 		border: 1px solid #dbe7f5;
 		border-radius: 999px;
 		background: var(--sb-primary-soft);
-		padding: 0.32rem 0.62rem;
+		padding: 0.32rem 0.66rem;
 		color: var(--sb-primary);
 		font-size: 0.66rem;
 		font-weight: 950;
 		letter-spacing: 0.07em;
 		text-transform: uppercase;
+	}
+
+	.sb-form-eyebrow::before {
+		content: "";
+		width: 6px;
+		height: 6px;
+		border-radius: 999px;
+		background: var(--sb-gold);
+		box-shadow: 0 0 0 3px var(--sb-gold-soft);
 	}
 
 	.sb-login-form-header h3 {
@@ -597,21 +795,21 @@
 		min-height: 46px !important;
 		border: 1px solid var(--sb-primary) !important;
 		border-radius: 15px !important;
-		background: var(--sb-primary) !important;
+		background: linear-gradient(135deg, #12356f 0%, var(--sb-primary) 60%, #081d44 100%) !important;
 		color: #ffffff !important;
 		padding: 0.72rem 1rem !important;
 		font-size: 0.92rem !important;
 		font-weight: 950 !important;
 		letter-spacing: -0.01em !important;
-		box-shadow: 0 14px 28px rgba(10, 34, 81, 0.17) !important;
+		box-shadow: 0 14px 28px rgba(10, 34, 81, 0.2) !important;
 		transition: 0.18s ease !important;
 	}
 
 	.sb-btn-login:hover {
-		background: var(--sb-primary-hover) !important;
+		background: linear-gradient(135deg, #1a4488 0%, #12356f 60%, #0a2251 100%) !important;
 		border-color: var(--sb-primary-hover) !important;
 		transform: translateY(-1px) !important;
-		box-shadow: 0 18px 36px rgba(10, 34, 81, 0.23) !important;
+		box-shadow: 0 18px 38px rgba(10, 34, 81, 0.28) !important;
 	}
 
 	.sb-btn-login:active {
@@ -811,10 +1009,22 @@
 		}
 
 		.sb-login-tagline h2 {
-			font-size: clamp(2.15rem, 4vw, 3.35rem);
+			font-size: clamp(2.05rem, 4vw, 3.1rem);
 		}
 
-		.sb-login-proof {
+		.sb-login-features {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	@media (max-height: 800px) and (min-width: 981px) {
+		.sb-login-features {
+			display: none;
+		}
+	}
+
+	@media (max-height: 680px) and (min-width: 981px) {
+		.sb-hero-stats {
 			display: none;
 		}
 	}
@@ -1055,6 +1265,11 @@
 {% block page_content %}
 <div class="sb-login-wrapper">
 	<div class="sb-login-left">
+		<div class="sb-login-left-bg" aria-hidden="true">
+			<span class="sb-glow sb-glow-gold"></span>
+			<span class="sb-glow sb-glow-blue"></span>
+		</div>
+
 		<div class="sb-login-left-inner">
 			<div class="sb-login-brand">
 				<img src="/assets/lms/images/studybadge/studybadge-logo.png" alt="StudyBadge" />
@@ -1064,14 +1279,51 @@
 			<div class="sb-login-tagline">
 				<div class="sb-login-kicker">
 					<span class="sb-login-kicker-dot"></span>
-					Aprendizaje práctico con IA
+					IA aplicada a negocios, estudios y servicios digitales
 				</div>
 
-				<h2>Aprende mejor. Avanza más rápido.</h2>
+				<h2>Aprende habilidades digitales con <span class="sb-accent">IA</span>.</h2>
 
 				<p>
-					Entra a tus cursos, practica con TutorIA y demuestra tu progreso con certificados verificables.
+					Cursos cortos, TutorIA, quizzes y certificados verificables. Aprende de forma práctica y demuestra lo que sabes.
 				</p>
+			</div>
+
+			<div class="sb-hero-card">
+				<div class="sb-hero-card-top">
+					<span class="sb-hero-dot"></span>
+					<span class="sb-hero-dot"></span>
+					<span class="sb-hero-dot"></span>
+					<span class="sb-hero-url">academy.studybadge.com</span>
+				</div>
+
+				<div class="sb-hero-card-body">
+					<div class="sb-hero-row">
+						<div>
+							<div class="sb-hero-label">Tu ruta de IA aplicada</div>
+							<div class="sb-hero-course">Sistema simple de ventas con IA</div>
+							<div class="sb-hero-sub">Lección 7 de 10 completada</div>
+						</div>
+						<div class="sb-hero-pct">72%</div>
+					</div>
+
+					<div class="sb-hero-progress"><span style="width: 72%;"></span></div>
+
+					<div class="sb-hero-stats">
+						<div class="sb-hero-stat">
+							<strong>Certificado</strong>
+							<span>1 listo</span>
+						</div>
+						<div class="sb-hero-stat">
+							<strong>Ranking</strong>
+							<span>Top 12</span>
+						</div>
+						<div class="sb-hero-stat">
+							<strong>TutorIA</strong>
+							<span>Disponible</span>
+						</div>
+					</div>
+				</div>
 			</div>
 
 			<div class="sb-login-features">
@@ -1107,23 +1359,6 @@
 						<line x1="6" x2="6" y1="20" y2="16"></line>
 					</svg>
 					Progreso real
-				</div>
-			</div>
-
-			<div class="sb-login-proof">
-				<div class="sb-proof-card">
-					<strong>IA</strong>
-					<span>Sesiones para estudiar mejor</span>
-				</div>
-
-				<div class="sb-proof-card">
-					<strong>24/7</strong>
-					<span>Acceso a tus cursos online</span>
-				</div>
-
-				<div class="sb-proof-card">
-					<strong>Plus</strong>
-					<span>Herramientas para avanzar más</span>
 				</div>
 			</div>
 		</div>
