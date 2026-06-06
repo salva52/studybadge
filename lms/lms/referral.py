@@ -29,13 +29,18 @@ def on_user_creation(doc, method):
 
     # Create Referral record
     try:
+        ref_status = "Pending" if not doc.get("email_verified") else "Verified"
         frappe.get_doc({
             "doctype": "LMS Referral",
             "referrer": referrer,
             "referred_email": doc.email,
             "referred_user": doc.name,
-            "status": "Pending" if not doc.get("email_verified") else "Verified"
+            "status": ref_status
         }).insert(ignore_permissions=True)
+        
+        if ref_status == "Verified":
+            check_and_grant_rewards(referrer)
+            
     except frappe.DuplicateEntryError:
         pass # Already referred
 

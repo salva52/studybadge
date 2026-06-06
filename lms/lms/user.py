@@ -121,6 +121,7 @@ def verify_signup_otp(email, otp, password):
 			"new_password": password,
 			"user_type": "Website User",
 			"send_welcome_email": 0,
+			"email_verified": 1,
 		}
 	)
 	user.flags.ignore_permissions = True
