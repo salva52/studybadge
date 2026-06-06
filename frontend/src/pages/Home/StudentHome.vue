@@ -367,7 +367,7 @@
 					</div>
 
 					<h3>
-						{{ billing.data?.active ? __('Tu plan Plus está activo') : __('Aprende más rápido con Plus') }}
+						{{ billing.data?.active ? __('Tu plan Plus está activo') : (hasExpiredTrial ? __('Renueva tu membresía Plus') : __('Aprende más rápido con Plus')) }}
 					</h3>
 
 					<p>
@@ -403,7 +403,7 @@
 						</router-link>
 
 						<router-link :to="{ name: 'Plus' }" class="sh-btn-plus-outline">
-							{{ billing.data?.active ? __('Gestionar mi Plus') : __('Desbloquear Plus') }}
+							{{ billing.data?.active ? __('Gestionar mi Plus') : (hasExpiredTrial ? __('Renovar mi Plus') : __('Desbloquear Plus')) }}
 						</router-link>
 					</div>
 				</div>
@@ -457,6 +457,12 @@ const streakInfo = createResource({
 const billing = createResource({
 	url: 'lms.lms.subscriptions.get_plus_billing',
 	auto: true,
+})
+
+const hasExpiredTrial = computed(() => {
+	const sub = billing.data?.subscription
+	if (!sub) return false
+	return !billing.data?.active
 })
 
 const certCount = ref(0)

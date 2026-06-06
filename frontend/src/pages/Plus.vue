@@ -283,9 +283,13 @@
 								STUDYBADGE PLUS
 							</div>
 
-							<h1>{{ __('Estudia mejor, crea más rápido y avanza con IA sin límites.') }}</h1>
+							<h1 v-if="hasExpiredTrial">{{ __('¡Esperamos que hayas disfrutado tu mes gratis! ¿Quieres continuar tu suscripción?') }}</h1>
+							<h1 v-else>{{ __('Estudia mejor, crea más rápido y avanza con IA sin límites.') }}</h1>
 
-							<p>
+							<p v-if="hasExpiredTrial">
+								{{ __('Tu plan ha finalizado. Renueva ahora para no perder tus beneficios, certificados ilimitados, tutor IA, simulaciones y tu progreso guardado.') }}
+							</p>
+							<p v-else>
 								{{ __('Desbloquea certificados ilimitados, Tutor IA, prompts premium, simulaciones y herramientas inteligentes para convertir StudyBadge en tu ventaja académica y profesional.') }}
 							</p>
 
@@ -297,7 +301,7 @@
 								>
 									<span v-if="activating" class="sb-button-spinner"></span>
 									<Crown v-else class="size-5" />
-									{{ subscription?.init_point ? __('Continuar pago pendiente') : __('Desbloquear Plus ahora') }}
+									{{ subscription?.init_point ? __('Continuar pago pendiente') : (hasExpiredTrial ? __('Renovar suscripción') : __('Desbloquear Plus ahora')) }}
 								</button>
 
 								<button class="sb-hero-secondary" @click="scrollToBenefits">
@@ -393,7 +397,7 @@
 									>
 										<span v-if="activating" class="sb-button-spinner sb-button-spinner-light"></span>
 										<Crown v-else class="size-5" />
-										{{ subscription?.init_point ? __('Continuar pago pendiente') : __('Desbloquear StudyBadge Plus') }}
+										{{ subscription?.init_point ? __('Continuar pago pendiente') : (hasExpiredTrial ? __('Renovar StudyBadge Plus') : __('Desbloquear StudyBadge Plus')) }}
 									</button>
 
 									<div
@@ -841,6 +845,11 @@ const paymentMethodResource = createResource({
 
 const subscription = computed(() => billing.data?.subscription || null)
 const receipts = computed(() => billing.data?.receipts || [])
+const hasExpiredTrial = computed(() => {
+	const sub = subscription.value
+	if (!sub) return false
+	return !billing.data?.active
+})
 const isPaddleSelected = computed(
 	() => selectedPaymentCurrency.value === 'USD' && selectedInternationalGateway.value === 'paddle'
 )
@@ -871,6 +880,9 @@ const formattedPrice = computed(() => {
 })
 
 const paymentMethodLabel = computed(() => {
+	if (subscription.value?.status === 'trialing') {
+		return __('Prueba gratuita')
+	}
 	if (subscription.value?.payment_gateway === 'Paddle') {
 		return __('Paddle')
 	}
@@ -880,6 +892,9 @@ const paymentMethodLabel = computed(() => {
 	const method = subscription.value?.payment_method
 
 	if (!method?.id && !method?.card_last_four) {
+		if (billing.data?.plan?.amount === 0) {
+			return __('Prueba gratuita')
+		}
 		return __('Mercado Pago')
 	}
 
