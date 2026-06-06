@@ -1844,25 +1844,28 @@
 								$btn.prop("disabled", true).text("Verificando...");
 								$("#otp-error-msg").hide();
 
-								refreshCsrfToken();
-								frappe.call({
-									method: "lms.lms.user.verify_otp_only",
-									args: { email: current_signup_email, otp: otp }
-								}).then(r => {
-									if (r.message && r.message.status === "success") {
-										current_signup_otp = otp;
-										goToPasswordStep();
-									} else if (r.message && r.message.status === "error") {
-										showOtpError(r.message.message);
-										$btn.prop("disabled", false).text("Verificar código");
-									} else {
-										showOtpError("Error inesperado. Intenta de nuevo.");
+								$.ajax({
+									url: "/api/method/lms.lms.user.verify_otp_only",
+									type: "GET",
+									data: { email: current_signup_email, otp: otp },
+									dataType: "json",
+									success: function(r) {
+										if (r.message && r.message.status === "success") {
+											current_signup_otp = otp;
+											goToPasswordStep();
+										} else if (r.message && r.message.status === "error") {
+											showOtpError(r.message.message);
+											$btn.prop("disabled", false).text("Verificar código");
+										} else {
+											showOtpError("Error inesperado. Intenta de nuevo.");
+											$btn.prop("disabled", false).text("Verificar código");
+										}
+									},
+									error: function(xhr) {
+										console.error("OTP verify error:", xhr);
+										showOtpError("Error de conexión. Intenta de nuevo.");
 										$btn.prop("disabled", false).text("Verificar código");
 									}
-								}).catch(err => {
-									console.error("OTP verify error:", err);
-									showOtpError("Error de conexión. Intenta de nuevo.");
-									$btn.prop("disabled", false).text("Verificar código");
 								});
 								return false;
 							});
@@ -1880,33 +1883,36 @@
 								$btn.prop("disabled", true).text("Creando cuenta...");
 								$("#pwd-error-msg").hide();
 
-								refreshCsrfToken();
-								frappe.call({
-									method: "lms.lms.user.verify_signup_otp",
-									args: {
+								$.ajax({
+									url: "/api/method/lms.lms.user.verify_signup_otp",
+									type: "GET",
+									data: {
 										email: current_signup_email,
 										otp: current_signup_otp,
 										password: password
-									}
-								}).then(r => {
-									if (r.message && r.message.status === "success") {
-										// Update stepper to completed
-										$("#otp-indicator-2").removeClass("active").addClass("completed");
-										$("#otp-step-num-2").html('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>');
-										$btn.text("¡Cuenta creada!");
-										// Redirect after brief celebration
-										setTimeout(() => { window.location.href = "/"; }, 800);
-									} else if (r.message && r.message.status === "error") {
-										showPwdError(r.message.message);
+									},
+									dataType: "json",
+									success: function(r) {
+										if (r.message && r.message.status === "success") {
+											// Update stepper to completed
+											$("#otp-indicator-2").removeClass("active").addClass("completed");
+											$("#otp-step-num-2").html('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>');
+											$btn.text("¡Cuenta creada!");
+											// Redirect after brief celebration
+											setTimeout(() => { window.location.href = "/"; }, 800);
+										} else if (r.message && r.message.status === "error") {
+											showPwdError(r.message.message);
+											$btn.prop("disabled", false).text("Completar registro");
+										} else {
+											showPwdError("Error inesperado. Intenta de nuevo.");
+											$btn.prop("disabled", false).text("Completar registro");
+										}
+									},
+									error: function(xhr) {
+										console.error("Signup complete error:", xhr);
+										showPwdError("Error de conexión. Intenta de nuevo.");
 										$btn.prop("disabled", false).text("Completar registro");
-									} else {
-										showPwdError("Error inesperado. Intenta de nuevo.");
-										$btn.prop("disabled", false).text("Completar registro");
 									}
-								}).catch(err => {
-									console.error("Signup complete error:", err);
-									showPwdError("Error de conexión. Intenta de nuevo.");
-									$btn.prop("disabled", false).text("Completar registro");
 								});
 								return false;
 							});
@@ -1920,23 +1926,26 @@
 								$link.addClass("disabled").text("Enviando...");
 								$("#otp-error-msg").hide();
 
-								refreshCsrfToken();
-								frappe.call({
-									method: "lms.lms.user.resend_signup_otp",
-									args: { email: current_signup_email }
-								}).then(r => {
-									if (r.message && r.message.status === "success") {
-										showOtpSuccess(r.message.message);
-										startResendCooldown(60);
-										$("#signup_otp").val("").focus();
-									} else if (r.message && r.message.status === "error") {
-										showOtpError(r.message.message);
+								$.ajax({
+									url: "/api/method/lms.lms.user.resend_signup_otp",
+									type: "GET",
+									data: { email: current_signup_email },
+									dataType: "json",
+									success: function(r) {
+										if (r.message && r.message.status === "success") {
+											showOtpSuccess(r.message.message);
+											startResendCooldown(60);
+											$("#signup_otp").val("").focus();
+										} else if (r.message && r.message.status === "error") {
+											showOtpError(r.message.message);
+											$link.removeClass("disabled").text("Reenviar código");
+										}
+									},
+									error: function(xhr) {
+										console.error("Resend error:", xhr);
+										showOtpError("Error al reenviar. Intenta de nuevo.");
 										$link.removeClass("disabled").text("Reenviar código");
 									}
-								}).catch(err => {
-									console.error("Resend error:", err);
-									showOtpError("Error al reenviar. Intenta de nuevo.");
-									$link.removeClass("disabled").text("Reenviar código");
 								});
 							});
 
