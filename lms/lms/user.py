@@ -56,40 +56,94 @@ def sign_up(email: str, full_name: str, verify_terms: bool, user_category: str, 
 				http_status_code=429,
 			)
 
+	import random
+	import time
+	otp = str(random.randint(100000, 999999))
+
+	cache_key = f"signup_data:{email}"
+	signup_data = {
+		"email": email,
+		"full_name": full_name,
+		"verify_terms": verify_terms,
+		"user_category": user_category,
+		"ref_code": ref_code,
+		"otp": otp,
+		"expires_at": time.time() + 600
+	}
+	frappe.cache().set_value(cache_key, signup_data, expires_in_sec=600)
+
+	message = f"""
+	<div style="padding: 20px; font-family: sans-serif; text-align: center; color: #171717;">
+		<h2>Código de Verificación</h2>
+		<p>Hola {escape_html(full_name)}, usa este código para completar tu registro:</p>
+		<h1 style="font-size: 32px; letter-spacing: 5px; color: #0a2251; padding: 10px 20px; background: #f3f6fb; display: inline-block; border-radius: 8px;">{otp}</h1>
+		<p>Este código expirará en 10 minutos.</p>
+	</div>
+	"""
+	
+	try:
+		frappe.sendmail(
+			recipients=email,
+			subject=_("Tu código de verificación"),
+			message=message,
+			now=True
+		)
+	except Exception as e:
+		frappe.log_error(title="OTP Email Error", message=frappe.get_traceback())
+		frappe.throw(_("Error al enviar el correo de verificación. Inténtalo de nuevo."))
+
+	return 1, _("OTP enviado al correo")
+
+
+@frappe.whitelist(allow_guest=True)
+def verify_signup_otp(email, otp, password):
+	cache_key = f"signup_data:{email}"
+	data = frappe.cache().get_value(cache_key)
+	
+	if not data:
+		frappe.throw(_("El código de verificación ha expirado o es inválido."))
+		
+	if str(data.get("otp")) != str(otp):
+		frappe.throw(_("Código OTP incorrecto."))
+		
+	if data.get("ref_code"):
+		frappe.local.flags.studybadge_ref = data.get("ref_code")
+
 	user = frappe.get_doc(
 		{
 			"doctype": "User",
 			"email": email,
-			"first_name": escape_html(full_name),
-			"verify_terms": verify_terms,
-			"user_category": user_category,
+			"first_name": escape_html(data.get("full_name")),
+			"verify_terms": data.get("verify_terms"),
+			"user_category": data.get("user_category"),
 			"country": "",
 			"enabled": 1,
-			"new_password": random_string(10),
+			"new_password": password,
 			"user_type": "Website User",
+			"send_welcome_email": 0,
 		}
 	)
 	user.flags.ignore_permissions = True
 	user.flags.ignore_password_policy = True
 	frappe.flags.mute_messages = True
+	
 	try:
 		user.insert()
 	except Exception as e:
 		frappe.log_error(title="Signup Error", message=frappe.get_traceback())
 		frappe.throw(f"Error during sign up: {str(e)}")
 
-	# set default signup role as per Portal Settings
 	default_role = frappe.db.get_single_value("Portal Settings", "default_role")
 	if default_role:
 		user.add_roles(default_role)
 
 	user.add_roles("LMS Student")
 	set_country_from_ip(None, user.name)
-
-	if user.flags.email_sent:
-		return 1, _("Please check your email for verification")
-	else:
-		return 2, _("Please ask your administrator to verify your sign-up")
+	
+	frappe.cache().delete_value(cache_key)
+	frappe.local.login_manager.login_as(email)
+	
+	return 1, _("Registro completado")
 
 
 def set_country_from_ip(login_manager: object = None, user: str = None):

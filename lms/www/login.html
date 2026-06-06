@@ -1548,6 +1548,35 @@
 
 						<script>
 							frappe.ready(function () {
+								let current_signup_email = "";
+								
+								$(".otp-verification-view").on("submit", (e) => {
+									e.preventDefault();
+									const otp = $("#signup_otp").val().trim();
+									const password = $("#signup_new_password").val();
+									
+									if (!otp || !password) return false;
+									
+									const $btn = $("#btn_verify_otp");
+									const originalBtnText = $btn.text();
+									$btn.prop("disabled", true).text("Verificando...");
+									
+									frappe.call({
+										method: "lms.lms.user.verify_signup_otp",
+										args: {
+											email: current_signup_email,
+											otp: otp,
+											password: password
+										},
+										callback: function(r) {
+											$btn.prop("disabled", false).text(originalBtnText);
+											if (!r.exc) {
+												window.location.href = "/";
+											}
+										}
+									});
+								});
+
 								$(".sb-form-signup").on("submit", (e) => {
 									e.preventDefault();
 									const email = ($("#signup_email").val() || "").trim();
@@ -1559,6 +1588,7 @@
 										return false;
 									}
 
+									current_signup_email = email;
 									console.log("Signup started (login.html) with email:", email, "name:", full_name);
 									
 									const $btn = $(".sb-form-signup button[type='submit']");
@@ -1585,7 +1615,7 @@
 												} else if (r.message) {
 													$(".sb-login-form-header").hide();
 													$(".sb-form-signup").hide();
-													$(".signup-success-view").removeClass("hide").show();
+													$(".otp-verification-view").removeClass("hide").hide().fadeIn();
 												} else if (r.exc) {
 													console.error("Exception during signup:", r.exc);
 													login.set_status("Error en el servidor al registrarse. Revisa la consola.", "red");
@@ -1638,22 +1668,32 @@
 							{%- endif -%}
 						</form>
 
-						<div class="signup-success-view hide">
-							<div class="success-animation">
-								<svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-									<circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
-									<path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+						<form class="otp-verification-view hide" style="text-align: center; padding: 1rem 0;">
+							<div class="success-animation" style="margin-bottom: 1.5rem;">
+								<svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="var(--sb-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="background: var(--sb-primary-soft); padding: 12px; border-radius: 50%;">
+									<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+									<polyline points="22,6 12,13 2,6"></polyline>
 								</svg>
 							</div>
-							<h3 style="color: var(--sb-primary); font-size: 1.6rem; font-weight: 900; margin-bottom: 0.8rem; letter-spacing: -0.03em;">¡Cuenta creada con éxito!</h3>
-							<p style="color: var(--sb-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem;">
-								Hemos enviado un enlace de confirmación a tu correo.<br>
-								<strong style="color: var(--sb-text);">Revisa tu bandeja de entrada o spam.</strong>
+							<h3 style="color: var(--sb-primary); font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.03em;">Verifica tu correo</h3>
+							<p style="color: var(--sb-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem;">
+								Ingresa el código de 6 dígitos que enviamos a tu correo y crea una contraseña para tu cuenta.
 							</p>
-							<a href="#login" class="btn btn-primary sb-btn-login" style="border-radius: 14px; text-decoration: none;" onclick="window.location.reload();">
-								Ir a Iniciar Sesión
-							</a>
-						</div>
+							
+							<div class="form-group" style="text-align: left; margin-bottom: 1rem;">
+								<label class="sb-login-label">Código de Verificación</label>
+								<input type="text" id="signup_otp" class="form-control sb-login-input" placeholder="123456" maxlength="6" required style="text-align: center; letter-spacing: 5px; font-size: 1.2rem; font-weight: bold;">
+							</div>
+							
+							<div class="form-group" style="text-align: left; margin-bottom: 1.5rem;">
+								<label class="sb-login-label">Crea una Contraseña</label>
+								<input type="password" id="signup_new_password" class="form-control sb-login-input" placeholder="••••••••" required minlength="6">
+							</div>
+							
+							<button type="submit" class="btn btn-primary btn-block sb-btn-login" id="btn_verify_otp">
+								Completar Registro
+							</button>
+						</form>
 
 						{%- else -%}
 						<div class="page-card-head mb-2">
