@@ -188,7 +188,7 @@
 
 							<div class="sb-plan-actions">
 								<button
-									v-if="!subscription?.cancel_at_period_end && subscription?.payment_gateway !== 'PayPal'"
+									v-if="!subscription?.cancel_at_period_end && subscription?.payment_gateway !== 'PayPal' && !isPromoSubscription"
 									class="sb-primary-btn"
 									@click="manageSubscription"
 								>
@@ -197,7 +197,7 @@
 								</button>
 
 								<button
-									v-if="!subscription?.cancel_at_period_end"
+									v-if="!subscription?.cancel_at_period_end && !isPromoSubscription"
 									class="sb-danger-btn"
 									:disabled="cancelResource.loading"
 									@click="requestCancellation"
@@ -850,6 +850,10 @@ const hasExpiredTrial = computed(() => {
 	if (!sub) return false
 	return !billing.data?.active
 })
+const isPromoSubscription = computed(() => {
+	const gw = subscription.value?.payment_gateway || ''
+	return gw.includes('Promo') || gw.includes('Regalo') || gw === 'Free' || gw === 'Referral' || gw === 'Gift'
+})
 const isPaddleSelected = computed(
 	() => selectedPaymentCurrency.value === 'USD' && selectedInternationalGateway.value === 'paddle'
 )
@@ -880,8 +884,8 @@ const formattedPrice = computed(() => {
 })
 
 const paymentMethodLabel = computed(() => {
-	if (subscription.value?.status === 'trialing') {
-		return __('Prueba gratuita')
+	if (subscription.value?.status === 'trialing' || isPromoSubscription.value) {
+		return __('Prueba gratuita (Regalo)')
 	}
 	if (subscription.value?.payment_gateway === 'Paddle') {
 		return __('Paddle')
