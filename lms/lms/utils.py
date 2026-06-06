@@ -703,19 +703,19 @@ def get_preferred_payment_currency(country: str | None = None) -> str:
 
 
 def convert_to_usd_amount(amount: float, currency: str, amount_usd: float = None):
-	if currency == "USD":
-		return amount
+	if not currency or currency == "USD":
+		return flt(amount)
 	if amount_usd:
-		return amount_usd
+		return flt(amount_usd)
 	exchange_rate = get_current_exchange_rate(currency, "USD")
-	return rounded(flt(amount * exchange_rate, 2))
+	return rounded(flt(flt(amount) * exchange_rate, 2))
 
 
 def convert_to_pen_amount(amount: float, currency: str):
-	if currency == "PEN":
-		return amount
+	if not currency or currency == "PEN":
+		return flt(amount)
 	exchange_rate = get_current_exchange_rate(currency, "PEN")
-	return rounded(flt(amount * exchange_rate, 2))
+	return rounded(flt(flt(amount) * exchange_rate, 2))
 
 
 def set_checkout_currency(details: dict, preferred_currency: str | None = None):
@@ -803,6 +803,11 @@ def apply_gst(amount: float, country: str = None) -> tuple:
 
 
 def get_current_exchange_rate(source: str, target: str = "USD") -> float:
+	if not source:
+		source = frappe.db.get_single_value("Global Defaults", "default_currency") or "PEN"
+	if source == target:
+		return 1.0
+
 	url = f"https://open.er-api.com/v6/latest/{source}"
 	try:
 		response = requests.get(url, timeout=5)
@@ -811,6 +816,15 @@ def get_current_exchange_rate(source: str, target: str = "USD") -> float:
 			return details["rates"][target]
 	except Exception:
 		pass
+
+	try:
+		from frappe.utils import get_exchange_rate
+		rate = get_exchange_rate(source, target)
+		if rate:
+			return rate
+	except Exception:
+		pass
+
 	frappe.throw(_("No se pudo obtener el tipo de cambio de {0} a {1} automáticamente. Por favor configura el precio en {1} manualmente en el curso/grupo.").format(source, target))
 
 
