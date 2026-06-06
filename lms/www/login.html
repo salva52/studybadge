@@ -1184,6 +1184,14 @@
 		from { opacity: 0; transform: translateY(20px); }
 		to { opacity: 1; transform: translateY(0); }
 	}
+	@keyframes fadeInScale {
+		from { opacity: 0; transform: scale(0.95); }
+		to { opacity: 1; transform: scale(1); }
+	}
+	@keyframes pulse {
+		0%, 100% { transform: scale(1); }
+		50% { transform: scale(1.05); }
+	}
 	.success-animation {
 		margin: 0 auto;
 	}
@@ -1223,6 +1231,196 @@
 	}
 	@keyframes fill {
 		100% { box-shadow: inset 0px 0px 0px 30px #34A853; }
+	}
+
+	/* ── OTP Verification Styles ── */
+	.otp-verification-view {
+		animation: fadeInScale 0.4s ease-out forwards;
+	}
+	.otp-stepper {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0;
+		margin-bottom: 1.8rem;
+	}
+	.otp-step-indicator {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.78rem;
+		font-weight: 600;
+		color: var(--sb-muted, #8896a6);
+		transition: color 0.3s ease;
+	}
+	.otp-step-indicator.active {
+		color: var(--sb-primary, #0a2251);
+	}
+	.otp-step-indicator.completed {
+		color: #34A853;
+	}
+	.otp-step-num {
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 0.75rem;
+		font-weight: 700;
+		background: var(--sb-bg-soft, #f0f2f5);
+		color: var(--sb-muted, #8896a6);
+		border: 2px solid var(--sb-bg-soft, #f0f2f5);
+		transition: all 0.3s ease;
+	}
+	.otp-step-indicator.active .otp-step-num {
+		background: var(--sb-primary, #0a2251);
+		color: #fff;
+		border-color: var(--sb-primary, #0a2251);
+	}
+	.otp-step-indicator.completed .otp-step-num {
+		background: #34A853;
+		color: #fff;
+		border-color: #34A853;
+	}
+	.otp-step-line {
+		width: 40px;
+		height: 2px;
+		background: var(--sb-bg-soft, #e0e4ea);
+		margin: 0 0.4rem;
+		border-radius: 2px;
+		transition: background 0.3s ease;
+	}
+	.otp-step-line.completed {
+		background: #34A853;
+	}
+	.otp-icon-wrap {
+		width: 60px;
+		height: 60px;
+		border-radius: 50%;
+		background: var(--sb-primary-soft, #edf1f8);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin: 0 auto 1.2rem;
+	}
+	.otp-icon-wrap svg {
+		width: 28px;
+		height: 28px;
+		stroke: var(--sb-primary, #0a2251);
+	}
+	.otp-title {
+		color: var(--sb-heading, #171717);
+		font-size: 1.35rem;
+		font-weight: 800;
+		margin-bottom: 0.4rem;
+		letter-spacing: -0.03em;
+	}
+	.otp-subtitle {
+		color: var(--sb-muted, #8896a6);
+		font-size: 0.88rem;
+		line-height: 1.5;
+		margin-bottom: 1.5rem;
+	}
+	.otp-subtitle strong {
+		color: var(--sb-heading, #171717);
+		font-weight: 600;
+	}
+	.otp-error-msg {
+		display: none;
+		padding: 0.6rem 0.85rem;
+		border-radius: 10px;
+		background: #fef2f2;
+		border: 1px solid #fecaca;
+		color: #dc2626;
+		font-size: 0.82rem;
+		font-weight: 500;
+		margin-bottom: 1rem;
+		text-align: center;
+		animation: fadeInScale 0.25s ease-out;
+	}
+	.otp-success-msg {
+		display: none;
+		padding: 0.6rem 0.85rem;
+		border-radius: 10px;
+		background: #f0fdf4;
+		border: 1px solid #bbf7d0;
+		color: #16a34a;
+		font-size: 0.82rem;
+		font-weight: 500;
+		margin-bottom: 1rem;
+		text-align: center;
+		animation: fadeInScale 0.25s ease-out;
+	}
+	.otp-input-wrap {
+		position: relative;
+	}
+	.otp-input-wrap input {
+		text-align: center;
+		letter-spacing: 8px;
+		font-size: 1.4rem;
+		font-weight: 700;
+		padding: 0.75rem 1rem !important;
+		font-family: 'SF Mono', 'Fira Code', monospace;
+	}
+	.otp-input-wrap input.shake {
+		animation: shake 0.4s ease-in-out;
+	}
+	@keyframes shake {
+		0%, 100% { transform: translateX(0); }
+		25% { transform: translateX(-6px); }
+		50% { transform: translateX(6px); }
+		75% { transform: translateX(-4px); }
+	}
+	.otp-resend-area {
+		text-align: center;
+		margin-top: 1rem;
+		font-size: 0.82rem;
+		color: var(--sb-muted, #8896a6);
+	}
+	.otp-resend-area a {
+		color: var(--sb-primary, #0a2251);
+		font-weight: 600;
+		cursor: pointer;
+		text-decoration: none;
+	}
+	.otp-resend-area a:hover {
+		text-decoration: underline;
+	}
+	.otp-resend-area a.disabled {
+		color: var(--sb-muted, #8896a6);
+		pointer-events: none;
+		opacity: 0.6;
+	}
+	.otp-timer {
+		font-weight: 600;
+		color: var(--sb-primary, #0a2251);
+		font-variant-numeric: tabular-nums;
+	}
+	.otp-password-step {
+		display: none;
+		animation: fadeInScale 0.4s ease-out forwards;
+	}
+	.otp-password-step .sb-field {
+		position: relative;
+	}
+	.password-strength-bar {
+		height: 3px;
+		border-radius: 3px;
+		background: var(--sb-bg-soft, #e0e4ea);
+		margin-top: 0.5rem;
+		overflow: hidden;
+	}
+	.password-strength-fill {
+		height: 100%;
+		border-radius: 3px;
+		width: 0%;
+		transition: width 0.3s ease, background 0.3s ease;
+	}
+	.password-hint {
+		font-size: 0.72rem;
+		color: var(--sb-muted, #8896a6);
+		margin-top: 0.35rem;
 	}
 </style>
 {% endblock %}
@@ -1547,134 +1745,288 @@
 						</form>
 
 						<script>
-							frappe.ready(function () {
-								let current_signup_email = "";
-								
-								$(".otp-verification-view").on("submit", (e) => {
-									e.preventDefault();
-									const otp = $("#signup_otp").val().trim();
-									const password = $("#signup_new_password").val();
-									
-									if (!otp || !password) return false;
-									
-									const $btn = $("#btn_verify_otp");
-									const originalBtnText = $btn.text();
-									$btn.prop("disabled", true).text("Verificando...");
-									
-									frappe.call({
-										method: "lms.lms.user.verify_signup_otp",
-										args: {
-											email: current_signup_email,
-											otp: otp,
-											password: password
-										},
-										callback: function(r) {
-											$btn.prop("disabled", false).text(originalBtnText);
-											if (!r.exc) {
-												window.location.href = "/";
-											}
-										}
-									});
+						frappe.ready(function () {
+							let current_signup_email = "";
+							let current_signup_otp = "";
+							let resend_timer = null;
+
+							// ── Helper: show/hide inline messages ──
+							function showOtpError(msg) {
+								$("#otp-error-msg").text(msg).show();
+								$("#otp-success-msg").hide();
+								$("#signup_otp").addClass("shake");
+								setTimeout(() => $("#signup_otp").removeClass("shake"), 400);
+							}
+							function showOtpSuccess(msg) {
+								$("#otp-success-msg").text(msg).show();
+								$("#otp-error-msg").hide();
+							}
+							function showPwdError(msg) {
+								$("#pwd-error-msg").text(msg).show();
+							}
+
+							// ── Helper: start resend cooldown ──
+							function startResendCooldown(seconds) {
+								if (resend_timer) clearInterval(resend_timer);
+								let remaining = seconds || 60;
+								$("#otp-resend-link").hide();
+								$("#otp-resend-text").hide();
+								$("#otp-cooldown").show();
+								$("#otp-timer-count").text(remaining);
+
+								resend_timer = setInterval(() => {
+									remaining--;
+									$("#otp-timer-count").text(remaining);
+									if (remaining <= 0) {
+										clearInterval(resend_timer);
+										resend_timer = null;
+										$("#otp-cooldown").hide();
+										$("#otp-resend-link").show();
+										$("#otp-resend-text").show();
+									}
+								}, 1000);
+							}
+
+							// ── Helper: transition to Step 2 ──
+							function goToPasswordStep() {
+								// Update stepper
+								$("#otp-indicator-1").removeClass("active").addClass("completed");
+								$("#otp-step-num-1").html('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>');
+								$("#otp-step-line").addClass("completed");
+								$("#otp-indicator-2").addClass("active");
+								// Hide step 1, show step 2
+								$("#otp-code-step").fadeOut(200, function() {
+									$("#otp-password-step").css("display", "block").hide().fadeIn(300);
+									$("#signup_new_password").focus();
 								});
+							}
 
-								$(".sb-form-signup").on("submit", (e) => {
-									e.preventDefault();
-									const email = ($("#signup_email").val() || "").trim();
-									const raw_full_name = ($("#signup_fullname").val() || "").trim();
-									const full_name = frappe.utils.xss_sanitise ? frappe.utils.xss_sanitise(raw_full_name) : raw_full_name;
-									const raw_ref_code = ($("#login_ref_code").val() || "").trim();
-									const ref_code = frappe.utils.xss_sanitise ? frappe.utils.xss_sanitise(raw_ref_code) : raw_ref_code;
+							// ── Password strength meter ──
+							$("#otp-password-step").on("input", "#signup_new_password", function() {
+								const pwd = $(this).val();
+								const fill = $("#pwd-strength-fill");
+								const hint = $("#pwd-hint");
+								let strength = 0;
+								if (pwd.length >= 6) strength++;
+								if (pwd.length >= 10) strength++;
+								if (/[A-Z]/.test(pwd)) strength++;
+								if (/[0-9]/.test(pwd)) strength++;
+								if (/[^A-Za-z0-9]/.test(pwd)) strength++;
 
-									if (!email || !(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) || !full_name) {
-										login.set_status('{{ _("Ingresa un correo válido y tu nombre completo") }}', "red");
-										return false;
-									}
+								const levels = [
+									{ w: "0%", c: "#e0e4ea", t: "Mínimo 6 caracteres" },
+									{ w: "25%", c: "#ef4444", t: "Débil" },
+									{ w: "50%", c: "#f59e0b", t: "Regular" },
+									{ w: "75%", c: "#22c55e", t: "Buena" },
+									{ w: "90%", c: "#16a34a", t: "Fuerte" },
+									{ w: "100%", c: "#15803d", t: "Muy fuerte" },
+								];
+								const level = levels[Math.min(strength, 5)];
+								fill.css({ width: level.w, background: level.c });
+								hint.text(level.t).css("color", level.c);
+							});
 
-									current_signup_email = email;
-									console.log("Signup started (login.html) with email:", email, "name:", full_name);
-									
-									const $btn = $(".sb-form-signup button[type='submit']");
-									const originalBtnText = $btn.text();
-									$btn.prop("disabled", true).text("Registrando...");
-
-									const do_signup = (captchaToken) => {
-										frappe.call({
-											method: "lms.lms.user.sign_up",
-											args: {
-												email: email,
-												full_name: full_name,
-												verify_terms: 1,
-												user_category: "",
-												ref_code: ref_code,
-												captcha_token: captchaToken
-											}
-										}).then(r => {
-											try {
-												console.log("Signup promise resolved:", r);
-												let is_success = false;
-
-												if (!r) {
-													throw new Error("Respuesta vacía del servidor.");
-												}
-
-												if (r.message) {
-													if (typeof r.message === "object" && r.message.status === "success") {
-														is_success = true;
-													} else if (r.message[0] === 1 || r.message === "OTP enviado al correo" || r.message === "success") {
-														is_success = true;
-													}
-												} else if (!r.exc && !r._server_messages) {
-													is_success = true;
-												}
-
-												if (is_success) {
-													try {
-														if (window.frappe && frappe.msg_dialog) { frappe.msg_dialog.hide(); }
-														if ($.fn && $.fn.modal) { $(".modal:has(.msgprint)").modal("hide"); }
-													} catch(err) { console.warn(err); }
-													
-													$(".sb-login-form-header").hide();
-													$(".sb-form-signup").hide();
-													$(".otp-verification-view").removeClass("hide").hide().fadeIn();
-												} else {
-													if (r.message && r.message[0] === 0) {
-														login.set_status(r.message[1] || "Error en el registro", "red");
-													} else if (r.message) {
-														login.set_status(typeof r.message === "string" ? r.message : JSON.stringify(r.message), "green");
-													} else if (r.exc) {
-														console.error("Exception during signup:", r.exc);
-														login.set_status(r._server_messages ? JSON.parse(r._server_messages).join('\n') : "Error de servidor", "red");
-													}
-													$btn.prop("disabled", false).text(originalBtnText);
-												}
-											} catch(e) {
-												console.error("Javascript error in signup then block:", e);
-												login.set_status("Error en el navegador al procesar registro.", "red");
-												$btn.prop("disabled", false).text(originalBtnText);
-											}
-										}).catch(err => {
-											console.error("Signup promise rejected:", err);
-											login.set_status("Error de red o servidor. Intenta de nuevo.", "red");
-											$btn.prop("disabled", false).text(originalBtnText);
-										});
-									};
-
-									if (window.grecaptcha && '{{ recaptcha_site_key or "" }}') {
-										window.grecaptcha.ready(function() {
-											window.grecaptcha.execute('{{ recaptcha_site_key or "" }}', {action: 'sign_up'}).then(function(token) {
-												do_signup(token);
-											}).catch(function(err) {
-												console.error("reCAPTCHA error:", err);
-												$btn.prop("disabled", false).text(originalBtnText);
-												login.set_status("Error al verificar reCAPTCHA", "red");
-											});
-										});
-									} else {
-										do_signup(null);
-									}
+							// ── STEP 1: Verify OTP Code ──
+							$(document).on("submit", "#otp-code-form", function(e) {
+								e.preventDefault();
+								const otp = $("#signup_otp").val().trim();
+								if (!otp || otp.length < 6) {
+									showOtpError("Ingresa los 6 dígitos del código.");
 									return false;
+								}
+
+								const $btn = $("#btn_verify_code");
+								$btn.prop("disabled", true).text("Verificando...");
+								$("#otp-error-msg").hide();
+
+								frappe.call({
+									method: "lms.lms.user.verify_otp_only",
+									args: { email: current_signup_email, otp: otp }
+								}).then(r => {
+									if (r.message && r.message.status === "success") {
+										current_signup_otp = otp;
+										goToPasswordStep();
+									} else if (r.message && r.message.status === "error") {
+										showOtpError(r.message.message);
+										$btn.prop("disabled", false).text("Verificar código");
+									} else {
+										showOtpError("Error inesperado. Intenta de nuevo.");
+										$btn.prop("disabled", false).text("Verificar código");
+									}
+								}).catch(err => {
+									console.error("OTP verify error:", err);
+									showOtpError("Error de conexión. Intenta de nuevo.");
+									$btn.prop("disabled", false).text("Verificar código");
+								});
+								return false;
+							});
+
+							// ── STEP 2: Complete Registration with Password ──
+							$(document).on("submit", "#otp-password-form", function(e) {
+								e.preventDefault();
+								const password = $("#signup_new_password").val();
+								if (!password || password.length < 6) {
+									showPwdError("La contraseña debe tener al menos 6 caracteres.");
+									return false;
+								}
+
+								const $btn = $("#btn_complete_signup");
+								$btn.prop("disabled", true).text("Creando cuenta...");
+								$("#pwd-error-msg").hide();
+
+								frappe.call({
+									method: "lms.lms.user.verify_signup_otp",
+									args: {
+										email: current_signup_email,
+										otp: current_signup_otp,
+										password: password
+									}
+								}).then(r => {
+									if (r.message && r.message.status === "success") {
+										// Update stepper to completed
+										$("#otp-indicator-2").removeClass("active").addClass("completed");
+										$("#otp-step-num-2").html('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>');
+										$btn.text("¡Cuenta creada!");
+										// Redirect after brief celebration
+										setTimeout(() => { window.location.href = "/"; }, 800);
+									} else if (r.message && r.message.status === "error") {
+										showPwdError(r.message.message);
+										$btn.prop("disabled", false).text("Completar registro");
+									} else {
+										showPwdError("Error inesperado. Intenta de nuevo.");
+										$btn.prop("disabled", false).text("Completar registro");
+									}
+								}).catch(err => {
+									console.error("Signup complete error:", err);
+									showPwdError("Error de conexión. Intenta de nuevo.");
+									$btn.prop("disabled", false).text("Completar registro");
+								});
+								return false;
+							});
+
+							// ── Resend OTP ──
+							$(document).on("click", "#otp-resend-link", function(e) {
+								e.preventDefault();
+								const $link = $(this);
+								if ($link.hasClass("disabled")) return;
+
+								$link.addClass("disabled").text("Enviando...");
+								$("#otp-error-msg").hide();
+
+								frappe.call({
+									method: "lms.lms.user.resend_signup_otp",
+									args: { email: current_signup_email }
+								}).then(r => {
+									if (r.message && r.message.status === "success") {
+										showOtpSuccess(r.message.message);
+										startResendCooldown(60);
+										$("#signup_otp").val("").focus();
+									} else if (r.message && r.message.status === "error") {
+										showOtpError(r.message.message);
+										$link.removeClass("disabled").text("Reenviar código");
+									}
+								}).catch(err => {
+									console.error("Resend error:", err);
+									showOtpError("Error al reenviar. Intenta de nuevo.");
+									$link.removeClass("disabled").text("Reenviar código");
 								});
 							});
+
+							// ── Signup form submit ──
+							$(".sb-form-signup").on("submit", (e) => {
+								e.preventDefault();
+								const email = ($("#signup_email").val() || "").trim();
+								const raw_full_name = ($("#signup_fullname").val() || "").trim();
+								const full_name = frappe.utils.xss_sanitise ? frappe.utils.xss_sanitise(raw_full_name) : raw_full_name;
+								const raw_ref_code = ($("#login_ref_code").val() || "").trim();
+								const ref_code = frappe.utils.xss_sanitise ? frappe.utils.xss_sanitise(raw_ref_code) : raw_ref_code;
+
+								if (!email || !(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) || !full_name) {
+									login.set_status('{{ _("Ingresa un correo válido y tu nombre completo") }}', "red");
+									return false;
+								}
+
+								current_signup_email = email;
+
+								const $btn = $(".sb-form-signup button[type='submit']");
+								const originalBtnText = $btn.text();
+								$btn.prop("disabled", true).text("Registrando...");
+
+								const do_signup = (captchaToken) => {
+									frappe.call({
+										method: "lms.lms.user.sign_up",
+										args: {
+											email: email,
+											full_name: full_name,
+											verify_terms: 1,
+											user_category: "",
+											ref_code: ref_code,
+											captcha_token: captchaToken
+										}
+									}).then(r => {
+										try {
+											let is_success = false;
+											if (r.message) {
+												if (typeof r.message === "object" && r.message.status === "success") {
+													is_success = true;
+												} else if (r.message[0] === 1 || r.message === "OTP enviado al correo" || r.message === "success") {
+													is_success = true;
+												}
+											} else if (!r.exc && !r._server_messages) {
+												is_success = true;
+											}
+
+											if (is_success) {
+												try {
+													if (window.frappe && frappe.msg_dialog) { frappe.msg_dialog.hide(); }
+													if ($.fn && $.fn.modal) { $(".modal:has(.msgprint)").modal("hide"); }
+												} catch(err) { console.warn(err); }
+
+												// Show email in OTP view
+												$("#otp-email-display").text(email);
+												$(".sb-login-form-header").hide();
+												$(".sb-form-signup").hide();
+												$(".otp-verification-view").removeClass("hide").hide().fadeIn();
+												startResendCooldown(60);
+												$("#signup_otp").focus();
+											} else {
+												if (r.message && r.message[0] === 0) {
+													login.set_status(r.message[1] || "Error en el registro", "red");
+												} else if (r.message && r.message.status === "error") {
+													login.set_status(r.message.message || "Error en el registro", "red");
+												} else if (r.exc) {
+													console.error("Exception during signup:", r.exc);
+												}
+												$btn.prop("disabled", false).text(originalBtnText);
+											}
+										} catch(e) {
+											console.error("JS error in signup:", e);
+											login.set_status("Error al procesar registro.", "red");
+											$btn.prop("disabled", false).text(originalBtnText);
+										}
+									}).catch(err => {
+										console.error("Signup promise rejected:", err);
+										login.set_status("Error de red o servidor. Intenta de nuevo.", "red");
+										$btn.prop("disabled", false).text(originalBtnText);
+									});
+								};
+
+								if (window.grecaptcha && '{{ recaptcha_site_key or "" }}') {
+									window.grecaptcha.ready(function() {
+										window.grecaptcha.execute('{{ recaptcha_site_key or "" }}', {action: 'sign_up'}).then(function(token) {
+											do_signup(token);
+										}).catch(function(err) {
+											console.error("reCAPTCHA error:", err);
+											$btn.prop("disabled", false).text(originalBtnText);
+											login.set_status("Error al verificar reCAPTCHA", "red");
+										});
+									});
+								} else {
+									do_signup(null);
+								}
+								return false;
+							});
+						});
 						</script>			{%- if social_login -%}
 							<div class="social-logins" style="margin-top: 1rem;">
 								<p class="text-muted login-divider">{{ _("o regístrate con") }}</p>
@@ -1706,32 +2058,94 @@
 							{%- endif -%}
 						</form>
 
-						<form class="otp-verification-view hide" style="text-align: center; padding: 1rem 0;">
-							<div class="success-animation" style="margin-bottom: 1.5rem;">
-								<svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="var(--sb-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="background: var(--sb-primary-soft); padding: 12px; border-radius: 50%;">
-									<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-									<polyline points="22,6 12,13 2,6"></polyline>
-								</svg>
+						<div class="otp-verification-view hide" style="padding: 1.2rem 0;">
+							<!-- Step Progress Indicator -->
+							<div class="otp-stepper">
+								<div class="otp-step-indicator active" id="otp-indicator-1">
+									<span class="otp-step-num" id="otp-step-num-1">1</span>
+									<span>Código</span>
+								</div>
+								<div class="otp-step-line" id="otp-step-line"></div>
+								<div class="otp-step-indicator" id="otp-indicator-2">
+									<span class="otp-step-num" id="otp-step-num-2">2</span>
+									<span>Contraseña</span>
+								</div>
 							</div>
-							<h3 style="color: var(--sb-primary); font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.03em;">Verifica tu correo</h3>
-							<p style="color: var(--sb-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem;">
-								Ingresa el código de 6 dígitos que enviamos a tu correo y crea una contraseña para tu cuenta.
-							</p>
-							
-							<div class="form-group" style="text-align: left; margin-bottom: 1rem;">
-								<label class="sb-login-label">Código de Verificación</label>
-								<input type="text" id="signup_otp" class="form-control sb-login-input" placeholder="123456" maxlength="6" required style="text-align: center; letter-spacing: 5px; font-size: 1.2rem; font-weight: bold;">
+
+							<!-- STEP 1: Verify Code -->
+							<div class="otp-code-step" id="otp-code-step">
+								<div class="otp-icon-wrap">
+									<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+										<polyline points="22,6 12,13 2,6"></polyline>
+									</svg>
+								</div>
+								<h3 class="otp-title">Ingresa tu código de verificación</h3>
+								<p class="otp-subtitle">
+									Enviamos un código de 6 dígitos a <strong id="otp-email-display"></strong>
+								</p>
+
+								<div class="otp-error-msg" id="otp-error-msg"></div>
+								<div class="otp-success-msg" id="otp-success-msg"></div>
+
+								<form id="otp-code-form">
+									<div class="form-group" style="text-align: left; margin-bottom: 0.8rem;">
+										<label class="sb-login-label">Código de verificación</label>
+										<div class="otp-input-wrap">
+											<input type="text" id="signup_otp" class="form-control sb-login-input" placeholder="000000" maxlength="6" required autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*">
+										</div>
+									</div>
+
+									<button type="submit" class="btn btn-primary btn-block sb-btn-login" id="btn_verify_code" style="margin-top: 1rem;">
+										Verificar código
+									</button>
+								</form>
+
+								<div class="otp-resend-area">
+									<span id="otp-resend-text">¿No recibiste el código? </span>
+									<a href="#" id="otp-resend-link">Reenviar código</a>
+									<span id="otp-cooldown" style="display: none;">
+										Reenviar en <span class="otp-timer" id="otp-timer-count">60</span>s
+									</span>
+								</div>
 							</div>
-							
-							<div class="form-group" style="text-align: left; margin-bottom: 1.5rem;">
-								<label class="sb-login-label">Crea una Contraseña</label>
-								<input type="password" id="signup_new_password" class="form-control sb-login-input" placeholder="••••••••" required minlength="6">
+
+							<!-- STEP 2: Create Password -->
+							<div class="otp-password-step" id="otp-password-step">
+								<div class="otp-icon-wrap" style="background: #f0fdf4;">
+									<svg viewBox="0 0 24 24" fill="none" stroke="#34A853" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="stroke: #34A853;">
+										<rect x="3" y="11" width="18" height="11" rx="2"></rect>
+										<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+									</svg>
+								</div>
+								<h3 class="otp-title">Crea tu contraseña</h3>
+								<p class="otp-subtitle">Último paso. Elige una contraseña segura para tu cuenta.</p>
+
+								<div class="otp-error-msg" id="pwd-error-msg"></div>
+
+								<form id="otp-password-form">
+									<div class="form-group" style="text-align: left; margin-bottom: 1.2rem;">
+										<label class="sb-login-label">Contraseña</label>
+										<div class="sb-field sb-password-field">
+											<input type="password" id="signup_new_password" class="form-control sb-login-input" placeholder="Mínimo 6 caracteres" required minlength="6" autocomplete="new-password">
+											<svg class="sb-field-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+												<rect x="3" y="11" width="18" height="11" rx="2"></rect>
+												<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+											</svg>
+											<span toggle="#signup_new_password" class="toggle-password text-muted" onclick="var p=document.getElementById('signup_new_password');p.type=p.type==='password'?'text':'password';this.textContent=p.type==='password'?'Mostrar':'Ocultar';">Mostrar</span>
+										</div>
+										<div class="password-strength-bar">
+											<div class="password-strength-fill" id="pwd-strength-fill"></div>
+										</div>
+										<div class="password-hint" id="pwd-hint">Mínimo 6 caracteres</div>
+									</div>
+
+									<button type="submit" class="btn btn-primary btn-block sb-btn-login" id="btn_complete_signup" style="margin-top: 0.5rem;">
+										Completar registro
+									</button>
+								</form>
 							</div>
-							
-							<button type="submit" class="btn btn-primary btn-block sb-btn-login" id="btn_verify_otp">
-								Completar Registro
-							</button>
-						</form>
+						</div>
 
 						{%- else -%}
 						<div class="page-card-head mb-2">

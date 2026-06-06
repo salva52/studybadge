@@ -96,16 +96,51 @@ def sign_up(email: str, full_name: str, verify_terms: bool, user_category: str, 
 
 
 @frappe.whitelist(allow_guest=True)
-def verify_signup_otp(email, otp, password):
+def verify_otp_only(email, otp):
+	"""Step 1: Just verify the OTP code is correct, don't create the account yet."""
+	import time
+
+	# Rate limit: max 5 attempts per email
+	attempts_key = f"otp_attempts:{email}"
+	attempts = cint(frappe.cache().get_value(attempts_key) or 0)
+	if attempts >= 5:
+		return {"status": "error", "message": "Demasiados intentos. Solicita un nuevo código."}
+
+	frappe.cache().set_value(attempts_key, attempts + 1, expires_in_sec=600)
+
 	cache_key = f"signup_data:{email}"
 	data = frappe.cache().get_value(cache_key)
-	
+
 	if not data:
-		frappe.throw(_("El código de verificación ha expirado o es inválido."))
-		
+		return {"status": "error", "message": "El código ha expirado. Solicita uno nuevo."}
+
 	if str(data.get("otp")) != str(otp):
-		frappe.throw(_("Código de verificación incorrecto."))
-		
+		remaining = 5 - (attempts + 1)
+		return {"status": "error", "message": f"Código incorrecto. Te quedan {remaining} intentos."}
+
+	# Mark as verified in cache
+	data["otp_verified"] = True
+	data["verified_at"] = time.time()
+	frappe.cache().set_value(cache_key, data, expires_in_sec=600)
+	# Reset attempts on success
+	frappe.cache().delete_value(attempts_key)
+
+	return {"status": "success"}
+
+
+@frappe.whitelist(allow_guest=True)
+def verify_signup_otp(email, otp, password):
+	"""Step 2: Create the account after OTP was verified."""
+	cache_key = f"signup_data:{email}"
+	data = frappe.cache().get_value(cache_key)
+
+	if not data:
+		return {"status": "error", "message": "La sesión ha expirado. Regístrate de nuevo."}
+
+	# Accept if OTP was pre-verified OR if it matches now
+	if not data.get("otp_verified") and str(data.get("otp")) != str(otp):
+		return {"status": "error", "message": "Código de verificación incorrecto."}
+
 	if data.get("ref_code"):
 		frappe.local.flags.studybadge_ref = data.get("ref_code")
 
@@ -127,12 +162,12 @@ def verify_signup_otp(email, otp, password):
 	user.flags.ignore_permissions = True
 	user.flags.ignore_password_policy = True
 	frappe.flags.mute_messages = True
-	
+
 	try:
 		user.insert()
 	except Exception as e:
 		frappe.log_error(title="Signup Error", message=frappe.get_traceback())
-		frappe.throw(f"Error during sign up: {str(e)}")
+		return {"status": "error", "message": f"Error al crear la cuenta: {str(e)}"}
 
 	default_role = frappe.db.get_single_value("Portal Settings", "default_role")
 	if default_role:
@@ -140,11 +175,76 @@ def verify_signup_otp(email, otp, password):
 
 	user.add_roles("LMS Student")
 	set_country_from_ip(None, user.name)
-	
+
 	frappe.cache().delete_value(cache_key)
 	frappe.local.login_manager.login_as(email)
-	
-	return 1, _("Registro completado")
+
+	return {"status": "success"}
+
+
+@frappe.whitelist(allow_guest=True)
+def resend_signup_otp(email):
+	"""Resend OTP with rate limiting: max 3 resends, 60s cooldown."""
+	import random
+	import time
+
+	# Rate limit: cooldown
+	cooldown_key = f"otp_cooldown:{email}"
+	last_sent = frappe.cache().get_value(cooldown_key)
+	if last_sent:
+		elapsed = time.time() - float(last_sent)
+		if elapsed < 60:
+			wait = int(60 - elapsed)
+			return {"status": "error", "message": f"Espera {wait} segundos antes de solicitar otro código."}
+
+	# Rate limit: max resends
+	resend_key = f"otp_resends:{email}"
+	resends = cint(frappe.cache().get_value(resend_key) or 0)
+	if resends >= 3:
+		return {"status": "error", "message": "Has alcanzado el límite de reenvíos. Intenta registrarte de nuevo en 10 minutos."}
+
+	cache_key = f"signup_data:{email}"
+	data = frappe.cache().get_value(cache_key)
+
+	if not data:
+		return {"status": "error", "message": "La sesión ha expirado. Regístrate de nuevo."}
+
+	# Generate new OTP
+	new_otp = str(random.randint(100000, 999999))
+	data["otp"] = new_otp
+	data["otp_verified"] = False
+	data["expires_at"] = time.time() + 600
+	frappe.cache().set_value(cache_key, data, expires_in_sec=600)
+
+	# Reset attempt counter for new OTP
+	frappe.cache().delete_value(f"otp_attempts:{email}")
+
+	# Track resends and cooldown
+	frappe.cache().set_value(resend_key, resends + 1, expires_in_sec=600)
+	frappe.cache().set_value(cooldown_key, str(time.time()), expires_in_sec=60)
+
+	full_name = data.get("full_name", "")
+	message = f"""
+	<div style="padding: 20px; font-family: sans-serif; text-align: center; color: #171717;">
+		<h2>Código de Verificación</h2>
+		<p>Hola {escape_html(full_name)}, aquí tienes tu nuevo código:</p>
+		<h1 style="font-size: 32px; letter-spacing: 5px; color: #0a2251; padding: 10px 20px; background: #f3f6fb; display: inline-block; border-radius: 8px;">{new_otp}</h1>
+		<p>Este código expirará en 10 minutos.</p>
+	</div>
+	"""
+
+	try:
+		frappe.sendmail(
+			recipients=email,
+			subject=_("Tu nuevo código de verificación"),
+			message=message,
+			now=True
+		)
+	except Exception:
+		frappe.log_error(title="OTP Resend Email Error", message=frappe.get_traceback())
+		return {"status": "error", "message": "Error al enviar el correo. Inténtalo de nuevo."}
+
+	return {"status": "success", "message": "Nuevo código enviado a tu correo."}
 
 
 def set_country_from_ip(login_manager: object = None, user: str = None):
