@@ -150,7 +150,7 @@ function submitAnswer() {
 </script>
 
 <style scoped>
-.modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); z-index: 9999 !important; display: flex; align-items: center; justify-content: center; padding: 1rem; }
 .modal-content { background: #fff; width: 96vw; max-width: 1500px; height: 92vh; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); display: flex; flex-direction: column; overflow: hidden; }
 .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0; background: #fff; z-index: 10; }
 .modal-header h2 { display: flex; align-items: center; gap: 0.5rem; font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0; }
