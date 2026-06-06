@@ -5,8 +5,11 @@ Uso:
   cd /home/salva-pc/frappe-bench
   bench --site studybadge.localhost execute lms.setup_google_login.setup_google_oauth
 
-Antes de ejecutar, reemplaza CLIENT_ID y CLIENT_SECRET con los valores
-de Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client ID
+Las credenciales se leen desde site_config.json (nunca las pongas en el código).
+Para configurarlas, ejecuta:
+
+  bench --site studybadge.localhost set-config google_client_id "TU_CLIENT_ID"
+  bench --site studybadge.localhost set-config google_client_secret "TU_CLIENT_SECRET"
 
 Pasos para obtener las credenciales:
 1. Ve a https://console.cloud.google.com/apis/credentials?project=studybadge-f2391
@@ -14,29 +17,26 @@ Pasos para obtener las credenciales:
 3. En "Authorized redirect URIs" agrega:
    - http://studybadge.localhost:8000/api/method/frappe.integrations.oauth2_logins.login_via_google
    - (Si tienes dominio público) https://TU-DOMINIO/api/method/frappe.integrations.oauth2_logins.login_via_google
-4. Copia el Client ID y Client Secret generados y pégalos abajo.
+4. Copia el Client ID y Client Secret y ejecútalos con bench set-config (ver arriba).
 """
 
 import frappe
 
 
-# ====================================================================
-# REEMPLAZA ESTOS VALORES CON TUS CREDENCIALES DE GOOGLE CLOUD CONSOLE
-# ====================================================================
-GOOGLE_CLIENT_ID = "748489238983-8lk28btdt5jquek232qd5sm35kg2e341.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET = "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"
-# ====================================================================
-
-
 def setup_google_oauth():
     """Configura el Social Login Key para Google OAuth en Frappe."""
 
-    if GOOGLE_CLIENT_ID == "TU_CLIENT_ID_AQUI" or GOOGLE_CLIENT_SECRET == "TU_CLIENT_SECRET_AQUI":
+    # Las credenciales se leen desde site_config.json
+    GOOGLE_CLIENT_ID = frappe.conf.get("google_client_id")
+    GOOGLE_CLIENT_SECRET = frappe.conf.get("google_client_secret")
+
+    if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
         print("=" * 60)
-        print("ERROR: Debes reemplazar GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET")
-        print("con los valores reales de Google Cloud Console.")
+        print("ERROR: Faltan las credenciales de Google en site_config.json")
         print("")
-        print("Edita el archivo: apps/lms/lms/setup_google_login.py")
+        print("Ejecútalos con:")
+        print('  bench --site studybadge.localhost set-config google_client_id "TU_CLIENT_ID"')
+        print('  bench --site studybadge.localhost set-config google_client_secret "TU_CLIENT_SECRET"')
         print("=" * 60)
         return
 
