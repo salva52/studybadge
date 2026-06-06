@@ -105,3 +105,15 @@ def on_login(login_manager):
 	default_app = frappe.db.get_single_value("System Settings", "default_app")
 	if default_app == "lms":
 		frappe.local.response["home_page"] = get_lms_route()
+
+
+def notify_admin_new_user(doc, method):
+	try:
+		frappe.sendmail(
+			recipients=["salvaalca52@gmail.com"],
+			subject="¡Nuevo usuario en StudyBadge!",
+			message=f"Se ha registrado un nuevo usuario en StudyBadge.<br><br>Nombre: {doc.full_name}<br>Email: {doc.email}<br>Usuario: {doc.username}",
+			delayed=True
+		)
+	except Exception as e:
+		frappe.log_error(title="Error sending admin notification", message=str(e))

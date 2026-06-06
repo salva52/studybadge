@@ -129,7 +129,10 @@ doc_events = {
 	"User": {
 		"validate": "lms.lms.user.validate_username_duplicates",
 		"before_insert": "lms.lms.user.add_lms_student_role",
-		"after_insert": "lms.lms.referral.on_user_creation",
+		"after_insert": [
+			"lms.lms.referral.on_user_creation",
+			"lms.lms.user.notify_admin_new_user"
+		],
 		"on_update": "lms.lms.referral.on_user_update",
 	},
 }
