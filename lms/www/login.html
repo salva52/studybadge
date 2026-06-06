@@ -1609,7 +1609,11 @@
 											statusCode: login.login_handlers,
 											callback: function(r) {
 												console.log("Signup server response:", r);
-												if (r.message && r.message.status === "success") {
+												if (r.message && (r.message.status === "success" || r.message[0] === 1 || r.message === "OTP enviado al correo")) {
+													// Close any default frappe msgprint dialogs that might have popped up
+													if (window.frappe && frappe.msg_dialog) { frappe.msg_dialog.hide(); }
+													$(".modal:has(.msgprint)").modal("hide");
+													
 													$(".sb-login-form-header").hide();
 													$(".sb-form-signup").hide();
 													$(".otp-verification-view").removeClass("hide").hide().fadeIn();
