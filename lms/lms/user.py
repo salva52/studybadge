@@ -104,7 +104,7 @@ def verify_signup_otp(email, otp, password):
 		frappe.throw(_("El código de verificación ha expirado o es inválido."))
 		
 	if str(data.get("otp")) != str(otp):
-		frappe.throw(_("Código OTP incorrecto."))
+		frappe.throw(_("Código de verificación incorrecto."))
 		
 	if data.get("ref_code"):
 		frappe.local.flags.studybadge_ref = data.get("ref_code")

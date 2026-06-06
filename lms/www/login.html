@@ -1580,8 +1580,10 @@
 								$(".sb-form-signup").on("submit", (e) => {
 									e.preventDefault();
 									const email = ($("#signup_email").val() || "").trim();
-									const full_name = frappe.utils.xss_sanitise(($("#signup_fullname").val() || "").trim());
-									const ref_code = frappe.utils.xss_sanitise(($("#login_ref_code").val() || "").trim());
+									const raw_full_name = ($("#signup_fullname").val() || "").trim();
+									const full_name = frappe.utils.xss_sanitise ? frappe.utils.xss_sanitise(raw_full_name) : raw_full_name;
+									const raw_ref_code = ($("#login_ref_code").val() || "").trim();
+									const ref_code = frappe.utils.xss_sanitise ? frappe.utils.xss_sanitise(raw_ref_code) : raw_ref_code;
 
 									if (!email || !(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) || !full_name) {
 										login.set_status('{{ _("Ingresa un correo válido y tu nombre completo") }}', "red");
@@ -1626,9 +1628,13 @@
 													$btn.prop("disabled", false).text(originalBtnText);
 												} else if (r.exc) {
 													console.error("Exception during signup:", r.exc);
-													login.set_status("Error en el servidor al registrarse. Revisa la consola.", "red");
 													$btn.prop("disabled", false).text(originalBtnText);
 												}
+											},
+											error: function(r) {
+												console.error("Network or server error during signup:", r);
+												login.set_status("Error de red o servidor. Intenta de nuevo.", "red");
+												$btn.prop("disabled", false).text(originalBtnText);
 											}
 										});
 									};
@@ -1637,6 +1643,10 @@
 										window.grecaptcha.ready(function() {
 											window.grecaptcha.execute('{{ recaptcha_site_key or "" }}', {action: 'sign_up'}).then(function(token) {
 												do_signup(token);
+											}).catch(function(err) {
+												console.error("reCAPTCHA error:", err);
+												$btn.prop("disabled", false).text(originalBtnText);
+												login.set_status("Error al verificar reCAPTCHA", "red");
 											});
 										});
 									} else {
