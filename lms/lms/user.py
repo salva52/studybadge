@@ -92,7 +92,7 @@ def sign_up(email: str, full_name: str, verify_terms: bool, user_category: str, 
 		frappe.log_error(title="OTP Email Error", message=frappe.get_traceback())
 		frappe.throw(_("Error al enviar el correo de verificación. Inténtalo de nuevo."))
 
-	return 1, _("OTP enviado al correo")
+	return {"status": "success"}
 
 
 @frappe.whitelist(allow_guest=True)

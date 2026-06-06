@@ -1609,13 +1609,16 @@
 											statusCode: login.login_handlers,
 											callback: function(r) {
 												console.log("Signup server response:", r);
-												if (r.message && r.message[0] === 0) {
-													login.set_status(r.message[1], "red");
-													$btn.prop("disabled", false).text(originalBtnText);
-												} else if (r.message) {
+												if (r.message && r.message.status === "success") {
 													$(".sb-login-form-header").hide();
 													$(".sb-form-signup").hide();
 													$(".otp-verification-view").removeClass("hide").hide().fadeIn();
+												} else if (r.message && r.message[0] === 0) {
+													login.set_status(r.message[1], "red");
+													$btn.prop("disabled", false).text(originalBtnText);
+												} else if (r.message) {
+													login.set_status(r.message[1], "green");
+													$btn.prop("disabled", false).text(originalBtnText);
 												} else if (r.exc) {
 													console.error("Exception during signup:", r.exc);
 													login.set_status("Error en el servidor al registrarse. Revisa la consola.", "red");
