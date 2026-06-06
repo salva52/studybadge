@@ -22,60 +22,15 @@
 					<span>{{ __('Guardar') }}</span>
 				</button>
 
-				<button class="room-danger" :disabled="finishing" @click="finishSession">
+				<button class="room-danger" :disabled="finishing" @click="hasFeedback ? openFeedbackModal() : finishSession()">
 					<Square class="size-4" />
-					<span>{{ finishing ? __('Evaluando...') : __('Finalizar y ver resumen') }}</span>
+					<span>{{ finishing ? __('Evaluando...') : hasFeedback ? __('Ver resumen') : __('Finalizar y ver resumen') }}</span>
 				</button>
 			</div>
 		</header>
 
 		<main class="room-layout">
 			<section class="room-stage">
-				<div v-if="hasFeedback" class="feedback-panel">
-					<div class="feedback-head">
-						<div class="feedback-score-wrap">
-							<div class="feedback-score">{{ feedbackScore }}</div>
-							<span>{{ feedbackScoreLabel }}</span>
-						</div>
-
-						<div class="feedback-copy">
-							<div class="room-kicker">{{ __('Resumen final de la IA') }}</div>
-							<h2>{{ __('Así te fue en la práctica') }}</h2>
-							<p>{{ feedback.summary || __('La IA preparó una evaluación con tus fortalezas, puntos de mejora y próximos pasos.') }}</p>
-						</div>
-					</div>
-
-					<div class="feedback-grid">
-						<div class="feedback-card">
-							<h3>{{ __('Fortalezas') }}</h3>
-							<ul v-if="feedback.strengths?.length">
-								<li v-for="item in feedback.strengths" :key="item">{{ item }}</li>
-							</ul>
-							<p v-else>{{ __('Aún no hay fortalezas detalladas.') }}</p>
-						</div>
-
-						<div class="feedback-card">
-							<h3>{{ __('Por mejorar') }}</h3>
-							<ul v-if="feedback.improvements?.length">
-								<li v-for="item in feedback.improvements" :key="item">{{ item }}</li>
-							</ul>
-							<p v-else>{{ __('Aún no hay mejoras detalladas.') }}</p>
-						</div>
-
-						<div class="feedback-card">
-							<h3>{{ __('Siguiente práctica') }}</h3>
-							<ul v-if="feedback.next_steps?.length">
-								<li v-for="item in feedback.next_steps" :key="item">{{ item }}</li>
-							</ul>
-							<p v-else>{{ __('Repite la simulación con un objetivo más específico.') }}</p>
-						</div>
-					</div>
-
-					<div v-if="feedback.sample_better_answer" class="better-answer">
-						<strong>{{ __('Ejemplo de mejor respuesta') }}</strong>
-						<p>{{ feedback.sample_better_answer }}</p>
-					</div>
-				</div>
 
 				<div class="meeting-grid">
 					<div class="ai-tile">
@@ -257,6 +212,76 @@
 				</div>
 			</aside>
 		</main>
+
+		<div v-if="showFeedbackModal && hasFeedback" class="feedback-modal-backdrop" @click.self="closeFeedbackModal">
+			<section class="feedback-modal" role="dialog" aria-modal="true" aria-labelledby="feedback-modal-title">
+				<header class="feedback-modal-header">
+					<div>
+						<div class="room-kicker">{{ __('Resumen final de la IA') }}</div>
+						<h2 id="feedback-modal-title">{{ __('Así te fue en la práctica') }}</h2>
+					</div>
+
+					<button class="modal-close" type="button" @click="closeFeedbackModal" aria-label="Cerrar resumen">
+						<X class="size-5" />
+					</button>
+				</header>
+
+				<div class="feedback-modal-body">
+					<div class="feedback-overview">
+						<div class="feedback-score-wrap">
+							<div class="feedback-score">{{ feedbackScore }}</div>
+							<span>{{ feedbackScoreLabel }}</span>
+						</div>
+
+						<p>
+							{{ feedback.summary || __('La IA preparó una evaluación con tus fortalezas, puntos de mejora y próximos pasos.') }}
+						</p>
+					</div>
+
+					<div class="feedback-grid">
+						<div class="feedback-card">
+							<h3>{{ __('Fortalezas') }}</h3>
+							<ul v-if="feedback.strengths?.length">
+								<li v-for="item in feedback.strengths" :key="item">{{ item }}</li>
+							</ul>
+							<p v-else>{{ __('Aún no hay fortalezas detalladas.') }}</p>
+						</div>
+
+						<div class="feedback-card">
+							<h3>{{ __('Por mejorar') }}</h3>
+							<ul v-if="feedback.improvements?.length">
+								<li v-for="item in feedback.improvements" :key="item">{{ item }}</li>
+							</ul>
+							<p v-else>{{ __('Aún no hay mejoras detalladas.') }}</p>
+						</div>
+
+						<div class="feedback-card">
+							<h3>{{ __('Siguiente práctica') }}</h3>
+							<ul v-if="feedback.next_steps?.length">
+								<li v-for="item in feedback.next_steps" :key="item">{{ item }}</li>
+							</ul>
+							<p v-else>{{ __('Repite la simulación con un objetivo más específico.') }}</p>
+						</div>
+					</div>
+
+					<div v-if="feedback.sample_better_answer" class="better-answer">
+						<strong>{{ __('Ejemplo de mejor respuesta') }}</strong>
+						<p>{{ feedback.sample_better_answer }}</p>
+					</div>
+				</div>
+
+				<footer class="feedback-modal-footer">
+					<button class="room-ghost modal-footer-btn" type="button" @click="closeFeedbackModal">
+						{{ __('Cerrar') }}
+					</button>
+
+					<button class="room-primary modal-footer-btn" type="button" @click="goToPractice">
+						<LayoutList class="size-4" />
+						{{ __('Ir a simulaciones') }}
+					</button>
+				</footer>
+			</section>
+		</div>
 	</div>
 </template>
 
@@ -275,6 +300,7 @@ import {
 	Send,
 	Square,
 	User,
+	X,
 } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
 
@@ -309,6 +335,7 @@ const liveSocketOpen = ref(false)
 const audioStreaming = ref(false)
 const isAiSpeaking = ref(false)
 const elapsedTime = ref('00:00')
+const showFeedbackModal = ref(false)
 
 let speakingInterval = null
 let timerInterval = null
@@ -410,6 +437,18 @@ const feedbackScoreLabel = computed(() => {
 	if (score > 0) return __('Necesita práctica')
 	return __('Evaluación')
 })
+
+function openFeedbackModal() {
+	showFeedbackModal.value = true
+}
+
+function closeFeedbackModal() {
+	showFeedbackModal.value = false
+}
+
+function goToPractice() {
+	window.location.href = '/lms/practice'
+}
 
 usePageMeta(() => ({
 	title: session.value?.title || __('Sala de práctica'),
@@ -539,6 +578,8 @@ async function finishSession() {
 		feedback.value = result.feedback || feedback.value
 		session.value = result.session || session.value
 
+		showFeedbackModal.value = true
+
 		toast.success(__('Resumen final generado.'))
 	} catch (error) {
 		toast.error(error.messages?.[0] || __('No se pudo finalizar la práctica.'))
@@ -575,7 +616,7 @@ async function startLiveVoice() {
 		const liveEndpoint =
 			token.endpoint ||
 			'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained'
-		const url = `${liveEndpoint}?access_token=${token.token}`
+		const url = `${liveEndpoint}?access_token=${encodeURIComponent(token.token)}`
 		const ws = new WebSocket(url)
 
 		liveSession.value = ws
@@ -635,10 +676,7 @@ async function startLiveVoice() {
 
 		ws.onclose = (event) => {
 			if (!manualLiveStop && event.code !== 1000) {
-				liveError.value =
-					event.code === 1011
-						? __('Live API cerró la sesión por un error interno. Intenta activar voz otra vez o continúa por texto.')
-						: `${__('Conexión cerrada')}: ${event.code}${event.reason ? ` - ${event.reason}` : ''}`
+				liveError.value = `${__('Conexión cerrada')}: ${event.code}${event.reason ? ` - ${event.reason}` : ''}`
 			}
 
 			liveConnected.value = false
@@ -1645,6 +1683,102 @@ function stopMicrophoneOnly() {
 	font-weight: 950;
 }
 
+.feedback-modal-backdrop {
+	position: fixed;
+	inset: 0;
+	z-index: 80;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(7, 22, 50, 0.56);
+	padding: 1rem;
+}
+
+.feedback-modal {
+	display: flex;
+	width: min(940px, 100%);
+	max-height: min(86vh, 820px);
+	flex-direction: column;
+	overflow: hidden;
+	border: 1px solid var(--room-border);
+	border-radius: 28px;
+	background: var(--room-surface);
+	box-shadow: 0 28px 80px rgba(7, 22, 50, 0.28);
+}
+
+.feedback-modal-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+	border-bottom: 1px solid var(--room-border);
+	padding: 1.15rem 1.2rem;
+	background: var(--room-surface);
+}
+
+.feedback-modal-header h2 {
+	margin: 0.25rem 0 0;
+	color: var(--room-ink);
+	font-size: 1.4rem;
+	font-weight: 950;
+	letter-spacing: -0.035em;
+}
+
+.modal-close {
+	display: grid;
+	place-items: center;
+	width: 42px;
+	height: 42px;
+	border: 1px solid var(--room-border);
+	border-radius: 999px;
+	background: var(--room-surface-soft);
+	color: var(--room-primary);
+	cursor: pointer;
+	transition: 0.18s ease;
+}
+
+.modal-close:hover {
+	background: #eef4fc;
+}
+
+.feedback-modal-body {
+	overflow-y: auto;
+	padding: 1.2rem;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(123, 138, 160, 0.5) transparent;
+}
+
+.feedback-overview {
+	display: flex;
+	align-items: flex-start;
+	gap: 1rem;
+	border: 1px solid var(--room-border);
+	border-radius: 22px;
+	background: var(--room-surface-soft);
+	padding: 1rem;
+}
+
+.feedback-overview p {
+	margin: 0.15rem 0 0;
+	color: var(--room-muted);
+	font-size: 0.95rem;
+	line-height: 1.65;
+}
+
+.feedback-modal-footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.75rem;
+	border-top: 1px solid var(--room-border);
+	padding: 1rem 1.2rem;
+	background: var(--room-surface);
+}
+
+.modal-footer-btn {
+	width: auto;
+	min-width: 150px;
+}
+
 @media (max-width: 1180px) {
 	.room-page {
 		height: auto;
@@ -1746,7 +1880,7 @@ function stopMicrophoneOnly() {
 	.user-tile,
 	.practice-card,
 	.side-section,
-	.feedback-panel {
+	.feedback-modal {
 		border-radius: 18px;
 	}
 
@@ -1881,5 +2015,45 @@ function stopMicrophoneOnly() {
 	.feedback-grid {
 		grid-template-columns: 1fr;
 	}
+	.feedback-modal-backdrop {
+		align-items: flex-end;
+		padding: 0;
+	}
+
+	.feedback-modal {
+		width: 100%;
+		max-height: 92vh;
+		border-right: 0;
+		border-bottom: 0;
+		border-left: 0;
+		border-radius: 24px 24px 0 0;
+	}
+
+	.feedback-modal-header {
+		padding: 1rem;
+	}
+
+	.feedback-modal-header h2 {
+		font-size: 1.18rem;
+	}
+
+	.feedback-modal-body {
+		padding: 1rem;
+	}
+
+	.feedback-overview {
+		flex-direction: column;
+	}
+
+	.feedback-modal-footer {
+		display: grid;
+		grid-template-columns: 1fr;
+		padding: 0.9rem 1rem calc(0.9rem + env(safe-area-inset-bottom));
+	}
+
+	.modal-footer-btn {
+		width: 100%;
+	}
+
 }
 </style>

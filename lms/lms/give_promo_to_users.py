@@ -27,6 +27,30 @@ def give_promo_to_all_recent_users():
                 
     print(f"\nSe otorgó StudyBadge Plus a {count} usuarios.")
 
+def give_promo_to_single_user(email):
+    if not frappe.db.exists("User", email):
+        print(f"Error: El usuario {email} no existe en el sistema.")
+        return
+
+    has_sub = frappe.db.exists("StudyBadge Plus Subscription", {"member": email})
+    if not has_sub:
+        try:
+            frappe.get_doc({
+                "doctype": "StudyBadge Plus Subscription",
+                "member": email,
+                "status": "active",
+                "amount": 0.0,
+                "payment_gateway": "Manual Promo",
+                "next_payment_date": frappe.utils.add_months(frappe.utils.today(), 12),
+                "date_created": frappe.utils.now_datetime()
+            }).insert(ignore_permissions=True)
+            frappe.db.commit()
+            print(f"Suscripción otorgada exitosamente a: {email}")
+        except Exception as e:
+            print(f"Error al otorgar suscripción a {email}: {e}")
+    else:
+        print(f"El usuario {email} ya tiene una suscripción Plus activa.")
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Uso: bench --site [tu-sitio] execute give_promo_to_users.give_promo_to_all_recent_users")
