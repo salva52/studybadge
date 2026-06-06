@@ -1539,7 +1539,7 @@
 								</script>
 
 								<div class="page-card-actions" style="margin-top: 1.2rem; margin-bottom: 0.5rem;">
-									<button class="btn btn-sm btn-primary btn-block btn-signup sb-btn-login" type="submit">
+									<button class="btn btn-sm btn-primary btn-block sb-btn-signup-custom sb-btn-login" type="submit">
 										{{ _("Registrarse") }}
 									</button>
 								</div>
@@ -1610,9 +1610,10 @@
 											callback: function(r) {
 												console.log("Signup server response:", r);
 												if (r.message && (r.message.status === "success" || r.message[0] === 1 || r.message === "OTP enviado al correo")) {
-													// Close any default frappe msgprint dialogs that might have popped up
-													if (window.frappe && frappe.msg_dialog) { frappe.msg_dialog.hide(); }
-													$(".modal:has(.msgprint)").modal("hide");
+													try {
+														if (window.frappe && frappe.msg_dialog) { frappe.msg_dialog.hide(); }
+														if ($.fn && $.fn.modal) { $(".modal:has(.msgprint)").modal("hide"); }
+													} catch(err) { console.warn(err); }
 													
 													$(".sb-login-form-header").hide();
 													$(".sb-form-signup").hide();
