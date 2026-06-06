@@ -711,6 +711,13 @@ def convert_to_usd_amount(amount: float, currency: str, amount_usd: float = None
 	return rounded(flt(amount * exchange_rate, 2))
 
 
+def convert_to_pen_amount(amount: float, currency: str):
+	if currency == "PEN":
+		return amount
+	exchange_rate = get_current_exchange_rate(currency, "PEN")
+	return rounded(flt(amount * exchange_rate, 2))
+
+
 def set_checkout_currency(details: dict, preferred_currency: str | None = None):
 	preferred_currency = (preferred_currency or "").upper()
 	if not preferred_currency:
@@ -725,7 +732,9 @@ def set_checkout_currency(details: dict, preferred_currency: str | None = None):
 		return
 
 	if preferred_currency == "PEN" and details.currency != "PEN":
-		frappe.throw(_("This item is not configured with a PEN price. Please choose USD or ask the creator to set a PEN price."))
+		details.amount = convert_to_pen_amount(details.amount, details.currency)
+		details.currency = "PEN"
+		return
 
 
 def check_multicurrency(amount: float, currency: str, country: str = None, amount_usd: float = None):
@@ -748,6 +757,14 @@ def check_multicurrency(amount: float, currency: str, country: str = None, amoun
 
 	# If the country is the one for which conversion is not needed then return as is
 	if not country or (exception_country and country in exception_country):
+		if currency != "PEN":
+			exchange_rate = get_current_exchange_rate(currency, "PEN")
+			amount = flt(amount * exchange_rate, 2)
+			currency = "PEN"
+			apply_rounding = settings.apply_rounding
+			if apply_rounding and amount % 100 != 0:
+				amount = amount + 100 - amount % 100
+			return rounded(amount), currency
 		return amount, currency
 
 	# If conversion is disabled from settings or the currency is already USD then return as is
