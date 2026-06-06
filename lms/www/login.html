@@ -1743,12 +1743,17 @@
 								</div>
 							</div>
 						</form>
-
-						<script>
+					<script>
 						frappe.ready(function () {
 							let current_signup_email = "";
 							let current_signup_otp = "";
 							let resend_timer = null;
+
+							// ── Helper: refresh CSRF token from cookie (prevents 417 errors) ──
+							function refreshCsrfToken() {
+								const match = document.cookie.match(new RegExp('(^| )csrf_token=([^;]+)'));
+								if (match) frappe.csrf_token = decodeURIComponent(match[2]);
+							}
 
 							// ── Helper: show/hide inline messages ──
 							function showOtpError(msg) {
@@ -1839,6 +1844,7 @@
 								$btn.prop("disabled", true).text("Verificando...");
 								$("#otp-error-msg").hide();
 
+								refreshCsrfToken();
 								frappe.call({
 									method: "lms.lms.user.verify_otp_only",
 									args: { email: current_signup_email, otp: otp }
@@ -1874,6 +1880,7 @@
 								$btn.prop("disabled", true).text("Creando cuenta...");
 								$("#pwd-error-msg").hide();
 
+								refreshCsrfToken();
 								frappe.call({
 									method: "lms.lms.user.verify_signup_otp",
 									args: {
@@ -1913,6 +1920,7 @@
 								$link.addClass("disabled").text("Enviando...");
 								$("#otp-error-msg").hide();
 
+								refreshCsrfToken();
 								frappe.call({
 									method: "lms.lms.user.resend_signup_otp",
 									args: { email: current_signup_email }
@@ -1953,6 +1961,7 @@
 								$btn.prop("disabled", true).text("Registrando...");
 
 								const do_signup = (captchaToken) => {
+									refreshCsrfToken();
 									frappe.call({
 										method: "lms.lms.user.sign_up",
 										args: {
