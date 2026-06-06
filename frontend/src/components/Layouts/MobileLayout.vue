@@ -4,6 +4,7 @@
 			id="scrollContainer"
 			class="mobile-scroll"
 			:class="{ 'menu-open': showMenu }"
+			@scroll="handleScroll"
 		>
 			<slot />
 
@@ -113,7 +114,18 @@
 				</div>
 			</Transition>
 
-			<nav class="mobile-bottom-nav" aria-label="Navegación móvil">
+			<!-- 
+				Agregamos la clase condicional nav-hidden
+				Si isNavHidden es true y el menú no está abierto, se oculta
+			-->
+			<nav 
+				class="mobile-bottom-nav" 
+				:class="{ 
+					'nav-hidden': isNavHidden && !showMenu,
+					'is-ai-minimized': forceMiniNav 
+				}"
+				aria-label="Navegación móvil"
+			>
 				<button
 					v-for="tab in visibleBottomTabs"
 					:key="tab.key"
@@ -175,7 +187,55 @@ const menu = ref(null)
 const isModerator = ref(false)
 const isInstructor = ref(false)
 
+// Estados para ocultar navbar con el scroll
+const isNavHidden = ref(false)
+let lastScrollTop = 0
+
+// Lógica fluida para ocultar la navbar (Hide on scroll)
+const handleScroll = (e) => {
+	// Si el menú está abierto no evaluamos el scroll
+	if (showMenu.value) return
+
+	const st = e.target.scrollTop
+	const threshold = 15 // Distancia mínima para activar el efecto y evitar "temblores"
+
+	// Siempre mostramos la barra si el usuario está hasta arriba de todo
+	if (st <= 0) {
+		isNavHidden.value = false
+		lastScrollTop = st
+		return
+	}
+
+	// Ignoramos micro-desplazamientos
+	if (Math.abs(st - lastScrollTop) <= threshold) return
+
+	// Si baja más de 80px (para no esconderla apenas arranca a bajar)
+	if (st > lastScrollTop && st > 80) {
+		isNavHidden.value = true
+	} else {
+		// Si está subiendo
+		isNavHidden.value = false
+	}
+
+	lastScrollTop = st
+}
+
 const fullScreenRoutes = ['AISessions', 'AISessionRoom', 'AISessionChat']
+
+const isAiSessionsPage = computed(() => {
+	const route = router.currentRoute.value
+	const routeName = route.name
+	const routePath = route.path || ''
+
+	return (
+		fullScreenRoutes.includes(routeName) ||
+		routePath.includes('/ai-sessions')
+	)
+})
+
+const forceMiniNav = computed(() => {
+	return isAiSessionsPage.value && !showMenu.value
+})
 
 const showBottomSpacer = computed(() => {
 	return !fullScreenRoutes.includes(router?.currentRoute?.value?.name)
@@ -1043,7 +1103,7 @@ const getLinkDescription = (link) => {
    ========================================= */
 .mobile-bottom-nav {
 	position: fixed;
-	left: 16px; /* Ligeramente más metido para dar el efecto de pastilla flotante */
+	left: 16px;
 	right: 16px;
 	bottom: calc(16px + env(safe-area-inset-bottom));
 	z-index: 80;
@@ -1054,8 +1114,8 @@ const getLinkDescription = (link) => {
 	padding: 0.5rem;
 
 	/* Efecto Transparente / Liquid Glass */
-	background: rgba(255, 255, 255, 0.15); /* Muy transparente */
-	backdrop-filter: blur(35px) saturate(250%); /* Alto desenfoque para colores vibrantes de fondo */
+	background: rgba(255, 255, 255, 0.15);
+	backdrop-filter: blur(35px) saturate(250%);
 	-webkit-backdrop-filter: blur(35px) saturate(250%);
 
 	/* Reflejos en los bordes del cristal */
@@ -1064,6 +1124,17 @@ const getLinkDescription = (link) => {
 		0 12px 40px -12px rgba(10, 34, 81, 0.2), 
 		inset 0 1px 0 rgba(255, 255, 255, 0.8), 
 		inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+	
+	/* Transición general para la barra entera cuando se oculta/muestra */
+	transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.4s ease;
+	will-change: transform, opacity;
+}
+
+/* Estado de la barra escondida */
+.mobile-bottom-nav.nav-hidden {
+	transform: translateY(calc(100% + 30px)); /* Se empuja hacia abajo fuera de la pantalla */
+	opacity: 0;
+	pointer-events: none; /* Evita que reciba clicks mientras está invisible */
 }
 
 :global(:root[data-theme='dark']) .mobile-bottom-nav {
@@ -1180,6 +1251,60 @@ const getLinkDescription = (link) => {
 .mobile-sheet-leave-to {
 	opacity: 0;
 	transform: translateY(24px) scale(0.96);
+}
+
+@media (max-width: 360px) {
+	.mobile-sheet {
+		left: 8px;
+		right: 8px;
+		border-radius: 30px;
+	}
+}
+
+.mobile-bottom-nav.is-ai-minimized {
+	left: 76px;
+	right: 76px;
+	bottom: calc(8px + env(safe-area-inset-bottom));
+	min-height: 52px;
+	padding: 0.28rem;
+	opacity: 0.72;
+	transform: translateY(10px) scale(0.9);
+	z-index: 10 !important;
+}
+
+.mobile-bottom-nav.is-ai-minimized .mobile-nav-label {
+	max-height: 0;
+	margin-top: -0.25rem;
+	opacity: 0;
+	transform: translateY(6px) scale(0.9);
+}
+
+.mobile-bottom-nav.is-ai-minimized .mobile-nav-item {
+	min-height: 38px;
+}
+
+.mobile-bottom-nav.is-ai-minimized .mobile-nav-icon :deep(svg) {
+	width: 21px;
+	height: 21px;
+}
+
+.mobile-bottom-nav.is-ai-minimized:hover,
+.mobile-bottom-nav.is-ai-minimized:active {
+	left: 14px;
+	right: 14px;
+	bottom: calc(14px + env(safe-area-inset-bottom));
+	min-height: 76px;
+	opacity: 1;
+	transform: translateY(0) scale(1);
+	z-index: 90 !important;
+}
+
+.mobile-bottom-nav.is-ai-minimized:hover .mobile-nav-label,
+.mobile-bottom-nav.is-ai-minimized:active .mobile-nav-label {
+	max-height: 20px;
+	margin-top: 0;
+	opacity: 1;
+	transform: translateY(0) scale(1);
 }
 
 @media (max-width: 360px) {
