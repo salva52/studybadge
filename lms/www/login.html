@@ -199,9 +199,7 @@
 		flex-direction: column;
 		justify-content: space-between;
 		min-height: 100svh;
-		background:
-			radial-gradient(115% 90% at 12% 8%, #14397e 0%, rgba(20, 57, 126, 0) 55%),
-			linear-gradient(155deg, #0a2251 0%, #0c2a63 48%, var(--sb-primary-deep) 100%);
+		background: var(--sb-primary);
 		color: #ffffff;
 		padding: 2.4rem 3.4rem;
 		overflow: hidden;
@@ -226,36 +224,6 @@
 		background-size: 46px 46px;
 		mask-image: radial-gradient(120% 90% at 30% 20%, #000 0%, transparent 72%);
 		-webkit-mask-image: radial-gradient(120% 90% at 30% 20%, #000 0%, transparent 72%);
-	}
-
-	.sb-glow {
-		position: absolute;
-		border-radius: 999px;
-		filter: blur(70px);
-		opacity: 0.55;
-	}
-
-	.sb-glow-gold {
-		width: 360px;
-		height: 360px;
-		top: -90px;
-		right: -60px;
-		background: radial-gradient(circle, rgba(245, 179, 1, 0.5) 0%, rgba(245, 179, 1, 0) 70%);
-		animation: sbFloat 11s ease-in-out infinite;
-	}
-
-	.sb-glow-blue {
-		width: 420px;
-		height: 420px;
-		bottom: -140px;
-		left: -120px;
-		background: radial-gradient(circle, rgba(64, 124, 235, 0.45) 0%, rgba(64, 124, 235, 0) 70%);
-		animation: sbFloat 13s ease-in-out infinite reverse;
-	}
-
-	@keyframes sbFloat {
-		0%, 100% { transform: translate(0, 0); }
-		50% { transform: translate(18px, -22px); }
 	}
 
 	.sb-login-left::before {
@@ -338,10 +306,7 @@
 	}
 
 	.sb-login-tagline h2 .sb-accent {
-		background: linear-gradient(100deg, var(--sb-gold) 10%, #ffd970 90%);
-		-webkit-background-clip: text;
-		background-clip: text;
-		-webkit-text-fill-color: transparent;
+		color: var(--sb-gold);
 	}
 
 	.sb-login-tagline p {
@@ -358,7 +323,7 @@
 		margin-top: 1.9rem;
 		border: 1px solid rgba(255, 255, 255, 0.14);
 		border-radius: 22px;
-		background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%);
+		background: rgba(255, 255, 255, 0.08);
 		box-shadow: 0 26px 56px rgba(0, 0, 0, 0.28);
 		backdrop-filter: blur(8px);
 		-webkit-backdrop-filter: blur(8px);
@@ -450,7 +415,7 @@
 		display: block;
 		height: 100%;
 		border-radius: 999px;
-		background: linear-gradient(90deg, var(--sb-gold) 0%, #ffd970 100%);
+		background: var(--sb-gold);
 		box-shadow: 0 0 14px rgba(245, 179, 1, 0.5);
 		animation: sbFill 1.3s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both;
 	}
@@ -600,7 +565,7 @@
 		left: 0;
 		right: 0;
 		height: 4px;
-		background: linear-gradient(90deg, var(--sb-primary) 0%, var(--sb-gold) 100%);
+		background: var(--sb-gold);
 	}
 
 	.sb-login-form-header {
@@ -795,7 +760,7 @@
 		min-height: 46px !important;
 		border: 1px solid var(--sb-primary) !important;
 		border-radius: 15px !important;
-		background: linear-gradient(135deg, #12356f 0%, var(--sb-primary) 60%, #081d44 100%) !important;
+		background: var(--sb-primary) !important;
 		color: #ffffff !important;
 		padding: 0.72rem 1rem !important;
 		font-size: 0.92rem !important;
@@ -806,7 +771,7 @@
 	}
 
 	.sb-btn-login:hover {
-		background: linear-gradient(135deg, #1a4488 0%, #12356f 60%, #0a2251 100%) !important;
+		background: var(--sb-primary-hover) !important;
 		border-color: var(--sb-primary-hover) !important;
 		transform: translateY(-1px) !important;
 		box-shadow: 0 18px 38px rgba(10, 34, 81, 0.28) !important;
@@ -1265,10 +1230,7 @@
 {% block page_content %}
 <div class="sb-login-wrapper">
 	<div class="sb-login-left">
-		<div class="sb-login-left-bg" aria-hidden="true">
-			<span class="sb-glow sb-glow-gold"></span>
-			<span class="sb-glow sb-glow-blue"></span>
-		</div>
+		<div class="sb-login-left-bg" aria-hidden="true"></div>
 
 		<div class="sb-login-left-inner">
 			<div class="sb-login-brand">
