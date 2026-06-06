@@ -1610,24 +1610,48 @@
 											},
 											statusCode: login.login_handlers,
 											callback: function(r) {
-												console.log("Signup server response:", r);
-												if (r.message && (r.message.status === "success" || r.message[0] === 1 || r.message === "OTP enviado al correo")) {
-													try {
-														if (window.frappe && frappe.msg_dialog) { frappe.msg_dialog.hide(); }
-														if ($.fn && $.fn.modal) { $(".modal:has(.msgprint)").modal("hide"); }
-													} catch(err) { console.warn(err); }
-													
-													$(".sb-login-form-header").hide();
-													$(".sb-form-signup").hide();
-													$(".otp-verification-view").removeClass("hide").hide().fadeIn();
-												} else if (r.message && r.message[0] === 0) {
-													login.set_status(r.message[1], "red");
-													$btn.prop("disabled", false).text(originalBtnText);
-												} else if (r.message) {
-													login.set_status(r.message[1], "green");
-													$btn.prop("disabled", false).text(originalBtnText);
-												} else if (r.exc) {
-													console.error("Exception during signup:", r.exc);
+												try {
+													console.log("Signup server response:", r);
+													let is_success = false;
+
+													if (!r) {
+														throw new Error("Respuesta vacía del servidor.");
+													}
+
+													if (r.message) {
+														if (typeof r.message === "object" && r.message.status === "success") {
+															is_success = true;
+														} else if (r.message[0] === 1 || r.message === "OTP enviado al correo" || r.message === "success") {
+															is_success = true;
+														}
+													} else if (!r.exc && !r._server_messages) {
+														// Si no hay mensaje pero tampoco hay error, asumimos éxito (por si acaso Frappe cambia el formato)
+														is_success = true;
+													}
+
+													if (is_success) {
+														try {
+															if (window.frappe && frappe.msg_dialog) { frappe.msg_dialog.hide(); }
+															if ($.fn && $.fn.modal) { $(".modal:has(.msgprint)").modal("hide"); }
+														} catch(err) { console.warn(err); }
+														
+														$(".sb-login-form-header").hide();
+														$(".sb-form-signup").hide();
+														$(".otp-verification-view").removeClass("hide").hide().fadeIn();
+													} else {
+														// Hubo un error de validación (por ejemplo, correo ya registrado)
+														if (r.message && r.message[0] === 0) {
+															login.set_status(r.message[1] || "Error en el registro", "red");
+														} else if (r.message) {
+															login.set_status(typeof r.message === "string" ? r.message : JSON.stringify(r.message), "green");
+														} else if (r.exc) {
+															console.error("Exception during signup:", r.exc);
+														}
+														$btn.prop("disabled", false).text(originalBtnText);
+													}
+												} catch(e) {
+													console.error("Javascript error in signup callback:", e);
+													login.set_status("Error en el navegador al procesar registro.", "red");
 													$btn.prop("disabled", false).text(originalBtnText);
 												}
 											},
