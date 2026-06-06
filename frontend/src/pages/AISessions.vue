@@ -2904,10 +2904,10 @@ function formatDate(value) {
 	.composer-wrap {
 		position: fixed;
 		right: 0;
-		bottom: 0;
+		bottom: calc(60px + env(safe-area-inset-bottom, 0px));
 		left: 0;
 		z-index: 50;
-		padding: 0.55rem 0.65rem calc(0.7rem + env(safe-area-inset-bottom, 0px));
+		padding: 0.55rem 0.65rem 0.7rem;
 	}
 
 	.composer {
@@ -3014,11 +3014,11 @@ function formatDate(value) {
 @media (max-width: 760px) {
 	.composer-wrap {
 		position: fixed;
-		bottom: 0;
+		bottom: calc(60px + env(safe-area-inset-bottom, 0px));
 		left: 0;
 		right: 0;
 		z-index: 50;
-		padding: 0.5rem 0.6rem calc(0.8rem + env(safe-area-inset-bottom, 0px));
+		padding: 0.5rem 0.6rem 0.8rem;
 		background: rgba(247, 248, 250, 0.88);
 		backdrop-filter: blur(14px);
 		-webkit-backdrop-filter: blur(14px);
