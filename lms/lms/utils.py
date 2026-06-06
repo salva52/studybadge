@@ -808,20 +808,36 @@ def get_current_exchange_rate(source: str, target: str = "USD") -> float:
 	if source == target:
 		return 1.0
 
-	url = f"https://open.er-api.com/v6/latest/{source}"
+	source_lower = source.lower()
+	target_lower = target.lower()
+
+	# Primary API: currency-api via jsDelivr CDN (Fast & Reliable)
+	url_primary = f"https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/{source_lower}.json"
 	try:
-		response = requests.get(url, timeout=5)
-		details = response.json()
-		if details.get("result") == "success" and "rates" in details and target in details["rates"]:
-			return details["rates"][target]
+		response = requests.get(url_primary, timeout=5)
+		if response.status_code == 200:
+			details = response.json()
+			if source_lower in details and target_lower in details[source_lower]:
+				return flt(details[source_lower][target_lower])
 	except Exception:
 		pass
 
+	# Fallback API 1: open.er-api.com
+	url_fallback = f"https://open.er-api.com/v6/latest/{source}"
+	try:
+		response = requests.get(url_fallback, timeout=5)
+		details = response.json()
+		if details.get("result") == "success" and "rates" in details and target in details["rates"]:
+			return flt(details["rates"][target])
+	except Exception:
+		pass
+
+	# Fallback API 2: Frappe's builtin exchange rate
 	try:
 		from frappe.utils import get_exchange_rate
 		rate = get_exchange_rate(source, target)
 		if rate:
-			return rate
+			return flt(rate)
 	except Exception:
 		pass
 
