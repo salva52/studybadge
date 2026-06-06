@@ -71,6 +71,7 @@ def sign_up(email: str, full_name: str, verify_terms: bool, user_category: str, 
 	)
 	user.flags.ignore_permissions = True
 	user.flags.ignore_password_policy = True
+	frappe.flags.mute_messages = True
 	try:
 		user.insert()
 	except Exception as e:

@@ -1363,6 +1363,10 @@
 									}
 
 									console.log("Signup started (login.html) with email:", email, "name:", full_name);
+									
+									const $btn = $(".sb-form-signup button[type='submit']");
+									const originalBtnText = $btn.text();
+									$btn.prop("disabled", true).text("Registrando...");
 
 									const do_signup = (captchaToken) => {
 										frappe.call({
@@ -1380,6 +1384,7 @@
 												console.log("Signup server response:", r);
 												if (r.message && r.message[0] === 0) {
 													login.set_status(r.message[1], "red");
+													$btn.prop("disabled", false).text(originalBtnText);
 												} else if (r.message) {
 													$(".sb-login-form-header").hide();
 													$(".sb-form-signup").hide();
@@ -1387,6 +1392,7 @@
 												} else if (r.exc) {
 													console.error("Exception during signup:", r.exc);
 													login.set_status("Error en el servidor al registrarse. Revisa la consola.", "red");
+													$btn.prop("disabled", false).text(originalBtnText);
 												}
 											}
 										});
