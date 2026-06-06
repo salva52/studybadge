@@ -96,8 +96,12 @@ def sign_up(email: str, full_name: str, verify_terms: bool, user_category: str, 
 
 
 @frappe.whitelist(allow_guest=True)
-def verify_otp_only(email, otp):
+def verify_otp_only(**kwargs):
 	"""Step 1: Just verify the OTP code is correct, don't create the account yet."""
+	email = kwargs.get("email")
+	otp = kwargs.get("otp")
+	if not email or not otp:
+		return {"status": "error", "message": "Faltan datos."}
 	import time
 
 	# Rate limit: max 5 attempts per email
@@ -129,8 +133,13 @@ def verify_otp_only(email, otp):
 
 
 @frappe.whitelist(allow_guest=True)
-def verify_signup_otp(email, otp, password):
+def verify_signup_otp(**kwargs):
 	"""Step 2: Create the account after OTP was verified."""
+	email = kwargs.get("email")
+	otp = kwargs.get("otp")
+	password = kwargs.get("password")
+	if not email or not otp or not password:
+		return {"status": "error", "message": "Faltan datos."}
 	cache_key = f"signup_data:{email}"
 	data = frappe.cache().get_value(cache_key)
 
@@ -183,7 +192,10 @@ def verify_signup_otp(email, otp, password):
 
 
 @frappe.whitelist(allow_guest=True)
-def resend_signup_otp(email):
+def resend_signup_otp(**kwargs):
+	email = kwargs.get("email")
+	if not email:
+		return {"status": "error", "message": "Falta el correo."}
 	"""Resend OTP with rate limiting: max 3 resends, 60s cooldown."""
 	import random
 	import time
