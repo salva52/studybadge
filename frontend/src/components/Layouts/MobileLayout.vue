@@ -755,24 +755,21 @@ const getLinkDescription = (link) => {
 	--mobile-gold: #f5b301;
 	--mobile-red: #ef4444;
 	--mobile-shadow: 0 24px 70px rgba(10, 34, 81, 0.16);
-	--mobile-glass: rgba(255, 255, 255, 0.58);
-	--mobile-glass-soft: rgba(255, 255, 255, 0.34);
-	--mobile-glass-strong: rgba(255, 255, 255, 0.78);
-	--mobile-glass-border: rgba(255, 255, 255, 0.66);
-	--mobile-glass-shadow: 0 24px 70px rgba(10, 34, 81, 0.22),
-		0 6px 18px rgba(10, 34, 81, 0.08),
-		inset 0 1px 1px rgba(255, 255, 255, 0.74),
-		inset 0 -1px 1px rgba(255, 255, 255, 0.22);
-	--mobile-glass-blur: blur(28px) saturate(190%) contrast(105%);
+	--mobile-glass: rgba(255, 255, 255, 0.22);
+	--mobile-glass-soft: rgba(255, 255, 255, 0.14);
+	--mobile-glass-strong: rgba(255, 255, 255, 0.32);
+	--mobile-glass-border: rgba(255, 255, 255, 0.58);
+	--mobile-glass-shadow: 0 24px 70px rgba(15, 23, 42, 0.18),
+		0 8px 22px rgba(15, 23, 42, 0.1),
+		inset 0 1px 0 rgba(255, 255, 255, 0.78),
+		inset 0 -1px 0 rgba(255, 255, 255, 0.34);
+	--mobile-glass-blur: blur(30px) saturate(170%);
 
 	position: relative;
 	display: flex;
 	height: 100dvh;
 	flex-direction: column;
-	background:
-		radial-gradient(circle at 12% 0%, rgba(245, 179, 1, 0.14), transparent 28%),
-		radial-gradient(circle at 88% 12%, rgba(59, 130, 246, 0.14), transparent 30%),
-		linear-gradient(180deg, #f8fbff 0%, var(--mobile-bg) 48%, #edf4ff 100%);
+	background: var(--mobile-bg);
 	color: var(--mobile-text);
 	overflow: hidden;
 }
@@ -787,14 +784,14 @@ const getLinkDescription = (link) => {
 	--mobile-border: rgba(255, 255, 255, 0.1);
 	--mobile-border-strong: rgba(255, 255, 255, 0.18);
 	--mobile-shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
-	--mobile-glass: rgba(9, 18, 32, 0.58);
-	--mobile-glass-soft: rgba(15, 23, 42, 0.38);
-	--mobile-glass-strong: rgba(30, 41, 59, 0.72);
-	--mobile-glass-border: rgba(255, 255, 255, 0.16);
-	--mobile-glass-shadow: 0 24px 70px rgba(0, 0, 0, 0.52),
-		0 8px 24px rgba(0, 0, 0, 0.28),
-		inset 0 1px 1px rgba(255, 255, 255, 0.18),
-		inset 0 -1px 1px rgba(255, 255, 255, 0.08);
+	--mobile-glass: rgba(10, 18, 32, 0.26);
+	--mobile-glass-soft: rgba(15, 23, 42, 0.18);
+	--mobile-glass-strong: rgba(30, 41, 59, 0.34);
+	--mobile-glass-border: rgba(255, 255, 255, 0.18);
+	--mobile-glass-shadow: 0 24px 70px rgba(0, 0, 0, 0.42),
+		0 8px 24px rgba(0, 0, 0, 0.22),
+		inset 0 1px 0 rgba(255, 255, 255, 0.22),
+		inset 0 -1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .mobile-scroll {
@@ -823,9 +820,7 @@ const getLinkDescription = (link) => {
 	position: fixed;
 	inset: 0;
 	z-index: 60;
-	background:
-		radial-gradient(circle at 50% 100%, rgba(255, 255, 255, 0.16), transparent 32%),
-		rgba(2, 6, 23, 0.42);
+	background: rgba(2, 6, 23, 0.32);
 	backdrop-filter: blur(14px) saturate(140%);
 	-webkit-backdrop-filter: blur(14px) saturate(140%);
 }
@@ -840,10 +835,7 @@ const getLinkDescription = (link) => {
 	overflow-y: auto;
 	border: 1px solid var(--mobile-glass-border);
 	border-radius: 34px;
-	background:
-		linear-gradient(145deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.34)),
-		radial-gradient(circle at 15% 0%, rgba(255, 255, 255, 0.9), transparent 30%),
-		var(--mobile-glass);
+	background: rgba(255, 255, 255, 0.24);
 	color: var(--mobile-text);
 	padding: 0.9rem;
 	box-shadow: var(--mobile-glass-shadow);
@@ -860,16 +852,13 @@ const getLinkDescription = (link) => {
 	display: block;
 	height: 1px;
 	margin: -1px -0.9rem 0;
-	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+	background: rgba(255, 255, 255, 0.56);
 	opacity: 0.8;
 	pointer-events: none;
 }
 
 :global(:root[data-theme='dark']) .mobile-sheet {
-	background:
-		linear-gradient(145deg, rgba(15, 23, 42, 0.76), rgba(15, 23, 42, 0.42)),
-		radial-gradient(circle at 15% 0%, rgba(96, 165, 250, 0.16), transparent 30%),
-		var(--mobile-glass);
+	background: rgba(12, 18, 30, 0.34);
 	color: #ffffff;
 }
 
@@ -957,9 +946,7 @@ const getLinkDescription = (link) => {
 	margin-bottom: 0.8rem;
 	border: 1px solid rgba(255, 255, 255, 0.54);
 	border-radius: 24px;
-	background:
-		linear-gradient(135deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.26)),
-		rgba(255, 255, 255, 0.32);
+	background: rgba(255, 255, 255, 0.22);
 	padding: 0.85rem;
 	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.62);
 }
@@ -975,9 +962,7 @@ const getLinkDescription = (link) => {
 	width: 44px;
 	height: 44px;
 	border-radius: 18px;
-	background:
-		linear-gradient(135deg, rgba(10, 34, 81, 0.14), rgba(59, 130, 246, 0.08)),
-		rgba(255, 255, 255, 0.45);
+	background: rgba(255, 255, 255, 0.34);
 	color: var(--mobile-primary);
 	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.78);
 }
@@ -1051,9 +1036,7 @@ const getLinkDescription = (link) => {
 	justify-content: space-between;
 	border: 1px solid rgba(255, 255, 255, 0.52);
 	border-radius: 22px;
-	background:
-		linear-gradient(135deg, rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0.18)),
-		rgba(255, 255, 255, 0.28);
+	background: rgba(255, 255, 255, 0.2);
 	padding: 0.85rem;
 	color: var(--mobile-text);
 	text-align: left;
@@ -1071,9 +1054,7 @@ const getLinkDescription = (link) => {
 .mobile-quick-card.active,
 .mobile-quick-card:hover {
 	border-color: rgba(10, 34, 81, 0.22);
-	background:
-		linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(245, 179, 1, 0.14)),
-		rgba(10, 34, 81, 0.055);
+	background: rgba(255, 255, 255, 0.34);
 	box-shadow:
 		inset 0 1px 0 rgba(255, 255, 255, 0.75),
 		0 16px 34px rgba(10, 34, 81, 0.12);
@@ -1097,9 +1078,7 @@ const getLinkDescription = (link) => {
 	width: 40px;
 	height: 40px;
 	border-radius: 17px;
-	background:
-		linear-gradient(135deg, rgba(10, 34, 81, 0.12), rgba(59, 130, 246, 0.08)),
-		rgba(255, 255, 255, 0.38);
+	background: rgba(255, 255, 255, 0.32);
 	color: var(--mobile-primary);
 	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
 }
@@ -1130,9 +1109,7 @@ const getLinkDescription = (link) => {
 	width: 100%;
 	border: 1px solid rgba(255, 255, 255, 0.5);
 	border-radius: 20px;
-	background:
-		linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.18)),
-		rgba(255, 255, 255, 0.26);
+	background: rgba(255, 255, 255, 0.2);
 	padding: 0.75rem;
 	color: var(--mobile-text);
 	text-align: left;
@@ -1148,9 +1125,7 @@ const getLinkDescription = (link) => {
 .mobile-sheet-link:hover,
 .mobile-sheet-link.active {
 	border-color: rgba(10, 34, 81, 0.22);
-	background:
-		linear-gradient(135deg, rgba(255, 255, 255, 0.68), rgba(245, 179, 1, 0.12)),
-		rgba(10, 34, 81, 0.055);
+	background: rgba(255, 255, 255, 0.34);
 	box-shadow:
 		inset 0 1px 0 rgba(255, 255, 255, 0.7),
 		0 12px 28px rgba(10, 34, 81, 0.09);
@@ -1182,9 +1157,7 @@ const getLinkDescription = (link) => {
 	width: 44px;
 	height: 44px;
 	border-radius: 18px;
-	background:
-		linear-gradient(135deg, rgba(10, 34, 81, 0.12), rgba(59, 130, 246, 0.08)),
-		rgba(255, 255, 255, 0.36);
+	background: rgba(255, 255, 255, 0.32);
 	color: var(--mobile-primary);
 	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68);
 }
@@ -1229,25 +1202,25 @@ const getLinkDescription = (link) => {
 
 .mobile-bottom-nav {
 	position: fixed;
-	left: 12px;
-	right: 12px;
-	bottom: calc(12px + env(safe-area-inset-bottom));
+	left: 14px;
+	right: 14px;
+	bottom: calc(14px + env(safe-area-inset-bottom));
 	z-index: 80;
 	display: grid;
 	grid-template-columns: repeat(5, minmax(0, 1fr));
-	gap: 0.28rem;
-	min-height: 72px;
-	border: 1px solid var(--mobile-glass-border);
-	border-radius: 34px;
-	background:
-		radial-gradient(circle at 12% 0%, rgba(255, 255, 255, 0.95), transparent 28%),
-		radial-gradient(circle at 84% 120%, rgba(245, 179, 1, 0.2), transparent 34%),
-		linear-gradient(135deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.28)),
-		var(--mobile-glass);
+	gap: 0.18rem;
+	min-height: 74px;
+	border: 1px solid rgba(255, 255, 255, 0.62);
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.24);
 	padding: 0.42rem;
-	box-shadow: var(--mobile-glass-shadow);
-	backdrop-filter: var(--mobile-glass-blur);
-	-webkit-backdrop-filter: var(--mobile-glass-blur);
+	box-shadow:
+		0 22px 60px rgba(15, 23, 42, 0.18),
+		0 8px 22px rgba(15, 23, 42, 0.1),
+		inset 0 1px 0 rgba(255, 255, 255, 0.82),
+		inset 0 -1px 0 rgba(255, 255, 255, 0.38);
+	backdrop-filter: blur(34px) saturate(170%);
+	-webkit-backdrop-filter: blur(34px) saturate(170%);
 	isolation: isolate;
 	overflow: hidden;
 	transform: translateZ(0);
@@ -1261,18 +1234,19 @@ const getLinkDescription = (link) => {
 		padding 0.34s cubic-bezier(0.22, 1, 0.36, 1),
 		transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
 		opacity 0.24s ease,
-		box-shadow 0.34s ease;
+		box-shadow 0.34s ease,
+		background 0.34s ease,
+		border-color 0.34s ease;
 }
 
 .mobile-bottom-nav::before {
 	content: "";
 	position: absolute;
 	inset: 1px 1px auto;
-	height: 46%;
+	height: 48%;
 	border-radius: inherit;
-	background:
-		linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0)),
-		radial-gradient(circle at 28% 12%, rgba(255, 255, 255, 0.95), transparent 32%);
+	background: rgba(255, 255, 255, 0.22);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
 	opacity: 0.78;
 	pointer-events: none;
 	z-index: -1;
@@ -1283,77 +1257,90 @@ const getLinkDescription = (link) => {
 	position: absolute;
 	inset: 0;
 	border-radius: inherit;
-	background:
-		linear-gradient(115deg, transparent 0%, rgba(255, 255, 255, 0.5) 36%, transparent 48%),
-		radial-gradient(circle at 78% 24%, rgba(255, 255, 255, 0.48), transparent 28%);
-	mix-blend-mode: screen;
-	opacity: 0.46;
+	border: 1px solid rgba(255, 255, 255, 0.26);
+	box-shadow:
+		inset 10px 0 24px rgba(255, 255, 255, 0.16),
+		inset -14px -8px 28px rgba(15, 23, 42, 0.08);
+	opacity: 0.86;
 	pointer-events: none;
-	transform: translateX(-16%);
-	transition: transform 0.42s ease, opacity 0.24s ease;
+	transition: opacity 0.24s ease, box-shadow 0.34s ease;
 }
 
 .mobile-bottom-nav.is-expanded,
 .mobile-bottom-nav:active {
-	left: 10px;
-	right: 10px;
-	bottom: calc(14px + env(safe-area-inset-bottom));
-	min-height: 76px;
-	border-radius: 36px;
+	left: 8px;
+	right: 8px;
+	bottom: calc(16px + env(safe-area-inset-bottom));
+	min-height: 80px;
+	background: rgba(255, 255, 255, 0.28);
+	border-color: rgba(255, 255, 255, 0.72);
 	box-shadow:
-		0 30px 80px rgba(10, 34, 81, 0.26),
-		0 12px 28px rgba(10, 34, 81, 0.12),
-		inset 0 1px 1px rgba(255, 255, 255, 0.78);
-	transform: translateY(-3px) scale(1.012);
+		0 30px 84px rgba(15, 23, 42, 0.22),
+		0 12px 28px rgba(15, 23, 42, 0.12),
+		inset 0 1px 0 rgba(255, 255, 255, 0.86),
+		inset 0 -1px 0 rgba(255, 255, 255, 0.42);
+	transform: translateY(-4px) scale(1.018);
 }
 
 .mobile-bottom-nav.is-expanded::after,
 .mobile-bottom-nav:active::after {
-	opacity: 0.72;
-	transform: translateX(12%);
+	opacity: 1;
+	box-shadow:
+		inset 14px 0 30px rgba(255, 255, 255, 0.2),
+		inset -18px -10px 34px rgba(15, 23, 42, 0.1);
 }
 
 .mobile-bottom-nav.is-compact {
-	left: 54px;
-	right: 54px;
+	left: 58px;
+	right: 58px;
 	bottom: calc(10px + env(safe-area-inset-bottom));
-	min-height: 54px;
+	min-height: 56px;
 	border-radius: 999px;
 	padding: 0.32rem;
-	opacity: 0.94;
+	background: rgba(255, 255, 255, 0.2);
+	opacity: 0.92;
 	box-shadow:
-		0 18px 48px rgba(10, 34, 81, 0.2),
-		inset 0 1px 1px rgba(255, 255, 255, 0.62);
-	transform: translateY(5px) scale(0.965);
+		0 18px 48px rgba(15, 23, 42, 0.16),
+		inset 0 1px 0 rgba(255, 255, 255, 0.7),
+		inset 0 -1px 0 rgba(255, 255, 255, 0.26);
+	transform: translateY(6px) scale(0.955);
 }
 
 :global(:root[data-theme='dark']) .mobile-bottom-nav {
-	background:
-		radial-gradient(circle at 18% 0%, rgba(96, 165, 250, 0.2), transparent 32%),
-		radial-gradient(circle at 84% 120%, rgba(245, 179, 1, 0.12), transparent 34%),
-		linear-gradient(135deg, rgba(15, 23, 42, 0.76), rgba(15, 23, 42, 0.4)),
-		var(--mobile-glass);
+	background: rgba(12, 18, 30, 0.28);
+	border-color: rgba(255, 255, 255, 0.16);
+	box-shadow:
+		0 24px 70px rgba(0, 0, 0, 0.46),
+		0 8px 24px rgba(0, 0, 0, 0.24),
+		inset 0 1px 0 rgba(255, 255, 255, 0.2),
+		inset 0 -1px 0 rgba(255, 255, 255, 0.08);
 }
 
 :global(:root[data-theme='dark']) .mobile-bottom-nav::before {
-	background:
-		linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0)),
-		radial-gradient(circle at 28% 12%, rgba(255, 255, 255, 0.18), transparent 32%);
+	background: rgba(255, 255, 255, 0.08);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+:global(:root[data-theme='dark']) .mobile-bottom-nav::after {
+	border-color: rgba(255, 255, 255, 0.08);
+	box-shadow:
+		inset 10px 0 24px rgba(255, 255, 255, 0.06),
+		inset -14px -8px 28px rgba(0, 0, 0, 0.2);
 }
 
 .mobile-nav-item {
 	position: relative;
 	display: flex;
 	min-width: 0;
-	min-height: 58px;
+	min-height: 60px;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
 	gap: 0.25rem;
 	border: 1px solid transparent;
-	border-radius: 23px;
+	border-radius: 999px;
 	background: transparent;
-	color: var(--mobile-muted);
+	color: rgba(15, 23, 42, 0.68);
 	cursor: pointer;
 	-webkit-tap-highlight-color: transparent;
 	transition:
@@ -1362,16 +1349,17 @@ const getLinkDescription = (link) => {
 		transform 0.18s ease,
 		background 0.18s ease,
 		border-color 0.18s ease,
-		color 0.18s ease;
+		color 0.18s ease,
+		box-shadow 0.18s ease;
 }
 
 .mobile-nav-item::before {
 	content: "";
 	position: absolute;
-	inset: 5px 8px auto;
-	height: 32%;
+	inset: 6px 10px auto;
+	height: 1px;
 	border-radius: inherit;
-	background: linear-gradient(180deg, rgba(255, 255, 255, 0.68), transparent);
+	background: rgba(255, 255, 255, 0.52);
 	opacity: 0;
 	pointer-events: none;
 	transition: opacity 0.18s ease;
@@ -1380,22 +1368,25 @@ const getLinkDescription = (link) => {
 .mobile-nav-item:hover,
 .mobile-nav-item:focus-visible {
 	color: var(--mobile-primary);
-	transform: translateY(-1px);
+	transform: translateY(-1px) scale(1.015);
 }
 
 .mobile-nav-item.active {
-	border-color: rgba(255, 255, 255, 0.54);
-	background:
-		linear-gradient(145deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.24)),
-		linear-gradient(135deg, rgba(10, 34, 81, 0.14), rgba(245, 179, 1, 0.1));
+	border-color: rgba(255, 255, 255, 0.5);
+	background: rgba(255, 255, 255, 0.26);
 	color: var(--mobile-primary);
 	box-shadow:
-		inset 0 1px 0 rgba(255, 255, 255, 0.82),
-		0 10px 24px rgba(10, 34, 81, 0.12);
+		inset 0 1px 0 rgba(255, 255, 255, 0.72),
+		inset 0 -1px 0 rgba(255, 255, 255, 0.26),
+		0 8px 22px rgba(15, 23, 42, 0.08);
 }
 
 .mobile-nav-item.active::before {
 	opacity: 1;
+}
+
+:global(:root[data-theme='dark']) .mobile-nav-item {
+	color: rgba(255, 255, 255, 0.72);
 }
 
 :global(:root[data-theme='dark']) .mobile-nav-item:hover,
@@ -1404,25 +1395,17 @@ const getLinkDescription = (link) => {
 }
 
 :global(:root[data-theme='dark']) .mobile-nav-item.active {
-	border-color: rgba(255, 255, 255, 0.16);
-	background:
-		linear-gradient(145deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.05)),
-		rgba(147, 197, 253, 0.14);
+	border-color: rgba(255, 255, 255, 0.14);
+	background: rgba(255, 255, 255, 0.1);
 	color: #ffffff;
 	box-shadow:
 		inset 0 1px 0 rgba(255, 255, 255, 0.18),
-		0 10px 24px rgba(0, 0, 0, 0.24);
+		inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+		0 10px 24px rgba(0, 0, 0, 0.22);
 }
 
 .mobile-nav-item.active::after {
-	content: "";
-	position: absolute;
-	top: 7px;
-	width: 5px;
-	height: 5px;
-	border-radius: 999px;
-	background: var(--mobile-gold);
-	box-shadow: 0 0 12px rgba(245, 179, 1, 0.72);
+	display: none;
 }
 
 .mobile-bottom-nav.is-compact .mobile-nav-item {
@@ -1432,15 +1415,13 @@ const getLinkDescription = (link) => {
 }
 
 .mobile-bottom-nav.is-compact .mobile-nav-item.active::after {
-	top: 5px;
-	width: 4px;
-	height: 4px;
+	display: none;
 }
 
 .mobile-nav-icon {
 	display: grid;
 	place-items: center;
-	height: 22px;
+	height: 23px;
 	transition:
 		transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
 		filter 0.18s ease;
@@ -1448,8 +1429,8 @@ const getLinkDescription = (link) => {
 
 .mobile-nav-item.active .mobile-nav-icon,
 .mobile-nav-item:hover .mobile-nav-icon {
-	filter: drop-shadow(0 4px 8px rgba(10, 34, 81, 0.18));
-	transform: translateY(-1px) scale(1.06);
+	filter: drop-shadow(0 5px 10px rgba(15, 23, 42, 0.14));
+	transform: translateY(-1px) scale(1.08);
 }
 
 .mobile-bottom-nav.is-compact .mobile-nav-icon {
@@ -1488,14 +1469,23 @@ const getLinkDescription = (link) => {
 }
 
 .mobile-more-button.active {
-	border-color: rgba(255, 255, 255, 0.62);
-	background:
-		linear-gradient(145deg, rgba(10, 34, 81, 0.96), rgba(18, 53, 111, 0.86)),
-		radial-gradient(circle at 30% 0%, rgba(255, 255, 255, 0.28), transparent 32%);
+	border-color: rgba(255, 255, 255, 0.56);
+	background: rgba(255, 255, 255, 0.3);
+	color: var(--mobile-primary);
+	box-shadow:
+		0 12px 26px rgba(15, 23, 42, 0.12),
+		inset 0 1px 0 rgba(255, 255, 255, 0.72),
+		inset 0 -1px 0 rgba(255, 255, 255, 0.28);
+}
+
+:global(:root[data-theme='dark']) .mobile-more-button.active {
+	border-color: rgba(255, 255, 255, 0.14);
+	background: rgba(255, 255, 255, 0.12);
 	color: #ffffff;
 	box-shadow:
-		0 12px 26px rgba(10, 34, 81, 0.22),
-		inset 0 1px 0 rgba(255, 255, 255, 0.26);
+		0 12px 26px rgba(0, 0, 0, 0.24),
+		inset 0 1px 0 rgba(255, 255, 255, 0.18),
+		inset 0 -1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .mobile-overlay-enter-active,
@@ -1519,6 +1509,240 @@ const getLinkDescription = (link) => {
 .mobile-sheet-leave-to {
 	opacity: 0;
 	transform: translateY(28px) scale(0.96);
+}
+
+
+/* --------------------------------------------------------------------------
+ * Liquid Glass v3 - navbar más transparente y legible
+ * Inspirado en la lógica de Liquid Glass: superficie clara, blur fuerte,
+ * borde refractivo, sombras internas y texto con protección de contraste.
+ * No usa gradientes pesados ni tintes de color.
+ * -------------------------------------------------------------------------- */
+.mobile-bottom-nav {
+	left: 14px;
+	right: 14px;
+	bottom: calc(13px + env(safe-area-inset-bottom));
+	min-height: 76px;
+	gap: 0.16rem;
+	padding: 0.42rem;
+	border: 1px solid rgba(255, 255, 255, 0.66);
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.14);
+	box-shadow:
+		0 28px 70px rgba(2, 6, 23, 0.22),
+		0 10px 26px rgba(2, 6, 23, 0.12),
+		inset 0 1px 1px rgba(255, 255, 255, 0.92),
+		inset 0 -1px 1px rgba(255, 255, 255, 0.28),
+		inset 0 -18px 42px rgba(15, 23, 42, 0.1);
+	backdrop-filter: blur(38px) saturate(190%) contrast(1.06);
+	-webkit-backdrop-filter: blur(38px) saturate(190%) contrast(1.06);
+}
+
+.mobile-bottom-nav::before {
+	inset: 2px 3px auto;
+	height: 42%;
+	border-radius: inherit;
+	background: rgba(255, 255, 255, 0.2);
+	box-shadow:
+		inset 0 1px 0 rgba(255, 255, 255, 0.9),
+		0 1px 12px rgba(255, 255, 255, 0.16);
+	opacity: 0.78;
+	z-index: 0;
+}
+
+.mobile-bottom-nav::after {
+	inset: 0;
+	border: 1px solid rgba(255, 255, 255, 0.34);
+	border-radius: inherit;
+	box-shadow:
+		inset 12px 0 28px rgba(255, 255, 255, 0.18),
+		inset -18px -10px 34px rgba(15, 23, 42, 0.16),
+		inset 0 0 22px rgba(255, 255, 255, 0.1);
+	opacity: 0.95;
+	z-index: 0;
+}
+
+.mobile-bottom-nav.is-expanded,
+.mobile-bottom-nav:active {
+	left: 8px;
+	right: 8px;
+	bottom: calc(16px + env(safe-area-inset-bottom));
+	min-height: 82px;
+	background: rgba(255, 255, 255, 0.17);
+	border-color: rgba(255, 255, 255, 0.78);
+	box-shadow:
+		0 34px 86px rgba(2, 6, 23, 0.26),
+		0 12px 30px rgba(2, 6, 23, 0.14),
+		inset 0 1px 1px rgba(255, 255, 255, 0.96),
+		inset 0 -1px 1px rgba(255, 255, 255, 0.34),
+		inset 0 -22px 48px rgba(15, 23, 42, 0.12);
+	transform: translateY(-5px) scale(1.02);
+}
+
+.mobile-bottom-nav.is-compact {
+	left: 62px;
+	right: 62px;
+	bottom: calc(10px + env(safe-area-inset-bottom));
+	min-height: 56px;
+	padding: 0.32rem;
+	background: rgba(255, 255, 255, 0.12);
+	opacity: 0.96;
+	box-shadow:
+		0 20px 54px rgba(2, 6, 23, 0.2),
+		inset 0 1px 1px rgba(255, 255, 255, 0.82),
+		inset 0 -1px 1px rgba(255, 255, 255, 0.24),
+		inset 0 -14px 34px rgba(15, 23, 42, 0.1);
+	transform: translateY(6px) scale(0.955);
+}
+
+.mobile-nav-item {
+	z-index: 1;
+	min-height: 60px;
+	border: 1px solid transparent;
+	border-radius: 999px;
+	background: transparent;
+	color: rgba(255, 255, 255, 0.95);
+	text-shadow:
+		0 1px 2px rgba(2, 6, 23, 0.72),
+		0 0 12px rgba(2, 6, 23, 0.42);
+}
+
+.mobile-nav-item::before {
+	inset: 5px 11px auto;
+	background: rgba(255, 255, 255, 0.42);
+	box-shadow: 0 1px 8px rgba(255, 255, 255, 0.14);
+}
+
+.mobile-nav-item:hover,
+.mobile-nav-item:focus-visible,
+.mobile-nav-item.active,
+.mobile-more-button.active {
+	border-color: rgba(255, 255, 255, 0.46);
+	background: rgba(255, 255, 255, 0.18);
+	color: #ffffff;
+	box-shadow:
+		inset 0 1px 1px rgba(255, 255, 255, 0.78),
+		inset 0 -1px 1px rgba(255, 255, 255, 0.22),
+		0 10px 22px rgba(2, 6, 23, 0.12);
+}
+
+.mobile-nav-item.active::before,
+.mobile-more-button.active::before {
+	opacity: 1;
+}
+
+.mobile-nav-icon {
+	height: 25px;
+	color: inherit;
+	filter:
+		drop-shadow(0 1px 1px rgba(2, 6, 23, 0.48))
+		drop-shadow(0 0 9px rgba(2, 6, 23, 0.24));
+}
+
+.mobile-nav-icon :deep(svg) {
+	width: 23px;
+	height: 23px;
+	stroke-width: 2.55;
+}
+
+.mobile-nav-label {
+	color: inherit;
+	font-size: 0.67rem;
+	font-weight: 950;
+	letter-spacing: -0.015em;
+	text-shadow:
+		0 1px 2px rgba(2, 6, 23, 0.72),
+		0 0 14px rgba(2, 6, 23, 0.42);
+}
+
+.mobile-bottom-nav.is-compact .mobile-nav-item {
+	min-height: 42px;
+}
+
+.mobile-bottom-nav.is-compact .mobile-nav-icon :deep(svg) {
+	width: 22px;
+	height: 22px;
+}
+
+.mobile-sheet {
+	border-color: rgba(255, 255, 255, 0.58);
+	background: rgba(255, 255, 255, 0.16);
+	color: #ffffff;
+	box-shadow:
+		0 30px 88px rgba(2, 6, 23, 0.28),
+		0 12px 30px rgba(2, 6, 23, 0.14),
+		inset 0 1px 1px rgba(255, 255, 255, 0.82),
+		inset 0 -1px 1px rgba(255, 255, 255, 0.24),
+		inset 0 -26px 56px rgba(15, 23, 42, 0.12);
+	backdrop-filter: blur(40px) saturate(190%) contrast(1.06);
+	-webkit-backdrop-filter: blur(40px) saturate(190%) contrast(1.06);
+}
+
+.mobile-sheet-header p,
+.mobile-section-title,
+.mobile-user-copy span,
+.mobile-sheet-link-copy span {
+	color: rgba(255, 255, 255, 0.74);
+	text-shadow: 0 1px 2px rgba(2, 6, 23, 0.5);
+}
+
+.mobile-sheet-header h2,
+.mobile-user-copy strong,
+.mobile-quick-card span,
+.mobile-sheet-link-copy strong {
+	color: #ffffff;
+	text-shadow:
+		0 1px 2px rgba(2, 6, 23, 0.62),
+		0 0 12px rgba(2, 6, 23, 0.3);
+}
+
+.mobile-user-card,
+.mobile-quick-card,
+.mobile-sheet-link,
+.mobile-sheet-close,
+.mobile-user-avatar,
+.mobile-quick-icon,
+.mobile-sheet-link-icon {
+	border-color: rgba(255, 255, 255, 0.36);
+	background: rgba(255, 255, 255, 0.12);
+	color: #ffffff;
+	box-shadow:
+		inset 0 1px 1px rgba(255, 255, 255, 0.62),
+		inset 0 -1px 1px rgba(255, 255, 255, 0.16);
+}
+
+.mobile-quick-card.active,
+.mobile-quick-card:hover,
+.mobile-sheet-link:hover,
+.mobile-sheet-link.active,
+.mobile-sheet-close:hover {
+	border-color: rgba(255, 255, 255, 0.56);
+	background: rgba(255, 255, 255, 0.18);
+	box-shadow:
+		inset 0 1px 1px rgba(255, 255, 255, 0.78),
+		inset 0 -1px 1px rgba(255, 255, 255, 0.22),
+		0 12px 28px rgba(2, 6, 23, 0.14);
+}
+
+.mobile-user-badge {
+	border-color: rgba(255, 255, 255, 0.36);
+	background: rgba(255, 255, 255, 0.12);
+	color: #ffffff;
+	text-shadow: 0 1px 2px rgba(2, 6, 23, 0.5);
+}
+
+:global(:root[data-theme='dark']) .mobile-bottom-nav,
+:global(:root[data-theme='dark']) .mobile-sheet {
+	background: rgba(8, 13, 24, 0.22);
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+:global(:root[data-theme='dark']) .mobile-nav-item,
+:global(:root[data-theme='dark']) .mobile-nav-item:hover,
+:global(:root[data-theme='dark']) .mobile-nav-item:focus-visible,
+:global(:root[data-theme='dark']) .mobile-nav-item.active,
+:global(:root[data-theme='dark']) .mobile-more-button.active {
+	color: #ffffff;
 }
 
 @media (prefers-reduced-motion: reduce) {
