@@ -387,24 +387,28 @@
 						<div class="s-panel s-panel--flush">
 							<div class="s-panel-header">
 								<div>
-									<div class="s-kicker">{{ __('Paso 4 de 4') }}</div>
-									<h2 class="s-panel-title">{{ __('Crear el curso') }}</h2>
-									<p class="s-panel-desc">{{ __('Genera la malla completa de módulos y lecciones basados en tu material y perfil.') }}</p>
+									<div class="s-kicker text-indigo-600">{{ __('Último paso') }}</div>
+									<h2 class="s-panel-title">{{ __('¡Dale vida a tu curso!') }}</h2>
+									<p class="s-panel-desc">{{ __('La IA organizará todo en módulos y lecciones a tu medida. ¡Prepárate para aprender de forma inteligente!') }}</p>
 								</div>
 							</div>
-							<div class="p-5">
-								<div v-if="loading === 'plan'" class="s-loader mb-4">
-									<div class="s-loader-spinner"></div>
-									{{ __('Creando módulos, lecciones y ruta de estudio...') }}
+							<div class="p-8 text-center bg-indigo-50/50 rounded-b-2xl border-t border-indigo-100/50">
+								<div v-if="loading === 'plan'" class="flex flex-col items-center justify-center py-6">
+									<div class="s-loader-spinner mb-4 h-10 w-10"></div>
+									<div class="font-bold text-indigo-900 text-lg">{{ __('Creando la magia...') }}</div>
+									<div class="text-indigo-600/80 mt-1">{{ __('Estructurando módulos, lecciones y ruta de estudio.') }}</div>
 								</div>
-								<div v-else class="step-instruction mb-6">
-									<CheckCircle2 class="h-5 w-5 stroke-1.5 text-green-500" />
-									<span class="font-medium text-slate-700">{{ __('Todo listo para generar el curso completo. ¿Comenzamos?') }}</span>
+								<div v-else class="flex flex-col items-center justify-center py-4">
+									<div class="h-16 w-16 bg-white rounded-2xl shadow-sm border border-indigo-100 flex items-center justify-center mb-5">
+										<Wand2 class="h-8 w-8 stroke-1.5 text-indigo-600" />
+									</div>
+									<h3 class="text-xl font-bold text-slate-800 mb-2">{{ __('Todo listo para empezar') }}</h3>
+									<p class="text-slate-600 max-w-sm mb-8">{{ __('Con toda tu información, crearemos un plan de estudio personalizado que se adapta a tu perfil y objetivos.') }}</p>
+									<div class="flex items-center gap-3 w-full max-w-sm justify-between">
+										<Button :label="__('Atrás')" @click="goToStep(3)" class="w-1/3 justify-center" size="lg" />
+										<Button class="w-2/3 justify-center text-base" :label="__('✨ Generar Curso IA')" variant="solid" theme="indigo" size="lg" :disabled="!canCreateFullCourse" :loading="loading === 'plan'" @click="generatePlan" />
+									</div>
 								</div>
-							</div>
-							<div class="wizard-actions">
-								<Button :label="__('Atrás')" @click="goToStep(3)" />
-								<Button :label="__('Generar Curso Mágico')" variant="solid" theme="indigo" size="lg" :disabled="!canCreateFullCourse" :loading="loading === 'plan'" @click="generatePlan" />
 							</div>
 						</div>
 					</div>
