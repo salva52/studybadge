@@ -708,14 +708,14 @@ def convert_to_usd_amount(amount: float, currency: str, amount_usd: float = None
 	if amount_usd:
 		return flt(amount_usd)
 	exchange_rate = get_current_exchange_rate(currency, "USD")
-	return rounded(flt(flt(amount) * exchange_rate, 2))
+	return flt(flt(amount) * exchange_rate, 2)
 
 
 def convert_to_pen_amount(amount: float, currency: str):
 	if not currency or currency == "PEN":
 		return flt(amount)
 	exchange_rate = get_current_exchange_rate(currency, "PEN")
-	return rounded(flt(flt(amount) * exchange_rate, 2))
+	return flt(flt(amount) * exchange_rate, 2)
 
 
 def set_checkout_currency(details: dict, preferred_currency: str | None = None):
@@ -764,7 +764,7 @@ def check_multicurrency(amount: float, currency: str, country: str = None, amoun
 			apply_rounding = settings.apply_rounding
 			if apply_rounding and amount % 100 != 0:
 				amount = amount + 100 - amount % 100
-			return rounded(amount), currency
+			return flt(amount, 2), currency
 		return amount, currency
 
 	# If conversion is disabled from settings or the currency is already USD then return as is
@@ -785,7 +785,7 @@ def check_multicurrency(amount: float, currency: str, country: str = None, amoun
 	if apply_rounding and amount % 100 != 0:
 		amount = amount + 100 - amount % 100
 
-	return rounded(amount), currency
+	return flt(amount, 2), currency
 
 
 def apply_gst(amount: float, country: str = None) -> tuple:
