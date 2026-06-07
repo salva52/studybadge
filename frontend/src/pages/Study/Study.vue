@@ -290,7 +290,7 @@
 								<div>
 									<div class="s-kicker">{{ __('Paso 2 de 4') }}</div>
 									<h2 class="s-panel-title">{{ __('Materiales y temas') }}</h2>
-									<p class="s-panel-desc">{{ __('Sube archivos o usa el texto manual, y analiza para detectar los temas del curso.') }}</p>
+									<p class="s-panel-desc">{{ __('Sube archivos de apuntes o PDFs. Si no tienes ninguno, simplemente haz clic en "Analizar material" para continuar.') }}</p>
 								</div>
 								<div class="flex flex-wrap gap-2">
 									<FileUploader
