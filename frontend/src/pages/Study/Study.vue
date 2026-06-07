@@ -12,7 +12,7 @@
 					<div class="hero-text">
 						<div v-if="!isDashboard" class="hero-breadcrumb">
 							<router-link :to="{ name: 'Study' }" class="hero-breadcrumb-link">
-								{{ __('Estudio IA') }}
+								{{ __('Cursos IA') }}
 							</router-link>
 							<span v-if="pageTitle" class="hero-breadcrumb-sep">/</span>
 							<span v-if="pageTitle" class="hero-breadcrumb-current">{{ pageTitle }}</span>
@@ -990,7 +990,7 @@ const headerTitle = computed(() => {
 	if (isStatistics.value) return __('Estadísticas')
 	if (isExplanations.value) return __('Explicaciones guardadas')
 	if (isWhiteboard.value) return __('Pizarra IA')
-	return __('Estudio IA')
+	return __('Cursos IA')
 })
 const headerSubtitle = computed(() => {
 	if (isDashboard.value) return __('Crea cursos propios con IA, organizados en módulos, lecciones y práctica paso a paso.')

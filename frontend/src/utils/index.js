@@ -497,7 +497,7 @@ const getSidebarItems = (forMobile = false) => {
 					},
 				},
 				{
-					label: 'Estudio IA',
+					label: 'Cursos IA',
 					icon: 'Brain',
 					to: 'Study',
 					activeFor: [

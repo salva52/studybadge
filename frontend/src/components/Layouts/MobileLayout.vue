@@ -349,12 +349,12 @@ const mobileNavConfig = [
 	},
 	{
 		key: 'estudio-ia',
-		label: 'Estudio IA',
+		label: 'Cursos IA',
 		shortLabel: 'Estudio',
 		icon: 'Sparkles',
 		to: 'Study',
 		path: '/study',
-		aliases: ['Study', 'Estudio IA', 'AI Study', 'Estudiar con IA'],
+		aliases: ['Study', 'Cursos IA', 'AI Study', 'Estudiar con IA'],
 		activeFor: ['Study', 'AIStudy'],
 	},
 	{
@@ -711,7 +711,7 @@ const getLinkDescription = (link) => {
 		Referidos: __('Invita personas y revisa tus recompensas.'),
 		Cursos: __('Explora tus cursos y lecciones.'),
 		'Sesiones IA': __('Continúa tus conversaciones de estudio.'),
-		'Estudio IA': __('Estudia con herramientas inteligentes.'),
+		'Cursos IA': __('Estudia con herramientas inteligentes.'),
 		Grupos: __('Participa en comunidades de aprendizaje.'),
 		'Simulaciones IA': __('Practica con escenarios y ejercicios.'),
 		'Biblioteca de prompts': __('Guarda y reutiliza prompts útiles.'),

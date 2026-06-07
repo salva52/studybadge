@@ -705,7 +705,7 @@ const benefits = [
 	},
 	{
 		icon: Zap,
-		label: __('Herramientas de estudio IA'),
+		label: __('Herramientas de cursos IA'),
 		description: __('Resume, practica, genera quizzes y convierte temas difíciles en ejercicios simples.'),
 	},
 ]

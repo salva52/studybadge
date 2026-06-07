@@ -213,7 +213,7 @@ const steps = [
 		routeName: 'StudyCalendar'
 	},
 	{
-		label: 'Estudio IA',
+		label: 'Cursos IA',
 		title: 'Arma tu plan con IA',
 		description: 'Pídele ayuda a la IA para estudiar mejor, crear planes, ordenar temas o practicar lo que estás aprendiendo. Menos caos, más avance real.',
 		tip: 'Útil cuando tienes mucho que estudiar y no sabes por dónde empezar.',
