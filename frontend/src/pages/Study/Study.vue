@@ -186,205 +186,229 @@
 			</section>
 
 			<!-- ═══════════ FLOW BUILDER ═══════════ -->
-			<section v-else-if="isFlow" class="grid gap-6 xl:grid-cols-[340px_1fr]">
-				<aside class="s-panel s-panel--flush h-fit">
-					<div class="builder-header">
+			<section v-else-if="isFlow" class="flow-wizard">
+				<!-- Stepper Responsive (Horizontal en Móvil, Vertical en Escritorio) -->
+				<aside class="wizard-sidebar s-panel s-panel--flush">
+					<div class="builder-header hidden xl:flex">
 						<Wand2 class="h-5 w-5 stroke-1.5" />
 						<div>
 							<div class="s-kicker">{{ __('Constructor guiado') }}</div>
 							<h2 class="s-panel-title">{{ __('Crea tu curso IA') }}</h2>
 						</div>
 					</div>
-					<p class="builder-desc">{{ __('Completa estos pasos. Cada avance desbloquea el siguiente sin perder tu progreso.') }}</p>
-					<div class="steps-list">
-						<div class="s-step" :class="currentSession ? 'is-done' : 'is-active'">
+					<div class="steps-list wizard-steps">
+						<button class="s-step" :class="activeFlowStep === 1 ? 'is-active' : (currentSession ? 'is-done' : 'is-locked')" @click="goToStep(1)">
 							<span class="s-step-num">1</span>
-							<div>
+							<div class="hidden xl:block text-left">
 								<div class="s-step-title">{{ __('Datos básicos') }}</div>
 								<p class="s-step-desc">{{ currentSession ? __('Curso creado') : __('Ponle nombre y contexto') }}</p>
 							</div>
-						</div>
-						<div class="s-step" :class="hasCourseSeed ? 'is-done' : currentSession ? 'is-active' : 'is-locked'">
+						</button>
+						<button class="s-step" :class="activeFlowStep === 2 ? 'is-active' : (hasCourseSeed ? 'is-done' : 'is-locked')" @click="goToStep(2)" :disabled="!currentSession && !hasCourseSeed">
 							<span class="s-step-num">2</span>
-							<div>
+							<div class="hidden xl:block text-left">
 								<div class="s-step-title">{{ __('Material y temas') }}</div>
 								<p class="s-step-desc">{{ __('Analiza archivos o texto base') }}</p>
 							</div>
-						</div>
-						<div class="s-step" :class="currentSession?.profile_questions?.length ? 'is-done' : canGenerateQuestions ? 'is-active' : 'is-locked'">
+						</button>
+						<button class="s-step" :class="activeFlowStep === 3 ? 'is-active' : (currentSession?.profile_questions?.length ? 'is-done' : 'is-locked')" @click="goToStep(3)" :disabled="!canGenerateQuestions">
 							<span class="s-step-num">3</span>
-							<div>
+							<div class="hidden xl:block text-left">
 								<div class="s-step-title">{{ __('Perfil de aprendizaje') }}</div>
 								<p class="s-step-desc">{{ __('Genera preguntas de nivel') }}</p>
 							</div>
-						</div>
-						<div class="s-step" :class="currentSession?.course_structure?.modules?.length ? 'is-done' : canCreateFullCourse ? 'is-active' : 'is-locked'">
+						</button>
+						<button class="s-step" :class="activeFlowStep === 4 ? 'is-active' : (currentSession?.course_structure?.modules?.length ? 'is-done' : 'is-locked')" @click="goToStep(4)" :disabled="!canCreateFullCourse">
 							<span class="s-step-num">4</span>
-							<div>
+							<div class="hidden xl:block text-left">
 								<div class="s-step-title">{{ __('Crear el curso') }}</div>
 								<p class="s-step-desc">{{ __('Genera módulos y lecciones') }}</p>
 							</div>
-						</div>
+						</button>
 					</div>
 				</aside>
 
-				<div class="flex flex-col gap-6">
+				<div class="wizard-content relative">
+					<Transition name="fade-slide" mode="out-in">
 					<!-- Step 1 -->
-					<div class="s-panel s-panel--flush">
-						<div class="s-panel-header">
-							<div>
-								<div class="s-kicker">{{ __('Paso 1') }}</div>
-								<h2 class="s-panel-title">{{ __('Datos básicos del curso') }}</h2>
-								<p class="s-panel-desc">{{ __('Haz esto primero: ponle nombre al curso y pega cualquier texto base que ya tengas.') }}</p>
+					<div v-if="activeFlowStep === 1" class="wizard-step">
+						<div class="s-panel s-panel--flush">
+							<div class="s-panel-header">
+								<div>
+									<div class="s-kicker">{{ __('Paso 1 de 4') }}</div>
+									<h2 class="s-panel-title">{{ __('Datos básicos del curso') }}</h2>
+									<p class="s-panel-desc">{{ __('Ponle nombre al curso y pega cualquier texto base que ya tengas.') }}</p>
+								</div>
 							</div>
-							<Button :label="currentSession ? __('Guardar cambios') : __('Crear curso')" variant="solid" :loading="loading === 'create'" @click="createOrUpdateSession" />
-						</div>
-						<div class="form-grid">
-							<FormControl v-model="draft.title" :label="__('Nombre del curso')" :placeholder="__('Ej. Parcial de cálculo')" />
-							<FormControl v-model="draft.academic_context" :label="__('Curso o contexto')" :placeholder="__('Ej. Universidad, curso, ciclo')" />
-							<FormControl v-model="draft.exam_date" type="date" :label="__('Fecha objetivo (Opcional)')" />
-							<div>
-								<label class="s-label">{{ __('Nivel') }}</label>
-								<select v-model="draft.student_level" class="s-select">
-									<option value="colegio">{{ __('Colegio') }}</option>
-									<option value="preuniversitario">{{ __('Preuniversitario') }}</option>
-									<option value="universitario">{{ __('Universitario') }}</option>
-									<option value="profesional">{{ __('Profesional') }}</option>
-								</select>
+							<div class="form-grid">
+								<FormControl v-model="draft.title" :label="__('Nombre del curso')" :placeholder="__('Ej. Parcial de cálculo')" />
+								<FormControl v-model="draft.academic_context" :label="__('Curso o contexto')" :placeholder="__('Ej. Universidad, curso, ciclo')" />
+								<FormControl v-model="draft.exam_date" type="date" :label="__('Fecha objetivo (Opcional)')" />
+								<div>
+									<label class="s-label">{{ __('Nivel') }}</label>
+									<select v-model="draft.student_level" class="s-select">
+										<option value="colegio">{{ __('Colegio') }}</option>
+										<option value="preuniversitario">{{ __('Preuniversitario') }}</option>
+										<option value="universitario">{{ __('Universitario') }}</option>
+										<option value="profesional">{{ __('Profesional') }}</option>
+									</select>
+								</div>
+								<FormControl class="md:col-span-2" v-model="draft.desired_topics" :label="__('Temas obligatorios')" :placeholder="__('Separados por coma, opcional')" />
+								<div class="md:col-span-2">
+									<label class="s-label">{{ __('Texto manual') }}</label>
+									<textarea v-model="draft.manual_text" class="s-textarea" rows="7" :placeholder="__('Pega sílabos, apuntes, ejercicios o temas del parcial.')" />
+								</div>
 							</div>
-							<FormControl class="md:col-span-2" v-model="draft.desired_topics" :label="__('Temas obligatorios')" :placeholder="__('Separados por coma, opcional')" />
-							<div class="md:col-span-2">
-								<label class="s-label">{{ __('Texto manual') }}</label>
-								<textarea v-model="draft.manual_text" class="s-textarea" rows="7" :placeholder="__('Pega sílabos, apuntes, ejercicios o temas del parcial.')" />
-							</div>
-						</div>
-					</div>
-
-					<!-- Admission search -->
-					<div v-if="flowId === 'admision'" class="s-panel s-panel--flush">
-						<div class="s-panel-header">
-							<div>
-								<div class="s-kicker">{{ __('Opcional') }}</div>
-								<h2 class="s-panel-title">{{ __('Buscar temario de admisión') }}</h2>
-								<p class="s-panel-desc">{{ __('La IA trae una base de temas para convertirla en curso.') }}</p>
+							<div class="wizard-actions">
+								<div></div>
+								<Button :label="currentSession ? __('Guardar y continuar') : __('Crear curso y continuar')" variant="solid" :loading="loading === 'create'" @click="createOrUpdateSession" />
 							</div>
 						</div>
-						<div class="form-grid form-grid--inline">
-							<FormControl v-model="university" :placeholder="__('Universidad')" />
-							<FormControl v-model="career" :placeholder="__('Carrera, opcional')" />
-							<Button :label="__('Buscar')" :loading="loading === 'search'" @click="searchTemario" />
+						
+						<!-- Admission search -->
+						<div v-if="flowId === 'admision'" class="s-panel s-panel--flush mt-6">
+							<div class="s-panel-header">
+								<div>
+									<div class="s-kicker">{{ __('Opcional') }}</div>
+									<h2 class="s-panel-title">{{ __('Buscar temario de admisión') }}</h2>
+									<p class="s-panel-desc">{{ __('La IA trae una base de temas para convertirla en curso.') }}</p>
+								</div>
+							</div>
+							<div class="form-grid form-grid--inline">
+								<FormControl v-model="university" :placeholder="__('Universidad')" />
+								<FormControl v-model="career" :placeholder="__('Carrera, opcional')" />
+								<Button :label="__('Buscar')" :loading="loading === 'search'" @click="searchTemario" />
+							</div>
+							<div v-if="searchResult" class="s-markdown-block" v-html="renderMarkdown(searchResult)" />
 						</div>
-						<div v-if="searchResult" class="s-markdown-block" v-html="renderMarkdown(searchResult)" />
 					</div>
 
 					<!-- Step 2 -->
-					<div class="s-panel s-panel--flush" :class="{ 's-panel--locked': !currentSession }">
-						<div class="s-panel-header">
-							<div>
-								<div class="s-kicker">{{ __('Paso 2') }}</div>
-								<h2 class="s-panel-title">{{ __('Materiales y temas') }}</h2>
-								<p class="s-panel-desc">{{ __('Luego haz esto: sube archivos o usa el texto manual, y analiza para detectar los temas del curso.') }}</p>
+					<div v-else-if="activeFlowStep === 2" class="wizard-step">
+						<div class="s-panel s-panel--flush">
+							<div class="s-panel-header">
+								<div>
+									<div class="s-kicker">{{ __('Paso 2 de 4') }}</div>
+									<h2 class="s-panel-title">{{ __('Materiales y temas') }}</h2>
+									<p class="s-panel-desc">{{ __('Sube archivos o usa el texto manual, y analiza para detectar los temas del curso.') }}</p>
+								</div>
+								<div class="flex flex-wrap gap-2">
+									<FileUploader
+										ref="fileUploader"
+										class="hidden"
+										:fileTypes="['.pdf', '.doc', '.docx', 'image/*', '.txt', '.md']"
+										:uploadArgs="{ private: true }"
+										:validateFile="validateFile"
+										@success="handleFileUploaded"
+									/>
+									<Button :label="__('Subir archivo')" @click="openUploader">
+										<template #prefix><Upload class="h-4 w-4 stroke-1.5" /></template>
+									</Button>
+									<Button :label="__('Analizar material')" variant="solid" :loading="loading === 'analyze'" @click="analyzeMaterial" />
+								</div>
 							</div>
-							<div class="flex flex-wrap gap-2">
-								<FileUploader
-									ref="fileUploader"
-									class="hidden"
-									:fileTypes="['.pdf', '.doc', '.docx', 'image/*', '.txt', '.md']"
-									:uploadArgs="{ private: true }"
-									:validateFile="validateFile"
-									@success="handleFileUploaded"
-								/>
-								<Button :label="__('Subir archivo')" :disabled="!currentSession" @click="openUploader">
-									<template #prefix><Upload class="h-4 w-4 stroke-1.5" /></template>
-								</Button>
-								<Button :label="__('Analizar material')" variant="solid" :disabled="!currentSession" :loading="loading === 'analyze'" @click="analyzeMaterial" />
+							<div v-if="loading === 'analyze'" class="s-loader">
+								<div class="s-loader-spinner"></div>
+								{{ __('Analizando material y ordenando temas...') }}
 							</div>
-						</div>
-						<div v-if="loading === 'analyze'" class="s-loader">
-							<div class="s-loader-spinner"></div>
-							{{ __('Analizando material y ordenando temas...') }}
-						</div>
-						<div class="grid gap-6 md:grid-cols-2 p-5">
-							<div>
-								<h3 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2"><FileText class="h-4 w-4 stroke-1.5 text-indigo-500" /> {{ __('Archivos subidos') }}</h3>
-								<div class="materials-list mt-0 pt-0">
-									<div v-for="material in currentSession?.materials || []" :key="material.idx" class="material-item">
-										<div class="material-icon"><FileText class="h-4 w-4 stroke-1.5" /></div>
-										<div class="min-w-0">
-											<div class="material-name">{{ material.file_name }}</div>
-											<div class="material-meta">{{ material.file_type }} · {{ material.analysis_status }}</div>
+							<div class="grid gap-6 md:grid-cols-2 p-5">
+								<div>
+									<h3 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2"><FileText class="h-4 w-4 stroke-1.5 text-indigo-500" /> {{ __('Archivos subidos') }}</h3>
+									<div class="materials-list mt-0 pt-0">
+										<div v-for="material in currentSession?.materials || []" :key="material.idx" class="material-item">
+											<div class="material-icon"><FileText class="h-4 w-4 stroke-1.5" /></div>
+											<div class="min-w-0">
+												<div class="material-name">{{ material.file_name }}</div>
+												<div class="material-meta">{{ material.file_type }} · {{ material.analysis_status }}</div>
+											</div>
+										</div>
+										<div v-if="!currentSession?.materials?.length" class="s-empty-sm">
+											<Upload class="h-6 w-6 stroke-1.5" />
+											<p>{{ __('Agrega material para mejorar el curso. También puedes usar solo el texto manual del paso 1.') }}</p>
 										</div>
 									</div>
-									<div v-if="!currentSession?.materials?.length" class="s-empty-sm">
-										<Upload class="h-6 w-6 stroke-1.5" />
-										<p>{{ currentSession ? __('Agrega material para mejorar el curso. También puedes usar solo el texto manual del paso 1.') : __('Primero crea el curso.') }}</p>
+								</div>
+								<div>
+									<h3 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2"><Layers class="h-4 w-4 stroke-1.5 text-indigo-500" /> {{ __('Temas detectados') }}</h3>
+									<div class="flex flex-col gap-2">
+										<div v-for="topic in currentSession?.topics || []" :key="topic.title || topic" class="topic-chip">
+											<CheckCircle2 class="h-3.5 w-3.5 stroke-1.5" />
+											{{ topic.title || topic }}
+										</div>
+										<div v-if="!currentSession?.topics?.length" class="s-mini-empty">
+											<Layers class="h-5 w-5 stroke-1.5" />
+											<span>{{ __('Cuando analices tu material, aquí aparecerán los temas base.') }}</span>
+										</div>
 									</div>
 								</div>
 							</div>
-							<div>
-								<h3 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-2"><Layers class="h-4 w-4 stroke-1.5 text-indigo-500" /> {{ __('Temas detectados') }}</h3>
-								<div class="flex flex-col gap-2">
-									<div v-for="topic in currentSession?.topics || []" :key="topic.title || topic" class="topic-chip">
-										<CheckCircle2 class="h-3.5 w-3.5 stroke-1.5" />
-										{{ topic.title || topic }}
-									</div>
-									<div v-if="!currentSession?.topics?.length" class="s-mini-empty">
-										<Layers class="h-5 w-5 stroke-1.5" />
-										<span>{{ __('Cuando analices tu material, aquí aparecerán los temas base.') }}</span>
-									</div>
-								</div>
+							<div class="wizard-actions">
+								<Button :label="__('Atrás')" @click="goToStep(1)" />
+								<Button :label="__('Continuar')" variant="solid" :disabled="!hasCourseSeed" @click="goToStep(3)" />
 							</div>
 						</div>
 					</div>
 
 					<!-- Step 3 -->
-					<div class="s-panel s-panel--flush" :class="{ 's-panel--locked': !canGenerateQuestions }">
-						<div class="s-panel-header">
-							<div>
-								<div class="s-kicker">{{ __('Paso 3') }}</div>
-								<h2 class="s-panel-title">{{ __('Perfil de aprendizaje') }}</h2>
-								<p class="s-panel-desc">{{ __('Después: genera preguntas breves para que la IA adapte dificultad, ritmo y ejemplos a tu nivel.') }}</p>
+					<div v-else-if="activeFlowStep === 3" class="wizard-step">
+						<div class="s-panel s-panel--flush">
+							<div class="s-panel-header">
+								<div>
+									<div class="s-kicker">{{ __('Paso 3 de 4') }}</div>
+									<h2 class="s-panel-title">{{ __('Perfil de aprendizaje') }}</h2>
+									<p class="s-panel-desc">{{ __('Genera preguntas breves para que la IA adapte dificultad, ritmo y ejemplos a tu nivel.') }}</p>
+								</div>
+								<div class="flex flex-wrap gap-2">
+									<Button :label="__('Generar preguntas')" :loading="loading === 'questions'" @click="generateQuestions" />
+								</div>
 							</div>
-							<div class="flex flex-wrap gap-2">
-								<Button :label="__('Generar preguntas')" :disabled="!canGenerateQuestions" :loading="loading === 'questions'" @click="generateQuestions" />
+							<div class="p-5 flex flex-col gap-4">
+								<div v-for="question in currentSession?.profile_questions || []" :key="question.id" class="profile-q">
+									<div class="profile-q-text">{{ question.question }}</div>
+									<select v-model="profileAnswers[question.id]" class="s-select s-select--sm max-w-md">
+										<option value="">{{ __('Selecciona una opción') }}</option>
+										<option v-for="option in question.options || []" :key="option.label" :value="option.label">{{ option.label }}</option>
+									</select>
+								</div>
+								<div v-if="!currentSession?.profile_questions?.length" class="s-mini-empty">
+									<UserCog class="h-5 w-5 stroke-1.5" />
+									<span>{{ __('Pulsa "Generar preguntas" para completar tu perfil.') }}</span>
+								</div>
 							</div>
-						</div>
-						<div class="p-5 flex flex-col gap-4">
-							<div v-for="question in currentSession?.profile_questions || []" :key="question.id" class="profile-q">
-								<div class="profile-q-text">{{ question.question }}</div>
-								<select v-model="profileAnswers[question.id]" class="s-select s-select--sm max-w-md">
-									<option value="">{{ __('Selecciona una opción') }}</option>
-									<option v-for="option in question.options || []" :key="option.label" :value="option.label">{{ option.label }}</option>
-								</select>
-							</div>
-							<div v-if="!currentSession?.profile_questions?.length" class="s-mini-empty">
-								<UserCog class="h-5 w-5 stroke-1.5" />
-								<span>{{ canGenerateQuestions ? __('Pulsa "Generar preguntas" para completar tu perfil.') : __('Primero crea el curso y agrega temas, texto o material analizado.') }}</span>
+							<div class="wizard-actions">
+								<Button :label="__('Atrás')" @click="goToStep(2)" />
+								<Button :label="__('Guardar perfil y continuar')" variant="solid" :disabled="!currentSession?.profile_questions?.length" :loading="loading === 'profile'" @click="saveProfileAndContinue" />
 							</div>
 						</div>
 					</div>
 
 					<!-- Step 4 -->
-					<div class="s-panel s-panel--flush" :class="{ 's-panel--locked': !canCreateFullCourse }">
-						<div class="s-panel-header">
-							<div>
-								<div class="s-kicker">{{ __('Paso 4') }}</div>
-								<h2 class="s-panel-title">{{ __('Crear el curso') }}</h2>
-								<p class="s-panel-desc">{{ __('Luego haz esto: crea la malla completa de módulos y lecciones cuando ya haya temas o texto base.') }}</p>
+					<div v-else-if="activeFlowStep === 4" class="wizard-step">
+						<div class="s-panel s-panel--flush">
+							<div class="s-panel-header">
+								<div>
+									<div class="s-kicker">{{ __('Paso 4 de 4') }}</div>
+									<h2 class="s-panel-title">{{ __('Crear el curso') }}</h2>
+									<p class="s-panel-desc">{{ __('Genera la malla completa de módulos y lecciones basados en tu material y perfil.') }}</p>
+								</div>
 							</div>
-							<div class="flex flex-wrap gap-2">
-								<Button :label="__('Crear curso completo')" variant="solid" :disabled="!canCreateFullCourse" :loading="loading === 'plan'" @click="generatePlan" />
+							<div class="p-5">
+								<div v-if="loading === 'plan'" class="s-loader mb-4">
+									<div class="s-loader-spinner"></div>
+									{{ __('Creando módulos, lecciones y ruta de estudio...') }}
+								</div>
+								<div v-else class="step-instruction mb-6">
+									<CheckCircle2 class="h-5 w-5 stroke-1.5 text-green-500" />
+									<span class="font-medium text-slate-700">{{ __('Todo listo para generar el curso completo. ¿Comenzamos?') }}</span>
+								</div>
 							</div>
-						</div>
-						<div v-if="loading === 'plan'" class="s-loader mb-4">
-							<div class="s-loader-spinner"></div>
-							{{ __('Creando módulos, lecciones y ruta de estudio...') }}
-						</div>
-						<div v-else class="step-instruction">
-							<CheckCircle2 class="h-4 w-4 stroke-1.5" />
-							<span>{{ canCreateFullCourse ? __('Listo para generar el curso completo.') : __('Completa el perfil de aprendizaje antes de crear la malla final.') }}</span>
+							<div class="wizard-actions">
+								<Button :label="__('Atrás')" @click="goToStep(3)" />
+								<Button :label="__('Generar Curso Mágico')" variant="solid" theme="indigo" size="lg" :disabled="!canCreateFullCourse" :loading="loading === 'plan'" @click="generatePlan" />
+							</div>
 						</div>
 					</div>
+					</Transition>
 				</div>
 			</section>
 
@@ -905,6 +929,8 @@ const whiteboardText = ref(localStorage.getItem('studybadge_whiteboard') || '')
 const whiteboardResponse = ref('')
 const isPageLoading = ref(true)
 
+const activeFlowStep = ref(1)
+
 const draft = ref({
 	title: '',
 	academic_context: '',
@@ -1105,10 +1131,31 @@ async function createOrUpdateSession() {
 	if (currentSession.value) {
 		currentSession.value = await api('update_session', { name: currentSession.value.name, data: draft.value }, 'create')
 		toast.success(__('Curso actualizado.'))
+		goToStep(2)
 		return
 	}
 	currentSession.value = await api('create_session', { data: { ...draft.value, flow_id: flowId.value, goal: flowId.value } }, 'create')
 	toast.success(__('Curso creado.'))
+	goToStep(2)
+}
+
+async function saveProfileAndContinue() {
+	if (!currentSession.value) return
+	loading.value = 'profile'
+	try {
+		currentSession.value = await api('update_session', { name: currentSession.value.name, data: { profile_answers: profileAnswers.value } })
+		goToStep(4)
+	} finally {
+		loading.value = ''
+	}
+}
+
+function goToStep(step) {
+	if (step === 2 && !currentSession.value && !hasCourseSeed.value) return
+	if (step === 3 && !canGenerateQuestions.value) return
+	if (step === 4 && !canCreateFullCourse.value) return
+	activeFlowStep.value = step
+	window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 function openPlan(name) {
@@ -3906,5 +3953,79 @@ const ExerciseList = defineComponent({
 	0% { opacity: 0.6; }
 	50% { opacity: 0.3; }
 	100% { opacity: 0.6; }
+}
+
+/* Flow Wizard */
+.flow-wizard {
+	display: grid;
+	gap: 1.5rem;
+	grid-template-columns: 1fr;
+}
+@media (min-width: 1280px) {
+	.flow-wizard {
+		grid-template-columns: 340px 1fr;
+		align-items: start;
+	}
+}
+
+.wizard-sidebar {
+	display: flex;
+	flex-direction: column;
+}
+@media (max-width: 1279px) {
+	.wizard-sidebar {
+		padding: 1rem;
+		border-radius: 1rem;
+	}
+	.wizard-steps {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		gap: 0.5rem;
+	}
+	.wizard-steps .s-step {
+		flex: 1;
+		justify-content: center;
+		padding: 0.5rem;
+	}
+	.wizard-steps .s-step-num {
+		margin: 0;
+	}
+}
+
+.wizard-content {
+	min-height: 400px;
+}
+
+.wizard-step {
+	width: 100%;
+}
+
+.wizard-actions {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 1.5rem;
+	padding-top: 1.5rem;
+	border-top: 1px solid var(--border);
+}
+
+/* Transitions */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+	transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.fade-slide-enter-from {
+	opacity: 0;
+	transform: translateX(15px);
+}
+.fade-slide-leave-to {
+	opacity: 0;
+	transform: translateX(-15px);
+}
+
+.s-step:disabled {
+	cursor: not-allowed;
+	opacity: 0.7;
 }
 </style>
