@@ -671,6 +671,11 @@
 										<strong class="text-2xl font-black text-amber-900 leading-none mt-1">{{ quizScore }}%</strong>
 									</div>
 								</div>
+								<div v-if="isQuizFinished && hasNextLesson" class="mt-4 flex justify-end">
+									<Button :label="__('Siguiente lección')" variant="solid" theme="indigo" @click="openRoom(currentSession.name, topicIndex + 1)">
+										<template #suffix><ArrowRight class="h-4 w-4 stroke-1.5" /></template>
+									</Button>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -975,6 +980,12 @@ const quizScore = computed(() => {
 	if (!answered.length) return 0
 	const correct = answered.filter((item) => item.selected === Number(item.correct || 0)).length
 	return Math.round((correct / activeQuiz.value.length) * 100)
+})
+const isQuizFinished = computed(() => {
+	return activeQuiz.value.length > 0 && activeQuiz.value.every((item) => item.selected !== undefined)
+})
+const hasNextLesson = computed(() => {
+	return topicIndex.value < lessonsFlat.value.length - 1
 })
 const lessonWorkedExamples = computed(() => {
 	const direct = lessonPack.value?.workedExamples || []
