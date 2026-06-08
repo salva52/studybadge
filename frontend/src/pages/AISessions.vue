@@ -200,7 +200,16 @@
 				</div>
 				<div v-if="chatLoading || toolLoading" class="message-row assistant">
 					<div class="avatar"><Bot class="size-5" /></div>
-					<div class="message-bubble typing"><span></span><span></span><span></span></div>
+					<div class="message-bubble border-2 border-blue-100 bg-blue-50/50 shadow-sm relative overflow-hidden">
+						<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
+						<div class="flex items-center gap-2 mb-1.5 text-blue-700 font-medium text-[0.95rem] relative z-10">
+							<Loader2 class="size-4 animate-spin" />
+							<span>{{ loadingStatusText || __('Procesando...') }}</span>
+						</div>
+						<div class="text-xs text-blue-600/80 italic leading-snug max-w-sm relative z-10 mt-2">
+							<span class="font-semibold not-italic">💡 Dato curioso:</span> {{ loadingFact }}
+						</div>
+					</div>
 				</div>
 			</section>
 
@@ -501,6 +510,33 @@ const creating = ref(false)
 const chatLoading = ref(false)
 const toolLoading = ref(false)
 const isPageLoading = ref(true)
+
+const loadingStatusText = ref('')
+const loadingFacts = [
+	"¿Sabías que tu cerebro puede almacenar hasta 2.5 petabytes de información?",
+	"Las manzanas son más eficientes que el café para despertarte por la mañana.",
+	"El corazón humano late unas 115,000 veces al día.",
+	"Júpiter es tan grande que podrías meter todos los demás planetas dentro de él.",
+	"¡Los pulpos tienen 3 corazones y su sangre es azul!",
+	"La miel nunca se echa a perder. Se han encontrado frascos en tumbas egipcias de hace 3000 años que aún son comestibles.",
+	"Un día en Venus dura más que un año en Venus.",
+	"Los delfines duermen con un ojo abierto.",
+	"El ojo humano puede distinguir unos 10 millones de colores diferentes."
+]
+const loadingFact = ref('')
+let loadingInterval = null
+
+function startLoadingAnim() {
+	loadingFact.value = loadingFacts[Math.floor(Math.random() * loadingFacts.length)]
+	clearInterval(loadingInterval)
+	loadingInterval = setInterval(() => {
+		loadingFact.value = loadingFacts[Math.floor(Math.random() * loadingFacts.length)]
+	}, 4000)
+}
+
+function stopLoadingAnim() {
+	clearInterval(loadingInterval)
+}
 
 const refreshTranscriptionHistoryTrigger = ref(0)
 
@@ -952,6 +988,8 @@ async function sendChat() {
 		return
 	}
 	chatLoading.value = true
+	loadingStatusText.value = __('Conectando...')
+	startLoadingAnim()
 	
 	const files = pendingFiles.value.map((file) => file.file_url)
 	const optimistic = { role: 'user', content: text || __('Analiza las fuentes adjuntas.'), created_at: String(Date.now()) }
@@ -964,6 +1002,7 @@ async function sendChat() {
 	scrollChat()
 
 	const streamEvent = `ai_stream_${activeSession.value.name}`
+	const statusEvent = `ai_status_${activeSession.value.name}`
 	let streamingContent = ''
 	let isStreamingStarted = false
 	const streamHandler = (data) => {
@@ -971,6 +1010,7 @@ async function sendChat() {
 			if (!isStreamingStarted) {
 				isStreamingStarted = true
 				chatLoading.value = false
+				stopLoadingAnim()
 				chatMessages.value = [...chatMessages.value, assistantOptimistic]
 			}
 			streamingContent += data.chunk
@@ -982,8 +1022,15 @@ async function sendChat() {
 		}
 	}
 	
+	const statusHandler = (data) => {
+		if (data && data.status) {
+			loadingStatusText.value = data.status
+		}
+	}
+	
 	if (window.frappe && window.frappe.realtime) {
 		window.frappe.realtime.on(streamEvent, streamHandler)
+		window.frappe.realtime.on(statusEvent, statusHandler)
 	}
 
 	try {
@@ -1001,6 +1048,7 @@ async function sendChat() {
 		} finally {
 			if (window.frappe && window.frappe.realtime) {
 				window.frappe.realtime.off(streamEvent, streamHandler)
+				window.frappe.realtime.off(statusEvent, statusHandler)
 			}
 		}
 		
@@ -1066,6 +1114,7 @@ async function sendChat() {
 		toast.error(__('No pude responder en este momento. Intenta de nuevo en unos segundos.'))
 	} finally {
 		chatLoading.value = false
+		stopLoadingAnim()
 	}
 }
 
@@ -1110,6 +1159,8 @@ async function runTool(tool) {
 	}
 
 	toolLoading.value = true
+	loadingStatusText.value = __('Preparando herramienta...')
+	startLoadingAnim()
 	showTools.value = false
 	try {
 		chatMessages.value = [
@@ -1135,6 +1186,7 @@ async function runTool(tool) {
 		await nextTick(scrollChat)
 	} finally {
 		toolLoading.value = false
+		stopLoadingAnim()
 	}
 }
 
