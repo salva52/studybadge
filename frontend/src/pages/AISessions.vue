@@ -522,22 +522,46 @@ const textTitle = ref('')
 const textContent = ref('')
 const isTextUploading = ref(false)
 
+async function uploadFileObj(file) {
+	const data = new FormData()
+	data.append('file', file, file.name)
+	data.append('is_private', '1')
+	const response = await fetch('/api/method/upload_file', {
+		method: 'POST',
+		headers: { 
+			'Accept': 'application/json',
+			'X-Frappe-CSRF-Token': window.csrf_token || '' 
+		},
+		body: data,
+	})
+	const payload = await response.json()
+	if (!response.ok || payload.exc) {
+		throw new Error(payload.exc || 'Upload failed')
+	}
+	return payload.message
+}
+
 async function uploadManualText() {
 	if (!textContent.value.trim() || !activeSession.value) return
 	isTextUploading.value = true
 	try {
-		const res = await api('upload_ai_session_text', {
+		const textBlob = new Blob([textContent.value], { type: 'text/plain;charset=utf-8' })
+		const safeTitle = (textTitle.value || 'Texto_Pegado').replace(/[^a-z0-9]/gi, '_')
+		const fileName = `${safeTitle || 'texto'}_${Date.now()}.txt`
+		const fileObj = new File([textBlob], fileName, { type: 'text/plain' })
+		const uploadedFile = await uploadFileObj(fileObj)
+		
+		activeSession.value = await api('upload_ai_session_material', {
 			session: activeSession.value.name,
-			title: textTitle.value,
-			text: textContent.value
+			file_url: uploadedFile.file_url,
 		})
-		activeSession.value = res
 		showTextModal.value = false
 		textTitle.value = ''
 		textContent.value = ''
-		toast.success(__('Texto agregado a tus fuentes.'))
+		toast.success(__('Texto agregado a tus fuentes como archivo.'))
 	} catch (e) {
 		console.error(e)
+		toast.error(__('No se pudo agregar el texto.'))
 	} finally {
 		isTextUploading.value = false
 	}
@@ -894,26 +918,39 @@ async function handlePaste(event) {
 }
 
 async function uploadPastedImage(file) {
-	const data = new FormData()
-	data.append('file', file, file.name || `captura-${Date.now()}.png`)
-	data.append('is_private', '1')
-	const response = await fetch('/api/method/upload_file', {
-		method: 'POST',
-		headers: { 'X-Frappe-CSRF-Token': window.csrf_token || '' },
-		body: data,
-	})
-	const payload = await response.json()
-	if (!response.ok || payload.exc) {
+	try {
+		const uploadedFile = await uploadFileObj(file)
+		await handleFileUploaded(uploadedFile)
+	} catch (e) {
 		toast.error(__('No se pudo pegar la imagen.'))
-		return
 	}
-	await handleFileUploaded(payload.message)
 }
 
 async function sendChat() {
 	if (!activeSession.value) return
-	const text = chatInput.value.trim()
-	if (!text && !pendingFiles.value.length) return
+	let text = chatInput.value.trim()
+	
+	if (text.length > 3000) {
+		chatLoading.value = true
+		try {
+			const textBlob = new Blob([text], { type: 'text/plain;charset=utf-8' })
+			const fileName = `texto_largo_${Date.now()}.txt`
+			const fileObj = new File([textBlob], fileName, { type: 'text/plain' })
+			const uploadedFile = await uploadFileObj(fileObj)
+			pendingFiles.value.push(uploadedFile)
+			text = __('Analiza el texto adjunto.')
+			toast.success(__('Texto largo convertido a archivo automáticamente.'))
+		} catch (e) {
+			toast.error(__('Error al convertir texto largo a archivo.'))
+			chatLoading.value = false
+			return
+		}
+	}
+	
+	if (!text && !pendingFiles.value.length) {
+		chatLoading.value = false
+		return
+	}
 	chatLoading.value = true
 	
 	const files = pendingFiles.value.map((file) => file.file_url)
