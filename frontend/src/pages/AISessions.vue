@@ -3,7 +3,7 @@
 		<FileUploader
 			ref="fileUploader"
 			class="hidden"
-			:fileTypes="['.pdf', '.doc', '.docx', 'image/*', '.txt', '.md']"
+			:fileTypes="allowedFileTypes"
 			:uploadArgs="{ private: true }"
 			:validateFile="validateFile"
 			@success="handleFileUploaded"
@@ -99,6 +99,9 @@
 					<div class="model-switch">
 						<button :class="{ active: selectedModel === 'light' }" @click="selectModel('light')">
 							<Zap class="size-4" /> <span>Light</span>
+						</button>
+						<button :class="{ active: selectedModel === 'fast' }" @click="selectModel('fast')">
+							<Gauge class="size-4" /> <span>Fast</span>
 						</button>
 						<button :class="{ active: selectedModel === 'pro', locked: !access?.pro_available }" @click="selectModel('pro')">
 							<Crown class="size-4" /> <span>Pro</span>
@@ -473,6 +476,7 @@ import {
 	Globe,
 	Type,
 	Loader2,
+	Gauge,
 } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
 import QuizModal from '@/components/QuizModal.vue'
@@ -668,6 +672,12 @@ const filteredSessions = computed(() => {
 	)
 })
 const selectedModel = computed(() => activeSession.value?.model_tier || draft.value.model_tier || 'light')
+const allowedFileTypes = computed(() => {
+	if (selectedModel.value === 'pro') {
+		return ['.pdf', '.doc', '.docx', 'image/*', '.txt', '.md']
+	}
+	return ['.pdf', '.doc', '.docx', '.txt', '.md']
+})
 const canCreate = computed(() => access.value?.can_create_session !== false)
 
 const pinnedThreads = computed(() => {
@@ -778,7 +788,9 @@ function findThread(name) {
 }
 
 function modelLabel(tier) {
-	return tier === 'pro' ? 'Study Model Pro' : 'Study Model Light'
+	if (tier === 'pro') return 'Study Model Pro'
+	if (tier === 'fast') return 'Study Model Fast'
+	return 'Study Model Light'
 }
 
 function startNewSession() {
@@ -909,6 +921,14 @@ async function attachPendingFiles() {
 }
 
 async function handlePaste(event) {
+	if (selectedModel.value !== 'pro') {
+		const hasImages = [...(event.clipboardData?.files || [])].some((file) => file.type.startsWith('image/'))
+		if (hasImages) {
+			toast.warning(__('Las imagenes solo estan disponibles en el modelo Pro.'))
+			event.preventDefault()
+			return
+		}
+	}
 	const imageFiles = [...(event.clipboardData?.files || [])].filter((file) => file.type.startsWith('image/'))
 	if (!imageFiles.length) return
 	event.preventDefault()
