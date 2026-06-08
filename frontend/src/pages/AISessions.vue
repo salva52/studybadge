@@ -521,7 +521,28 @@ const loadingFacts = [
 	"La miel nunca se echa a perder. Se han encontrado frascos en tumbas egipcias de hace 3000 años que aún son comestibles.",
 	"Un día en Venus dura más que un año en Venus.",
 	"Los delfines duermen con un ojo abierto.",
-	"El ojo humano puede distinguir unos 10 millones de colores diferentes."
+	"El ojo humano puede distinguir unos 10 millones de colores diferentes.",
+	"Las vacas tienen mejores amigas y se estresan si las separan.",
+	"El agua que bebes tiene aproximadamente 3 mil millones de años de antigüedad.",
+	"Los gatos duermen entre el 70% y el 75% de sus vidas.",
+	"El alfabeto hawaiano solo tiene 13 letras.",
+	"Los astronautas no pueden eructar en el espacio porque no hay gravedad para separar los líquidos y los gases en sus estómagos.",
+	"Las huellas dactilares de un koala son tan parecidas a las humanas que a veces confunden a la policía.",
+	"Un rayo contiene suficiente energía para tostar 100,000 rebanadas de pan.",
+	"En Júpiter y Saturno llueven diamantes.",
+	"Hay más estrellas en el universo que granos de arena en todas las playas de la Tierra.",
+	"Las abejas pueden reconocer rostros humanos.",
+	"El monte Everest crece unos 4 milímetros cada año.",
+	"El material más resistente creado por la naturaleza es la seda de la araña de corteza de Darwin.",
+	"Las tortugas pueden respirar a través de sus traseros.",
+	"El olor a tierra mojada tiene un nombre: petricor.",
+	"El pez globo contiene una toxina 1,200 veces más mortal que el cianuro.",
+	"Si pudieras conducir tu auto hacia arriba, llegarías al espacio en aproximadamente una hora.",
+	"La Torre Eiffel puede crecer hasta 15 centímetros en verano debido a la expansión térmica del metal.",
+	"Los pingüinos proponen matrimonio entregándole una piedrecita perfecta a su pareja.",
+	"El músculo más fuerte del cuerpo humano (en proporción a su tamaño) es el masetero de la mandíbula.",
+	"Si gritas sin parar durante 8 años, 7 meses y 6 días, generarás suficiente energía sonora para calentar una taza de café.",
+	"Las hormigas no duermen nunca."
 ]
 const loadingFact = ref('')
 let loadingInterval = null
@@ -988,7 +1009,7 @@ async function sendChat() {
 		return
 	}
 	chatLoading.value = true
-	loadingStatusText.value = __('Conectando...')
+	loadingStatusText.value = __('Pensando...')
 	startLoadingAnim()
 	
 	const files = pendingFiles.value.map((file) => file.file_url)
