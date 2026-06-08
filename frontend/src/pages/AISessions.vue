@@ -203,7 +203,10 @@
 				</div>
 				<div v-if="chatLoading || toolLoading" class="message-row assistant">
 					<div class="avatar"><Bot class="size-5" /></div>
-					<div class="message-bubble typing"><span></span><span></span><span></span></div>
+					<div class="message-bubble typing">
+						<span></span><span></span><span></span>
+						<div v-if="aiStatusText" class="mt-2 text-[0.8rem] text-ink-gray-5">{{ aiStatusText }}</div>
+					</div>
 				</div>
 			</section>
 
@@ -505,6 +508,7 @@ const creating = ref(false)
 const chatLoading = ref(false)
 const toolLoading = ref(false)
 const isPageLoading = ref(true)
+const aiStatusText = ref('')
 
 const refreshTranscriptionHistoryTrigger = ref(0)
 
@@ -984,6 +988,7 @@ async function sendChat() {
 	scrollChat()
 
 	const streamEvent = `ai_stream_${activeSession.value.name}`
+	const statusEvent = `ai_status_${activeSession.value.name}`
 	let streamingContent = ''
 	let isStreamingStarted = false
 	const streamHandler = (data) => {
@@ -991,6 +996,7 @@ async function sendChat() {
 			if (!isStreamingStarted) {
 				isStreamingStarted = true
 				chatLoading.value = false
+				aiStatusText.value = ''
 				chatMessages.value = [...chatMessages.value, assistantOptimistic]
 			}
 			streamingContent += data.chunk
@@ -1002,8 +1008,16 @@ async function sendChat() {
 		}
 	}
 	
+	const statusHandler = (data) => {
+		if (data && data.status) {
+			aiStatusText.value = data.status
+			scrollChat()
+		}
+	}
+	
 	if (window.frappe && window.frappe.realtime) {
 		window.frappe.realtime.on(streamEvent, streamHandler)
+		window.frappe.realtime.on(statusEvent, statusHandler)
 	}
 
 	try {
@@ -1019,8 +1033,10 @@ async function sendChat() {
 				mode: chatMode.value,
 			})
 		} finally {
+			aiStatusText.value = ''
 			if (window.frappe && window.frappe.realtime) {
 				window.frappe.realtime.off(streamEvent, streamHandler)
+				window.frappe.realtime.off(statusEvent, statusHandler)
 			}
 		}
 		
