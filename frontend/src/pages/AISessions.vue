@@ -169,7 +169,7 @@
 				</div>
 			</section>
 
-			<section v-else class="chat-thread" ref="chatBox">
+			<section v-else class="chat-thread" ref="chatBox" @scroll="handleScroll">
 				<div v-if="!chatMessages.length" class="welcome-block">
 					<div class="new-badge"><Bot class="size-5" /> {{ activeSession.model_label || modelLabel(activeSession.model_tier) }}</div>
 					<h2>{{ __('Listo. Este chat ya conoce tu sesión.') }}</h2>
@@ -212,6 +212,16 @@
 					</div>
 				</div>
 			</section>
+
+			<!-- Scroll to Bottom Button (outside scroll container) -->
+			<button 
+				v-show="showScrollBottom" 
+				class="scroll-bottom-btn shadow-md border border-gray-200" 
+				@click="scrollToBottom"
+				title="Ir al último mensaje"
+			>
+				<ArrowDown class="size-5" />
+			</button>
 
 			<footer v-if="activeSession" class="composer-wrap">
 				<div class="composer-container">
@@ -450,6 +460,7 @@ import mk from 'markdown-it-katex'
 import 'katex/dist/katex.min.css'
 import DOMPurify from 'dompurify'
 import {
+	ArrowDown,
 	BookOpenCheck,
 	Bot,
 	BellRing,
@@ -510,6 +521,24 @@ const creating = ref(false)
 const chatLoading = ref(false)
 const toolLoading = ref(false)
 const isPageLoading = ref(true)
+
+const showScrollBottom = ref(false)
+
+function handleScroll() {
+	if (!chatBox.value) return
+	const threshold = 150 // píxeles antes de considerar que ya no está en el fondo
+	const isNearBottom = chatBox.value.scrollHeight - chatBox.value.scrollTop - chatBox.value.clientHeight < threshold
+	showScrollBottom.value = !isNearBottom
+}
+
+function scrollToBottom() {
+	if (chatBox.value) {
+		chatBox.value.scrollTo({
+			top: chatBox.value.scrollHeight,
+			behavior: 'smooth'
+		})
+	}
+}
 
 const loadingStatusText = ref('')
 const loadingFacts = [
@@ -1279,7 +1308,16 @@ function renderMarkdown(text) {
 }
 
 function scrollChat() {
-	if (chatBox.value) chatBox.value.scrollTop = chatBox.value.scrollHeight
+	if (chatBox.value) {
+		chatBox.value.scrollTop = chatBox.value.scrollHeight
+		// Llamamos un par de veces más para asegurar el scroll después de renderizar markdown/imágenes
+		setTimeout(() => {
+			if (chatBox.value) chatBox.value.scrollTop = chatBox.value.scrollHeight
+		}, 150)
+		setTimeout(() => {
+			if (chatBox.value) chatBox.value.scrollTop = chatBox.value.scrollHeight
+		}, 500)
+	}
 }
 
 function formatDate(value) {
@@ -1540,6 +1578,33 @@ function formatDate(value) {
 	color: #ffffff;
 	padding: 0.72rem 1rem;
 	box-shadow: var(--sb-shadow-sm);
+}
+
+.scroll-bottom-btn {
+	position: absolute;
+	bottom: 110px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 50;
+	background-color: white;
+	color: var(--sb-primary);
+	border-radius: 9999px;
+	width: 40px;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.2s ease;
+	cursor: pointer;
+}
+
+.chat-main {
+	position: relative;
+}
+
+.scroll-bottom-btn:hover {
+	background-color: var(--sb-panel-soft);
+	transform: translateX(-50%) scale(1.05);
 }
 
 .primary-btn:hover:not(:disabled) {
