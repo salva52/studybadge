@@ -3,7 +3,7 @@
 		<FileUploader
 			ref="fileUploader"
 			class="hidden"
-			:fileTypes="allowedFileTypes"
+			:fileTypes="['.pdf', '.doc', '.docx', 'image/*', '.txt', '.md']"
 			:uploadArgs="{ private: true }"
 			:validateFile="validateFile"
 			@success="handleFileUploaded"
@@ -99,9 +99,6 @@
 					<div class="model-switch">
 						<button :class="{ active: selectedModel === 'light' }" @click="selectModel('light')">
 							<Zap class="size-4" /> <span>Light</span>
-						</button>
-						<button :class="{ active: selectedModel === 'fast' }" @click="selectModel('fast')">
-							<Gauge class="size-4" /> <span>Fast</span>
 						</button>
 						<button :class="{ active: selectedModel === 'pro', locked: !access?.pro_available }" @click="selectModel('pro')">
 							<Crown class="size-4" /> <span>Pro</span>
@@ -203,10 +200,7 @@
 				</div>
 				<div v-if="chatLoading || toolLoading" class="message-row assistant">
 					<div class="avatar"><Bot class="size-5" /></div>
-					<div class="message-bubble typing">
-						<span></span><span></span><span></span>
-						<div v-if="aiStatusText" class="mt-2 text-[0.8rem] text-ink-gray-5">{{ aiStatusText }}</div>
-					</div>
+					<div class="message-bubble typing"><span></span><span></span><span></span></div>
 				</div>
 			</section>
 
@@ -479,7 +473,6 @@ import {
 	Globe,
 	Type,
 	Loader2,
-	Gauge,
 } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
 import QuizModal from '@/components/QuizModal.vue'
@@ -508,7 +501,6 @@ const creating = ref(false)
 const chatLoading = ref(false)
 const toolLoading = ref(false)
 const isPageLoading = ref(true)
-const aiStatusText = ref('')
 
 const refreshTranscriptionHistoryTrigger = ref(0)
 
@@ -676,12 +668,6 @@ const filteredSessions = computed(() => {
 	)
 })
 const selectedModel = computed(() => activeSession.value?.model_tier || draft.value.model_tier || 'light')
-const allowedFileTypes = computed(() => {
-	if (selectedModel.value === 'pro') {
-		return ['.pdf', '.doc', '.docx', 'image/*', '.txt', '.md']
-	}
-	return ['.pdf', '.doc', '.docx', '.txt', '.md']
-})
 const canCreate = computed(() => access.value?.can_create_session !== false)
 
 const pinnedThreads = computed(() => {
@@ -792,9 +778,7 @@ function findThread(name) {
 }
 
 function modelLabel(tier) {
-	if (tier === 'pro') return 'Study Model Pro'
-	if (tier === 'fast') return 'Study Model Fast'
-	return 'Study Model Light'
+	return tier === 'pro' ? 'Study Model Pro' : 'Study Model Light'
 }
 
 function startNewSession() {
@@ -925,14 +909,6 @@ async function attachPendingFiles() {
 }
 
 async function handlePaste(event) {
-	if (selectedModel.value !== 'pro') {
-		const hasImages = [...(event.clipboardData?.files || [])].some((file) => file.type.startsWith('image/'))
-		if (hasImages) {
-			toast.warning(__('Las imagenes solo estan disponibles en el modelo Pro.'))
-			event.preventDefault()
-			return
-		}
-	}
 	const imageFiles = [...(event.clipboardData?.files || [])].filter((file) => file.type.startsWith('image/'))
 	if (!imageFiles.length) return
 	event.preventDefault()
@@ -988,7 +964,6 @@ async function sendChat() {
 	scrollChat()
 
 	const streamEvent = `ai_stream_${activeSession.value.name}`
-	const statusEvent = `ai_status_${activeSession.value.name}`
 	let streamingContent = ''
 	let isStreamingStarted = false
 	const streamHandler = (data) => {
@@ -996,7 +971,6 @@ async function sendChat() {
 			if (!isStreamingStarted) {
 				isStreamingStarted = true
 				chatLoading.value = false
-				aiStatusText.value = ''
 				chatMessages.value = [...chatMessages.value, assistantOptimistic]
 			}
 			streamingContent += data.chunk
@@ -1008,16 +982,8 @@ async function sendChat() {
 		}
 	}
 	
-	const statusHandler = (data) => {
-		if (data && data.status) {
-			aiStatusText.value = data.status
-			scrollChat()
-		}
-	}
-	
 	if (window.frappe && window.frappe.realtime) {
 		window.frappe.realtime.on(streamEvent, streamHandler)
-		window.frappe.realtime.on(statusEvent, statusHandler)
 	}
 
 	try {
@@ -1033,10 +999,8 @@ async function sendChat() {
 				mode: chatMode.value,
 			})
 		} finally {
-			aiStatusText.value = ''
 			if (window.frappe && window.frappe.realtime) {
 				window.frappe.realtime.off(streamEvent, streamHandler)
-				window.frappe.realtime.off(statusEvent, statusHandler)
 			}
 		}
 		
